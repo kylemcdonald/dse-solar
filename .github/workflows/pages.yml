@@ -25,6 +25,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Use the lockfile npm version
+        run: npm install --global npm@11.6.2
       - name: Install dependencies
         run: npm ci
       - name: Build static viewer
