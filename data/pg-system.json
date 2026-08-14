@@ -1,0 +1,355 @@
+{
+  "schemaVersion": "1.0",
+  "id": "pg",
+  "shortName": "PG · PNG",
+  "name": "Pasana Group",
+  "subtitle": "Original 12 V Starlink system · reconstructed ground truth",
+  "location": "Papua New Guinea",
+  "revision": "As-built reference · source files reviewed 11 Aug 2026",
+  "status": "Reference system",
+  "currency": {
+    "base": "USD",
+    "fjdPerUsd": 2.2,
+    "note": "The original PG BOM is denominated in USD."
+  },
+  "budget": {
+    "targetUsd": 3225,
+    "contingencyIncluded": false,
+    "note": "Planned-item total reconstructed from active rows in the PG workbook, including Starlink, panels, tools and locally purchased batteries. The separate purchase log includes returns and unrelated travel equipment, so it is not used as the design total."
+  },
+  "summary": "Two 400 W portable panels feed a Victron SmartSolar through 40 A PV protection. Two 12 V, 200 Ah batteries are paralleled into a 12 V, 400 Ah bank. A 60 A DC distribution point feeds a protected 12-to-48 V Starlink branch plus 12 V socket / USB branches for the router and devices.",
+  "keyFacts": [
+    { "label": "Solar array", "value": "800 W", "detail": "2 × 400 W blankets" },
+    { "label": "Battery bank", "value": "4.8 kWh", "detail": "12 V · 400 Ah parallel" },
+    { "label": "Solar controller", "value": "50 A", "detail": "Victron SmartSolar 100/50" },
+    { "label": "Primary load", "value": "Starlink Mini", "detail": "12 → 48 V regulated branch" },
+    { "label": "AC capability", "value": "Light duty", "detail": "Small plug-in inverters only" }
+  ],
+  "powerModel": {
+    "arrayWatts": 800,
+    "arrayVmp": null,
+    "arrayVoc25C": null,
+    "arrayColdVoc10C": null,
+    "arrayImp": null,
+    "arrayIsc": null,
+    "averageSolarKwhDay": null,
+    "nominalBatteryKwh": 4.8,
+    "usableBatteryKwh": 2.4,
+    "modeledBatteryKwhDay": null,
+    "essentialBatteryKwhDay": null,
+    "assumptions": "Electrical values follow the original workbook and draw.io diagram; no new performance claims are added."
+  },
+  "components": [
+    {
+      "id": "pgArray",
+      "title": "2 × 400 W blankets",
+      "kicker": "Portable PV array",
+      "kind": "solar",
+      "summary": "Two Renogy portable solar blankets connected in parallel for an 800 W nominal array.",
+      "specs": ["800 W total", "MC4 interconnects", "10 AWG home-run"],
+      "sourceUrl": "https://www.renogy.com/renogy-400w-portable-solar-panel-foldable-monocrystalline-solar-blanket/"
+    },
+    {
+      "id": "pgPanel1",
+      "title": "400 W panel 1",
+      "kicker": "Portable blanket",
+      "kind": "solar",
+      "summary": "First of two portable panels.",
+      "specs": ["MC4 output", "Parallel array"],
+      "sourceUrl": "https://www.renogy.com/renogy-400w-portable-solar-panel-foldable-monocrystalline-solar-blanket/"
+    },
+    {
+      "id": "pgPanel2",
+      "title": "400 W panel 2",
+      "kicker": "Portable blanket",
+      "kind": "solar",
+      "summary": "Second of two portable panels.",
+      "specs": ["MC4-to-MC4 parallel link", "10 AWG conductors"],
+      "sourceUrl": "https://www.renogy.com/renogy-400w-portable-solar-panel-foldable-monocrystalline-solar-blanket/"
+    },
+    {
+      "id": "pgPvBreaker",
+      "title": "40 A PV breaker",
+      "kicker": "Array isolation",
+      "kind": "protection",
+      "summary": "The original drawing places a 40 A breaker between the panel array and SCC.",
+      "specs": ["40 A", "DIN rail", "10 AWG PV conductors"]
+    },
+    {
+      "id": "pgScc",
+      "title": "Victron SmartSolar SCC",
+      "kicker": "100/50 purchased controller",
+      "kind": "conversion",
+      "summary": "MPPT charge controller connecting the 800 W array to the 12 V battery system.",
+      "specs": ["50 A purchased unit", "100 V PV class", "Bluetooth configuration"],
+      "note": "The BOM row shows a $124 planning price, while the purchase log records $201.97 for the 50 A SCC. The connectivity view follows the 50 A as-built evidence.",
+      "sourceUrl": "https://www.victronenergy.com/upload/documents/Manual_SmartSolar_MPPT_100-30__100-50/29694-MPPT_solar_charger_manual-pdf-en.pdf"
+    },
+    {
+      "id": "pgChargeBreaker",
+      "title": "60 A charge breaker",
+      "kicker": "SCC ↔ DC bus",
+      "kind": "protection",
+      "summary": "Charge-controller output isolation shown in both detailed and high-level source diagrams.",
+      "specs": ["60 A", "AWG 6 / AWG 10 shown in source drawing"]
+    },
+    {
+      "id": "pgBatteryBank",
+      "title": "12 V · 400 Ah bank",
+      "kicker": "2 × 200 Ah in parallel",
+      "kind": "battery",
+      "summary": "Two locally purchased 12 V batteries connected in parallel.",
+      "specs": ["12 V nominal", "400 Ah total", "4.8 kWh nominal"],
+      "note": "The diagram shows the positive path through a 125 A breaker and the negative path through a shunt."
+    },
+    {
+      "id": "pgBattery1",
+      "title": "200 Ah battery 1",
+      "kicker": "12 V · parallel",
+      "kind": "battery",
+      "summary": "First local battery in the parallel bank.",
+      "specs": ["AWG 4 bank wiring", "Car-style terminal connector"]
+    },
+    {
+      "id": "pgBattery2",
+      "title": "200 Ah battery 2",
+      "kicker": "12 V · parallel",
+      "kind": "battery",
+      "summary": "Second local battery in the parallel bank.",
+      "specs": ["AWG 4 bank wiring", "Car-style terminal connector"]
+    },
+    {
+      "id": "pgMainBreaker",
+      "title": "125 A main breaker",
+      "kicker": "Battery positive",
+      "kind": "protection",
+      "summary": "Main positive battery protection and disconnect in the original drawing.",
+      "specs": ["125 A", "AWG 4"]
+    },
+    {
+      "id": "pgShunt",
+      "title": "Shunt + battery monitor",
+      "kicker": "Battery negative",
+      "kind": "control",
+      "summary": "All negative current passes through the shunt; a shielded lead feeds the monitor.",
+      "specs": ["500 A-class monitor", "B− and P− sides", "Shielded monitor lead"]
+    },
+    {
+      "id": "pgDcBus",
+      "title": "60 A DC distribution",
+      "kicker": "Main protected junction",
+      "kind": "distribution",
+      "summary": "The source diagram branches from the 60 A protection point to Starlink and 12 V accessory circuits.",
+      "specs": ["SCC charge path", "Battery path", "10 A + 30 A load branches"]
+    },
+    {
+      "id": "pgStarBreaker",
+      "title": "10 A breaker + switch",
+      "kicker": "Starlink branch",
+      "kind": "protection",
+      "summary": "Dedicated breaker and operator switch ahead of the Starlink boost converter.",
+      "specs": ["10 A breaker", "Rocker switch", "AWG 14 shown"]
+    },
+    {
+      "id": "pgStepup",
+      "title": "12 → 48 V step-up",
+      "kicker": "Starlink DC supply",
+      "kind": "conversion",
+      "summary": "Boost converter supplies Starlink through a 2.1 mm DC connector and 15 m male-to-male cable.",
+      "specs": ["12 V input", "48 V output", "DC 2.1 mm connector"]
+    },
+    {
+      "id": "pgStarlink",
+      "title": "Starlink Mini",
+      "kicker": "Primary load",
+      "kind": "loadDc",
+      "summary": "Powered by the dedicated 12-to-48 V branch; Ethernet connects to the UniFi Express.",
+      "specs": ["15 m DC cable", "Ethernet to router"],
+      "sourceUrl": "https://www.starlink.com/specifications?spec=5"
+    },
+    {
+      "id": "pgAccessoryFuse",
+      "title": "30 A accessory fuse",
+      "kicker": "12 V socket branch",
+      "kind": "protection",
+      "summary": "30 A fused branch feeding the cigarette-lighter accessory system.",
+      "specs": ["30 A ATO fuse", "12 AWG shown"]
+    },
+    {
+      "id": "pgSocketSplit",
+      "title": "12 V socket + splitter",
+      "kicker": "Two accessory outlets",
+      "kind": "distribution",
+      "summary": "A battery-eyelet cigarette socket feeds a male-to-two-female splitter.",
+      "specs": ["12 V cigarette socket", "2-way splitter"]
+    },
+    {
+      "id": "pgUsbDevices",
+      "title": "USB-PD + devices",
+      "kicker": "Accessory branch",
+      "kind": "loadDc",
+      "summary": "Two 12 V-to-USB-PD adapters supply general USB devices from the splitter.",
+      "specs": ["2 × 12 V USB-PD adapters", "Other device charging"]
+    },
+    {
+      "id": "pgRouterBranch",
+      "title": "12 V socket → USB-PD",
+      "kicker": "Router power branch",
+      "kind": "conversion",
+      "summary": "A separate cigarette jack and USB-PD adapter power the UniFi Express.",
+      "specs": ["12 V socket", "USB-C cable", "USB-PD adapter"]
+    },
+    {
+      "id": "pgRouter",
+      "title": "UniFi Express",
+      "kicker": "Wi-Fi router",
+      "kind": "loadDc",
+      "summary": "USB-C powered router with Ethernet uplink from Starlink.",
+      "specs": ["USB-C power", "Ethernet from Starlink"]
+    },
+    {
+      "id": "pgAltInverter",
+      "title": "Small inverter + USB-C PD",
+      "kicker": "Alternate Starlink path",
+      "kind": "alternate",
+      "summary": "The source diagram also records an alternate small-inverter/USB-C-to-barrel path to Starlink, separate from the main step-up branch.",
+      "specs": ["40 W+ USB-C PD", "USB-C to barrel adapter"],
+      "note": "Shown for source fidelity; the dedicated boost-converter branch is the principal as-built path."
+    }
+  ],
+  "diagram": {
+    "singleLineNote": "Reconstructed from Pasana Solar.drawio.svg and Pasana Solar.json. The original uses separate positive/negative conductor lines; this viewer combines each circuit into one labeled edge for legibility.",
+    "views": {
+      "overview": {
+        "label": "Overview",
+        "canvas": { "width": 1600, "height": 760 },
+        "nodes": [
+          { "id": "pgArray", "x": 70, "y": 80 },
+          { "id": "pgPvBreaker", "x": 350, "y": 80 },
+          { "id": "pgScc", "x": 640, "y": 80, "featured": true },
+          { "id": "pgChargeBreaker", "x": 930, "y": 80 },
+          { "id": "pgBatteryBank", "x": 70, "y": 360 },
+          { "id": "pgMainBreaker", "x": 350, "y": 360 },
+          { "id": "pgDcBus", "x": 930, "y": 360 },
+          { "id": "pgStarBreaker", "x": 1180, "y": 200 },
+          { "id": "pgStepup", "x": 1430, "y": 200 },
+          { "id": "pgStarlink", "x": 1430, "y": 430 },
+          { "id": "pgAccessoryFuse", "x": 1180, "y": 560 },
+          { "id": "pgSocketSplit", "x": 1430, "y": 650 },
+          { "id": "pgShunt", "x": 640, "y": 520 }
+        ],
+        "edges": [
+          { "id": "pg-ov-pv1", "from": "pgArray", "to": "pgPvBreaker", "type": "solar", "label": "parallel · 800 W" },
+          { "id": "pg-ov-pv2", "from": "pgPvBreaker", "to": "pgScc", "type": "solar", "label": "40 A" },
+          { "id": "pg-ov-charge", "from": "pgScc", "to": "pgChargeBreaker", "type": "battery", "label": "12 V charge" },
+          { "id": "pg-ov-bat1", "from": "pgBatteryBank", "to": "pgMainBreaker", "type": "battery", "label": "12 V · 400 Ah" },
+          { "id": "pg-ov-bat2", "from": "pgMainBreaker", "to": "pgDcBus", "type": "battery", "label": "125 A positive" },
+          { "id": "pg-ov-shunt1", "from": "pgBatteryBank", "to": "pgShunt", "type": "battery", "label": "bank negative" },
+          { "id": "pg-ov-shunt2", "from": "pgShunt", "to": "pgDcBus", "type": "battery", "label": "monitored negative" },
+          { "id": "pg-ov-bus", "from": "pgChargeBreaker", "to": "pgDcBus", "type": "battery", "label": "60 A distribution" },
+          { "id": "pg-ov-star1", "from": "pgDcBus", "to": "pgStarBreaker", "type": "dc12", "label": "10 A branch" },
+          { "id": "pg-ov-star2", "from": "pgStarBreaker", "to": "pgStepup", "type": "dc12", "label": "switched 12 V" },
+          { "id": "pg-ov-star3", "from": "pgStepup", "to": "pgStarlink", "type": "dc12", "label": "48 V / DC 2.1" },
+          { "id": "pg-ov-aux1", "from": "pgDcBus", "to": "pgAccessoryFuse", "type": "dc12", "label": "30 A branch" },
+          { "id": "pg-ov-aux2", "from": "pgAccessoryFuse", "to": "pgSocketSplit", "type": "dc12", "label": "12 V accessories" }
+        ]
+      },
+      "detail": {
+        "label": "Detailed wiring",
+        "canvas": { "width": 2180, "height": 1050 },
+        "nodes": [
+          { "id": "pgPanel1", "x": 40, "y": 70 },
+          { "id": "pgPanel2", "x": 300, "y": 70 },
+          { "id": "pgPvBreaker", "x": 600, "y": 70 },
+          { "id": "pgScc", "x": 900, "y": 70, "featured": true },
+          { "id": "pgChargeBreaker", "x": 1190, "y": 70 },
+          { "id": "pgDcBus", "x": 1480, "y": 280 },
+          { "id": "pgBattery1", "x": 40, "y": 530 },
+          { "id": "pgBattery2", "x": 300, "y": 530 },
+          { "id": "pgMainBreaker", "x": 600, "y": 440 },
+          { "id": "pgShunt", "x": 600, "y": 650 },
+          { "id": "pgStarBreaker", "x": 1190, "y": 330 },
+          { "id": "pgStepup", "x": 1480, "y": 500 },
+          { "id": "pgStarlink", "x": 1780, "y": 500 },
+          { "id": "pgAccessoryFuse", "x": 900, "y": 790 },
+          { "id": "pgSocketSplit", "x": 1190, "y": 790 },
+          { "id": "pgUsbDevices", "x": 1480, "y": 790 },
+          { "id": "pgRouterBranch", "x": 1480, "y": 930 },
+          { "id": "pgRouter", "x": 1780, "y": 790 },
+          { "id": "pgAltInverter", "x": 1780, "y": 70 }
+        ],
+        "edges": [
+          { "id": "pg-dt-par", "from": "pgPanel1", "to": "pgPanel2", "type": "solar", "label": "MC4 parallel link" },
+          { "id": "pg-dt-pv", "from": "pgPanel2", "to": "pgPvBreaker", "type": "solar", "label": "10 AWG · 800 W" },
+          { "id": "pg-dt-scc", "from": "pgPvBreaker", "to": "pgScc", "type": "solar", "label": "40 A isolation" },
+          { "id": "pg-dt-charge", "from": "pgScc", "to": "pgChargeBreaker", "type": "battery", "label": "SCC output" },
+          { "id": "pg-dt-bpar", "from": "pgBattery1", "to": "pgBattery2", "type": "battery", "label": "AWG 4 parallel bank" },
+          { "id": "pg-dt-main", "from": "pgBattery2", "to": "pgMainBreaker", "type": "battery", "label": "bank positive" },
+          { "id": "pg-dt-shunt", "from": "pgBattery2", "to": "pgShunt", "type": "battery", "label": "bank negative" },
+          { "id": "pg-dt-bus1", "from": "pgMainBreaker", "to": "pgDcBus", "type": "battery", "label": "125 A +" },
+          { "id": "pg-dt-bus2", "from": "pgShunt", "to": "pgDcBus", "type": "battery", "label": "monitored −" },
+          { "id": "pg-dt-bus3", "from": "pgChargeBreaker", "to": "pgDcBus", "type": "battery", "label": "60 A charge path" },
+          { "id": "pg-dt-star1", "from": "pgDcBus", "to": "pgStarBreaker", "type": "dc12", "label": "10 A + switch" },
+          { "id": "pg-dt-star2", "from": "pgStarBreaker", "to": "pgStepup", "type": "dc12", "label": "12 V" },
+          { "id": "pg-dt-star3", "from": "pgStepup", "to": "pgStarlink", "type": "dc12", "label": "48 V · 2.1 mm" },
+          { "id": "pg-dt-aux1", "from": "pgDcBus", "to": "pgAccessoryFuse", "type": "dc12", "label": "30 A fuse" },
+          { "id": "pg-dt-aux2", "from": "pgAccessoryFuse", "to": "pgSocketSplit", "type": "dc12", "label": "cigarette socket" },
+          { "id": "pg-dt-usb", "from": "pgSocketSplit", "to": "pgUsbDevices", "type": "dc12", "label": "2 × USB-PD" },
+          { "id": "pg-dt-router-power", "from": "pgSocketSplit", "to": "pgRouterBranch", "type": "dc12", "label": "second socket" },
+          { "id": "pg-dt-router-usb", "from": "pgRouterBranch", "to": "pgRouter", "type": "dc12", "label": "USB-C" },
+          { "id": "pg-dt-data", "from": "pgStarlink", "to": "pgRouter", "type": "data", "label": "Ethernet" },
+          { "id": "pg-dt-alt", "from": "pgAltInverter", "to": "pgStarlink", "type": "control", "label": "alternate USB-C → barrel" }
+        ]
+      }
+    }
+  },
+  "bom": [
+    { "id": "pg-1", "category": "Generation", "item": "Renogy 400 W portable solar blanket", "qty": 2, "unit": "ea", "unitCost": 700, "currency": "USD", "totalUsd": 1400, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Portable 400 W blanket; two units form the 800 W array.", "productUrl": "https://www.renogy.com/renogy-400w-portable-solar-panel-foldable-monocrystalline-solar-blanket/" },
+    { "id": "pg-2", "category": "Tools", "item": "Multimeter", "qty": 1, "unit": "ea", "unitCost": 24, "currency": "USD", "totalUsd": 24, "location": "Import", "procurement": "Purchased", "priority": "Support", "description": "Commissioning and diagnostics.", "productUrl": "https://a.co/d/5qJPQbu" },
+    { "id": "pg-3", "category": "Tools", "item": "8-inch wire cutters", "qty": 1, "unit": "ea", "unitCost": 13, "currency": "USD", "totalUsd": 13, "location": "Import", "procurement": "Purchased", "priority": "Support", "description": "Assembly tool.", "productUrl": "https://a.co/d/c1bR2h3" },
+    { "id": "pg-4", "category": "Tools", "item": "Wire stripper", "qty": 1, "unit": "ea", "unitCost": 14, "currency": "USD", "totalUsd": 14, "location": "Import", "procurement": "Purchased", "priority": "Support", "description": "Assembly tool.", "productUrl": "https://a.co/d/idyVIlc" },
+    { "id": "pg-5", "category": "Internet", "item": "Starlink case", "qty": 1, "unit": "ea", "unitCost": 59, "currency": "USD", "totalUsd": 59, "location": "Import", "procurement": "Purchased", "priority": "Should", "description": "Transport case for Starlink.", "productUrl": "https://a.co/d/3D8oY96" },
+    { "id": "pg-6", "category": "Internet", "item": "Starlink Mini", "qty": 1, "unit": "ea", "unitCost": 680, "currency": "USD", "totalUsd": 680, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Primary communications load.", "productUrl": "https://www.starlink.com/specifications?spec=5" },
+    { "id": "pg-7", "category": "AC / USB", "item": "Small inverter + USB", "qty": 2, "unit": "ea", "unitCost": 30, "currency": "USD", "totalUsd": 60, "location": "Import", "procurement": "Purchased", "priority": "Should", "description": "Light-duty inverter/USB units; one alternate Starlink path appears in the drawing.", "productUrl": "https://a.co/d/4G5y5wU" },
+    { "id": "pg-8", "category": "Power electronics", "item": "Victron solar charge controller", "qty": 1, "unit": "ea", "unitCost": 124, "currency": "USD", "totalUsd": 124, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Workbook price; purchase log separately records $201.97 for the 50 A controller.", "productUrl": "https://a.co/d/3og0Y2o", "specUrl": "https://www.victronenergy.com/upload/documents/Manual_SmartSolar_MPPT_100-30__100-50/29694-MPPT_solar_charger_manual-pdf-en.pdf" },
+    { "id": "pg-9", "category": "DC conversion", "item": "USB-C to DC power adapter", "qty": 2, "unit": "ea", "unitCost": 9, "currency": "USD", "totalUsd": 18, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "USB-C-to-Starlink barrel conversion.", "productUrl": "https://a.co/d/eXImVNY" },
+    { "id": "pg-10", "category": "DC conversion", "item": "DC female-female adapter", "qty": 1, "unit": "ea", "unitCost": 9, "currency": "USD", "totalUsd": 9, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Barrel coupler.", "productUrl": "https://a.co/d/6M76cfR" },
+    { "id": "pg-11", "category": "DC loads", "item": "12 V to USB-C PD adapter", "qty": 2, "unit": "ea", "unitCost": 25, "currency": "USD", "totalUsd": 50, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "130 W-class USB-PD adapters for router and devices.", "productUrl": "https://a.co/d/9gIOc2b" },
+    { "id": "pg-12", "category": "DC distribution", "item": "12 V eyelet-to-cigarette socket, 3 ft AWG 12", "qty": 1, "unit": "ea", "unitCost": 17, "currency": "USD", "totalUsd": 17, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Battery accessory outlet.", "productUrl": "https://a.co/d/3B6QPs2" },
+    { "id": "pg-13", "category": "DC safety", "item": "30 A ATO fuse", "qty": 1, "unit": "ea", "unitCost": 4, "currency": "USD", "totalUsd": 4, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Accessory socket branch fuse.", "productUrl": "https://a.co/d/dvN3abr" },
+    { "id": "pg-14", "category": "Monitoring", "item": "Battery monitor + shunt", "qty": 1, "unit": "ea", "unitCost": 90, "currency": "USD", "totalUsd": 90, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Bank current/state monitor shown beside the shunt.", "productUrl": "https://a.co/d/iIhAbDi" },
+    { "id": "pg-15", "category": "Wiring", "item": "30 ft 10 AWG wire", "qty": 1, "unit": "roll", "unitCost": 33, "currency": "USD", "totalUsd": 33, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "PV and DC wiring.", "productUrl": "https://a.co/d/6oK6PX7" },
+    { "id": "pg-16", "category": "Tools", "item": "Solar connector crimper kit", "qty": 1, "unit": "kit", "unitCost": 26, "currency": "USD", "totalUsd": 26, "location": "Import", "procurement": "Purchased", "priority": "Support", "description": "MC4 assembly tool.", "productUrl": "https://a.co/d/hWul3SI" },
+    { "id": "pg-17", "category": "Wiring", "item": "Electrical tape", "qty": 1, "unit": "roll", "unitCost": 3, "currency": "USD", "totalUsd": 3, "location": "Import", "procurement": "Purchased", "priority": "Support", "description": "Assembly consumable.", "productUrl": "https://a.co/d/1rCku0A" },
+    { "id": "pg-18", "category": "Wiring", "item": "Car battery terminal connectors", "qty": 2, "unit": "ea", "unitCost": 12, "currency": "USD", "totalUsd": 24, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Battery terminal hardware.", "productUrl": "https://a.co/d/67evZma" },
+    { "id": "pg-19", "category": "Mounting", "item": "Junction box", "qty": 1, "unit": "ea", "unitCost": 60, "currency": "USD", "totalUsd": 60, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "DC component enclosure.", "productUrl": "https://a.co/d/hPhJvAU" },
+    { "id": "pg-20", "category": "DC safety", "item": "40 A circuit breaker", "qty": 2, "unit": "ea", "unitCost": 10, "currency": "USD", "totalUsd": 20, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "PV/DC isolation; the drawing separately labels its SCC output breaker 60 A.", "productUrl": "https://a.co/d/adxHU1O" },
+    { "id": "pg-21", "category": "DC safety", "item": "125 A circuit breaker", "qty": 1, "unit": "ea", "unitCost": 13, "currency": "USD", "totalUsd": 13, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Main battery positive breaker.", "productUrl": "https://a.co/d/7nZC7Ul" },
+    { "id": "pg-22", "category": "Mounting", "item": "DIN rail", "qty": 1, "unit": "ea", "unitCost": 7, "currency": "USD", "totalUsd": 7, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Breaker mounting rail.", "productUrl": "https://a.co/d/0SH4Rhk" },
+    { "id": "pg-23", "category": "DC conversion", "item": "12-to-48 V step-up converter", "qty": 1, "unit": "ea", "unitCost": 20, "currency": "USD", "totalUsd": 20, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Dedicated Starlink boost supply.", "productUrl": "https://a.co/d/eWHsUlV" },
+    { "id": "pg-24", "category": "Wiring", "item": "Power pigtail 1 m", "qty": 1, "unit": "ea", "unitCost": 10, "currency": "USD", "totalUsd": 10, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "DC barrel lead.", "productUrl": "https://a.co/d/9z2zAUT" },
+    { "id": "pg-25", "category": "Wiring", "item": "Power pigtail 0.5 m", "qty": 1, "unit": "ea", "unitCost": 10, "currency": "USD", "totalUsd": 10, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "DC barrel lead.", "productUrl": "https://a.co/d/ezfFTg8" },
+    { "id": "pg-26", "category": "Controls", "item": "Rocker switches", "qty": 1, "unit": "pack", "unitCost": 9, "currency": "USD", "totalUsd": 9, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Operator switch on the Starlink branch.", "productUrl": "https://a.co/d/bHIHZSr" },
+    { "id": "pg-27", "category": "DC safety", "item": "10 A breaker", "qty": 1, "unit": "ea", "unitCost": 8, "currency": "USD", "totalUsd": 8, "location": "Import", "procurement": "Purchased", "priority": "Must", "description": "Dedicated Starlink branch breaker.", "productUrl": "https://a.co/d/1gERdrB" },
+    { "id": "pg-28", "category": "Storage", "item": "12 V 200 Ah local battery", "qty": 2, "unit": "ea", "unitCost": 210, "currency": "USD", "totalUsd": 420, "location": "PNG", "procurement": "Purchased", "priority": "Must", "description": "Two batteries purchased in Alotau and wired in parallel." }
+  ],
+  "operatingRules": [
+    "The PG system is an historical reference, not a recommendation to reuse low-voltage automotive breakers in the new 24 V DSE system.",
+    "Starlink uses the dedicated 10 A / switched / 12-to-48 V branch in the principal as-built path.",
+    "The 30 A accessory branch feeds cigarette sockets, USB-PD adapters, general devices and the router.",
+    "The small inverter/USB-C path is shown as an alternate because it appears separately in the source diagram."
+  ],
+  "commissioning": [
+    "Verify the two batteries share charge/discharge current and remain at equal resting voltage.",
+    "Confirm the 40 A PV, 60 A charge, 125 A main, 10 A Starlink and 30 A accessory protection labels against the physical system.",
+    "Confirm all negative load/charge current passes through the battery-monitor shunt.",
+    "Verify Starlink boost output and polarity before connecting the 2.1 mm DC lead.",
+    "Back up the UniFi Express configuration and label both power and Ethernet paths."
+  ],
+  "research": [
+    { "title": "Pasana Group Solar Starlink System.xlsx", "publisher": "Project source", "url": "../docs/Pasana%20Group%20Solar%20Starlink%20System.xlsx" },
+    { "title": "Pasana Solar.drawio.svg", "publisher": "Project source", "url": "../docs/Pasana%20Solar.drawio.svg" },
+    { "title": "Pasana Solar.json", "publisher": "Project source", "url": "../docs/Pasana%20Solar.json" },
+    { "title": "SmartSolar MPPT 100/30 & 100/50 manual", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/upload/documents/Manual_SmartSolar_MPPT_100-30__100-50/29694-MPPT_solar_charger_manual-pdf-en.pdf" }
+  ]
+}

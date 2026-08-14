@@ -1,0 +1,237 @@
+{
+  "revision": "Physical fit model R13 · 13 Aug 2026",
+  "units": "metres",
+  "scale": "1 scene unit = 1 metre",
+  "scene": {
+    "siteSpanM": [12, 3.2, 8],
+    "plannedPvHomeRunM": 15,
+    "illustratedPvRouteM": 4.8,
+    "arrayOrientation": { "azimuth": "north", "tiltDeg": 18 },
+    "backWallM": [5.8, 3, 0.08],
+    "equipmentBoardM": [3.4, 2.5, 0.018],
+    "sideWallPlanes": false,
+    "roofPlane": false,
+    "batteryArrangement": "four batteries directly on the floor in a 2 × 2 footprint",
+    "batteryRack": false,
+    "wallCableStandOffMm": 35,
+    "wallCableRoutingEnvelopeMm": [35, 245],
+    "classTFuseMounting": "two holders mount directly to the plywood wall above the floor battery bank; no separate backplate",
+    "heavyBatteryCableRoute": "around the outside of the floor battery footprint, then directly onto plywood",
+    "junctionCableEntries": "23 continuous inside / gland / outside centerlines through registered enclosure walls",
+    "junctionMounting": "back of enclosure flush to plywood; zero cable routes behind it; the four upper right-side routes clear the enclosure face and pass above, while the four Orion routes pass below",
+    "layoutSolver": "layout-solver-r3 independently generates device envelopes, port coordinates, major cable centerlines, cable reversals, route lengths, overlap checks and optimization score before Three.js rendering",
+    "ceilingCableRouting": "Starlink power and both lighting rows turn directly from each assigned wall-clearance lane toward the ceiling. Starlink Ethernet descends on the Starlink side and travels directly left to UniFi in a clear forward plane, without the former rightward overshoot. No route snaps back to the plywood datum before departing, and there are no perpendicular mesh handoffs.",
+    "cameraControls": "ofxGrabCam-inspired perspective camera: ray-pick the XYZ surface point under the cursor, upright world-Y yaw and pitch around that off-axis point with roll locked out, zoom along its camera vector, and scale panning at its depth",
+    "cableGeometry": "one continuous tube surface per route with tangent corner-contained bends, seamless adjacent corners, tangent render handoffs and stable greedy board-depth lanes"
+  },
+  "assumptions": [
+    "The back wall, wall board, panel rack, generator and small protection-enclosure dimensions are planning envelopes, not surveyed site measurements. Side walls and roof planes are omitted from the review model.",
+    "The array is shown close to the north side of the building. The two 4 mm² PV pairs retain a conservative 15 m one-way design allowance even though the illustrated route is shorter.",
+    "The array faces north at an 18° planning tilt, consistent with Fiji's latitude and government residential-solar guidance; final angle and shading require site verification.",
+    "Small conductors are slightly widened so individual polarity, fused positives, unfused negative returns and data paths remain visible.",
+    "Ordinary power conductors begin approximately 35 mm in front of the plywood and receive stable wall lanes. Flush-junction bypasses briefly stand farther forward—up to about 245 mm from plywood—to clear the enclosure face before returning toward their terminal; no route occupies the inaccessible space behind the box.",
+    "All battery shelving is omitted. Four batteries sit directly on the floor in two side-by-side series strings, arranged as a 2 × 2 footprint. The two Class T holders mount directly to the plywood and heavy conductors route around the battery footprint.",
+    "Every illustrated junction-box boundary crossing uses one continuous centerline from its internal termination, through a modeled cable gland, around the complete exterior bend and into the outgoing run. Render-visibility handoffs occur only on audited tangent straight sections.",
+    "Every green conductor terminates at a modeled stud: the electrode and array frame share the electrode connection, and dedicated studs on a visible main PE bar feed PV protection, SmartSolar chassis, MultiPlus chassis, AC output protection and Ekrano GX. Protective earth is not tied to the DC-negative bus in this planning model.",
+    "Each complete cable route renders as one continuous tube surface rather than separate open cylinders and bend pieces. This removes polygon-ring gaps when two bends are close together. Bends use tangent, corner-contained quadratic geometry; each curve stays within the intended turn and cannot curl backwards in perspective. A greedy minimum-conflict planner gives each complete board route one stable depth lane; ceiling departures retain that lane instead of snapping back to a shared wall datum. The geometry audit checks both reverse bends and non-terminal crossings.",
+    "Camera interactions ray-pick the visible XYZ point beneath the cursor. Upright orbit and zoom preserve that off-axis point's screen position; roll is locked to world-up and pan scale derives from picked depth. Empty-space interactions reuse the last valid projected depth, following the ofxGrabCam interaction model.",
+    "Gland positions and bend radii remain a planning layout and require a full-size mock-up with the actual parts before drilling or ordering preterminated cables."
+  ],
+  "connectionAudit": {
+    "rule": "Every rendered conductor terminates at an explicit device port or terminal; no 12 V conductor lands directly on the 5 V UniFi Express and no protective-earth conductor ends in open space.",
+    "smartSolar": {
+      "ports": ["PV +", "PV −", "BAT +", "BAT −"],
+      "connections": ["PV entry protection", "24 V positive bus through 100 A fuse", "24 V negative bus"]
+    },
+    "multiPlus": {
+      "ports": ["DC +", "DC −", "AC-in L / N / PE", "AC-out L / N / PE"],
+      "connections": ["24 V bus", "generator inlet", "AC output protection"]
+    },
+    "ekrano": {
+      "ports": ["DC +", "DC −", "VE.Direct", "VE.Can", "VE.Bus", "Ethernet", "protective earth"],
+      "connections": ["3.15 A protected 24 V branch", "SmartShunt", "SmartSolar", "MultiPlus-II", "UniFi Express LAN", "main PE bar"]
+    },
+    "orion": {
+      "ports": ["24 V input + / −", "12 V output + / −"],
+      "connections": ["protected 24 V bus", "35 A output protection and 12 V distribution"]
+    },
+    "usbCharger": {
+      "ports": ["12 V +", "12 V −", "reserved USB-C output"],
+      "connections": ["15 A fused 12 V branch", "unfused negative-return bus", "UniFi Express USB-C power"]
+    },
+    "unifiExpress": {
+      "ports": ["USB-C power", "WAN", "LAN"],
+      "connections": ["USB charger at 5 V / 3 A", "Starlink Ethernet", "Ekrano GX Ethernet"]
+    },
+    "starlinkMini": {
+      "ports": ["12 V +", "12 V −", "Ethernet"],
+      "connections": ["10 A fused 12 V branch", "unfused negative-return bus", "UniFi Express WAN"],
+      "routing": "Each run remains continuous through the high-wall turn and terminates at an explicit Starlink port."
+    },
+    "lighting": {
+      "ports": ["12 V + trunk", "12 V − trunk"],
+      "connections": ["10 A fused 12 V branch", "unfused negative-return bus", "six fixtures across both ceiling rows"],
+      "routing": "Positive and negative conductors each remain one continuous rounded centerline from the junction box through both ceiling rows. The two unused wall-side task-light objects were removed."
+    },
+    "protectiveEarth": {
+      "ports": ["earth electrode", "array-frame lug", "seven-stud main PE bar", "equipment PE / chassis lugs"],
+      "connections": ["array frame", "PV protection / SPD", "SmartSolar chassis", "MultiPlus chassis", "AC output protection", "Ekrano GX"],
+      "routing": "Every branch is generated by the independent layout solver and terminates exactly at a visible stud or device lug."
+    },
+    "batteryBalancers": {
+      "ports": ["string +", "series midpoint", "string −"],
+      "connections": ["one independent three-conductor set per 24 V battery string"]
+    },
+    "batteryStringProtection": {
+      "ports": ["String A battery side", "String A selector side", "String B battery side", "String B selector side"],
+      "connections": ["each string positive to its own 150 A Class T holder", "each protected output to the A / B selector"],
+      "mounting": "two holders fixed directly to the plywood above the floor battery bank; no intermediate backplate"
+    }
+  },
+  "envelopes": [
+    {
+      "id": "suntech-panel",
+      "componentIds": ["panel1", "panel2", "panel3", "panel4"],
+      "quantity": 4,
+      "dimensionsMm": { "width": 2279, "height": 1134, "depth": 35 },
+      "status": "verified",
+      "sourceUrl": "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf"
+    },
+    {
+      "id": "everexceed-battery",
+      "componentIds": ["battery1", "battery2", "battery3", "battery4"],
+      "quantity": 4,
+      "dimensionsMm": { "width": 520, "height": 220, "depth": 238 },
+      "status": "verified",
+      "sourceUrl": "https://pulsar.kiev.ua/uploads/pdf/ES200-12G.pdf"
+    },
+    {
+      "id": "multiplus",
+      "componentIds": ["inverter"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 268, "height": 499, "depth": 141 },
+      "status": "verified",
+      "sourceUrl": "https://www.victronenergy.com/upload/documents/Datasheet-MultiPlus-II-inverter-charger-EN.pdf"
+    },
+    {
+      "id": "smartsolar",
+      "componentIds": ["solarController"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 295, "height": 216, "depth": 103 },
+      "status": "verified",
+      "sourceUrl": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html"
+    },
+    {
+      "id": "ekrano",
+      "componentIds": ["systemMonitor"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 187, "height": 124, "depth": 29.8 },
+      "status": "verified",
+      "sourceUrl": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/technical-specifications.html"
+    },
+    {
+      "id": "orion",
+      "componentIds": ["dcConverter"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 186, "height": 130, "depth": 80 },
+      "status": "verified",
+      "sourceUrl": "https://www.victronenergy.com/media/pg/Orion-Tr_Smart_DC-DC_Charger_-_Isolated/en/specifications.html"
+    },
+    {
+      "id": "battery-balancer",
+      "componentIds": ["balancers"],
+      "quantity": 2,
+      "dimensionsMm": { "width": 113, "height": 100, "depth": 47 },
+      "status": "verified",
+      "sourceUrl": "https://www.victronenergy.com/upload/documents/Battery-Balancer.PDF"
+    },
+    {
+      "id": "smartshunt",
+      "componentIds": ["mainDc"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 120, "height": 46, "depth": 54 },
+      "status": "verified",
+      "sourceUrl": "https://www.victronenergy.com/media/pg/SmartShunt/en/technical-data.html"
+    },
+    {
+      "id": "ekrano-junction-box",
+      "componentIds": ["mounting"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 350, "height": 247, "depth": 150 },
+      "status": "user-specified",
+      "sourceUrl": ""
+    },
+    {
+      "id": "battery-selector",
+      "componentIds": ["batterySelector"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 74.9, "height": 74.9, "depth": 84.3 },
+      "status": "verified",
+      "sourceUrl": "https://www.bluesea.com/products/6007"
+    },
+    {
+      "id": "unifi-express",
+      "componentIds": ["router"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 98, "height": 98, "depth": 30 },
+      "status": "verified",
+      "sourceUrl": "https://techspecs.ui.com/unifi/cloud-gateways/ux"
+    },
+    {
+      "id": "starlink-mini",
+      "componentIds": ["starlink"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 298.5, "height": 38.5, "depth": 259 },
+      "status": "verified",
+      "sourceUrl": "https://www.starlink.com/specifications/5"
+    },
+    {
+      "id": "array-protection-box",
+      "componentIds": ["pvSafety"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 250, "height": 300, "depth": 120 },
+      "status": "assumed",
+      "sourceUrl": ""
+    },
+    {
+      "id": "building-entry-pv-box",
+      "componentIds": ["pvSafety"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 250, "height": 300, "depth": 120 },
+      "status": "assumed",
+      "sourceUrl": ""
+    },
+    {
+      "id": "ac-output-box",
+      "componentIds": ["acBoard"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 220, "height": 180, "depth": 100 },
+      "status": "assumed",
+      "sourceUrl": ""
+    },
+    {
+      "id": "generator",
+      "componentIds": ["generator"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 600, "height": 460, "depth": 450 },
+      "status": "assumed",
+      "sourceUrl": "https://www.husqvarna.com/au/generators/g3200p/"
+    },
+    {
+      "id": "fuse-block",
+      "componentIds": ["fuseBlock"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 125, "height": 85, "depth": 35 },
+      "status": "assumed",
+      "sourceUrl": ""
+    },
+    {
+      "id": "class-t-holder",
+      "componentIds": ["mainDc"],
+      "quantity": 2,
+      "dimensionsMm": { "width": 150, "height": 55, "depth": 60 },
+      "status": "assumed",
+      "sourceUrl": "https://www.bluesea.com/products/5007100/"
+    }
+  ]
+}
