@@ -172,6 +172,7 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-roof-planes", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-side-walls", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-wall-overlaps", "0");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-shadow-map-size", "4096");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-solver-route-count", /[1-9]\d*/);
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-generated-cable-m", /\d+\.\d+/);
 
@@ -194,9 +195,9 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.getByText(/four batteries form a floor-level 2 × 2 grid/i)).toBeVisible();
   await expect(page.getByText(/Ordinary power conductors begin about 35 mm/)).toBeVisible();
   await expect(page.getByText(/one continuous tube surface, so back-to-back bends share their polygon rings without gaps/i)).toBeVisible();
-  await expect(page.getByText(/visible XYZ point below the cursor becomes the grab point/i)).toBeVisible();
+  await expect(page.getByText(/visible XYZ point below the mouse or touch gesture becomes the grab point/i)).toBeVisible();
   await expect(page.getByText(/0 reverse bends/)).toBeVisible();
-  await expect(page.getByText(/18 tangent handoffs · 0 discontinuous handoffs/)).toBeVisible();
+  await expect(page.getByText(/14 tangent handoffs · 0 discontinuous handoffs/)).toBeVisible();
   await expect(page.getByText(/0 board-lane conflicts/)).toBeVisible();
   await expect(page.getByText(/0 solid intersections · 0 unresolved cable intersections/)).toBeVisible();
   await page.getByRole("button", { name: "Close scale notes" }).click();
@@ -357,6 +358,129 @@ test("PG selection does not invent an unverified three-dimensional site layout",
   await expect(page.getByText(/has not been assigned speculative site geometry/)).toBeVisible();
   await page.getByRole("button", { name: "Open the DSE 3D model" }).click();
   await expect(page.locator('[data-model-ready="true"]')).toBeVisible({ timeout: 15_000 });
+});
+
+test("mobile layout fits iPhone Safari and the 3D camera supports one- and two-finger gestures", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openViewer(page);
+
+  const diagramMetrics = await page.evaluate(() => ({
+    documentWidth: document.documentElement.scrollWidth,
+    viewportWidth: document.documentElement.clientWidth,
+    headerHeight: document.querySelector(".app-header")?.getBoundingClientRect().height,
+  }));
+  expect(diagramMetrics.documentWidth).toBeLessThanOrEqual(diagramMetrics.viewportWidth + 1);
+  expect(diagramMetrics.headerHeight).toBe(52);
+  const modeTabs = page.locator(".mode-tabs");
+  for (const mode of ["Diagram", "3D model", "System", /Bill of materials/, "Field notes"]) {
+    await expect(modeTabs.getByRole("button", { name: mode, exact: typeof mode === "string" })).toBeVisible();
+  }
+
+  await page.getByRole("button", { name: "3D model" }).click();
+  await expect(page.locator('[data-model-ready="true"]')).toBeVisible({ timeout: 15_000 });
+  const canvas = page.locator(".model-canvas canvas");
+  await expect(canvas).toHaveCSS("touch-action", "none");
+  await expect(page.locator(".model-canvas")).toHaveAttribute(
+    "data-touch-gestures",
+    "one-finger-orbit-two-finger-pan-pinch",
+  );
+  const initial = await page.locator(".model-canvas").evaluate((element) => ({
+    distance: Number(element.dataset.cameraDistance),
+    position: (element.dataset.cameraPosition ?? "").split(",").map(Number),
+    quaternion: (element.dataset.cameraQuaternion ?? "").split(",").map(Number),
+    target: (element.dataset.cameraTarget ?? "").split(",").map(Number),
+  }));
+
+  await canvas.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const fire = (type, pointerId, x, y, isPrimary) => element.dispatchEvent(new PointerEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      pointerId,
+      pointerType: "touch",
+      isPrimary,
+      button: 0,
+      buttons: type === "pointerup" ? 0 : 1,
+      clientX: rect.left + x,
+      clientY: rect.top + y,
+    }));
+    fire("pointerdown", 21, rect.width * 0.52, rect.height * 0.45, true);
+    fire("pointermove", 21, rect.width * 0.66, rect.height * 0.52, true);
+    fire("pointerup", 21, rect.width * 0.66, rect.height * 0.52, true);
+  });
+  await page.waitForTimeout(100);
+  const afterOrbit = await page.locator(".model-canvas").evaluate((element) => ({
+    activeTouches: element.dataset.activeTouchPoints,
+    quaternion: (element.dataset.cameraQuaternion ?? "").split(",").map(Number),
+  }));
+  expect(afterOrbit.activeTouches).toBe("0");
+  expect(Math.hypot(...afterOrbit.quaternion.map((value, index) => value - initial.quaternion[index]))).toBeGreaterThan(0.01);
+
+  await canvas.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const fire = (type, pointerId, x, y, isPrimary) => element.dispatchEvent(new PointerEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      pointerId,
+      pointerType: "touch",
+      isPrimary,
+      button: 0,
+      buttons: type === "pointerup" ? 0 : 1,
+      clientX: rect.left + x,
+      clientY: rect.top + y,
+    }));
+    fire("pointerdown", 31, rect.width * 0.38, rect.height * 0.48, true);
+    fire("pointerdown", 32, rect.width * 0.62, rect.height * 0.48, false);
+    fire("pointermove", 31, rect.width * 0.29, rect.height * 0.53, true);
+    fire("pointermove", 32, rect.width * 0.76, rect.height * 0.53, false);
+    fire("pointerup", 31, rect.width * 0.29, rect.height * 0.53, true);
+    fire("pointerup", 32, rect.width * 0.76, rect.height * 0.53, false);
+  });
+  await page.waitForTimeout(100);
+  const afterTransform = await page.locator(".model-canvas").evaluate((element) => ({
+    activeTouches: element.dataset.activeTouchPoints,
+    distance: Number(element.dataset.cameraDistance),
+    position: (element.dataset.cameraPosition ?? "").split(",").map(Number),
+    target: (element.dataset.cameraTarget ?? "").split(",").map(Number),
+  }));
+  expect(afterTransform.activeTouches).toBe("0");
+  expect(afterTransform.distance).toBeLessThan(initial.distance);
+  expect(Math.hypot(...afterTransform.position.map((value, index) => value - initial.position[index]))).toBeGreaterThan(0.1);
+  expect(Math.hypot(...afterTransform.target.map((value, index) => value - initial.target[index]))).toBeGreaterThan(0.001);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+
+  await modeTabs.getByRole("button", { name: /Bill of materials/ }).click();
+  const bomMetrics = await page.evaluate(() => {
+    const wrap = document.querySelector(".bom-table-wrap");
+    return {
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: document.documentElement.clientWidth,
+      tableScrollsInternally: Boolean(wrap && wrap.scrollWidth > wrap.clientWidth),
+    };
+  });
+  expect(bomMetrics.documentWidth).toBeLessThanOrEqual(bomMetrics.viewportWidth + 1);
+  expect(bomMetrics.tableScrollsInternally).toBe(true);
+
+  await page.setViewportSize({ width: 844, height: 390 });
+  await openViewer(page);
+  const landscapeMetrics = await page.evaluate(() => ({
+    documentWidth: document.documentElement.scrollWidth,
+    viewportWidth: document.documentElement.clientWidth,
+    headerHeight: document.querySelector(".app-header")?.getBoundingClientRect().height,
+  }));
+  expect(landscapeMetrics.documentWidth).toBeLessThanOrEqual(landscapeMetrics.viewportWidth + 1);
+  expect(landscapeMetrics.headerHeight).toBe(52);
+  await expect(page.getByRole("button", { name: /DSE · Fiji/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /PG · PNG/ })).toBeVisible();
+  await page.getByRole("button", { name: "3D model", exact: true }).click();
+  await expect(page.locator('[data-model-ready="true"]')).toBeVisible({ timeout: 15_000 });
+  const landscapeModel = await page.locator(".model-shell").evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { bottom: rect.bottom, viewportHeight: window.innerHeight, minHeight: getComputedStyle(element).minHeight };
+  });
+  expect(landscapeModel.bottom).toBeLessThanOrEqual(landscapeModel.viewportHeight + 1);
+  expect(landscapeModel.minHeight).toBe("0px");
 });
 
 test("PG reference switches projects and preserves its source-grounded topology", async ({ page }) => {

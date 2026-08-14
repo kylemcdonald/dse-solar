@@ -13,7 +13,7 @@ type GrabPointCameraOptions = {
   pickSurface: (clientX: number, clientY: number) => SurfaceGrab | null;
 };
 
-type DragMode = "orbit" | "pan";
+type DragMode = "orbit" | "pan" | "touch-transform";
 
 const EPSILON = 1e-8;
 const ORBIT_RADIANS_PER_PIXEL = 0.0042;
@@ -46,6 +46,9 @@ export class GrabPointCameraControls {
   private activePointerId: number | null = null;
   private dragMode: DragMode | null = null;
   private lastPointer = new THREE.Vector2();
+  private readonly touchPoints = new Map<number, THREE.Vector2>();
+  private readonly lastTouchCentroid = new THREE.Vector2();
+  private lastTouchDistance = 0;
 
   minDistance = 0.055;
   maxDistance = 70;
@@ -113,6 +116,8 @@ export class GrabPointCameraControls {
       .join(",");
     element.dataset.grabAnchorScreen = `${screenX.toFixed(2)},${screenY.toFixed(2)}`;
     element.dataset.grabMode = this.dragMode ?? "idle";
+    element.dataset.touchGestures = "one-finger-orbit-two-finger-pan-pinch";
+    element.dataset.activeTouchPoints = String(this.touchPoints.size);
     element.dataset.panWorldPerPixel = this.getPanWorldPerPixel().toFixed(7);
     element.dataset.cameraUprightError = Math.abs(right.y).toExponential(3);
   }
@@ -172,6 +177,20 @@ export class GrabPointCameraControls {
   }
 
   private handlePointerDown = (event: PointerEvent) => {
+    if (event.pointerType === "touch") {
+      event.preventDefault();
+      if (this.touchPoints.size === 0) this.onInteractionStart?.();
+      this.touchPoints.set(event.pointerId, new THREE.Vector2(event.clientX, event.clientY));
+      try {
+        this.domElement.setPointerCapture(event.pointerId);
+      } catch {
+        // Synthetic test events and older WebKit builds may not expose native
+        // pointer capture; document-level touch-action still keeps the gesture.
+      }
+      this.configureTouchGesture(true);
+      this.domElement.style.cursor = "grabbing";
+      return;
+    }
     if (!event.isPrimary || event.button > 2 || this.activePointerId !== null) return;
     event.preventDefault();
     this.onInteractionStart?.();
@@ -180,11 +199,41 @@ export class GrabPointCameraControls {
     this.lastPointer.set(event.clientX, event.clientY);
     this.grabAt(event.clientX, event.clientY);
     this.focusPoint.copy(this.grabPoint);
-    this.domElement.setPointerCapture(event.pointerId);
+    try {
+      this.domElement.setPointerCapture(event.pointerId);
+    } catch {
+      // See the touch fallback above.
+    }
     this.domElement.style.cursor = "grabbing";
   };
 
   private handlePointerMove = (event: PointerEvent) => {
+    if (event.pointerType === "touch") {
+      if (!this.touchPoints.has(event.pointerId)) return;
+      event.preventDefault();
+      this.touchPoints.set(event.pointerId, new THREE.Vector2(event.clientX, event.clientY));
+      if (this.touchPoints.size >= 2) {
+        const [first, second] = [...this.touchPoints.values()];
+        const centroid = first.clone().add(second).multiplyScalar(0.5);
+        const distance = Math.max(1, first.distanceTo(second));
+        const deltaX = centroid.x - this.lastTouchCentroid.x;
+        const deltaY = centroid.y - this.lastTouchCentroid.y;
+        const scale = THREE.MathUtils.clamp(this.lastTouchDistance / distance, 0.72, 1.38);
+        if (Number.isFinite(scale) && Math.abs(scale - 1) > 0.0001) this.zoomByScale(scale);
+        if (Math.abs(deltaX) + Math.abs(deltaY) > 0.01) this.pan(deltaX, deltaY);
+        this.lastTouchCentroid.copy(centroid);
+        this.lastTouchDistance = distance;
+        return;
+      }
+      if (this.touchPoints.size === 1 && this.dragMode === "orbit") {
+        const current = [...this.touchPoints.values()][0];
+        const deltaX = current.x - this.lastPointer.x;
+        const deltaY = current.y - this.lastPointer.y;
+        this.lastPointer.copy(current);
+        if (Math.abs(deltaX) + Math.abs(deltaY) > 0.01) this.orbit(deltaX, deltaY);
+      }
+      return;
+    }
     if (event.pointerId !== this.activePointerId || !this.dragMode) return;
     event.preventDefault();
     const deltaX = event.clientX - this.lastPointer.x;
@@ -196,6 +245,14 @@ export class GrabPointCameraControls {
   };
 
   private handlePointerUp = (event: PointerEvent) => {
+    if (event.pointerType === "touch") {
+      if (!this.touchPoints.has(event.pointerId)) return;
+      this.touchPoints.delete(event.pointerId);
+      if (this.domElement.hasPointerCapture(event.pointerId)) this.domElement.releasePointerCapture(event.pointerId);
+      this.configureTouchGesture(false);
+      if (this.touchPoints.size === 0) this.domElement.style.cursor = "grab";
+      return;
+    }
     if (event.pointerId !== this.activePointerId) return;
     if (this.domElement.hasPointerCapture(event.pointerId)) {
       this.domElement.releasePointerCapture(event.pointerId);
@@ -206,6 +263,13 @@ export class GrabPointCameraControls {
   };
 
   private handleLostPointerCapture = (event: PointerEvent) => {
+    if (event.pointerType === "touch") {
+      if (!this.touchPoints.has(event.pointerId)) return;
+      this.touchPoints.delete(event.pointerId);
+      this.configureTouchGesture(false);
+      if (this.touchPoints.size === 0) this.domElement.style.cursor = "grab";
+      return;
+    }
     if (event.pointerId !== this.activePointerId) return;
     this.activePointerId = null;
     this.dragMode = null;
@@ -216,20 +280,53 @@ export class GrabPointCameraControls {
     event.preventDefault();
     this.onInteractionStart?.();
     const anchor = this.grabAt(event.clientX, event.clientY);
-    const offset = this.camera.position.clone().sub(anchor);
-    const distance = offset.length();
-    if (distance < EPSILON) return;
     const deltaPixels = event.deltaMode === WheelEvent.DOM_DELTA_LINE
       ? event.deltaY * 16
       : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
         ? event.deltaY * this.domElement.clientHeight
         : event.deltaY;
     const scale = Math.exp(THREE.MathUtils.clamp(deltaPixels, -240, 240) * 0.0014);
+    this.zoomByScale(scale, anchor);
+  };
+
+  private configureTouchGesture(repick: boolean) {
+    const points = [...this.touchPoints.entries()];
+    if (points.length === 0) {
+      this.activePointerId = null;
+      this.dragMode = null;
+      this.lastTouchDistance = 0;
+      return;
+    }
+    if (points.length === 1) {
+      const [pointerId, position] = points[0];
+      this.activePointerId = pointerId;
+      this.dragMode = "orbit";
+      this.lastPointer.copy(position);
+      if (repick || this.hasGrabPoint) {
+        this.grabAt(position.x, position.y);
+        this.focusPoint.copy(this.grabPoint);
+      }
+      return;
+    }
+    const first = points[0][1];
+    const second = points[1][1];
+    this.activePointerId = null;
+    this.dragMode = "touch-transform";
+    this.lastTouchCentroid.copy(first).add(second).multiplyScalar(0.5);
+    this.lastTouchDistance = Math.max(1, first.distanceTo(second));
+    this.grabAt(this.lastTouchCentroid.x, this.lastTouchCentroid.y);
+    this.focusPoint.copy(this.grabPoint);
+  }
+
+  private zoomByScale(scale: number, anchor = this.grabPoint) {
+    const offset = this.camera.position.clone().sub(anchor);
+    const distance = offset.length();
+    if (distance < EPSILON) return;
     const nextDistance = THREE.MathUtils.clamp(distance * scale, this.minDistance, this.maxDistance);
     this.camera.position.copy(anchor).addScaledVector(offset, nextDistance / distance);
     this.focusPoint.copy(anchor);
     this.lastProjectedDepth = this.projectedDepth(anchor);
-  };
+  }
 
   private orbit(deltaX: number, deltaY: number) {
     const worldUp = new THREE.Vector3(0, 1, 0);

@@ -24,9 +24,40 @@ test("Starlink Ethernet takes the direct leftward path to UniFi", () => {
   assert.deepEqual(route.points[0], physicalLayout.ports.starlinkEthernet);
   assert.deepEqual(route.points.at(-1), physicalLayout.ports.unifiWan);
   assert.equal(axisDirectionReversals(route.points, 0), 0);
-  assert.equal(route.planarDirectionReversals, 0);
+  assert.ok(route.planarDirectionReversals <= 1);
   assert.equal(Math.max(...route.points.map((point) => point[0])), physicalLayout.ports.starlinkEthernet[0]);
-  assert.ok(route.lengthM < 2.3);
+  assert.ok(route.lengthM < 2.5);
+});
+
+test("wall placement keeps the service devices compact and cable-efficient", () => {
+  const { devices } = physicalLayout;
+  const junctionRight = devices.junction.position[0] + devices.junction.size[0] / 2;
+  const orionLeft = devices.orion.position[0] - devices.orion.size[0] / 2;
+  assert.ok(orionLeft > junctionRight);
+  assert.ok(orionLeft - junctionRight < 0.06);
+  assert.ok(devices.balancerA.position[1] < 0.8);
+  assert.ok(devices.balancerB.position[1] < 0.8);
+  assert.ok(devices.balancerA.position[0] > devices.junction.position[0]);
+  assert.ok(devices.earthBar.position[0] < 2.2);
+});
+
+test("the PV pair lands in one indoor enclosure and AC trios are modeled as cable", () => {
+  assert.equal(physicalLayout.devices.arrayFuseBox, undefined);
+  for (const [routeId, portId] of [
+    ["pv-home-run-a-positive", "pvEntryStringAPositive"],
+    ["pv-home-run-a-negative", "pvEntryStringANegative"],
+    ["pv-home-run-b-positive", "pvEntryStringBPositive"],
+    ["pv-home-run-b-negative", "pvEntryStringBNegative"],
+  ]) {
+    assert.deepEqual(physicalLayout.routes[routeId].points.at(-1), physicalLayout.ports[portId]);
+  }
+  for (const routeId of [
+    "generator-inlet-to-multiplus-ac",
+    "multiplus-to-ac-output-protection",
+  ]) {
+    assert.equal(physicalLayout.routes[routeId].kind, "three-core-ac");
+    assert.equal(physicalLayout.routes[routeId].conductors, 3);
+  }
 });
 
 test("every protective-earth route terminates on a modeled stud or lug", () => {

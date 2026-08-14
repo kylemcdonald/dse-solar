@@ -213,15 +213,14 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     ekran: createDevice("ekran", [3.45, 2.06, z(0.0298)], [0.187, 0.124, 0.0298], "wall"),
     unifi: createDevice("unifi", [3.68, 2.06, z(0.03)], [0.098, 0.098, 0.03], "wall"),
     usb: createDevice("usb", [3.82, 2.06, z(0.04)], [0.08, 0.04, 0.04], "wall"),
-    orion: createDevice("orion", [4.02, 0.55, z(0.08)], [0.186, 0.13, 0.08], "wall"),
-    balancerA: createDevice("balancerA", [3.86, 1.08, z(0.047)], [0.113, 0.1, 0.047], "wall"),
-    balancerB: createDevice("balancerB", [4.04, 1.08, z(0.047)], [0.113, 0.1, 0.047], "wall"),
+    orion: createDevice("orion", [3.77, 1.68, z(0.08)], [0.186, 0.13, 0.08], "wall"),
+    balancerA: createDevice("balancerA", [3.9, 0.75, z(0.047)], [0.113, 0.1, 0.047], "wall"),
+    balancerB: createDevice("balancerB", [4.08, 0.75, z(0.047)], [0.113, 0.1, 0.047], "wall"),
     classTA: createDevice("classTA", [3.48, 0.53, z(0.06)], [0.15, 0.055, 0.06], "wall"),
     classTB: createDevice("classTB", [3.78, 0.53, z(0.06)], [0.15, 0.055, 0.06], "wall"),
-    earthBar: createDevice("earthBar", [2.78, 1.15, z(0.026)], [0.14, 0.025, 0.026], "wall"),
+    earthBar: createDevice("earthBar", [2.115, 1.16, z(0.026)], [0.14, 0.025, 0.026], "wall"),
     trailingSocket: createDevice("trailingSocket", [2.54, 1.48, -1.94], [0.09, 0.13, 0.07], "hanging"),
     generator: createDevice("generator", [0.15, 0.28, -2.8], [0.6, 0.56, 0.48], "exterior"),
-    arrayFuseBox: createDevice("arrayFuseBox", [0.82, 0.62, -1.68], [0.25, 0.3, 0.12], "array"),
     battery1: createDevice("battery1", [3.14, 0.11, -1.8], [0.52, 0.22, 0.238], "floor"),
     battery2: createDevice("battery2", [3.7, 0.11, -1.8], [0.52, 0.22, 0.238], "floor"),
     battery3: createDevice("battery3", [3.14, 0.11, -1.47], [0.52, 0.22, 0.238], "floor"),
@@ -230,8 +229,10 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
   }, input.deviceOverrides);
 
   const ports: Record<string, LayoutVector> = {
-    pvEntryArrayPositive: frontPort(devices.pvEntry, -0.08, -0.08),
-    pvEntryArrayNegative: frontPort(devices.pvEntry, -0.04, -0.08),
+    pvEntryStringAPositive: frontPort(devices.pvEntry, -0.09, -0.156),
+    pvEntryStringANegative: frontPort(devices.pvEntry, -0.045, -0.156),
+    pvEntryStringBPositive: frontPort(devices.pvEntry, 0, -0.156),
+    pvEntryStringBNegative: frontPort(devices.pvEntry, 0.045, -0.156),
     pvEntryMpptPositive: frontPort(devices.pvEntry, 0.06, -0.08),
     pvEntryMpptNegative: frontPort(devices.pvEntry, 0.1, -0.08),
     smartSolarPvPositive: frontPort(devices.smartSolar, -0.1, -0.114),
@@ -240,12 +241,10 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     smartSolarBatteryNegative: frontPort(devices.smartSolar, 0.03, -0.114),
     multiPlusDcPositive: frontPort(devices.multiPlus, -0.115, -0.258),
     multiPlusDcNegative: frontPort(devices.multiPlus, -0.083, -0.258),
-    multiPlusAcInputL: frontPort(devices.multiPlus, -0.051, -0.258),
-    multiPlusAcInputN: frontPort(devices.multiPlus, -0.019, -0.258),
-    multiPlusAcInputPe: frontPort(devices.multiPlus, 0.013, -0.258),
-    multiPlusAcOutputL: frontPort(devices.multiPlus, 0.045, -0.258),
-    multiPlusAcOutputN: frontPort(devices.multiPlus, 0.077, -0.258),
-    multiPlusAcOutputPe: frontPort(devices.multiPlus, 0.109, -0.258),
+    generatorInletAcCable: frontPort(devices.generatorInlet, 0.076, 0),
+    multiPlusAcInputCable: frontPort(devices.multiPlus, -0.019, -0.258),
+    multiPlusAcOutputCable: frontPort(devices.multiPlus, 0.077, -0.258),
+    acBoardAcCable: frontPort(devices.acBoard, 0, -0.096),
     orionInputPositive: frontPort(devices.orion, -0.06, -0.07),
     orionInputNegative: frontPort(devices.orion, -0.02, -0.07),
     orionOutputPositive: frontPort(devices.orion, 0.02, -0.07),
@@ -256,9 +255,9 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     ekranVeCan: frontPort(devices.ekran, 0.014, -0.07),
     ekranVeBus: frontPort(devices.ekran, 0.042, -0.07),
     ekranEthernet: frontPort(devices.ekran, 0.07, -0.07),
-    unifiPower: frontPort(devices.unifi, -0.035, -0.052),
-    unifiWan: frontPort(devices.unifi, 0.005, -0.052),
-    unifiLan: frontPort(devices.unifi, 0.04, -0.052),
+    unifiPower: frontPort(devices.unifi, -0.035, -0.06),
+    unifiWan: frontPort(devices.unifi, 0.005, -0.06),
+    unifiLan: frontPort(devices.unifi, 0.04, -0.06),
     usbPositive: frontPort(devices.usb, -0.02, -0.022),
     usbNegative: frontPort(devices.usb, 0.02, -0.022),
     usbReservedUsbC: frontPort(devices.usb, -0.022, 0),
@@ -273,7 +272,7 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     smartSolarEarth: frontPort(devices.smartSolar, 0.1, -0.114),
     multiPlusChassisEarth: frontPort(devices.multiPlus, 0.12, -0.19),
     acBoardEarth: frontPort(devices.acBoard, 0.05, -0.096),
-    ekranEarth: frontPort(devices.ekran, 0.087, -0.02),
+    ekranEarth: frontPort(devices.ekran, 0.101, 0),
     classTAInput: frontPort(devices.classTA, -0.055, 0),
     classTAOutput: frontPort(devices.classTA, 0.055, 0),
     classTBInput: frontPort(devices.classTB, -0.055, 0),
@@ -293,27 +292,30 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     conductors = 1,
   ) => { routes[id] = createRoute(id, kind, points, radiusM, conductors); };
 
-  addRoute("pv-string-a-positive", "pv-positive", [[0.559, 0.925, -1.18], [0.69, 0.925, -1.18], [0.69, 0.68, -1.62]], 0.0055);
-  addRoute("pv-string-a-negative", "pv-negative", [[-1.659, 0.205, -1.18], [-1.659, 0.14, -1.55], [0.66, 0.14, -1.55], [0.69, 0.58, -1.62]], 0.0055);
-  addRoute("pv-string-b-positive", "pv-positive", [[0.559, 0.925, 1.18], [0.72, 0.925, 1.18], [0.72, 0.72, -1.55]], 0.0055);
-  addRoute("pv-string-b-negative", "pv-negative", [[-1.659, 0.205, 1.18], [-1.76, 0.12, 1.18], [-1.76, 0.12, -1.5], [0.63, 0.12, -1.5], [0.69, 0.52, -1.62]], 0.0055);
+  const stringAHomePositive: LayoutVector = [0.69, 0.68, -1.62];
+  const stringAHomeNegative: LayoutVector = [0.69, 0.58, -1.62];
+  const stringBHomePositive: LayoutVector = [0.72, 0.72, -1.55];
+  const stringBHomeNegative: LayoutVector = [0.69, 0.52, -1.62];
+  addRoute("pv-string-a-positive", "pv-positive", [[0.559, 0.925, -1.18], [0.69, 0.925, -1.18], stringAHomePositive], 0.0055);
+  addRoute("pv-string-a-negative", "pv-negative", [[-1.659, 0.205, -1.18], [-1.659, 0.14, -1.55], [0.66, 0.14, -1.55], stringAHomeNegative], 0.0055);
+  addRoute("pv-string-b-positive", "pv-positive", [[0.559, 0.925, 1.18], [0.72, 0.925, 1.18], stringBHomePositive], 0.0055);
+  addRoute("pv-string-b-negative", "pv-negative", [[-1.659, 0.205, 1.18], [-1.76, 0.12, 1.18], [-1.76, 0.12, -1.5], [0.63, 0.12, -1.5], stringBHomeNegative], 0.0055);
 
-  const homeRunA: LayoutVector[] = [[0.945, 0.67, -1.7], [1.06, 0.67, -1.7], [1.06, 0.18, -1.86], [1.28, 0.18, wallZ], [1.28, 0.5, wallZ], [1.59, 0.5, wallZ], ports.pvEntryArrayPositive];
-  const homeRunB = homeRunA.map((point, index) => [
-    point[0] + 0.035,
-    point[1] + 0.035,
-    index >= 3 ? point[2] : point[2] + 0.035,
-  ] as LayoutVector);
-  addRoute("pv-home-run-a-positive", "pv-positive", homeRunA, 0.005);
-  addRoute("pv-home-run-a-negative", "pv-negative", homeRunA.map((point, index) => [point[0] + 0.018, point[1] + 0.018, index >= 3 && index < homeRunA.length - 1 ? point[2] + 0.016 : point[2]]), 0.005);
-  addRoute("pv-home-run-b-positive", "pv-positive", homeRunB.map((point, index) => [point[0], point[1], index >= 3 && index < homeRunB.length - 1 ? wallZ + 0.032 : point[2]]), 0.005);
-  addRoute("pv-home-run-b-negative", "pv-negative", homeRunB.map((point, index) => [point[0] + 0.018, point[1] + 0.018, index >= 3 && index < homeRunB.length - 1 ? wallZ + 0.048 : point[2]]), 0.005);
+  // Each string keeps its own complete red/black 4 mm² home run. All four
+  // conductors enter one indoor enclosure, where they are combined behind the
+  // DC disconnect and Type 2 SPD. There is no separate array-side box.
+  addRoute("pv-home-run-a-positive", "pv-positive", [stringAHomePositive, [1.06, 0.68, -1.62], [1.06, 0.18, -1.86], [1.28, 0.18, wallZ], [1.28, 0.36, wallZ], [ports.pvEntryStringAPositive[0], 0.36, wallZ], ports.pvEntryStringAPositive], 0.005);
+  addRoute("pv-home-run-a-negative", "pv-negative", [stringAHomeNegative, [1.09, 0.58, -1.62], [1.09, 0.21, -1.84], [1.31, 0.21, wallZ + 0.016], [1.31, 0.33, wallZ + 0.016], [ports.pvEntryStringANegative[0], 0.33, wallZ + 0.016], ports.pvEntryStringANegative], 0.005);
+  addRoute("pv-home-run-b-positive", "pv-positive", [stringBHomePositive, [1.12, 0.72, -1.55], [1.12, 0.24, -1.82], [1.34, 0.24, wallZ + 0.032], [1.34, 0.3, wallZ + 0.032], [ports.pvEntryStringBPositive[0], 0.3, wallZ + 0.032], ports.pvEntryStringBPositive], 0.005);
+  addRoute("pv-home-run-b-negative", "pv-negative", [stringBHomeNegative, [1.15, 0.52, -1.62], [1.15, 0.27, -1.8], [1.37, 0.27, wallZ + 0.048], [ports.pvEntryStringBNegative[0], 0.27, wallZ + 0.048], ports.pvEntryStringBNegative], 0.005);
 
   addRoute("pv-entry-to-mppt-positive", "pv-positive", [ports.pvEntryMpptPositive, [1.96, 0.42, wallZ], [ports.smartSolarPvPositive[0], 0.42, wallZ], ports.smartSolarPvPositive], 0.0055);
   addRoute("pv-entry-to-mppt-negative", "pv-negative", [ports.pvEntryMpptNegative, [1.99, 0.45, wallZ], [ports.smartSolarPvNegative[0], 0.45, wallZ], ports.smartSolarPvNegative], 0.0055);
 
   addRoute("generator-flex", "three-core-ac", [[0.39, 0.18, -2.8], [0.86, 0.12, -2.8], [0.86, 0.12, -2.35], [1.14, 0.12, -2.35], [1.14, 0.42, -2.18], [1.25, 0.42, -2.18], [1.25, 0.42, -2.02], [1.33, 0.42, -2.02]], 0.011, 3);
   addRoute("trailing-tool-flex", "three-core-ac", [[2.49, 1.72, -2.01], [2.49, 1.6, -1.99], [2.51, 1.48, -1.97]], 0.011, 3);
+  addRoute("generator-inlet-to-multiplus-ac", "three-core-ac", [ports.generatorInletAcCable, [1.56, 0.42, wallZ + 0.07], [1.56, 1.58, wallZ + 0.07], [ports.multiPlusAcInputCable[0], 1.58, wallZ + 0.07], ports.multiPlusAcInputCable], 0.011, 3);
+  addRoute("multiplus-to-ac-output-protection", "three-core-ac", [ports.multiPlusAcOutputCable, [ports.multiPlusAcOutputCable[0], 1.62, wallZ + 0.15], [ports.acBoardAcCable[0], 1.62, wallZ + 0.15], ports.acBoardAcCable], 0.011, 3);
 
   const batteryTerminalY = 0.257;
   const batteryTerminals = {
@@ -354,18 +356,16 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
   ): LayoutVector[] => {
     const clearY = round(junctionTopY + 0.055 + lane * 0.03);
     const clearX = round(junctionRightX + lane * 0.022);
-    const laneZ = round(wallZ + 0.06 + lane * 0.024);
     const frontZ = round(junctionFrontZ + lane * 0.021);
     return [
       gland,
       [gland[0], gland[1], frontZ],
       [clearX, gland[1], frontZ],
       [clearX, clearY, frontZ],
-      [clearX, clearY, laneZ],
-      [routeX, clearY, laneZ],
-      [routeX, approachY, laneZ],
-      [destination[0], approachY, laneZ],
-      [destination[0], destination[1], laneZ],
+      [routeX, clearY, frontZ],
+      [routeX, approachY, frontZ],
+      [destination[0], approachY, frontZ],
+      [destination[0], destination[1], frontZ],
       destination,
     ];
   };
@@ -381,7 +381,9 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     ports.starlinkEthernet,
     [ports.starlinkEthernet[0], 2.48, ports.starlinkEthernet[2]],
     [ports.starlinkEthernet[0], 2.48, -1.99],
-    [ports.unifiWan[0], 2.48, -1.99],
+    [3.79, 2.48, -1.99],
+    [3.79, 1.94, -1.99],
+    [ports.unifiWan[0], 1.94, -1.99],
     [ports.unifiWan[0], ports.unifiWan[1], -1.99],
     ports.unifiWan,
   ], 0.0038);
@@ -392,10 +394,10 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
   addRoute("earth-electrode-to-main-bar", "earth", [
     ports.earthElectrode,
     [1.08, 0.1, -2.58],
-    [1.08, 0.1, -2.02],
-    [1.18, 0.1, -2.02],
-    [1.18, devices.earthBar.position[1], -2.02],
-    [ports.earthBar1[0], devices.earthBar.position[1], -2.02],
+    [1.08, 0.1, -2.055],
+    [1.18, 0.1, -2.055],
+    [1.18, devices.earthBar.position[1], -2.055],
+    [ports.earthBar1[0], devices.earthBar.position[1], -2.055],
     ports.earthBar1,
   ], 0.0055);
   addRoute("earth-electrode-to-array-frame", "earth", [
@@ -406,38 +408,38 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
   ], 0.0055);
   addRoute("earth-bar-to-pv-entry", "earth", [
     ports.earthBar2,
-    [ports.earthBar2[0], 0.93, -1.98],
-    [ports.pvEntryEarth[0], 0.93, -1.98],
-    [ports.pvEntryEarth[0], ports.pvEntryEarth[1], -1.98],
+    [ports.earthBar2[0], 0.93, -2.045],
+    [ports.pvEntryEarth[0], 0.93, -2.045],
+    [ports.pvEntryEarth[0], ports.pvEntryEarth[1], -2.045],
     ports.pvEntryEarth,
   ], 0.0045);
   addRoute("earth-bar-to-smartsolar", "earth", [
     ports.earthBar3,
-    [ports.earthBar3[0], 0.87, -1.965],
-    [ports.smartSolarEarth[0], 0.87, -1.965],
-    [ports.smartSolarEarth[0], ports.smartSolarEarth[1], -1.965],
+    [ports.earthBar3[0], 0.87, -2.04],
+    [ports.smartSolarEarth[0], 0.87, -2.04],
+    [ports.smartSolarEarth[0], ports.smartSolarEarth[1], -2.04],
     ports.smartSolarEarth,
   ], 0.0045);
   addRoute("earth-bar-to-multiplus", "earth", [
     ports.earthBar4,
-    [ports.earthBar4[0], 1.34, -1.95],
-    [ports.multiPlusChassisEarth[0], 1.34, -1.95],
-    [ports.multiPlusChassisEarth[0], ports.multiPlusChassisEarth[1], -1.95],
+    [ports.earthBar4[0], 1.34, -2.035],
+    [ports.multiPlusChassisEarth[0], 1.34, -2.035],
+    [ports.multiPlusChassisEarth[0], ports.multiPlusChassisEarth[1], -2.035],
     ports.multiPlusChassisEarth,
   ], 0.0045);
   addRoute("earth-bar-to-ac-board", "earth", [
     ports.earthBar5,
-    [ports.earthBar5[0], 1.29, -1.935],
-    [ports.acBoardEarth[0], 1.29, -1.935],
-    [ports.acBoardEarth[0], ports.acBoardEarth[1], -1.935],
+    [ports.earthBar5[0], 1.29, -2.03],
+    [ports.acBoardEarth[0], 1.29, -2.03],
+    [ports.acBoardEarth[0], ports.acBoardEarth[1], -2.03],
     ports.acBoardEarth,
   ], 0.0045);
   addRoute("earth-bar-to-ekrano", "earth", [
     ports.earthBar6,
-    [2.97, ports.earthBar6[1], -1.92],
-    [2.97, 2.26, -1.92],
-    [ports.ekranEarth[0], 2.26, -1.92],
-    [ports.ekranEarth[0], ports.ekranEarth[1], -1.92],
+    [2.98, ports.earthBar6[1], -2.025],
+    [2.98, 2.26, -2.025],
+    [3.59, 2.26, -2.025],
+    [3.59, ports.ekranEarth[1], -2.025],
     ports.ekranEarth,
   ], 0.0042);
 
@@ -466,7 +468,7 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
   );
 
   return {
-    revision: "layout-solver-r3",
+    revision: "layout-solver-r4",
     coordinateSystem: "metres; +X right along wall, +Y up, +Z toward viewer/south",
     devices,
     ports,

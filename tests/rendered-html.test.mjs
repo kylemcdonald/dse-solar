@@ -71,7 +71,8 @@ test("canonical system files contain valid totals, diagram levels and physical e
   assert.equal(dse.powerModel.arrayColdVoc10C, 104.71);
   assert.equal(dse.powerModel.pvHomeRuns, 2);
   assert.equal(dse.powerModel.pvCableLossPercent, 2.02);
-  assert.equal(dse.powerModel.fallbackPvCableLossPercent, 4.04);
+  assert.equal(dse.powerModel.fallbackPvCableLossPercent, undefined);
+  assert.doesNotMatch(JSON.stringify(physicalModel), /array-protection-box/);
   assert.match(dse.components.find((item) => item.id === "array").summary, /2S2P/);
   assert.equal(dse.components.find((item) => item.id === "inverter").title, "MultiPlus-II 24/3000");
   assert.equal(dse.components.find((item) => item.id === "systemMonitor").title, "Ekrano GX");
@@ -114,7 +115,7 @@ test("canonical system files contain valid totals, diagram levels and physical e
   assert.ok(!dse.bom.some((item) => /Growatt|MikroTik|Mean Well/i.test(item.item)));
 
   assert.equal(physicalModel.scale, "1 scene unit = 1 metre");
-  assert.match(physicalModel.revision, /R13/);
+  assert.match(physicalModel.revision, /R14/);
   assert.equal(physicalModel.scene.plannedPvHomeRunM, 15);
   assert.deepEqual(physicalModel.scene.arrayOrientation, { azimuth: "north", tiltDeg: 18 });
   assert.ok(physicalModel.scene.illustratedPvRouteM < physicalModel.scene.plannedPvHomeRunM);
@@ -136,8 +137,9 @@ test("canonical system files contain valid totals, diagram levels and physical e
   assert.match(physicalModel.scene.ceilingCableRouting, /no perpendicular mesh handoffs/i);
   assert.match(physicalModel.scene.ceilingCableRouting, /no route snaps back/i);
   assert.match(physicalModel.scene.cameraControls, /ofxGrabCam-inspired/i);
-  assert.match(physicalModel.scene.cameraControls, /XYZ surface point under the cursor/i);
+  assert.match(physicalModel.scene.cameraControls, /XYZ surface point under mouse or touch/i);
   assert.match(physicalModel.scene.cameraControls, /upright world-Y yaw and pitch/i);
+  assert.match(physicalModel.scene.cameraControls, /one touch orbits and two touches pan plus pinch-zoom/i);
   assert.match(physicalModel.connectionAudit.rule, /no 12 V conductor lands directly/i);
   assert.match(physicalModel.connectionAudit.rule, /no protective-earth conductor ends in open space/i);
   assert.equal(physicalModel.connectionAudit.protectiveEarth.connections.length, 6);

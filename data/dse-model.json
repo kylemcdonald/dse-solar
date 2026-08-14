@@ -1,5 +1,5 @@
 {
-  "revision": "Physical fit model R13 · 13 Aug 2026",
+  "revision": "Physical fit model R14 · 14 Aug 2026",
   "units": "metres",
   "scale": "1 scene unit = 1 metre",
   "scene": {
@@ -18,15 +18,16 @@
     "classTFuseMounting": "two holders mount directly to the plywood wall above the floor battery bank; no separate backplate",
     "heavyBatteryCableRoute": "around the outside of the floor battery footprint, then directly onto plywood",
     "junctionCableEntries": "23 continuous inside / gland / outside centerlines through registered enclosure walls",
-    "junctionMounting": "back of enclosure flush to plywood; zero cable routes behind it; the four upper right-side routes clear the enclosure face and pass above, while the four Orion routes pass below",
-    "layoutSolver": "layout-solver-r3 independently generates device envelopes, port coordinates, major cable centerlines, cable reversals, route lengths, overlap checks and optimization score before Three.js rendering",
+    "junctionMounting": "back of enclosure flush to plywood; zero cable routes behind it; three light-gauge Ekrano leads turn immediately into shallow wall lanes, four heavy upper right-side routes remain in front of the enclosure, and four short Orion leads cross directly to the adjacent unit",
+    "layoutSolver": "layout-solver-r4 independently generates device envelopes, port coordinates, major cable centerlines, cable reversals, route lengths, overlap checks and optimization score before Three.js rendering",
     "ceilingCableRouting": "Starlink power and both lighting rows turn directly from each assigned wall-clearance lane toward the ceiling. Starlink Ethernet descends on the Starlink side and travels directly left to UniFi in a clear forward plane, without the former rightward overshoot. No route snaps back to the plywood datum before departing, and there are no perpendicular mesh handoffs.",
-    "cameraControls": "ofxGrabCam-inspired perspective camera: ray-pick the XYZ surface point under the cursor, upright world-Y yaw and pitch around that off-axis point with roll locked out, zoom along its camera vector, and scale panning at its depth",
+    "cameraControls": "ofxGrabCam-inspired perspective camera: ray-pick the XYZ surface point under mouse or touch, use upright world-Y yaw and pitch around that off-axis point with roll locked out, and scale zoom/pan at its depth; one touch orbits and two touches pan plus pinch-zoom",
     "cableGeometry": "one continuous tube surface per route with tangent corner-contained bends, seamless adjacent corners, tangent render handoffs and stable greedy board-depth lanes"
   },
   "assumptions": [
     "The back wall, wall board, panel rack, generator and small protection-enclosure dimensions are planning envelopes, not surveyed site measurements. Side walls and roof planes are omitted from the review model.",
     "The array is shown close to the north side of the building. The two 4 mm² PV pairs retain a conservative 15 m one-way design allowance even though the illustrated route is shorter.",
+    "Both PV strings retain independent positive and negative home-run conductors all the way to one indoor entry enclosure. For this two-string array, the other string can contribute only about one module Isc (14.20 A) into a faulted string, below the Suntech module's 25 A maximum series-fuse rating; the base design therefore omits the separate outdoor fuse/combiner. The indoor enclosure still provides protected parallel terminals, a two-pole 40 A DC disconnect and Type 2 SPD. Final cable ampacity and local-code review remain mandatory.",
     "The array faces north at an 18° planning tilt, consistent with Fiji's latitude and government residential-solar guidance; final angle and shading require site verification.",
     "Small conductors are slightly widened so individual polarity, fused positives, unfused negative returns and data paths remain visible.",
     "Ordinary power conductors begin approximately 35 mm in front of the plywood and receive stable wall lanes. Flush-junction bypasses briefly stand farther forward—up to about 245 mm from plywood—to clear the enclosure face before returning toward their terminal; no route occupies the inaccessible space behind the box.",
@@ -34,7 +35,7 @@
     "Every illustrated junction-box boundary crossing uses one continuous centerline from its internal termination, through a modeled cable gland, around the complete exterior bend and into the outgoing run. Render-visibility handoffs occur only on audited tangent straight sections.",
     "Every green conductor terminates at a modeled stud: the electrode and array frame share the electrode connection, and dedicated studs on a visible main PE bar feed PV protection, SmartSolar chassis, MultiPlus chassis, AC output protection and Ekrano GX. Protective earth is not tied to the DC-negative bus in this planning model.",
     "Each complete cable route renders as one continuous tube surface rather than separate open cylinders and bend pieces. This removes polygon-ring gaps when two bends are close together. Bends use tangent, corner-contained quadratic geometry; each curve stays within the intended turn and cannot curl backwards in perspective. A greedy minimum-conflict planner gives each complete board route one stable depth lane; ceiling departures retain that lane instead of snapping back to a shared wall datum. The geometry audit checks both reverse bends and non-terminal crossings.",
-    "Camera interactions ray-pick the visible XYZ point beneath the cursor. Upright orbit and zoom preserve that off-axis point's screen position; roll is locked to world-up and pan scale derives from picked depth. Empty-space interactions reuse the last valid projected depth, following the ofxGrabCam interaction model.",
+    "Camera interactions ray-pick the visible XYZ point beneath the mouse or touch centroid. Upright orbit and zoom preserve that off-axis point's screen position; roll is locked to world-up and pan scale derives from picked depth. One finger orbits, two fingers pan and pinch-zoom, and empty-space interactions reuse the last valid projected depth, following the ofxGrabCam interaction model.",
     "Gland positions and bend radii remain a planning layout and require a full-size mock-up with the actual parts before drilling or ordering preterminated cables."
   ],
   "connectionAudit": {
@@ -45,7 +46,8 @@
     },
     "multiPlus": {
       "ports": ["DC +", "DC −", "AC-in L / N / PE", "AC-out L / N / PE"],
-      "connections": ["24 V bus", "generator inlet", "AC output protection"]
+      "connections": ["24 V bus", "generator inlet", "AC output protection"],
+      "routing": "Each AC trio is represented by one thick white three-core cable; the internal brown, blue and green conductors are not broken out in the wall-layout view."
     },
     "ekrano": {
       "ports": ["DC +", "DC −", "VE.Direct", "VE.Can", "VE.Bus", "Ethernet", "protective earth"],
@@ -61,7 +63,8 @@
     },
     "unifiExpress": {
       "ports": ["USB-C power", "WAN", "LAN"],
-      "connections": ["USB charger at 5 V / 3 A", "Starlink Ethernet", "Ekrano GX Ethernet"]
+      "connections": ["USB charger at 5 V / 3 A", "Starlink Ethernet", "Ekrano GX Ethernet"],
+      "routing": "All three leads approach from below or around the enclosure, leaving the front face unobscured."
     },
     "starlinkMini": {
       "ports": ["12 V +", "12 V −", "Ethernet"],
@@ -80,7 +83,8 @@
     },
     "batteryBalancers": {
       "ports": ["string +", "series midpoint", "string −"],
-      "connections": ["one independent three-conductor set per 24 V battery string"]
+      "connections": ["one independent three-conductor set per 24 V battery string"],
+      "routing": "Both balancers sit low and right of the junction box. Positive leads use an outer-right channel, yellow midpoint leads use a separate central channel and negatives use the left channel."
     },
     "batteryStringProtection": {
       "ports": ["String A battery side", "String A selector side", "String B battery side", "String B selector side"],
@@ -184,14 +188,6 @@
       "dimensionsMm": { "width": 298.5, "height": 38.5, "depth": 259 },
       "status": "verified",
       "sourceUrl": "https://www.starlink.com/specifications/5"
-    },
-    {
-      "id": "array-protection-box",
-      "componentIds": ["pvSafety"],
-      "quantity": 1,
-      "dimensionsMm": { "width": 250, "height": 300, "depth": 120 },
-      "status": "assumed",
-      "sourceUrl": ""
     },
     {
       "id": "building-entry-pv-box",

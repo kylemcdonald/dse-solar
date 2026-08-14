@@ -159,16 +159,8 @@ const DEVICE_PORTS = {
   multiPlus: {
     dcPositive: physicalLayout.ports.multiPlusDcPositive as VectorTuple,
     dcNegative: physicalLayout.ports.multiPlusDcNegative as VectorTuple,
-    acInput: [
-      physicalLayout.ports.multiPlusAcInputL,
-      physicalLayout.ports.multiPlusAcInputN,
-      physicalLayout.ports.multiPlusAcInputPe,
-    ] as VectorTuple[],
-    acOutput: [
-      physicalLayout.ports.multiPlusAcOutputL,
-      physicalLayout.ports.multiPlusAcOutputN,
-      physicalLayout.ports.multiPlusAcOutputPe,
-    ] as VectorTuple[],
+    acInputCable: physicalLayout.ports.multiPlusAcInputCable as VectorTuple,
+    acOutputCable: physicalLayout.ports.multiPlusAcOutputCable as VectorTuple,
     chassisEarth: physicalLayout.ports.multiPlusChassisEarth as VectorTuple,
   },
   orion: {
@@ -203,15 +195,26 @@ const DEVICE_PORTS = {
     stringBOutput: physicalLayout.ports.classTBOutput as VectorTuple,
   },
   pvEntry: {
+    stringInputs: [
+      physicalLayout.ports.pvEntryStringAPositive,
+      physicalLayout.ports.pvEntryStringANegative,
+      physicalLayout.ports.pvEntryStringBPositive,
+      physicalLayout.ports.pvEntryStringBNegative,
+    ] as VectorTuple[],
+    mpptPositive: physicalLayout.ports.pvEntryMpptPositive as VectorTuple,
+    mpptNegative: physicalLayout.ports.pvEntryMpptNegative as VectorTuple,
     earth: physicalLayout.ports.pvEntryEarth as VectorTuple,
   },
   acBoard: {
+    acCable: physicalLayout.ports.acBoardAcCable as VectorTuple,
     earth: physicalLayout.ports.acBoardEarth as VectorTuple,
+  },
+  generatorInlet: {
+    acCable: physicalLayout.ports.generatorInletAcCable as VectorTuple,
   },
 };
 
 const COLORS = {
-  acBrown: 0x8a4d32,
   battery: 0x315f68,
   black: 0x20262a,
   blue: 0x3e73a5,
@@ -270,12 +273,11 @@ const MODEL_LABELS: ModelLabel[] = [
   { id: "panel2", componentId: "panel2", label: "Panel 2", detail: "2.279 × 1.134 m · string A", position: [0.02, 1.38, -1.18], offset: [-110, -12], views: ["array"] },
   { id: "panel3", componentId: "panel3", label: "Panel 3", detail: "2.279 × 1.134 m · string B", position: [-1.12, 1.02, 1.18], offset: [20, 10], views: ["array"] },
   { id: "panel4", componentId: "panel4", label: "Panel 4", detail: "2.279 × 1.134 m · string B", position: [0.02, 1.38, 1.18], offset: [26, 0], views: ["array"] },
-  { id: "array-box", componentId: "pvSafety", label: "Array fuse box", detail: "2 × 25 A gPV · north-side rack", position: [0.82, 1.02, -1.68], views: ["site", "array"] },
-  { id: "pv-runs", label: "Two complete PV pairs", detail: "short illustrated route · 15 m design allowance", position: [1.05, 0.52, -1.75], offset: [-360, 65], views: ["site"] },
+  { id: "pv-runs", label: "Two complete PV pairs", detail: "four conductors run directly to indoor entry protection · 15 m design allowance", position: [1.05, 0.52, -1.75], offset: [-360, 65], views: ["site"] },
   { id: "starlink", componentId: "starlink", label: "Starlink Mini", detail: "high back-wall mount · 298.5 × 259 mm", position: physicalLayout.devices.starlink.position as VectorTuple, offset: [-120, -10], views: ["site"] },
   { id: "generator", componentId: "generator", label: "G3200P", detail: "backup · opposite / cable-entry side of array", position: physicalLayout.devices.generator.position as VectorTuple, offset: [-120, 25], views: ["site"] },
   { id: "generator-inlet", componentId: "generatorInput", label: "Generator inlet", detail: "low wall · single 3-core flex outside", position: physicalLayout.devices.generatorInlet.position as VectorTuple, offset: [-125, 10], views: ["wall"] },
-  { id: "entry-box", componentId: "pvSafety", label: "PV entry protection", detail: "low-left · 40 A disconnect · SPD · combine", position: physicalLayout.devices.pvEntry.position as VectorTuple, offset: [-100, -28], views: ["wall"] },
+  { id: "entry-box", componentId: "pvSafety", label: "PV entry protection + combine", detail: "four string inputs · 40 A disconnect · Type 2 SPD", position: physicalLayout.devices.pvEntry.position as VectorTuple, offset: [-100, -28], views: ["wall"] },
   { id: "smartsolar", componentId: "solarController", label: "SmartSolar 150/85", detail: "immediately right of PV entry · 295 × 216 × 103 mm", position: physicalLayout.devices.smartSolar.position as VectorTuple, offset: [10, 26], views: ["wall"] },
   { id: "multiplus", componentId: "inverter", label: "MultiPlus-II 24/3000", detail: "high wall · 268 × 499 × 141 mm", position: physicalLayout.devices.multiPlus.position as VectorTuple, offset: [-145, 18], views: ["wall"] },
   { id: "junction", componentId: "mounting", label: "Compact junction box", detail: "350 × 247 × 150 mm · shown open", position: [3.49, 1.94, -1.87], offset: [34, 34], views: ["wall"] },
@@ -290,7 +292,7 @@ const MODEL_LABELS: ModelLabel[] = [
   { id: "branch-fuses", componentId: "mainDc", label: "INLINE BRANCH FUSES", detail: "MPPT 100 A · Orion input 30 A · Orion output 35 A · GX 3.15 A", position: [3.59, 1.7, -1.79], offset: [-255, -180], views: ["junction"] },
   { id: "balancer-a", componentId: "balancers", label: "Battery balancer A", detail: "wired to string A − / midpoint / +", position: physicalLayout.devices.balancerA.position as VectorTuple, offset: [-105, -65], views: ["wall", "batteries"] },
   { id: "balancer-b", componentId: "balancers", label: "Battery balancer B", detail: "wired to string B − / midpoint / +", position: physicalLayout.devices.balancerB.position as VectorTuple, offset: [52, -60], views: ["wall", "batteries"] },
-  { id: "orion", componentId: "dcConverter", label: "Orion-Tr 24/12-30", detail: "low wall · 186 × 130 × 80 mm", position: physicalLayout.devices.orion.position as VectorTuple, offset: [10, -18], views: ["wall"] },
+  { id: "orion", componentId: "dcConverter", label: "Orion-Tr 24/12-30", detail: "immediately right of junction box · 186 × 130 × 80 mm", position: physicalLayout.devices.orion.position as VectorTuple, offset: [10, -18], views: ["wall"] },
   { id: "ac-box", componentId: "acBoard", label: "AC output protection", detail: "beside MultiPlus · 10 A Type A RCBO", position: physicalLayout.devices.acBoard.position as VectorTuple, offset: [8, 25], views: ["wall"] },
   { id: "unifi", componentId: "router", label: "UniFi Express", detail: "next to Ekrano · 98 × 98 × 30 mm", position: physicalLayout.devices.unifi.position as VectorTuple, offset: [-18, 70], views: ["wall"] },
   { id: "usb", componentId: "usb", label: "USB charging", detail: "UniFi USB-C + device charging", position: physicalLayout.devices.usb.position as VectorTuple, offset: [-45, -110], views: ["wall"] },
@@ -593,31 +595,6 @@ function wallPathFromPenetration(
   ];
 }
 
-function wallPathAroundJunctionFront(
-  penetration: JunctionPenetration,
-  route: Array<[number, number]>,
-  end: VectorTuple,
-  radius: number,
-  side: "above" | "below",
-  laneIndex: number,
-) {
-  const escapeX = JUNCTION_RIGHT_X + 0.045 + laneIndex * 0.022;
-  const bypassY = side === "above"
-    ? JUNCTION_TOP_Y + 0.055 + laneIndex * 0.03
-    : JUNCTION_BOTTOM_Y - 0.32 - laneIndex * 0.06;
-  const anchors: Array<[number, number]> = [[escapeX, bypassY], ...route, [end[0], end[1]]];
-  const footprint = orthogonalWallFootprint(anchors);
-  const frontZ = JUNCTION_FRONT_CABLE_Z + laneIndex * (radius * 2 + 0.009);
-  const lanePoints = footprint.map(([x, y]) => [x, y, frontZ] as VectorTuple);
-  return [
-    [penetration.outside[0], penetration.outside[1], frontZ] as VectorTuple,
-    [escapeX, penetration.outside[1], frontZ] as VectorTuple,
-    [escapeX, bypassY, frontZ] as VectorTuple,
-    ...lanePoints,
-    end,
-  ];
-}
-
 function wallPathFromPenetrationToDeparture(
   scene: THREE.Scene,
   penetration: JunctionPenetration,
@@ -643,8 +620,20 @@ function addContinuousJunctionCable(
   exteriorPoints: VectorTuple[],
   color: number,
   radius: number,
+  splitVisibility = true,
 ) {
   const through = penetration.through;
+  if (!splitVisibility) {
+    addOrthogonalCable(
+      scene,
+      [...insidePoints, ...through.slice(1), ...exteriorPoints],
+      color,
+      radius,
+      "junction",
+      false,
+    );
+    return;
+  }
   const prefix: VectorTuple[] = [
     ...insidePoints,
     ...through.slice(1),
@@ -1057,13 +1046,15 @@ function addJunctionBox(scene: THREE.Scene, pickables: THREE.Object3D[]) {
     cableRadius: number,
     lane: number,
   ): VectorTuple[] => {
-    const frontZ = JUNCTION_FRONT_CABLE_Z + lane * (cableRadius * 2 + 0.005);
-    const clearY = JUNCTION_TOP_Y + 0.07 + lane * 0.025;
+    const wallLaneZ = WALL_CABLE_Z + 0.012 + lane * (cableRadius * 2 + 0.006);
+    const approachY = 1.91 - lane * 0.018;
     return [
-      [penetration.outside[0], penetration.outside[1], frontZ],
-      [penetration.outside[0], clearY, frontZ],
-      [penetration.outside[0], clearY, destination[2]],
-      [penetration.outside[0], destination[1], destination[2]],
+      // The three light-gauge GX leads are installed first and turn straight
+      // back to their shallow wall lanes as soon as they clear the top glands.
+      [penetration.outside[0], penetration.outside[1], wallLaneZ],
+      [penetration.outside[0], approachY, wallLaneZ],
+      [destination[0], approachY, wallLaneZ],
+      [destination[0], destination[1], wallLaneZ],
       destination,
     ];
   };
@@ -1134,8 +1125,6 @@ function addArrayStructure(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   addRodBetween(scene, [-1.67, 0.05, -2.28], [-1.67, 0.05, 2.28], 0.025);
   addRodBetween(scene, [0.57, 0.05, -2.28], [0.57, 0.05, 2.28], 0.025);
 
-  addCylinder(scene, 0.025, 0.5, [0.82, 0.27, -1.68], 0x65716f);
-  addProtectionBox(scene, "pvSafety", physicalLayout.devices.arrayFuseBox.position as VectorTuple, pickables, physicalLayout.devices.arrayFuseBox.size as VectorTuple);
 }
 
 function addWallEquipment(scene: THREE.Scene, pickables: THREE.Object3D[]) {
@@ -1155,6 +1144,33 @@ function addWallEquipment(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   [-0.022, 0, 0.022].forEach((x) => addOutlinedBox(usb, [0.012, 0.016, 0.005], [x, 0, 0.023], 0xbcc8c7, { outline: 0x687270 }));
   addTerminalBusbar(scene, devices.earthBar.position as VectorTuple, COLORS.earth, "earth", pickables, 7);
 
+  // These two front faces are routing obstacles. Every modeled lead approaches
+  // a registered edge port, so no cable is allowed to cross the display or the
+  // UniFi enclosure simply because it is shorter in projection.
+  registerCableObstacle(
+    scene,
+    "ekrano-front",
+    devices.ekran.position as VectorTuple,
+    devices.ekran.size as VectorTuple,
+    [
+      DEVICE_PORTS.ekran.powerPositive,
+      DEVICE_PORTS.ekran.powerNegative,
+      DEVICE_PORTS.ekran.veDirect,
+      DEVICE_PORTS.ekran.veCan,
+      DEVICE_PORTS.ekran.veBus,
+      DEVICE_PORTS.ekran.ethernet,
+      DEVICE_PORTS.ekran.earth,
+    ].map((center) => ({ axis: "z" as const, center, radius: 0.012 })),
+  );
+  registerCableObstacle(
+    scene,
+    "unifi-front",
+    devices.unifi.position as VectorTuple,
+    devices.unifi.size as VectorTuple,
+    [DEVICE_PORTS.unifi.power, DEVICE_PORTS.unifi.wan, DEVICE_PORTS.unifi.lan]
+      .map((center) => ({ axis: "z" as const, center, radius: 0.014 })),
+  );
+
   [
     [DEVICE_PORTS.smartSolar.pvPositive, COLORS.red],
     [DEVICE_PORTS.smartSolar.pvNegative, COLORS.black],
@@ -1164,8 +1180,8 @@ function addWallEquipment(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   [
     [DEVICE_PORTS.multiPlus.dcPositive, COLORS.red],
     [DEVICE_PORTS.multiPlus.dcNegative, COLORS.black],
-    ...DEVICE_PORTS.multiPlus.acInput.map((position, index) => [position, [COLORS.acBrown, COLORS.blue, COLORS.earth][index]]),
-    ...DEVICE_PORTS.multiPlus.acOutput.map((position, index) => [position, [COLORS.acBrown, COLORS.blue, COLORS.earth][index]]),
+    [DEVICE_PORTS.multiPlus.acInputCable, COLORS.threeCoreAc],
+    [DEVICE_PORTS.multiPlus.acOutputCable, COLORS.threeCoreAc],
   ].forEach(([position, color]) => addFrontTerminal(scene, position as VectorTuple, color as number, 0.006));
   [
     [DEVICE_PORTS.orion.inputPositive, COLORS.red],
@@ -1189,9 +1205,18 @@ function addWallEquipment(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   addFrontTerminal(scene, DEVICE_PORTS.usb.dcNegative, COLORS.black, 0.0045);
   addFrontTerminal(scene, DEVICE_PORTS.ekran.powerPositive, COLORS.red, 0.004);
   addFrontTerminal(scene, DEVICE_PORTS.ekran.powerNegative, COLORS.black, 0.004);
+  DEVICE_PORTS.pvEntry.stringInputs.forEach((position, index) => addFrontTerminal(
+    scene,
+    position,
+    index % 2 === 0 ? COLORS.red : COLORS.black,
+    0.0045,
+  ));
+  addFrontTerminal(scene, DEVICE_PORTS.pvEntry.mpptPositive, COLORS.red, 0.0045);
+  addFrontTerminal(scene, DEVICE_PORTS.pvEntry.mpptNegative, COLORS.black, 0.0045);
   addFrontTerminal(scene, DEVICE_PORTS.pvEntry.earth, COLORS.earth, 0.0045);
   addFrontTerminal(scene, DEVICE_PORTS.smartSolar.earth, COLORS.earth, 0.0045);
   addFrontTerminal(scene, DEVICE_PORTS.multiPlus.chassisEarth, COLORS.earth, 0.0045);
+  addFrontTerminal(scene, DEVICE_PORTS.acBoard.earth, COLORS.earth, 0.0045);
   addFrontTerminal(scene, DEVICE_PORTS.ekran.earth, COLORS.earth, 0.0042);
   addOutlinedBox(scene, [0.014, 0.009, 0.006], DEVICE_PORTS.ekran.veDirect, COLORS.orange, { outline: 0x8f641f });
   addOutlinedBox(scene, [0.014, 0.009, 0.006], DEVICE_PORTS.ekran.veCan, COLORS.blue, { outline: 0x244c71 });
@@ -1209,32 +1234,17 @@ function addAcAndGenerator(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   addOrthogonalCable(scene, physicalLayout.routes["trailing-tool-flex"].points as VectorTuple[], COLORS.threeCoreAc, physicalLayout.routes["trailing-tool-flex"].radiusM);
 
   addOrthogonalCable(scene, physicalLayout.routes["generator-flex"].points as VectorTuple[], COLORS.threeCoreAc, physicalLayout.routes["generator-flex"].radiusM);
-  [COLORS.acBrown, COLORS.blue, COLORS.earth].forEach((color, index) => {
-    const inletStart: VectorTuple = [devices.generatorInlet.position[0] + devices.generatorInlet.size[0] / 2 + 0.006, devices.generatorInlet.position[1] + 0.035 * (index - 1), devices.generatorInlet.position[2] + devices.generatorInlet.size[2] / 2 + 0.006];
-    const inputPort = DEVICE_PORTS.multiPlus.acInput[index];
-    const outputPort = DEVICE_PORTS.multiPlus.acOutput[index];
-    const acBoardPort: VectorTuple = [devices.acBoard.position[0] + (index - 1) * 0.05, devices.acBoard.position[1] - devices.acBoard.size[1] / 2 - 0.006, devices.acBoard.position[2] + devices.acBoard.size[2] / 2 + 0.006];
-    addFrontTerminal(scene, inletStart, color, 0.005);
-    addFrontTerminal(scene, acBoardPort, color, 0.005);
-    addWallRoutedCable(
+  addFrontTerminal(scene, DEVICE_PORTS.generatorInlet.acCable, COLORS.threeCoreAc, 0.009);
+  addFrontTerminal(scene, DEVICE_PORTS.acBoard.acCable, COLORS.threeCoreAc, 0.009);
+  ["generator-inlet-to-multiplus-ac", "multiplus-to-ac-output-protection"].forEach((id) => {
+    const route = physicalLayout.routes[id];
+    addOrthogonalCable(
       scene,
-      inletStart,
-      [[1.58 + index * 0.018, inletStart[1]], [1.58 + index * 0.018, 1.58 + index * 0.012], [inputPort[0], 1.58 + index * 0.012]],
-      inputPort,
-      color,
-      0.0055,
+      route.points as VectorTuple[],
+      COLORS.threeCoreAc,
+      route.radiusM,
       "context",
-      index * 0.016,
-    );
-    addWallRoutedCable(
-      scene,
-      outputPort,
-      [[outputPort[0], 1.61 - index * 0.012], [acBoardPort[0], 1.61 - index * 0.012]],
-      acBoardPort,
-      color,
-      0.0055,
-      "context",
-      0.045 + index * 0.018,
+      false,
     );
   });
 }
@@ -1322,10 +1332,22 @@ function addBatterySystem(scene: THREE.Scene, pickables: THREE.Object3D[]) {
       const start: VectorTuple = [balancer.position[0] + offset, balancer.position[1] - balancer.size[1] / 2 - 0.006, balancer.position[2] + balancer.size[2] / 2 + 0.006];
       const end = stringPorts[stringIndex][leadIndex];
       const routeIndex = stringIndex * 3 + leadIndex;
-      const sideX = leadIndex === 2 ? 2.78 - stringIndex * 0.06 : 4.15 + stringIndex * 0.12 + leadIndex * 0.055;
-      const laneY = 0.96 - routeIndex * 0.045;
-      const lowerY = 0.22 + routeIndex * 0.012;
-      addOrthogonalCable(scene, wallRoutedPoints(scene, start, [[start[0], laneY], [sideX, laneY], [sideX, lowerY]], [sideX, lowerY, -1.92], 0.0035, 0.012 + routeIndex * 0.01).concat([
+      // Positives stay outside the right edge, midpoint yellows use the clear
+      // central channel, and negatives use the left channel. Keeping those
+      // domains disjoint prevents the former yellow/red crossing on the right.
+      const sideX = leadIndex === 0
+        ? 4.18 + stringIndex * 0.07
+        : leadIndex === 1
+          ? 3.54 + stringIndex * 0.045
+          : 2.62 - stringIndex * 0.055;
+      const laneY = leadIndex === 2
+        ? 0.42 - stringIndex * 0.045
+        : start[1] - 0.045 - routeIndex * 0.022;
+      const lowerY = 0.285 + routeIndex * 0.009;
+      const preferredPlane = leadIndex === 1
+        ? 0.072 + stringIndex * 0.014
+        : 0.012 + routeIndex * 0.009;
+      addOrthogonalCable(scene, wallRoutedPoints(scene, start, [[start[0], laneY], [sideX, laneY], [sideX, lowerY]], [sideX, lowerY, -1.92], 0.0035, preferredPlane).concat([
         [sideX, lowerY, end[2]],
         end,
       ]), [COLORS.red, COLORS.yellow, COLORS.black][leadIndex], 0.0035, "context", false);
@@ -1377,37 +1399,60 @@ function addPvWiring(scene: THREE.Scene) {
 }
 
 function addDcLoadsAndData(scene: THREE.Scene) {
+  const orionFrontPath = (
+    penetration: JunctionPenetration,
+    destination: VectorTuple,
+    radius: number,
+    lane: number,
+  ): VectorTuple[] => {
+    const frontZ = JUNCTION_FRONT_CABLE_Z + 0.1 + lane * (radius * 2 + 0.007);
+    const escapeX = JUNCTION_RIGHT_X + 0.042 + lane * 0.014;
+    const approachY = JUNCTION_BOTTOM_Y - 0.055 - lane * 0.032;
+    return [
+      [penetration.outside[0], penetration.outside[1], frontZ],
+      [escapeX, penetration.outside[1], frontZ],
+      [escapeX, approachY, frontZ],
+      [destination[0], approachY, frontZ],
+      [destination[0], destination[1], frontZ],
+      destination,
+    ];
+  };
+
   addContinuousJunctionCable(
     scene,
     [[3.606, 1.755, JUNCTION_WIRE_Z], [3.57, 1.755, JUNCTION_WIRE_Z + 0.052], [3.57, 1.652, JUNCTION_WIRE_Z + 0.052], [3.598, 1.652, JUNCTION_WIRE_Z + 0.052], JUNCTION_PORTS.orion24Pos.terminal],
     JUNCTION_PORTS.orion24Pos,
-    wallPathAroundJunctionFront(JUNCTION_PORTS.orion24Pos, [[4.16, 0.42], [DEVICE_PORTS.orion.inputPositive[0], 0.42]], DEVICE_PORTS.orion.inputPositive, 0.0055, "below", 0),
+    orionFrontPath(JUNCTION_PORTS.orion24Pos, DEVICE_PORTS.orion.inputPositive, 0.0055, 0),
     COLORS.red,
     0.0055,
+    false,
   );
   addContinuousJunctionCable(
     scene,
     [[3.563, 1.735, JUNCTION_WIRE_Z], [3.552, 1.735, JUNCTION_WIRE_Z + 0.064], [3.552, 1.627, JUNCTION_WIRE_Z + 0.064], [3.598, 1.627, JUNCTION_WIRE_Z + 0.064], JUNCTION_PORTS.orion24Neg.terminal],
     JUNCTION_PORTS.orion24Neg,
-    wallPathAroundJunctionFront(JUNCTION_PORTS.orion24Neg, [[4.22, 0.38], [DEVICE_PORTS.orion.inputNegative[0], 0.38]], DEVICE_PORTS.orion.inputNegative, 0.0055, "below", 1),
+    orionFrontPath(JUNCTION_PORTS.orion24Neg, DEVICE_PORTS.orion.inputNegative, 0.0055, 1),
     COLORS.black,
     0.0055,
+    false,
   );
   addContinuousJunctionCable(
     scene,
     [[3.607, 1.665, JUNCTION_WIRE_Z], [3.607, 1.665, JUNCTION_WIRE_Z + 0.1], [3.535, 1.665, JUNCTION_WIRE_Z + 0.1], [3.535, 1.603, JUNCTION_WIRE_Z + 0.1], [3.598, 1.603, JUNCTION_WIRE_Z + 0.1], JUNCTION_PORTS.orion12Pos.terminal],
     JUNCTION_PORTS.orion12Pos,
-    wallPathAroundJunctionFront(JUNCTION_PORTS.orion12Pos, [[4.28, 0.34], [DEVICE_PORTS.orion.outputPositive[0], 0.34]], DEVICE_PORTS.orion.outputPositive, 0.0048, "below", 2),
+    orionFrontPath(JUNCTION_PORTS.orion12Pos, DEVICE_PORTS.orion.outputPositive, 0.0048, 2),
     COLORS.red,
     0.0048,
+    false,
   );
   addContinuousJunctionCable(
     scene,
     [[3.59, 1.591, JUNCTION_WIRE_Z], [3.59, 1.582, JUNCTION_WIRE_Z], JUNCTION_PORTS.orion12Neg.terminal],
     JUNCTION_PORTS.orion12Neg,
-    wallPathAroundJunctionFront(JUNCTION_PORTS.orion12Neg, [[4.34, 0.3], [DEVICE_PORTS.orion.outputNegative[0], 0.3]], DEVICE_PORTS.orion.outputNegative, 0.0048, "below", 3),
+    orionFrontPath(JUNCTION_PORTS.orion12Neg, DEVICE_PORTS.orion.outputNegative, 0.0048, 3),
     COLORS.black,
     0.0048,
+    false,
   );
 
   const loadRadii = [0.0045, 0.0042, 0.0045];
@@ -1483,10 +1528,28 @@ function addDcLoadsAndData(scene: THREE.Scene) {
     "context",
     false,
   );
-  addWallRoutedCable(scene, DEVICE_PORTS.unifi.lan, [[DEVICE_PORTS.unifi.lan[0], 2.14], [DEVICE_PORTS.ekran.ethernet[0], 2.14]], DEVICE_PORTS.ekran.ethernet, 0x3f7cb8, 0.0032, "context", 0.016);
-  addWallRoutedCable(scene, [physicalLayout.devices.smartSolar.position[0] + 0.08, physicalLayout.devices.smartSolar.position[1] + 0.1, DEVICE_PORTS.smartSolar.pvPositive[2]], [[2.3, 0.65], [2.3, 2.27], [3.31, 2.27], [3.31, 2.14]], DEVICE_PORTS.ekran.veCan, 0x3f7cb8, 0.0032, "context", 0.02);
-  addWallRoutedCable(scene, [physicalLayout.devices.multiPlus.position[0] + 0.1, physicalLayout.devices.multiPlus.position[1], DEVICE_PORTS.multiPlus.dcPositive[2]], [[2.32, 1.92], [2.32, 2.23], [3.35, 2.23], [3.35, 2.1]], DEVICE_PORTS.ekran.veBus, 0x3f7cb8, 0.0032, "context", 0.024);
-  addWallRoutedCable(scene, DEVICE_PORTS.usb.reservedUsbC, [[DEVICE_PORTS.usb.reservedUsbC[0], 2.12], [DEVICE_PORTS.unifi.power[0], 2.12]], DEVICE_PORTS.unifi.power, 0x343a3d, 0.0035, "context", 0.012);
+  addWallRoutedCable(scene, DEVICE_PORTS.unifi.lan, [[DEVICE_PORTS.unifi.lan[0], 1.93], [DEVICE_PORTS.ekran.ethernet[0], 1.93]], DEVICE_PORTS.ekran.ethernet, 0x3f7cb8, 0.0032, "context", 0.075);
+  addWallRoutedCable(
+    scene,
+    [physicalLayout.devices.smartSolar.position[0] + 0.08, physicalLayout.devices.smartSolar.position[1] + 0.1, DEVICE_PORTS.smartSolar.pvPositive[2]],
+    [[2.3, 0.65], [2.3, 2.25], [3.3, 2.25], [3.3, 1.89], [DEVICE_PORTS.ekran.veCan[0], 1.89]],
+    DEVICE_PORTS.ekran.veCan,
+    0x3f7cb8,
+    0.0032,
+    "context",
+    0.09,
+  );
+  addWallRoutedCable(
+    scene,
+    [physicalLayout.devices.multiPlus.position[0] + 0.1, physicalLayout.devices.multiPlus.position[1], DEVICE_PORTS.multiPlus.dcPositive[2]],
+    [[2.32, 1.92], [2.32, 2.21], [3.32, 2.21], [3.32, 1.87], [DEVICE_PORTS.ekran.veBus[0], 1.87]],
+    DEVICE_PORTS.ekran.veBus,
+    0x3f7cb8,
+    0.0032,
+    "context",
+    0.105,
+  );
+  addWallRoutedCable(scene, DEVICE_PORTS.usb.reservedUsbC, [[DEVICE_PORTS.usb.reservedUsbC[0], 1.91], [DEVICE_PORTS.unifi.power[0], 1.91]], DEVICE_PORTS.unifi.power, 0x343a3d, 0.0035, "context", 0.085);
 }
 
 function addEarthing(scene: THREE.Scene, pickables: THREE.Object3D[]) {
@@ -1588,7 +1651,7 @@ function DseModel({
   const [activePreset, setActivePreset] = useState<CameraPreset["id"]>("site");
   const [labelsVisible, setLabelsVisible] = useState(false);
   const [showScaleNotes, setShowScaleNotes] = useState(false);
-  const [hovered, setHovered] = useState("Drag a surface to orbit · right/shift-drag to pan · scroll zooms at grabbed point");
+  const [hovered, setHovered] = useState("Drag to orbit · right/shift-drag to pan · touch: one finger orbit, two fingers pan / pinch");
   const [ready, setReady] = useState(false);
   const [routingReport, setRoutingReport] = useState<CableRoutingReport | null>(null);
 
@@ -1604,8 +1667,8 @@ function DseModel({
     camera.position.set(...CAMERA_PRESETS[0].position);
     camera.lookAt(vector(CAMERA_PRESETS[0].target));
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.5));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -1618,11 +1681,17 @@ function DseModel({
     const sun = new THREE.DirectionalLight(0xffffff, 2.6);
     sun.position.set(-6, 12, 10);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
-    sun.shadow.camera.left = -18;
-    sun.shadow.camera.right = 18;
-    sun.shadow.camera.top = 12;
-    sun.shadow.camera.bottom = -8;
+    sun.shadow.mapSize.set(4096, 4096);
+    sun.shadow.camera.left = -10;
+    sun.shadow.camera.right = 10;
+    sun.shadow.camera.top = 8;
+    sun.shadow.camera.bottom = -5;
+    sun.shadow.camera.near = 0.5;
+    sun.shadow.camera.far = 35;
+    sun.shadow.bias = -0.00015;
+    sun.shadow.normalBias = 0.015;
+    sun.shadow.radius = 1.5;
+    sun.shadow.camera.updateProjectionMatrix();
     scene.add(sun);
     const fill = new THREE.DirectionalLight(0xaac8d4, 0.65);
     fill.position.set(8, 4, -8);
@@ -1643,6 +1712,8 @@ function DseModel({
     scene.add(hoverHelper);
     let hoveredId: string | null = null;
     let pointerStart = { x: 0, y: 0 };
+    const activeTouchPointers = new Set<number>();
+    let touchWasMultiPointer = false;
     let cameraGoal = {
       position: vector(CAMERA_PRESETS[0].position),
       target: vector(CAMERA_PRESETS[0].target),
@@ -1693,6 +1764,7 @@ function DseModel({
     }
 
     function handlePointerMove(event: PointerEvent) {
+      if (event.pointerType === "touch") return;
       if (event.buttons !== 0) return;
       const object = hitAt(event);
       const componentId = object?.userData.componentId as string | undefined;
@@ -1707,22 +1779,42 @@ function DseModel({
         setHovered(`${label} · click for design values`);
       } else {
         hoverHelper.visible = false;
-        setHovered("Drag a surface to orbit · right/shift-drag to pan · scroll zooms at grabbed point");
+        setHovered("Drag to orbit · right/shift-drag to pan · touch: one finger orbit, two fingers pan / pinch");
       }
     }
 
     function handlePointerDown(event: PointerEvent) {
+      if (event.pointerType === "touch") {
+        activeTouchPointers.add(event.pointerId);
+        touchWasMultiPointer ||= activeTouchPointers.size > 1;
+        if (activeTouchPointers.size === 1) pointerStart = { x: event.clientX, y: event.clientY };
+        cameraGoal.active = false;
+        return;
+      }
       pointerStart = { x: event.clientX, y: event.clientY };
       cameraGoal.active = false;
     }
 
     function handlePointerUp(event: PointerEvent) {
+      if (event.pointerType === "touch") {
+        activeTouchPointers.delete(event.pointerId);
+        if (touchWasMultiPointer) {
+          if (activeTouchPointers.size === 0) touchWasMultiPointer = false;
+          return;
+        }
+      }
       if (event.button !== 0 || event.shiftKey) return;
       const moved = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y);
       if (moved > 5) return;
       const object = hitAt(event);
       const componentId = object?.userData.componentId as string | undefined;
       if (componentId) onSelect(componentId);
+    }
+
+    function handlePointerCancel(event: PointerEvent) {
+      if (event.pointerType !== "touch") return;
+      activeTouchPointers.delete(event.pointerId);
+      if (activeTouchPointers.size === 0) touchWasMultiPointer = false;
     }
 
     function preventCanvasMenu(event: MouseEvent) {
@@ -1732,6 +1824,7 @@ function DseModel({
     renderer.domElement.addEventListener("pointermove", handlePointerMove);
     renderer.domElement.addEventListener("pointerdown", handlePointerDown);
     renderer.domElement.addEventListener("pointerup", handlePointerUp);
+    renderer.domElement.addEventListener("pointercancel", handlePointerCancel);
     renderer.domElement.addEventListener("contextmenu", preventCanvasMenu);
 
     cameraActionRef.current = (preset) => {
@@ -1828,6 +1921,7 @@ function DseModel({
       renderer.domElement.removeEventListener("pointermove", handlePointerMove);
       renderer.domElement.removeEventListener("pointerdown", handlePointerDown);
       renderer.domElement.removeEventListener("pointerup", handlePointerUp);
+      renderer.domElement.removeEventListener("pointercancel", handlePointerCancel);
       renderer.domElement.removeEventListener("contextmenu", preventCanvasMenu);
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments) {
@@ -1866,6 +1960,7 @@ function DseModel({
       data-layout-generated-cable-m={physicalLayout.metrics.totalRenderedCableM}
       data-layout-wall-overlaps={physicalLayout.metrics.wallOverlapCount}
       data-layout-wall-span-m={physicalLayout.metrics.wallDeviceSpanM}
+      data-shadow-map-size="4096"
     >
       <div className="model-toolbar">
         <div className="model-view-buttons" aria-label="3D camera views">
@@ -1929,9 +2024,9 @@ function DseModel({
               <div><dt>Assumed</dt><dd>5.8 m back-wall span, 3.4 × 2.5 m wall board, generator envelope and small protection boxes. Side walls and roof planes are intentionally omitted.</dd></div>
               <div><dt>Layout solver</dt><dd>{physicalLayout.metrics.wallDeviceCount} wall devices occupy a {physicalLayout.metrics.wallDeviceSpanM.toFixed(2)} m span with {physicalLayout.metrics.wallOverlapCount} envelope overlaps. The four batteries form a floor-level 2 × 2 grid. Generated major routes total {physicalLayout.metrics.totalRenderedCableM.toFixed(1)} m before procurement allowances.</dd></div>
               <div><dt>Protective earth</dt><dd>The electrode, array frame and six wall-side bonds terminate at modeled studs. A visible main PE bar replaces the former floating green branch ends.</dd></div>
-              <div><dt>Routing</dt><dd>Ordinary power conductors begin about 35 mm off the plywood. Complete board routes receive stable depth lanes; the eight flush-junction side leads clear the box face above or below before returning toward their terminals, with no cable behind the enclosure.</dd></div>
+              <div><dt>Routing</dt><dd>Ordinary power conductors begin about 35 mm off the plywood. Complete board routes receive stable depth lanes. The three GX leads leave the junction top and return to shallow wall lanes immediately; four heavy side leads stay in front of the enclosure, while the adjacent Orion leads take direct short routes. Nothing passes behind the flush-mounted enclosure.</dd></div>
               <div><dt>Geometry</dt><dd>Each cable route is one continuous tube surface, so back-to-back bends share their polygon rings without gaps. Tangent, corner-contained bends cannot curl behind the intended turn. A minimum-conflict greedy planner selects one stable depth lane per board route instead of adding a hump at every crossing.</dd></div>
-              <div><dt>Camera</dt><dd>The visible XYZ point below the cursor becomes the grab point. Upright yaw/pitch rotation orbits around it without roll, scrolling zooms along its camera vector, and panning is scaled at its depth. Empty space reuses the last valid depth.</dd></div>
+              <div><dt>Camera</dt><dd>The visible XYZ point below the mouse or touch gesture becomes the grab point. Upright yaw/pitch rotation orbits around it without roll; scrolling or pinching zooms along its camera vector. One finger rotates, while two fingers pan and pinch-zoom at picked depth.</dd></div>
               <div><dt>Routing audit</dt><dd>{routingReport ? `${routingReport.routeCount} route sections · ${routingReport.roundedCorners} rounded bends · ${routingReport.backtrackingCorners} reverse bends · ${routingReport.continuousHandoffs} tangent handoffs · ${routingReport.discontinuousHandoffs} discontinuous handoffs · ${routingReport.boardLaneAssignments} board routes across ${routingReport.boardLaneCount} lanes · ${routingReport.boardLaneConflicts} board-lane conflicts · ${routingReport.obstacleIntersections} solid intersections · ${routingReport.unresolvedCableIntersections} unresolved cable intersections.` : "Checking cable clearances…"}</dd></div>
               <div><dt>Legibility</dt><dd>Small wires are widened slightly. Final bend radii, gland sizing and clearances still require the actual parts and a full-size mock-up.</dd></div>
             </dl>
@@ -1940,8 +2035,7 @@ function DseModel({
         <div className="model-wire-legend" aria-label="Visible conductor colors">
           <span><i className="wire-red" />DC positive</span>
           <span><i className="wire-black" />DC negative</span>
-          <span><i className="wire-brown" />AC line</span>
-          <span><i className="wire-blue" />AC neutral / data</span>
+          <span><i className="wire-blue" />Data / control</span>
           <span><i className="wire-green" />Protective earth</span>
           <span><i className="wire-white" />3-core AC flex</span>
         </div>

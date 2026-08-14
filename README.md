@@ -1,6 +1,6 @@
 # DSE solar system viewer
 
-Interactive desktop viewer for the proposed Drua Sailing Experience (Fiji) solar system and the Pasana Group (Papua New Guinea) reference system. It includes connectivity diagrams, a measured-envelope 3D fit model, system planning notes, BOMs and field notes.
+Interactive desktop and mobile viewer for the proposed Drua Sailing Experience (Fiji) solar system and the Pasana Group (Papua New Guinea) reference system. It includes connectivity diagrams, a measured-envelope 3D fit model, system planning notes, BOMs and field notes. In the 3D view, one-finger touch rotates around the picked model point; two-finger touch pans and pinch-zooms at that depth.
 
 ## Run locally
 
@@ -19,9 +19,10 @@ Canonical system specifications live in `data/dse-system.json` and `data/pg-syst
 npm run lint
 npm test
 npm run test:e2e
+npx playwright test --config=playwright.config.mjs --browser=webkit -g "mobile layout"
 ```
 
-The browser interaction test is in `tests/viewer.e2e.spec.mjs` and can be run with the globally installed Playwright test runner while the local server is active.
+The browser interaction test is in `tests/viewer.e2e.spec.mjs` and can be run with the globally installed Playwright test runner while the local server is active. Its mobile scenario covers portrait and landscape layouts plus one- and two-finger camera gestures; the WebKit run exercises the Safari engine.
 
 ## GitHub Pages
 

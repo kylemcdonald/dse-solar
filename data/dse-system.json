@@ -5,7 +5,7 @@
   "name": "Drua Sailing Experience",
   "subtitle": "Serviceable 24 V solar workshop with two-string battery resilience",
   "location": "Remote Fiji",
-  "revision": "Design R8 · 12 Aug 2026",
+  "revision": "Design R9 · 14 Aug 2026",
   "status": "Recommended design",
   "currency": {
     "base": "USD",
@@ -19,10 +19,10 @@
     "contingencyIncluded": false,
     "note": "Panels, batteries and the UniFi Express are included in the project total even though they have already been purchased. The estimated $607.11 Ekrano GX increment, net of the $80 list-price saving from using a non-GX rather than GX 24 V MultiPlus and including the estimated border-tax effect, is donor-funded. Victron power-electronics costs are current planning prices pending a same-part-number Solar Fiji quote. Freight beyond Nadi, panel mounting, Starlink hardware and labor are excluded."
   },
-  "summary": "Four 565 W panels form two matched two-panel series strings (2S2P) and feed a Victron SmartSolar 150/85 through two separate 4 mm² positive/negative home runs. At the assumed 15 m one-way distance, the two runs lose about 2.0% at rated power; a documented one-run fallback accepts about 4.0% loss only after an array-side combiner and cable-ampacity check. Four 12 V GEL batteries form two independently fused 24 V series strings used together through a compact 1 / 2 / BOTH / OFF selector. If one battery fails, its whole two-battery string can be isolated while the other preserves essential service at half capacity. A non-GX Victron MultiPlus-II provides AC and generator charging, while the Ekrano GX coordinates charge current, local monitoring and VRM reporting. A protected 24-to-12 V branch keeps Starlink, UniFi, lights and USB online with the inverter off.",
+  "summary": "Four 565 W panels form two matched two-panel series strings (2S2P) and feed a Victron SmartSolar 150/85 through two separate 4 mm² positive/negative home runs. At the assumed 15 m one-way distance, the two runs lose about 2.0% at rated power and land directly in one indoor PV entry enclosure for combining, a two-pole disconnect and surge protection. Four 12 V GEL batteries form two independently fused 24 V series strings used together through a compact 1 / 2 / BOTH / OFF selector. If one battery fails, its whole two-battery string can be isolated while the other preserves essential service at half capacity. A non-GX Victron MultiPlus-II provides AC and generator charging, while the Ekrano GX coordinates charge current, local monitoring and VRM reporting. A protected 24-to-12 V branch keeps Starlink, UniFi, lights and USB online with the inverter off.",
   "keyFacts": [
     { "label": "Solar array", "value": "2.26 kW", "detail": "2S2P · 85.1 Vmp" },
-    { "label": "PV cable", "value": "2 × 4 mm² pairs", "detail": "≈2.02% loss · one-pair fallback ≈4.04%" },
+    { "label": "PV cable", "value": "2 × 4 mm² pairs", "detail": "≈2.02% loss · direct to indoor combine" },
     { "label": "Battery bank", "value": "9.6 kWh", "detail": "24 V · 400 Ah · two strings" },
     { "label": "Conservative usable", "value": "4.8 kWh", "detail": "50% depth of discharge" },
     { "label": "AC output", "value": "2.2 kW hot-rated", "detail": "3 kVA · 5.5 kW peak" },
@@ -44,10 +44,6 @@
     "pvCableTotalSingleCoreM": 60,
     "pvCableLossWatts": 45.61,
     "pvCableLossPercent": 2.02,
-    "fallbackPvHomeRuns": 1,
-    "fallbackPvCableTotalSingleCoreM": 30,
-    "fallbackPvCableLossWatts": 91.21,
-    "fallbackPvCableLossPercent": 4.04,
     "averageSolarKwhDay": 7.119,
     "nominalBatteryKwh": 9.6,
     "usableBatteryKwh": 4.8,
@@ -121,11 +117,11 @@
     {
       "id": "pvSafety",
       "title": "PV protection + combine",
-      "kicker": "Array + building entry · PV-rated DC",
+      "kicker": "Single indoor building-entry unit · PV-rated DC",
       "kind": "protection",
-      "summary": "A configurable weatherproof array box protects and identifies both strings; at the building entry, protected terminals parallel the two runs ahead of surge protection and a common disconnect.",
-      "specs": ["Array: 2 × 25 A gPV string protection", "Entry: 40 A two-pole PV disconnect", "Entry: Type 2 PV SPD coordinated with 150 V MPPT", "2 × 4 mm² positive/negative home runs", "60 m single-core cable total at 15 m one-way"],
-      "note": "Each string can sit near 105 VDC in cool sunlight. Cover modules before connector work; never break MC4 connectors under load. The one-run contingency requires combining at the array in a weatherproof protected box—do not substitute an improvised MC4 Y lead—and confirming that the actual 4 mm² cable and installation method are rated for at least the combined design current."
+      "summary": "Both complete string pairs enter one indoor enclosure, where protected terminals parallel them ahead of surge protection and a common disconnect.",
+      "specs": ["Four labeled string-input conductors", "40 A two-pole PV disconnect", "Type 2 PV SPD coordinated with 150 V MPPT", "Protected parallel terminals", "2 × 4 mm² positive/negative home runs", "60 m single-core cable total at 15 m one-way"],
+      "note": "With only two parallel strings, a faulted string can receive about one intact-string Isc (14.20 A), below Suntech's 25 A maximum series-fuse rating, so this base design does not add an outdoor string-fuse/combiner box. Confirm the exact module label, cable ampacity, connector ratings and applicable Fiji/AS-NZS requirements before omitting string fuses. Each string can sit near 105 VDC in cool sunlight: cover modules before connector work and never break MC4 connectors under load."
     },
     {
       "id": "solarController",
@@ -154,7 +150,7 @@
       "kind": "control",
       "summary": "The system's only GX device combines a bright local touchscreen with coordinated DVCC control, collects inverter, solar and battery data, and sends monitoring and alarms to Victron VRM through the UniFi Express and Starlink.",
       "specs": ["BPP900480100 · donor-funded", "7-inch · 1024 × 600 touchscreen", "187 × 124 × 29.8 mm without connectors", "8–70 VDC · supplied 3.15 A fused lead", "3 isolated VE.Direct ports · VE.Bus", "Ethernet · Wi-Fi · VRM", "Front IP54 with steel bracket · rear IP21"],
-      "note": "Power directly from the protected 24 V bus on the system side of the SmartShunt—not from AC output or the low-voltage-controlled load branch—so it can report faults and recovery. Install horizontally through the flat junction-box door with the supplied rear steel bracket and compressed seal; the spring-clip method is only IP31. Keep its rear connectors inside the dry enclosure and hardwire Ethernet to the UniFi LAN port.",
+      "note": "Power directly from the protected 24 V bus on the system side of the SmartShunt—not from AC output or the low-voltage-controlled load branch—so it can report faults and recovery. Mount horizontally on the wall immediately above the junction box with the supplied steel bracket, sheltered from drips and salt air, and route all small leads around rather than across its front. Hardwire Ethernet to the UniFi LAN port.",
       "sourceUrl": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/technical-specifications.html"
     },
     {
@@ -338,9 +334,9 @@
       "title": "Compact junction box + wall board",
       "kicker": "13.8 × 9.7 × 5.9 in target enclosure",
       "kind": "structure",
-      "summary": "A PG-sized 350 × 247 × 150 mm enclosure carries the 187 × 124 mm Ekrano in its flat door and protects a fixed-faceplate selector, SmartShunt, busbars, branch fuses, 12 V fuse block and prewired low-current connections.",
-      "specs": ["Exterior 13.8 × 9.7 × 5.9 in", "Flat hinged door + removable backplate", "Ekrano rear-bracket door cut-out", "Selector on fixed internal faceplate", "Power electronics remain on ventilated wall board", "Fits inside either iM2875 with padding"],
-      "note": "Keep the MultiPlus, SmartSolar, Orion and both balancers outside this sealed box because they need open ventilation. Put the two Class T string fuses at the battery positives. The Ekrano may move with the door because its leads are small and strain-relieved; the selector must stay fixed because it carries three 1/0 AWG cables. Use factory-crimped tinned lugs, adhesive heat-shrink, noncorroding hardware and bottom cable entries; prove component depth, terminal access, route length and the 14.4 mm cable bend envelope at 1:1 scale before ordering cables or drilling the purchased enclosure.",
+      "summary": "A PG-sized 350 × 247 × 150 mm enclosure protects a fixed-faceplate selector, SmartShunt, busbars, branch fuses, 12 V fuse block and prewired low-current connections. The Ekrano mounts separately just above it.",
+      "specs": ["Exterior 13.8 × 9.7 × 5.9 in", "Flat hinged door + removable backplate", "Selector on fixed internal faceplate", "Power electronics and Ekrano remain on wall", "Fits inside either iM2875 with padding"],
+      "note": "Keep the MultiPlus, SmartSolar, Orion, Ekrano and both balancers outside this sealed box. Put the two Class T string fuses at the battery positives. The three small Ekrano leads leave top glands and turn immediately into shallow wall lanes; the selector stays fixed because it carries three 1/0 AWG cables. Use factory-crimped tinned lugs, adhesive heat-shrink, noncorroding hardware and bottom cable entries; prove component depth, terminal access, route length and the 14.4 mm cable bend envelope at 1:1 scale before ordering cables or drilling the purchased enclosure.",
       "sourceUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html"
     },
     {
@@ -526,7 +522,7 @@
       "location": "Fiji",
       "procurement": "Buy",
       "priority": "Must",
-      "description": "Primary design: two independent 15 m one-way string home runs, each with a positive and negative conductor (4 conductors × 15 m = 60 m single-core total). At STC and 20°C copper resistance, each string loses about 22.8 W and both together lose 45.6 W / 2.02%. If only 30 m is available, use the documented protected array-side combining configuration and one positive/negative run; expect about 91.2 W / 4.04% loss and first confirm the actual cable's installed ampacity is at least 40 A. Purchase locally in Fiji."
+      "description": "Two independent 15 m one-way string home runs, each with a positive and negative conductor (4 conductors × 15 m = 60 m single-core total). At STC and 20°C copper resistance, each string loses about 22.8 W and both together lose 45.6 W / 2.02%. This revision requires the full 60 m and combines only at the indoor entry enclosure. Purchase locally in Fiji."
     },
     {
       "id": "dse-battery-cable",
@@ -803,7 +799,7 @@
     {
       "id": "dse-pv-protection",
       "category": "PV safety",
-      "item": "Two-string PV protection, combiner + Type 2 SPD",
+      "item": "Indoor two-string PV entry protection, combine + Type 2 SPD",
       "qty": 1,
       "unit": "set",
       "unitCost": 160,
@@ -812,7 +808,7 @@
       "location": "Import",
       "procurement": "Allowance",
       "priority": "Must",
-      "description": "Configurable weatherproof array box with two labeled 25 A gPV string fuses (the module's published maximum series-fuse value) and normally independent outputs, plus a building-entry box with a 40 A two-pole PV disconnect, protected parallel terminals and Type 2 PV SPD coordinated with the 150 V MPPT. Carry fitted linking hardware so the array box can combine both strings onto one 4 mm² pair only in the documented cable-shortage fallback; never use an improvised MC4 Y lead for the combined run. Final component selection, ambient derating and fuse coordination require installer verification."
+      "description": "One building-entry enclosure with four labeled string-conductor inputs, protected parallel terminals, a 40 A two-pole PV disconnect and Type 2 PV SPD coordinated with the 150 V MPPT. No separate outdoor array fuse/combiner is included: with two strings, reverse current from the one intact string is about 14.20 A, below the module's 25 A maximum series-fuse rating. Final component selection, cable/connector ampacity, ambient derating and local-code review require installer verification."
     },
     {
       "id": "dse-fuse-block",
@@ -1011,7 +1007,7 @@
     }
   ],
   "operatingRules": [
-    "Keep both PV strings on their separate 4 mm² positive/negative home runs in normal service. The one-run arrangement is a cable-shortage contingency only: combine in the protected array box, verify the actual cable and route are rated for at least 40 A, label the change at both ends, and expect about 4% cable loss instead of 2%.",
+    "Keep both PV strings on their separate 4 mm² positive/negative home runs all the way to the indoor entry enclosure. Do not combine at the array or substitute MC4 branch leads; this revision deliberately removes the one-run fallback and the outdoor combiner.",
     "Use one corded power tool at a time from the dedicated trailing socket and keep the tool nameplate at or below about 1,800 W. Fully uncoil and inspect the lead before use; do not add a power board, daisy-chain another extension, or combine the saw with the planer, jigsaw, drill, kettle or another large AC load. Hang the lead dry beside the equipment after use.",
     "Run tool work mainly in sunny hours. Stop tool loads around 50% state of charge; reserve the lower half of the GEL bank for longevity and essentials.",
     "Keep the AC inverter off when no AC loads are required. Starlink, UniFi, USB and lights continue on the protected 12 V branch.",
@@ -1027,12 +1023,12 @@
     "Before ordering the imported heavy-cable set, buy or fix the exact Class T holders, selector, SmartShunt and M10 busbars; then make a full-size battery/box/MultiPlus layout from actual hardware and battery dimensions. Confirm the EverExceed terminal is M8, measure each supported route hole-to-hole, preserve broad bends, and keep the paired A/B positive and negative paths equal. Order the 12 UL 1426 tinned-copper 1/0 AWG assemblies factory-crimped with tinned lugs and adhesive heat-shrink; no site crimping is planned.",
     "Separately fully charge and voltage-match the four batteries. Build two matched 24 V strings, install one balancer per string, and land each balancer alarm relay on its own Ekrano digital input.",
     "Fit a 150 A Class T fuse close to each string positive. Make both positive and negative string paths equal in conductor size and length, identify A and B permanently, and prove OFF / 1 / 2 / BOTH selector behavior with all charge sources and loads disabled.",
-    "With modules covered, build two independent two-panel series strings. Uncover and measure about 100.8 V Voc at 25°C on each string separately; confirm close agreement, polarity, labels and isolation before landing their separate 4 mm² home runs. Parallel them only at the protected building-entry terminals, then confirm the SmartSolar's 100 A protected battery branch before closing the 40 A PV disconnect.",
-    "Commission the normal two-run PV configuration first and record current from each string. If cable shortage forces the one-run contingency, move the parallel point to the weatherproof protected array box using the supplied links, confirm the installed 4 mm² cable's ampacity is at least 40 A under the actual temperature/grouping method, use terminals rated for the combined current, and record the expected 4.04% STC cable loss. Do not use an improvised MC4 Y lead on the combined run.",
+    "With modules covered, build two independent two-panel series strings. Uncover and measure about 100.8 V Voc at 25°C on each string separately; confirm close agreement, polarity, labels and isolation before landing all four 4 mm² home-run conductors. Parallel them only at the protected indoor building-entry terminals, then confirm the SmartSolar's 100 A protected battery branch before closing the 40 A PV disconnect.",
+    "Before omitting individual string fuses, confirm the installed modules retain the published 25 A maximum series-fuse rating and 14.20 A Isc, verify each home-run cable and connector against the actual installation method and temperature, and have the final design checked against applicable Fiji/AS-NZS requirements. Record current from each string independently at commissioning.",
     "Program MultiPlus and SmartSolar for the exact GEL label; planning values are 28.2 V absorption, 27.2 V float and equalization disabled. Install the temperature sensor supplied with the 24 V MultiPlus and set the Ekrano/DVCC system-wide charge-current limit to 100 A with both strings healthy.",
     "Set the MultiPlus to 230 V / 50 Hz with a 10 A AC input-current limit for the G3200P; verify generator acceptance before enabling unattended charging.",
     "Configure the Orion in power-supply mode with an initial 24.0 V input lockout and 25.0 V restart, then validate under the actual essential load and exact battery specification. Verify that recovery occurs only after meaningful recharge.",
-    "With the 24 V bank isolated, make a full-size enclosure layout and clearance mock-up. Mount the Ekrano horizontally through the 13.8 × 9.7 inch door using its rear steel bracket and compressed seal; fit the selector beside it, bond the Ekrano protective-earth terminal and keep every rear connector inside the dry box.",
+    "With the 24 V bank isolated, make a full-size enclosure and wall-layout mock-up. Mount the Ekrano horizontally just above the 13.8 × 9.7 inch junction box using its steel bracket, keep its rear and lower connectors sheltered, bond its protective-earth terminal and preserve clear service access around its face.",
     "Power the Ekrano directly from the protected 24 V bus with its supplied 3.15 A slow-blow fused lead, with negative on the system side of the SmartShunt. Never power it from MultiPlus AC-out or from the voltage-controlled DC-load branch.",
     "Connect the MultiPlus by Victron RJ45 UTP/VE.Bus, SmartSolar and SmartShunt by separate VE.Direct cables, and Ekrano Ethernet to the UniFi Express LAN port. Confirm all three devices and the SmartShunt battery state appear locally.",
     "Register the Ekrano in VRM over UniFi/Starlink, enable HTTPS and two-factor authentication on administrator accounts, configure useful battery/temperature/offline alarms, set a connection-appropriate log interval, and test both local operation without internet and remote recovery after reconnect.",
@@ -1056,6 +1052,7 @@
     { "title": "Ekrano GX current in-stock retail listing", "publisher": "Blue Marine", "url": "https://bluemarine.com/products/victron-energy-ekrano-gx" },
     { "title": "SmartSolar MPPT 150/85 VE.Can technical specifications", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html" },
     { "title": "SmartSolar MPPT 150/85 VE.Can installation and PV sizing", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/installation.html" },
+    { "title": "Reverse-current sizing for parallel PV strings", "publisher": "SMA Solar Technology", "url": "https://files.sma.de/downloads/Rueckstrom-UEN083010.pdf" },
     { "title": "Orion-Tr Smart 24/12-30 isolated manual", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/upload/documents/Orion-Tr_Smart_DC-DC_Charger_-_Isolated/34439-Orion-Tr_Smart_DC-DC_Charger-pdf-en.pdf" },
     { "title": "Orion-Tr Smart 24/12-30 isolated physical dimensions", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/Orion-Tr_Smart_DC-DC_Charger_-_Isolated/en/specifications.html" },
     { "title": "SmartShunt 500 A physical dimensions", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/SmartShunt/en/technical-data.html" },
