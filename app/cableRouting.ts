@@ -14,9 +14,6 @@ export type CableRoutingReport = {
   automaticCrossovers: number;
   backtrackingCorners: number;
   backtrackingIssues: string[];
-  boardLaneAssignments: number;
-  boardLaneConflicts: number;
-  boardLaneCount: number;
   continuousHandoffs: number;
   discontinuousHandoffIssues: string[];
   discontinuousHandoffs: number;
@@ -26,13 +23,6 @@ export type CableRoutingReport = {
   routeCount: number;
   unresolvedCableIssues: string[];
   unresolvedCableIntersections: number;
-};
-
-type PlanarCableRoute = {
-  id: string;
-  offset: number;
-  points: THREE.Vector2[];
-  radius: number;
 };
 
 type CableRoute = {
@@ -73,7 +63,6 @@ type Crossing = SegmentProximity & {
 const EPSILON = 1e-5;
 const TERMINAL_GRACE = 0.1;
 const ROUTE_CLEARANCE = 0.003;
-const BOARD_ROUTE_CLEARANCE = 0.004;
 
 function tuple(point: THREE.Vector3): VectorTuple {
   return [point.x, point.y, point.z];
@@ -118,138 +107,6 @@ function compactPoints(points: VectorTuple[]) {
   }
   compacted.push(unique[unique.length - 1]);
   return compacted;
-}
-
-function compactPlanarPoints(points: Array<[number, number]>) {
-  return points
-    .map(([x, y]) => new THREE.Vector2(x, y))
-    .filter((point, index, all) => (
-      index === 0 || point.distanceToSquared(all[index - 1]) > EPSILON * EPSILON
-    ));
-}
-
-function planarSegmentsConflict(
-  firstStart: THREE.Vector2,
-  firstEnd: THREE.Vector2,
-  secondStart: THREE.Vector2,
-  secondEnd: THREE.Vector2,
-  clearance: number,
-) {
-  const proximity = segmentProximity(
-    new THREE.Vector3(firstStart.x, firstStart.y, 0),
-    new THREE.Vector3(firstEnd.x, firstEnd.y, 0),
-    new THREE.Vector3(secondStart.x, secondStart.y, 0),
-    new THREE.Vector3(secondEnd.x, secondEnd.y, 0),
-  );
-  if (proximity.distance >= clearance) return false;
-
-  const sharedEndpoint = [firstStart, firstEnd].some((firstPoint) => (
-    [secondStart, secondEnd].some((secondPoint) => firstPoint.distanceTo(secondPoint) < EPSILON * 10)
-  ));
-  if (!sharedEndpoint) return true;
-
-  const firstAtEnd = proximity.candidateT < 0.035 || proximity.candidateT > 0.965;
-  const secondAtEnd = proximity.existingT < 0.035 || proximity.existingT > 0.965;
-  return !(firstAtEnd && secondAtEnd);
-}
-
-function planarRoutesConflict(
-  first: THREE.Vector2[],
-  second: THREE.Vector2[],
-  clearance: number,
-) {
-  for (let firstIndex = 0; firstIndex < first.length - 1; firstIndex += 1) {
-    for (let secondIndex = 0; secondIndex < second.length - 1; secondIndex += 1) {
-      if (planarSegmentsConflict(
-        first[firstIndex],
-        first[firstIndex + 1],
-        second[secondIndex],
-        second[secondIndex + 1],
-        clearance,
-      )) return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Assigns one stable depth lane to each complete board route. This avoids the
- * repeated up/down crossover humps that make individual bends look broken.
- * Routes are considered in installation order; every available lane is scored,
- * and a zero-conflict lane wins before the planner falls back to the lane with
- * the fewest conflicts.
- */
-export class PlanarCableLanePlanner {
-  private readonly routes: PlanarCableRoute[] = [];
-  private remainingConflicts = 0;
-
-  constructor(
-    private readonly minimumOffset = 0,
-    private readonly maximumOffset = 0.11,
-  ) {}
-
-  assign(
-    sourcePoints: Array<[number, number]>,
-    radius: number,
-    preferredOffset = 0,
-  ) {
-    const points = compactPlanarPoints(sourcePoints);
-    if (points.length < 2) return 0;
-
-    const planarConflicts = this.routes.filter((route) => planarRoutesConflict(
-      points,
-      route.points,
-      radius + route.radius + BOARD_ROUTE_CLEARANCE,
-    ));
-    const candidateOffsets = new Set<number>([
-      this.minimumOffset,
-      this.maximumOffset,
-      THREE.MathUtils.clamp(preferredOffset, this.minimumOffset, this.maximumOffset),
-    ]);
-    planarConflicts.forEach((route) => {
-      const separation = radius + route.radius + BOARD_ROUTE_CLEARANCE + 0.0005;
-      candidateOffsets.add(THREE.MathUtils.clamp(
-        route.offset - separation,
-        this.minimumOffset,
-        this.maximumOffset,
-      ));
-      candidateOffsets.add(THREE.MathUtils.clamp(
-        route.offset + separation,
-        this.minimumOffset,
-        this.maximumOffset,
-      ));
-    });
-
-    const candidates = [...candidateOffsets].map((offset) => {
-      const conflicts = planarConflicts.filter((route) => {
-        const depthClearance = radius + route.radius + BOARD_ROUTE_CLEARANCE;
-        return Math.abs(offset - route.offset) < depthClearance;
-      }).length;
-      return { conflicts, offset };
-    }).sort((first, second) => (
-      first.conflicts - second.conflicts ||
-      Math.abs(first.offset - preferredOffset) - Math.abs(second.offset - preferredOffset) ||
-      first.offset - second.offset
-    ));
-
-    const selected = candidates[0];
-    this.remainingConflicts += selected.conflicts;
-    this.routes.push({
-      id: `board-route-${String(this.routes.length + 1).padStart(3, "0")}`,
-      offset: selected.offset,
-      points,
-      radius,
-    });
-    return selected.offset;
-  }
-
-  report() {
-    return {
-      boardLaneAssignments: this.routes.length,
-      boardLaneConflicts: this.remainingConflicts,
-      boardLaneCount: new Set(this.routes.map((route) => route.offset.toFixed(4))).size,
-    };
-  }
 }
 
 function segmentProximity(
@@ -542,7 +399,11 @@ export function buildRoundedCableGeometry(
   geometry.userData.continuousCableSurface = true;
   geometry.userData.internalJoinCount = Math.max(0, centerline.length - 2);
   geometry.computeBoundingSphere();
-  return { geometry, roundedCorners };
+  return {
+    centerline: centerline.map(tuple),
+    geometry,
+    roundedCorners,
+  };
 }
 
 export class CableRoutingSystem {
@@ -671,9 +532,6 @@ export class CableRoutingSystem {
       automaticCrossovers: this.automaticCrossovers,
       backtrackingCorners,
       backtrackingIssues,
-      boardLaneAssignments: 0,
-      boardLaneConflicts: 0,
-      boardLaneCount: 0,
       continuousHandoffs: this.handoffs.length - discontinuousHandoffIssues.length,
       discontinuousHandoffIssues,
       discontinuousHandoffs: discontinuousHandoffIssues.length,

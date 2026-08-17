@@ -37,16 +37,19 @@ test("server-renders the solar viewer shell", async () => {
   assert.match(html, /Drua Sailing Experience/);
   assert.match(html, />3D model</);
   assert.match(html, /Bill of materials/);
+  assert.match(html, />Customs</);
   assert.match(html, />System</);
   assert.doesNotMatch(html, /Power-flow overview|System connectivity|Fieldline/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
 test("canonical system files contain valid totals, diagram levels and physical envelopes", async () => {
-  const [dse, pg, physicalModel] = await Promise.all([
+  const [dse, pg, physicalModel, delivery, customs] = await Promise.all([
     readFile(new URL("../data/dse-system.json", import.meta.url), "utf8").then(JSON.parse),
     readFile(new URL("../data/pg-system.json", import.meta.url), "utf8").then(JSON.parse),
     readFile(new URL("../data/dse-model.json", import.meta.url), "utf8").then(JSON.parse),
+    readFile(new URL("../data/dse-delivery.json", import.meta.url), "utf8").then(JSON.parse),
+    readFile(new URL("../data/dse-customs.json", import.meta.url), "utf8").then(JSON.parse),
   ]);
 
   for (const system of [dse, pg]) {
@@ -113,6 +116,37 @@ test("canonical system files contain valid totals, diagram levels and physical e
   assert.ok(!dse.bom.some((item) => item.id === "dse-bp"));
   assert.ok(!dse.bom.some((item) => /Cerbo GX|GX Touch/i.test(item.item)));
   assert.ok(!dse.bom.some((item) => /Growatt|MikroTik|Mean Well/i.test(item.item)));
+
+  assert.equal(delivery.checkedOn, "2026-08-15");
+  assert.equal(delivery.destination, "Los Angeles, CA 90065");
+  assert.deepEqual(Object.keys(delivery.items).sort(), dse.bom.map((item) => item.id).sort());
+  assert.equal(delivery.items["dse-ekrano-gx"].amazonStatus, "available");
+  assert.equal(delivery.items["dse-multiplus"].amazonStatus, "unavailable");
+  assert.match(delivery.items["dse-multiplus"].note, /120 V units.*not PMP242305010/i);
+  assert.equal(delivery.items["dse-battery-cable"].sourceLabel, "BatteryCablesUSA");
+  assert.equal(delivery.items["dse-class-t"].eta, "Aug 21");
+  assert.equal(delivery.items["dse-ex-labor"].amazonStatus, "not-applicable");
+  assert.equal(delivery.items["dse-ekrano-gx"].ebay.status, "available");
+  assert.match(delivery.items["dse-ekrano-gx"].ebay.sourceUrl, /ebay\.com\/itm\/116685644602/);
+  assert.equal(delivery.items["dse-smartsolar"].ebay.price, "$476.00");
+  assert.equal(delivery.items["dse-multiplus"].ebay.status, "unavailable");
+  assert.match(delivery.items["dse-multiplus"].ebay.note, /120 V.*exact 24\/3000\/70-32 230 V/i);
+  assert.equal(delivery.items["dse-class-t"].ebay.secondaryLabel, "Blue Sea 5114 150 A fuse");
+
+  const customsItems = dse.bom.filter(
+    (item) => item.location === "Import" && customs.itemMeta[item.id],
+  );
+  const customsGoodsTotal = customsItems.reduce((sum, item) => sum + item.totalUsd, 0);
+  assert.equal(Number(customsGoodsTotal.toFixed(2)), 3835.8);
+  assert.equal(customs.vatRate, 0.125);
+  assert.equal(
+    Object.values(customs.itemMeta).filter((item) => item.tafPermitRequired).length,
+    5,
+  );
+  assert.equal(customs.itemMeta["dse-multiplus"].model, "PMP242305010");
+  assert.equal(customs.itemMeta["dse-router"].model, "Ubiquiti UniFi Express UX-US");
+  assert.ok(customs.sources.some((source) => source.id === "taf-permit" && /taf\.org\.fj/.test(source.url)));
+  assert.ok(customs.sources.some((source) => source.id === "charity-concession"));
 
   assert.equal(physicalModel.scale, "1 scene unit = 1 metre");
   assert.match(physicalModel.revision, /R14/);

@@ -1,0 +1,388 @@
+{
+  "checkedOn": "2026-08-15",
+  "destination": "Los Angeles, CA 90065",
+  "items": {
+    "dse-panels": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Purchased in Fiji",
+      "eta": "Already purchased",
+      "time": "No LA shipment needed",
+      "note": "The exact Suntech STP565S-C72/Vmh panel was not found on Amazon; results were unrelated panels."
+    },
+    "dse-batteries": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Purchased in Fiji",
+      "eta": "Already purchased",
+      "time": "No LA shipment needed",
+      "note": "The exact EverExceed ES200-12G GEL battery was not found on Amazon; results were different AGM or lithium batteries."
+    },
+    "dse-pv-cable": {
+      "amazonStatus": "substitute",
+      "sourceLabel": "Amazon · 6 mm² option",
+      "sourceUrl": "https://www.amazon.com/dp/B0FB8G62NG",
+      "eta": "Aug 15",
+      "time": "Same-day to LA",
+      "note": "Exact 4 mm² cable was not found. This 100 ft red + 100 ft black 6 mm² copper option is electrically suitable but heavier; Fiji purchase remains the plan."
+    },
+    "dse-battery-cable": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "BatteryCablesUSA",
+      "sourceUrl": "https://www.batterycablesusa.com/0-gauge-1-0-awg-marine-grade-battery-cable-with-ends",
+      "eta": "Aug 19–21",
+      "time": "Ships Mon; 2–4 transit days",
+      "note": "Amazon has fixed cables, not the twelve made-to-length marine assemblies with the required M6/M8/M10 lug combinations. Measure before ordering.",
+      "ebay": {
+        "status": "unavailable",
+        "sourceLabel": "No like-for-like custom set",
+        "eta": "Not found",
+        "price": "—",
+        "condition": "—",
+        "shipsFrom": "U.S.-only search",
+        "note": "eBay has fixed-length battery cables, but not one seller/configurator for all twelve measured marine assemblies and the required M6/M8/M10 lug combinations."
+      }
+    },
+    "dse-wall-board": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Fabricate in Fiji",
+      "eta": "Buy locally",
+      "time": "No LA shipment",
+      "note": "This is a site-cut plywood, shield, duct and hardware lot rather than one shippable product."
+    },
+    "dse-ac-board": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "WI Automation · RCBO fallback",
+      "sourceUrl": "https://us.wiautomation.com/schneider-electric/drives-motors-circuits-protection/r9d01610-schneider-electric",
+      "eta": "1–10 business days",
+      "time": "DHL Express; confirm at checkout",
+      "note": "Amazon had no suitable complete Fiji Type I kit. Its exact Type A 10 A RCBO choices arrived after departure; the linked Schneider 10 A / 30 mA Type A unit is in stock, but local Fiji sourcing is preferred."
+    },
+    "dse-gen-input": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Assemble in Fiji",
+      "eta": "Buy locally",
+      "time": "No LA shipment",
+      "note": "No suitable single Amazon kit matched the G3200P, Fiji plug format, weather-protected inlet, lead and two-pole protection."
+    },
+    "dse-lights": {
+      "amazonStatus": "substitute",
+      "sourceLabel": "Amazon · comparable 6-pack",
+      "sourceUrl": "https://www.amazon.com/dp/B0C331RDPN",
+      "eta": "Aug 16",
+      "time": "1 day to LA",
+      "note": "Comparable regulated-12 V six-light pack only; confirm damp rating and source the switches and building cable separately."
+    },
+    "dse-earth": {
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon · busbar component",
+      "sourceUrl": "https://www.amazon.com/dp/B000OTJ8A0",
+      "eta": "Aug 16",
+      "time": "1 day to LA",
+      "note": "The covered tinned busbar is available; electrode, bonding conductor, lugs and corrosion protection still require local selection."
+    },
+    "dse-terms": {
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon · termination parts",
+      "sourceUrl": "https://www.amazon.com/dp/B0CS6N1F48",
+      "eta": "Aug 15–16",
+      "time": "Same/next day to LA",
+      "note": "Amazon stocks lugs and adhesive heat-shrink, but this row also needs verified lug sizes, ferrules, glands, genuine-compatible MC4 parts, ties and labels."
+    },
+    "dse-battery-rack": {
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon · restraint straps",
+      "sourceUrl": "https://www.amazon.com/dp/B0D46WHNXS",
+      "eta": "Aug 15",
+      "time": "Same-day to LA",
+      "note": "Stainless-hardware straps are available; the low rack/base and fitted terminal covers remain local fabrication."
+    },
+    "dse-multiplus": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Off-Grid Source · exact model",
+      "sourceUrl": "https://offgridsource.com/products/victron-energy-multiplus-ii-24-3000-70-32-230v",
+      "eta": "Aug 19–28",
+      "time": "3–10 business days",
+      "note": "Order-critical. Amazon returned 120 V units, not PMP242305010. The linked U.S. supplier lists the exact 230 V non-GX model in stock; confirm the checkout date before paying.",
+      "ebay": {
+        "status": "unavailable",
+        "sourceLabel": "No exact U.S. listing",
+        "sourceUrl": "https://www.ebay.com/sch/i.html?_nkw=Victron+MultiPlus-II+24%2F3000%2F70-32+230V&LH_BIN=1&LH_PrefLoc=1",
+        "eta": "Not available",
+        "price": "—",
+        "condition": "—",
+        "shipsFrom": "U.S.-only search",
+        "note": "The U.S.-only results were 120 V or different-capacity units. Exact 24/3000/70-32 230 V listings were international, so eBay is not a safe substitute for the linked U.S. supplier."
+      }
+    },
+    "dse-ekrano-gx": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact model",
+      "sourceUrl": "https://www.amazon.com/dp/B0C9N42K9Z",
+      "eta": "Aug 16",
+      "time": "1 day to LA",
+      "note": "Exact Victron Ekrano GX listing; recheck seller, condition and delivery at checkout.",
+      "ebay": {
+        "status": "available",
+        "sourceLabel": "eBay · exact BPP900480100",
+        "sourceUrl": "https://www.ebay.com/itm/116685644602",
+        "eta": "2–4 days",
+        "price": "$619.65",
+        "condition": "New",
+        "shipsFrom": "United States",
+        "note": "Exact model from a U.S. seller; displayed free 2–4 day delivery to 90065."
+      }
+    },
+    "dse-smartsolar": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact model",
+      "sourceUrl": "https://www.amazon.com/dp/B08LP7JLLT",
+      "eta": "Aug 17",
+      "time": "2 days to LA",
+      "note": "Exact 150/85-Tr VE.Can controller listing.",
+      "ebay": {
+        "status": "available",
+        "sourceLabel": "eBay · exact 150/85-Tr VE.Can",
+        "sourceUrl": "https://www.ebay.com/itm/172957792110",
+        "eta": "2–4 days",
+        "price": "$476.00",
+        "condition": "New",
+        "shipsFrom": "United States",
+        "note": "Exact controller; displayed free 2–4 day delivery to 90065 and is $32 below the BOM planning value."
+      }
+    },
+    "dse-mppt-wirebox": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact model",
+      "sourceUrl": "https://www.amazon.com/dp/B08LBX79XY",
+      "eta": "Aug 16",
+      "time": "1 day to LA",
+      "note": "Exact WireBox-XL Tr for the 150/85-Tr controller.",
+      "ebay": {
+        "status": "available",
+        "sourceLabel": "eBay · exact SCC950400210",
+        "sourceUrl": "https://www.ebay.com/itm/327310682825",
+        "eta": "2–4 days",
+        "price": "$54.49",
+        "condition": "New",
+        "shipsFrom": "United States",
+        "note": "Exact WireBox-XL Tr; displayed free 2–4 day delivery to 90065. Amazon is currently cheaper."
+      }
+    },
+    "dse-supplier-freight": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Shipping allowance",
+      "eta": "Not applicable",
+      "time": "Replace with checkout quotes",
+      "note": "This row budgets inbound freight; it is not a purchasable item."
+    },
+    "dse-orion": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact model",
+      "sourceUrl": "https://www.amazon.com/dp/B086R9ZVK5",
+      "eta": "Aug 16",
+      "time": "1 day to LA",
+      "note": "Exact Smart 24/12-30 A 360 W isolated model; do not choose the visually similar non-isolated listing.",
+      "ebay": {
+        "status": "available",
+        "sourceLabel": "eBay · exact ORI241236120",
+        "sourceUrl": "https://www.ebay.com/itm/116489159799",
+        "eta": "2–4 days",
+        "price": "$243.95",
+        "condition": "New",
+        "shipsFrom": "Ranchita, California",
+        "note": "Exact isolated 24/12-30 A model; item page displayed free 2–4 day delivery to 90065."
+      }
+    },
+    "dse-balancers": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact model",
+      "sourceUrl": "https://www.amazon.com/dp/B01DH6B2D2",
+      "eta": "Aug 15",
+      "time": "Same-day to LA",
+      "note": "Exact Victron Battery Balancer; BOM quantity is two.",
+      "ebay": {
+        "status": "available",
+        "sourceLabel": "eBay · exact BBA000100100",
+        "sourceUrl": "https://www.ebay.com/itm/235590012699",
+        "eta": "Aug 19–22",
+        "price": "$48.45 each",
+        "condition": "New",
+        "shipsFrom": "Boca Raton, Florida",
+        "note": "Exact balancer; item page estimated Aug 19–22 to 90065. BOM quantity is two."
+      }
+    },
+    "dse-shunt": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · IP65 500 A",
+      "sourceUrl": "https://www.amazon.com/dp/B0BF636VBX",
+      "eta": "Aug 15",
+      "time": "Same-day to LA",
+      "note": "The 500 A IP65 SmartShunt is a suitable harsh-environment version of the BOM item.",
+      "ebay": {
+        "status": "available",
+        "sourceLabel": "eBay · exact SHU050150050",
+        "sourceUrl": "https://www.ebay.com/itm/115801019590",
+        "eta": "2–4 days",
+        "price": "$100.30",
+        "condition": "New",
+        "shipsFrom": "United States",
+        "note": "Exact standard 500 A SmartShunt; displayed free 2–4 day delivery to 90065. Amazon's IP65 version remains preferable for this climate if the price is acceptable."
+      }
+    },
+    "dse-class-t": {
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon · holder + fuses",
+      "sourceUrl": "https://www.amazon.com/s?k=Blue+Sea+Class+T+fuse+block+150A+fuse",
+      "eta": "Aug 21",
+      "time": "6 days to LA for the fuse",
+      "note": "Blue Sea holders arrive Aug 15, but 150 A Blue Sea 5114 fuses arrive Aug 21. Order two holders, two installed fuses and at least one spare.",
+      "ebay": {
+        "status": "partial",
+        "sourceLabel": "eBay · Blue Sea 5007100 holder",
+        "sourceUrl": "https://www.ebay.com/itm/167299673103",
+        "secondaryLabel": "Blue Sea 5114 150 A fuse",
+        "secondaryUrl": "https://www.ebay.com/itm/377307070044",
+        "eta": "Aug 19–24",
+        "price": "$82.99/holder + $49.99/fuse",
+        "condition": "New",
+        "shipsFrom": "Texas + Rhode Island",
+        "note": "Correct 110–200 A covered holder and exact 150 A fuse. The holder displayed 2–4 day delivery; the fuse item page estimated Aug 19–24. Two holders plus three fuses cost about $316 before tax, above the $220 BOM allowance."
+      }
+    },
+    "dse-selector": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact model",
+      "sourceUrl": "https://www.amazon.com/dp/B000MMFJH0",
+      "eta": "Aug 15",
+      "time": "Same-day to LA",
+      "note": "Exact Blue Sea 6007 four-position m-Series selector.",
+      "ebay": {
+        "status": "available",
+        "sourceLabel": "eBay · exact Blue Sea 6007",
+        "sourceUrl": "https://www.ebay.com/itm/155534611272",
+        "eta": "2–4 days",
+        "price": "$39.95",
+        "condition": "New",
+        "shipsFrom": "United States",
+        "note": "Exact selector; displayed free 2–4 day delivery to 90065."
+      }
+    },
+    "dse-pv-protection": {
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon · comparable combiner",
+      "sourceUrl": "https://www.amazon.com/dp/B0F4331NJ1",
+      "eta": "Aug 16",
+      "time": "1 day to LA",
+      "note": "A two-string 40 A combiner/SPD box is available, but it is not an approved drop-in selection. Verify disconnect poles, SPD Ucpv, enclosure, terminals and all DC ratings before purchase."
+    },
+    "dse-fuse-block": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact model",
+      "sourceUrl": "https://www.amazon.com/dp/B000THQ0CQ",
+      "eta": "Aug 15",
+      "time": "Same-day to LA",
+      "note": "Exact Blue Sea 5025 six-circuit covered fuse block with negative bus.",
+      "ebay": {
+        "status": "available",
+        "sourceLabel": "eBay · exact Blue Sea 5025",
+        "sourceUrl": "https://www.ebay.com/itm/168227609552",
+        "eta": "2–4 days",
+        "price": "$33.14",
+        "condition": "New",
+        "shipsFrom": "United States",
+        "note": "Exact six-circuit block with negative bus and cover; displayed free 2–4 day delivery to 90065."
+      }
+    },
+    "dse-usb": {
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon · exact charger",
+      "sourceUrl": "https://www.amazon.com/dp/B0CZ7BL16W",
+      "eta": "Aug 15",
+      "time": "Same-day to LA",
+      "note": "Exact Anker 167.5 W charger is available; the panel-mount 12 V socket and its wiring/protection are separate."
+    },
+    "dse-router": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact UX-US",
+      "sourceUrl": "https://www.amazon.com/dp/B0CW2KC9VT",
+      "eta": "Aug 24",
+      "time": "9 days to LA",
+      "note": "Already purchased. Amazon currently has the exact UniFi Express, but its delivery is slower and its listed price was high."
+    },
+    "dse-dc-spares": {
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon · busbar component",
+      "sourceUrl": "https://www.amazon.com/dp/B0BBZDTHWH",
+      "eta": "Aug 15–17",
+      "time": "Same day to 2 days",
+      "note": "Covered 300 A M10 busbars are available; the 100 A MPPT and 30/35 A Orion protection and 25 mm² jumpers remain separate selections."
+    },
+    "dse-victron-data": {
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon · exact Victron cables",
+      "sourceUrl": "https://www.amazon.com/dp/B01F9ESFZS",
+      "eta": "Aug 16",
+      "time": "1 day for the last cable",
+      "note": "The 0.9 m VE.Direct cables arrive Aug 15 and the 3 m Victron RJ45 UTP cable arrives Aug 16; add a short standard Ethernet patch lead."
+    },
+    "dse-junction-box": {
+      "amazonStatus": "substitute",
+      "sourceLabel": "Amazon · 14 × 10 × 6 in",
+      "sourceUrl": "https://www.amazon.com/dp/B0BWR3LG6C",
+      "eta": "Aug 15",
+      "time": "Same-day to LA",
+      "note": "Near-exact 350 × 250 × 150 mm metal IP65 enclosure with mounting plate. Verify usable interior depth, hinge clearance and luggage fit before drilling."
+    },
+    "dse-service-spares": {
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon · separate spares",
+      "sourceUrl": "https://www.amazon.com/s?k=Class+T+150A+PV+fuse+blade+fuse+MC4+spares",
+      "eta": "Aug 15–21",
+      "time": "Same day to 6 days",
+      "note": "No single service kit exists. The 150 A Class T fuse is the slowest identified component, arriving Aug 21."
+    },
+    "dse-baggage": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Fiji Airways",
+      "sourceUrl": "https://www.fijiairways.com/en-us/manage/baggage-allowances",
+      "eta": "At booking/check-in",
+      "time": "No parcel delivery",
+      "note": "This is an airline fee, not an Amazon item."
+    },
+    "dse-customs-vat": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Fiji Revenue & Customs",
+      "sourceUrl": "https://frcs.org.fj/our-services/customs/visiting-fiji/arriving-in-fiji/",
+      "eta": "At Fiji entry",
+      "time": "No parcel delivery",
+      "note": "This is a border-tax allowance, not an Amazon item."
+    },
+    "dse-ex-starlink": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Outside scope",
+      "eta": "Not researched",
+      "time": "No project purchase",
+      "note": "Starlink Mini purchase is expressly outside this BOM."
+    },
+    "dse-ex-mount": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "By others",
+      "eta": "Not researched",
+      "time": "No project purchase",
+      "note": "The panel structure and mounting are outside scope and site-specific."
+    },
+    "dse-ex-freight": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Outside scope",
+      "eta": "Not researched",
+      "time": "No project purchase",
+      "note": "Inter-island freight beyond Nadi is expressly excluded."
+    },
+    "dse-ex-labor": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Donated labor",
+      "eta": "Not applicable",
+      "time": "No parcel delivery",
+      "note": "Labor is donated and is not a purchasable item."
+    }
+  }
+}

@@ -2,13 +2,22 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import modelRaw from "@/data/dse-model.json";
 import { GrabPointCameraControls } from "@/app/GrabPointCameraControls";
-import { physicalLayout } from "@/app/physicalLayoutSolver";
+import {
+  physicalLayout as defaultPhysicalLayout,
+  solvePhysicalLayout,
+  type PhysicalLayoutSpecification,
+} from "@/app/physicalLayoutSolver";
+import {
+  WallLayoutEditor,
+  type DetailedCablePath,
+  type WallDeviceOverrides,
+} from "@/app/WallLayoutEditor";
 import {
   buildRoundedCableGeometry,
   CableRoutingSystem,
-  PlanarCableLanePlanner,
   type CablePassage,
   type CableRoutingReport,
   type CableVisibility,
@@ -16,6 +25,7 @@ import {
 } from "@/app/cableRouting";
 
 type CameraPresetId = "site" | "array" | "wall" | "batteries" | "junction";
+type ActiveModelView = CameraPresetId | "layout";
 
 type ModelLabel = {
   id: string;
@@ -37,9 +47,16 @@ type CameraPreset = {
 };
 
 type SceneBuild = {
+  detailedCablePaths: DetailedCablePath[];
   labelPositions: Map<string, THREE.Vector3>;
   pickables: THREE.Object3D[];
   routingReport: CableRoutingReport;
+};
+
+type StaticPrimitiveBatch = {
+  root: THREE.Object3D;
+  objects: Array<THREE.Mesh | THREE.LineSegments>;
+  matrices: THREE.Matrix4[];
 };
 
 type PhysicalModelSystem = {
@@ -47,23 +64,82 @@ type PhysicalModelSystem = {
   name: string;
 };
 
+const WALL_LAYOUT_STORAGE_KEY = "dse-solar.wall-layout.v1";
+
+function readStoredWallLayout(): WallDeviceOverrides {
+  if (typeof window === "undefined") return {};
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(WALL_LAYOUT_STORAGE_KEY) ?? "null") as {
+      overrides?: WallDeviceOverrides;
+      version?: number;
+    } | null;
+    if (!parsed || parsed.version !== 1 || !parsed.overrides) return {};
+    const board = defaultPhysicalLayout.surfaces.equipmentBoard;
+    const left = board.center[0] - board.size[0] / 2;
+    const right = board.center[0] + board.size[0] / 2;
+    const bottom = board.center[1] - board.size[1] / 2;
+    const top = board.center[1] + board.size[1] / 2;
+    return Object.fromEntries(Object.entries(parsed.overrides).flatMap(([id, override]) => {
+      const device = defaultPhysicalLayout.devices[id];
+      const position = override.position;
+      if (
+        !device || device.mounting !== "wall" || id === "equipmentBoard" ||
+        !Array.isArray(position) || position.length !== 3 || !position.every(Number.isFinite)
+      ) return [];
+      return [[id, {
+        position: [
+          Math.min(right - device.size[0] / 2, Math.max(left + device.size[0] / 2, position[0])),
+          Math.min(top - device.size[1] / 2, Math.max(bottom + device.size[1] / 2, position[1])),
+          device.position[2],
+        ],
+      }]];
+    })) as WallDeviceOverrides;
+  } catch {
+    return {};
+  }
+}
+
+function storeWallLayout(overrides: WallDeviceOverrides) {
+  try {
+    window.localStorage.setItem(WALL_LAYOUT_STORAGE_KEY, JSON.stringify({
+      overrides,
+      version: 1,
+    }));
+  } catch {
+    // A blocked or full storage area must not prevent layout editing.
+  }
+}
+
 const model = modelRaw;
+// Scene construction is synchronous and only one DSE scene is mounted. Point
+// the existing authored builders at the committed solver result immediately
+// before each full rebuild; pointer-move previews never mutate this value.
+let physicalLayout: PhysicalLayoutSpecification = defaultPhysicalLayout;
 const CABLE_ROUTERS = new WeakMap<THREE.Object3D, CableRoutingSystem>();
-const WALL_LANE_PLANNERS = new WeakMap<THREE.Scene, PlanarCableLanePlanner>();
+const CABLE_MESH_BATCHES = new WeakMap<THREE.Object3D, Map<string, {
+  color: number;
+  geometries: THREE.BufferGeometry[];
+  visibility: CableVisibility;
+}>>();
+const DETAILED_CABLE_PATHS = new WeakMap<THREE.Object3D, DetailedCablePath[]>();
 
 const FIJI_PANEL_TILT_DEG = 18;
-const WALL_CABLE_Z = -2.086;
-const STARLINK_CEILING_Y = 2.94;
-const LIGHTING_TRUNK_Y = 2.86;
-const JUNCTION_CENTER = physicalLayout.devices.junction.position as VectorTuple;
-const JUNCTION_WIRE_Z = JUNCTION_CENTER[2] + 0.105;
-const JUNCTION_FRONT_INTERNAL_Z = JUNCTION_CENTER[2] + 0.143;
-const JUNCTION_GLAND_Z = JUNCTION_CENTER[2];
-const JUNCTION_FRONT_CABLE_Z = JUNCTION_CENTER[2] + physicalLayout.devices.junction.size[2] / 2 + 0.018;
-const JUNCTION_TOP_Y = JUNCTION_CENTER[1] + physicalLayout.devices.junction.size[1] / 2;
-const JUNCTION_BOTTOM_Y = JUNCTION_CENTER[1] - physicalLayout.devices.junction.size[1] / 2;
-const JUNCTION_RIGHT_X = JUNCTION_CENTER[0] + physicalLayout.devices.junction.size[0] / 2;
-const JUNCTION_LEFT_X = JUNCTION_CENTER[0] - physicalLayout.devices.junction.size[0] / 2;
+const DEFAULT_JUNCTION_CENTER = defaultPhysicalLayout.devices.junction.position as VectorTuple;
+let JUNCTION_CENTER = [...DEFAULT_JUNCTION_CENTER] as VectorTuple;
+let JUNCTION_WIRE_Z = JUNCTION_CENTER[2] + 0.105;
+let JUNCTION_FRONT_INTERNAL_Z = JUNCTION_CENTER[2] + 0.143;
+let JUNCTION_GLAND_Z = JUNCTION_CENTER[2];
+let JUNCTION_TOP_Y = JUNCTION_CENTER[1] + physicalLayout.devices.junction.size[1] / 2;
+let JUNCTION_BOTTOM_Y = JUNCTION_CENTER[1] - physicalLayout.devices.junction.size[1] / 2;
+let JUNCTION_RIGHT_X = JUNCTION_CENTER[0] + physicalLayout.devices.junction.size[0] / 2;
+let JUNCTION_LEFT_X = JUNCTION_CENTER[0] - physicalLayout.devices.junction.size[0] / 2;
+const JUNCTION_FOCUS_COMPONENT_IDS = new Set([
+  "mounting",
+  "systemMonitor",
+  "batterySelector",
+  "mainDc",
+  "fuseBlock",
+]);
 
 type JunctionPenetration = {
   axis: "x" | "y";
@@ -74,33 +150,36 @@ type JunctionPenetration = {
   through: VectorTuple[];
 };
 
-function rightJunctionPenetration(y: number, glandRadius: number): JunctionPenetration {
-  const terminal: VectorTuple = [3.598, y, JUNCTION_WIRE_Z];
-  const outside: VectorTuple = [3.642, y, JUNCTION_GLAND_Z];
+function rightJunctionPenetration(yOffset: number, glandRadius: number): JunctionPenetration {
+  const y = JUNCTION_CENTER[1] + yOffset;
+  const terminal: VectorTuple = [JUNCTION_RIGHT_X - 0.027, y, JUNCTION_WIRE_Z];
+  const outside: VectorTuple = [JUNCTION_RIGHT_X + 0.017, y, JUNCTION_GLAND_Z];
   return {
     axis: "x",
-    glandCenter: [3.6175, y, JUNCTION_GLAND_Z],
+    glandCenter: [JUNCTION_RIGHT_X - 0.0075, y, JUNCTION_GLAND_Z],
     glandRadius,
     outside,
     terminal,
-    through: [terminal, [3.598, y, JUNCTION_GLAND_Z], outside],
+    through: [terminal, [terminal[0], y, JUNCTION_GLAND_Z], outside],
   };
 }
 
-function bottomJunctionPenetration(x: number, glandRadius: number): JunctionPenetration {
-  const terminal: VectorTuple = [x, 1.584, JUNCTION_WIRE_Z];
-  const outside: VectorTuple = [x, 1.542, JUNCTION_GLAND_Z];
+function bottomJunctionPenetration(xOffset: number, glandRadius: number): JunctionPenetration {
+  const x = JUNCTION_CENTER[0] + xOffset;
+  const terminal: VectorTuple = [x, JUNCTION_BOTTOM_Y + 0.0275, JUNCTION_WIRE_Z];
+  const outside: VectorTuple = [x, JUNCTION_BOTTOM_Y - 0.0145, JUNCTION_GLAND_Z];
   return {
     axis: "y",
-    glandCenter: [x, 1.564, JUNCTION_GLAND_Z],
+    glandCenter: [x, JUNCTION_BOTTOM_Y + 0.0075, JUNCTION_GLAND_Z],
     glandRadius,
     outside,
     terminal,
-    through: [terminal, [x, 1.584, JUNCTION_GLAND_Z], outside],
+    through: [terminal, [x, JUNCTION_BOTTOM_Y + 0.0275, JUNCTION_GLAND_Z], outside],
   };
 }
 
-function topJunctionPenetration(x: number, glandRadius: number): JunctionPenetration {
+function topJunctionPenetration(xOffset: number, glandRadius: number): JunctionPenetration {
+  const x = JUNCTION_CENTER[0] + xOffset;
   const terminal: VectorTuple = [x, JUNCTION_TOP_Y - 0.028, JUNCTION_WIRE_Z];
   const outside: VectorTuple = [x, JUNCTION_TOP_Y + 0.032, JUNCTION_GLAND_Z];
   return {
@@ -113,37 +192,34 @@ function topJunctionPenetration(x: number, glandRadius: number): JunctionPenetra
   };
 }
 
-const JUNCTION_PORTS = {
-  batteryPosA: bottomJunctionPenetration(3.31, 0.013),
-  batteryPosB: bottomJunctionPenetration(3.342, 0.013),
-  batteryNegA: bottomJunctionPenetration(3.374, 0.013),
-  batteryNegB: bottomJunctionPenetration(3.406, 0.013),
-  mpptPos: rightJunctionPenetration(1.772, 0.0095),
-  mpptNeg: rightJunctionPenetration(1.746, 0.0095),
-  multiplusPos: rightJunctionPenetration(1.716, 0.013),
-  multiplusNeg: rightJunctionPenetration(1.682, 0.013),
-  orion24Pos: rightJunctionPenetration(1.652, 0.009),
-  orion24Neg: rightJunctionPenetration(1.627, 0.009),
-  orion12Pos: rightJunctionPenetration(1.603, 0.008),
-  orion12Neg: rightJunctionPenetration(1.582, 0.008),
-  ekranPos: topJunctionPenetration(3.41, 0.006),
-  ekranNeg: topJunctionPenetration(3.45, 0.006),
-  ekranData: topJunctionPenetration(3.49, 0.0055),
-  loadPos: [
-    bottomJunctionPenetration(3.438, 0.007),
-    bottomJunctionPenetration(3.482, 0.007),
-    bottomJunctionPenetration(3.526, 0.007),
-    bottomJunctionPenetration(3.57, 0.007),
-  ],
-  loadNeg: [
-    bottomJunctionPenetration(3.46, 0.007),
-    bottomJunctionPenetration(3.504, 0.007),
-    bottomJunctionPenetration(3.548, 0.007),
-    bottomJunctionPenetration(3.592, 0.007),
-  ],
-};
+function createJunctionPorts() {
+  return {
+    batteryPosA: bottomJunctionPenetration(-0.14, 0.013),
+    batteryPosB: bottomJunctionPenetration(-0.108, 0.013),
+    batteryNegA: bottomJunctionPenetration(-0.076, 0.013),
+    batteryNegB: bottomJunctionPenetration(-0.044, 0.013),
+    mpptPos: rightJunctionPenetration(0.092, 0.0095),
+    mpptNeg: rightJunctionPenetration(0.066, 0.0095),
+    multiplusPos: rightJunctionPenetration(0.036, 0.013),
+    multiplusNeg: rightJunctionPenetration(0.002, 0.013),
+    orion24Pos: rightJunctionPenetration(-0.028, 0.009),
+    orion24Neg: rightJunctionPenetration(-0.053, 0.009),
+    orion12Pos: rightJunctionPenetration(-0.077, 0.008),
+    orion12Neg: rightJunctionPenetration(-0.098, 0.008),
+    ekranPos: topJunctionPenetration(-0.04, 0.006),
+    ekranNeg: topJunctionPenetration(0, 0.006),
+    ekranData: topJunctionPenetration(0.04, 0.0055),
+    loadPos: [-0.012, 0.032, 0.076, 0.12]
+      .map((offset) => bottomJunctionPenetration(offset, 0.007)),
+    loadNeg: [0.01, 0.054, 0.098, 0.142]
+      .map((offset) => bottomJunctionPenetration(offset, 0.007)),
+  };
+}
 
-const DEVICE_PORTS = {
+let JUNCTION_PORTS = createJunctionPorts();
+
+function createDevicePorts() {
+  return {
   starlink: {
     powerPositive: [physicalLayout.devices.starlink.position[0] - 0.04, physicalLayout.devices.starlink.position[1] - 0.05, physicalLayout.devices.starlink.position[2]] as VectorTuple,
     powerNegative: [physicalLayout.devices.starlink.position[0], physicalLayout.devices.starlink.position[1] - 0.05, physicalLayout.devices.starlink.position[2]] as VectorTuple,
@@ -155,6 +231,7 @@ const DEVICE_PORTS = {
     batteryPositive: physicalLayout.ports.smartSolarBatteryPositive as VectorTuple,
     batteryNegative: physicalLayout.ports.smartSolarBatteryNegative as VectorTuple,
     earth: physicalLayout.ports.smartSolarEarth as VectorTuple,
+    data: physicalLayout.ports.smartSolarData as VectorTuple,
   },
   multiPlus: {
     dcPositive: physicalLayout.ports.multiPlusDcPositive as VectorTuple,
@@ -162,6 +239,7 @@ const DEVICE_PORTS = {
     acInputCable: physicalLayout.ports.multiPlusAcInputCable as VectorTuple,
     acOutputCable: physicalLayout.ports.multiPlusAcOutputCable as VectorTuple,
     chassisEarth: physicalLayout.ports.multiPlusChassisEarth as VectorTuple,
+    data: physicalLayout.ports.multiPlusData as VectorTuple,
   },
   orion: {
     inputPositive: physicalLayout.ports.orionInputPositive as VectorTuple,
@@ -207,12 +285,42 @@ const DEVICE_PORTS = {
   },
   acBoard: {
     acCable: physicalLayout.ports.acBoardAcCable as VectorTuple,
+    toolCable: physicalLayout.ports.acBoardToolCable as VectorTuple,
     earth: physicalLayout.ports.acBoardEarth as VectorTuple,
   },
   generatorInlet: {
     acCable: physicalLayout.ports.generatorInletAcCable as VectorTuple,
   },
-};
+  };
+}
+
+let DEVICE_PORTS = createDevicePorts();
+
+function configureSceneLayout(nextLayout: PhysicalLayoutSpecification) {
+  physicalLayout = nextLayout;
+  JUNCTION_CENTER = [...physicalLayout.devices.junction.position] as VectorTuple;
+  JUNCTION_WIRE_Z = JUNCTION_CENTER[2] + 0.105;
+  JUNCTION_FRONT_INTERNAL_Z = JUNCTION_CENTER[2] + 0.143;
+  JUNCTION_GLAND_Z = JUNCTION_CENTER[2];
+  JUNCTION_TOP_Y = JUNCTION_CENTER[1] + physicalLayout.devices.junction.size[1] / 2;
+  JUNCTION_BOTTOM_Y = JUNCTION_CENTER[1] - physicalLayout.devices.junction.size[1] / 2;
+  JUNCTION_RIGHT_X = JUNCTION_CENTER[0] + physicalLayout.devices.junction.size[0] / 2;
+  JUNCTION_LEFT_X = JUNCTION_CENTER[0] - physicalLayout.devices.junction.size[0] / 2;
+  JUNCTION_PORTS = createJunctionPorts();
+  DEVICE_PORTS = createDevicePorts();
+}
+
+function junctionInsidePoint(point: VectorTuple): VectorTuple {
+  return [
+    point[0] + JUNCTION_CENTER[0] - DEFAULT_JUNCTION_CENTER[0],
+    point[1] + JUNCTION_CENTER[1] - DEFAULT_JUNCTION_CENTER[1],
+    point[2],
+  ];
+}
+
+function junctionInsidePath(points: VectorTuple[]): VectorTuple[] {
+  return points.map(junctionInsidePoint);
+}
 
 const COLORS = {
   battery: 0x315f68,
@@ -233,6 +341,20 @@ const COLORS = {
   threeCoreAc: 0xf2f1ec,
   yellow: 0xe4bb42,
 };
+
+// Reuse the immutable primitive vertex buffers throughout the scene. Object
+// transforms carry the physical dimensions, so hundreds of boxes and studs do
+// not each upload identical topology to WebGL on first render.
+const UNIT_BOX_GEOMETRY = new THREE.BoxGeometry(1, 1, 1);
+const UNIT_BOX_EDGES_GEOMETRY = new THREE.EdgesGeometry(UNIT_BOX_GEOMETRY);
+const UNIT_CYLINDER_8_GEOMETRY = new THREE.CylinderGeometry(1, 1, 1, 8);
+const UNIT_CYLINDER_12_GEOMETRY = new THREE.CylinderGeometry(1, 1, 1, 12);
+const BATCHABLE_PRIMITIVE_GEOMETRIES = new Set([
+  UNIT_BOX_GEOMETRY.uuid,
+  UNIT_BOX_EDGES_GEOMETRY.uuid,
+  UNIT_CYLINDER_8_GEOMETRY.uuid,
+  UNIT_CYLINDER_12_GEOMETRY.uuid,
+]);
 
 const CAMERA_PRESETS: CameraPreset[] = [
   {
@@ -320,15 +442,148 @@ function material(
   options: { opacity?: number; metalness?: number; roughness?: number; emissive?: number } = {},
 ) {
   const opacity = options.opacity ?? 1;
-  return new THREE.MeshStandardMaterial({
+  return new THREE.MeshLambertMaterial({
     color,
     emissive: options.emissive ?? 0x000000,
     flatShading: true,
-    metalness: options.metalness ?? 0.08,
     opacity,
-    roughness: options.roughness ?? 0.72,
     transparent: opacity < 1,
   });
+}
+
+function staticMaterialKey(source: THREE.Material) {
+  const common = [
+    source.type,
+    source.opacity,
+    source.transparent,
+    source.depthTest,
+    source.depthWrite,
+    source.side,
+    source.blending,
+    source.vertexColors,
+  ];
+  if (source instanceof THREE.MeshLambertMaterial) {
+    return [...common, source.color.getHex(), source.emissive.getHex(), source.flatShading].join(":");
+  }
+  if (source instanceof THREE.LineBasicMaterial) {
+    return [...common, source.color.getHex(), source.linewidth].join(":");
+  }
+  return "";
+}
+
+function componentBatchRoot(scene: THREE.Scene, object: THREE.Object3D) {
+  const componentId = object.userData.componentId as string | undefined;
+  if (!componentId) return scene;
+  let root = object;
+  while (
+    root.parent &&
+    root.parent !== scene &&
+    root.parent.userData.componentId === componentId
+  ) root = root.parent;
+  return root;
+}
+
+/**
+ * Collapse repeated transformed cubes, cylinders and outline edges after the
+ * authored scene has been assembled. Mesh instances retain the original
+ * component root, so raycasting and whole-component hover boxes still work.
+ * This turns hundreds of small WebGL draw submissions into a few dozen without
+ * changing the layout/routing code or the generated cable geometry. Geometry
+ * is merged instead of instanced: these primitives contain very few vertices,
+ * and avoiding an instancing shader variant is faster on WebKit and SwiftShader.
+ */
+function batchStaticPrimitives(scene: THREE.Scene, sourcePickables: THREE.Object3D[]) {
+  scene.updateMatrixWorld(true);
+  const batches = new Map<string, StaticPrimitiveBatch>();
+  scene.traverse((object) => {
+    if (!(object instanceof THREE.Mesh || object instanceof THREE.LineSegments)) return;
+    if (!BATCHABLE_PRIMITIVE_GEOMETRIES.has(object.geometry.uuid)) return;
+    if (object.children.length > 0 || Array.isArray(object.material)) return;
+    const materialKey = staticMaterialKey(object.material);
+    if (!materialKey) return;
+    const root = componentBatchRoot(scene, object);
+    const localMatrix = new THREE.Matrix4()
+      .copy(root.matrixWorld)
+      .invert()
+      .multiply(object.matrixWorld);
+    const key = [
+      root.uuid,
+      object instanceof THREE.Mesh ? "mesh" : "lines",
+      object.geometry.uuid,
+      materialKey,
+      object.castShadow,
+      object.receiveShadow,
+      object.renderOrder,
+    ].join("|");
+    const batch = batches.get(key) ?? { root, objects: [], matrices: [] };
+    batch.objects.push(object);
+    batch.matrices.push(localMatrix);
+    batches.set(key, batch);
+  });
+
+  const removed = new Set<THREE.Object3D>();
+  const replacementPickables: THREE.Object3D[] = [];
+  let drawCallsSaved = 0;
+  let mergedMeshGroups = 0;
+  let mergedLineGroups = 0;
+
+  batches.forEach(({ root, objects, matrices }) => {
+    if (objects.length < 2) return;
+    const first = objects[0];
+    let replacement: THREE.Mesh | THREE.LineSegments;
+    const transformed = matrices.map((matrix) => first.geometry.clone().applyMatrix4(matrix));
+    const merged = mergeGeometries(transformed, false);
+    transformed.forEach((geometry) => geometry.dispose());
+    if (!merged) return;
+    if (first instanceof THREE.Mesh) {
+      replacement = new THREE.Mesh(merged, first.material);
+      mergedMeshGroups += 1;
+    } else {
+      replacement = new THREE.LineSegments(merged, first.material);
+      mergedLineGroups += 1;
+    }
+    replacement.castShadow = first.castShadow;
+    replacement.receiveShadow = first.receiveShadow;
+    replacement.renderOrder = first.renderOrder;
+    replacement.userData = { ...first.userData };
+    root.add(replacement);
+    if (replacement.userData.componentId && replacement instanceof THREE.Mesh) {
+      replacementPickables.push(replacement);
+    }
+    objects.forEach((object) => {
+      removed.add(object);
+      object.removeFromParent();
+    });
+    drawCallsSaved += objects.length - 1;
+  });
+
+  scene.userData.staticBatching = { drawCallsSaved, mergedMeshGroups, mergedLineGroups };
+  return [
+    ...sourcePickables.filter((object) => !removed.has(object)),
+    ...replacementPickables,
+  ];
+}
+
+function focusMaterialScope(object: THREE.Object3D) {
+  const cableVisibility = object.userData.modelCable as CableVisibility | undefined;
+  if (cableVisibility) return `cable-${cableVisibility}`;
+  const componentId = object.userData.componentId as string | undefined;
+  if (!componentId) return "neutral";
+  return JUNCTION_FOCUS_COMPONENT_IDS.has(componentId) ? "junction-component" : "context-component";
+}
+
+function deduplicateStaticMaterials(scene: THREE.Scene) {
+  const cache = new Map<string, THREE.Material>();
+  scene.traverse((object) => {
+    if (!(object instanceof THREE.Mesh || object instanceof THREE.LineSegments)) return;
+    if (Array.isArray(object.material)) return;
+    const key = `${focusMaterialScope(object)}|${staticMaterialKey(object.material)}`;
+    if (key.endsWith("|")) return;
+    const shared = cache.get(key);
+    if (shared) object.material = shared;
+    else cache.set(key, object.material);
+  });
+  scene.userData.deduplicatedMaterialCount = cache.size;
 }
 
 function tagObject(root: THREE.Object3D, componentId: string, pickables: THREE.Object3D[]) {
@@ -345,10 +600,13 @@ function addOutlinedBox(
   position: VectorTuple,
   color: number,
   options: {
+    castShadow?: boolean;
+    emissive?: number;
     opacity?: number;
     outline?: number;
     componentId?: string;
     pickables?: THREE.Object3D[];
+    receiveShadow?: boolean;
     rotation?: VectorTuple;
   } = {},
 ) {
@@ -361,19 +619,24 @@ function addOutlinedBox(
       radians(options.rotation[2]),
     );
   }
-  const geometry = new THREE.BoxGeometry(...size);
-  const body = new THREE.Mesh(geometry, material(color, { opacity: options.opacity }));
-  body.castShadow = true;
-  body.receiveShadow = true;
+  const body = new THREE.Mesh(UNIT_BOX_GEOMETRY, material(color, {
+    emissive: options.emissive,
+    opacity: options.opacity,
+  }));
+  body.scale.set(...size);
+  const dimensions = [...size].sort((first, second) => second - first);
+  body.castShadow = options.castShadow ?? dimensions[1] >= 0.05;
+  body.receiveShadow = options.receiveShadow ?? true;
   group.add(body);
   const edges = new THREE.LineSegments(
-    new THREE.EdgesGeometry(geometry),
+    UNIT_BOX_EDGES_GEOMETRY,
     new THREE.LineBasicMaterial({
       color: options.outline ?? 0x263a3c,
       opacity: options.opacity ? Math.min(1, options.opacity + 0.25) : 0.72,
       transparent: true,
     }),
   );
+  edges.scale.set(...size);
   group.add(edges);
   parent.add(group);
   if (options.componentId && options.pickables) {
@@ -390,11 +653,11 @@ function addCylinder(
   color: number,
   rotation: VectorTuple = [0, 0, 0],
 ) {
-  const geometry = new THREE.CylinderGeometry(radius, radius, height, 12);
-  const mesh = new THREE.Mesh(geometry, material(color, { metalness: 0.22 }));
+  const mesh = new THREE.Mesh(UNIT_CYLINDER_12_GEOMETRY, material(color, { metalness: 0.22 }));
   mesh.position.set(...position);
+  mesh.scale.set(radius, height, radius);
   mesh.rotation.set(radians(rotation[0]), radians(rotation[1]), radians(rotation[2]));
-  mesh.castShadow = true;
+  mesh.castShadow = Math.max(radius * 2, height) >= 0.08;
   parent.add(mesh);
   return mesh;
 }
@@ -418,6 +681,66 @@ function registerCableObstacle(
   cableRouter(parent).registerObstacle(id, center, size, passages);
 }
 
+function queueCableGeometry(
+  parent: THREE.Object3D,
+  geometry: THREE.BufferGeometry,
+  color: number,
+  visibility: CableVisibility,
+) {
+  let batches = CABLE_MESH_BATCHES.get(parent);
+  if (!batches) {
+    batches = new Map();
+    CABLE_MESH_BATCHES.set(parent, batches);
+  }
+  const key = `${visibility}-${color.toString(16)}`;
+  const batch = batches.get(key) ?? { color, geometries: [], visibility };
+  batch.geometries.push(geometry);
+  batches.set(key, batch);
+}
+
+function recordDetailedCablePath(
+  parent: THREE.Object3D,
+  points: VectorTuple[],
+  color: number,
+  radiusM: number,
+  visibility: CableVisibility,
+) {
+  const paths = DETAILED_CABLE_PATHS.get(parent) ?? [];
+  paths.push({
+    id: `final-cable-${String(paths.length + 1).padStart(3, "0")}`,
+    color,
+    points: points.map((point) => [...point] as VectorTuple),
+    radiusM,
+    visibility,
+  });
+  DETAILED_CABLE_PATHS.set(parent, paths);
+}
+
+function flushCableMeshes(parent: THREE.Object3D) {
+  const batches = CABLE_MESH_BATCHES.get(parent);
+  if (!batches) return;
+  batches.forEach((batch) => {
+    const geometry = batch.geometries.length === 1
+      ? batch.geometries[0]
+      : mergeGeometries(batch.geometries, false);
+    if (!geometry) {
+      batch.geometries.forEach((fallbackGeometry) => {
+        const mesh = new THREE.Mesh(fallbackGeometry, material(batch.color, { metalness: 0, roughness: 0.82 }));
+        mesh.userData.modelCable = batch.visibility;
+        mesh.castShadow = true;
+        parent.add(mesh);
+      });
+      return;
+    }
+    if (batch.geometries.length > 1) batch.geometries.forEach((source) => source.dispose());
+    const mesh = new THREE.Mesh(geometry, material(batch.color, { metalness: 0, roughness: 0.82 }));
+    mesh.userData.modelCable = batch.visibility;
+    mesh.castShadow = true;
+    parent.add(mesh);
+  });
+  CABLE_MESH_BATCHES.delete(parent);
+}
+
 function addCable(
   parent: THREE.Object3D,
   points: VectorTuple[],
@@ -427,21 +750,24 @@ function addCable(
 ) {
   const plannedPoints = cableRouter(parent).prepareRoute(points, radius, visibility, false);
   const curve = new THREE.CatmullRomCurve3(plannedPoints.map(vector), false, "centripetal", 0.45);
+  const tubularSegments = Math.max(18, plannedPoints.length * 9);
+  recordDetailedCablePath(
+    parent,
+    Array.from({ length: tubularSegments + 1 }, (_, index) => (
+      curve.getPointAt(index / tubularSegments).toArray() as VectorTuple
+    )),
+    color,
+    radius,
+    visibility,
+  );
   const geometry = new THREE.TubeGeometry(
     curve,
-    Math.max(18, plannedPoints.length * 9),
+    tubularSegments,
     radius,
     10,
     false,
   );
-  const mesh = new THREE.Mesh(
-    geometry,
-    material(color, { metalness: 0, roughness: 0.82 }),
-  );
-  mesh.userData.modelCable = visibility;
-  mesh.castShadow = true;
-  parent.add(mesh);
-  return mesh;
+  queueCableGeometry(parent, geometry, color, visibility);
 }
 
 function addStraightSegment(
@@ -457,12 +783,12 @@ function addStraightSegment(
   const direction = endVector.clone().sub(startVector);
   const length = direction.length();
   if (length < 0.0001) return undefined;
-  const geometry = new THREE.CylinderGeometry(radius, radius, length, 8);
-  const mesh = new THREE.Mesh(geometry, material(color, { metalness: 0, roughness: 0.82 }));
+  const mesh = new THREE.Mesh(UNIT_CYLINDER_8_GEOMETRY, material(color, { metalness: 0, roughness: 0.82 }));
   mesh.position.copy(startVector).add(endVector).multiplyScalar(0.5);
+  mesh.scale.set(radius, length, radius);
   mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
   mesh.userData.modelCable = visibility;
-  mesh.castShadow = true;
+  mesh.castShadow = Math.max(radius * 2, length) >= 0.08;
   parent.add(mesh);
   return mesh;
 }
@@ -478,21 +804,15 @@ function addOrthogonalCable(
   const router = cableRouter(parent);
   const plannedPoints = router.prepareRoute(points, radius, visibility, avoidCrossings);
   const bendRadius = Math.max(radius * 4.25, 0.009);
-  const { geometry, roundedCorners } = buildRoundedCableGeometry(
+  const { centerline, geometry, roundedCorners } = buildRoundedCableGeometry(
     plannedPoints,
     bendRadius,
     radius,
     9,
   );
+  recordDetailedCablePath(parent, centerline, color, radius, visibility);
   router.noteRoundedCorners(roundedCorners);
-  const mesh = new THREE.Mesh(
-    geometry,
-    material(color, { metalness: 0, roughness: 0.82 }),
-  );
-  mesh.userData.modelCable = visibility;
-  mesh.castShadow = true;
-  parent.add(mesh);
-  return mesh;
+  queueCableGeometry(parent, geometry, color, visibility);
 }
 
 function addRodBetween(
@@ -507,112 +827,6 @@ function addRodBetween(
   return rod;
 }
 
-function wallLanePlanner(scene: THREE.Scene) {
-  let planner = WALL_LANE_PLANNERS.get(scene);
-  if (!planner) {
-    planner = new PlanarCableLanePlanner();
-    WALL_LANE_PLANNERS.set(scene, planner);
-  }
-  return planner;
-}
-
-function wallPlaneRoutePoints(
-  scene: THREE.Scene,
-  footprint: Array<[number, number]>,
-  radius: number,
-  preferredPlaneOffset = 0,
-) {
-  const planeOffset = wallLanePlanner(scene).assign(footprint, radius, preferredPlaneOffset);
-  const planeZ = WALL_CABLE_Z + planeOffset;
-  return footprint.map(([x, y]) => [x, y, planeZ] as VectorTuple);
-}
-
-function orthogonalWallFootprint(anchors: Array<[number, number]>) {
-  return anchors.flatMap((point, index) => {
-    if (index === 0) return [point];
-    const previous = anchors[index - 1];
-    if (Math.abs(previous[0] - point[0]) < 0.0001 || Math.abs(previous[1] - point[1]) < 0.0001) return [point];
-    return [[point[0], previous[1]] as [number, number], point];
-  });
-}
-
-function wallRoutedPoints(
-  scene: THREE.Scene,
-  start: VectorTuple,
-  route: Array<[number, number]>,
-  end: VectorTuple,
-  radius: number,
-  preferredPlaneOffset = 0,
-) {
-  const footprint = orthogonalWallFootprint([
-    [start[0], start[1]],
-    ...route,
-    [end[0], end[1]],
-  ]);
-  const points: VectorTuple[] = [
-    start,
-    ...wallPlaneRoutePoints(scene, footprint, radius, preferredPlaneOffset),
-    end,
-  ];
-  return points.filter((point, index) => {
-    if (index === 0) return true;
-    const previous = points[index - 1];
-    return point.some((value, axis) => Math.abs(value - previous[axis]) > 0.0001);
-  });
-}
-
-function addWallRoutedCable(
-  scene: THREE.Scene,
-  start: VectorTuple,
-  route: Array<[number, number]>,
-  end: VectorTuple,
-  color: number,
-  radius = 0.005,
-  visibility: CableVisibility = "context",
-  preferredPlaneOffset = 0,
-) {
-  const points = wallRoutedPoints(scene, start, route, end, radius, preferredPlaneOffset);
-  addOrthogonalCable(scene, points, color, radius, visibility, false);
-}
-
-function wallPathFromPenetration(
-  scene: THREE.Scene,
-  penetration: JunctionPenetration,
-  route: Array<[number, number]>,
-  end: VectorTuple,
-  radius = 0.005,
-  preferredPlaneOffset = 0,
-) {
-  const anchors: Array<[number, number]> = [
-    [penetration.outside[0], penetration.outside[1]],
-    ...route,
-    [end[0], end[1]],
-  ];
-  const footprint = orthogonalWallFootprint(anchors);
-  return [
-    ...wallPlaneRoutePoints(scene, footprint, radius, preferredPlaneOffset),
-    end,
-  ];
-}
-
-function wallPathFromPenetrationToDeparture(
-  scene: THREE.Scene,
-  penetration: JunctionPenetration,
-  route: Array<[number, number]>,
-  radius: number,
-  preferredPlaneOffset = 0,
-) {
-  // A cable leaving the plywood for the ceiling must depart directly from its
-  // assigned clearance lane. Snapping to WALL_CABLE_Z first creates a short
-  // 180-degree backtrack for every lane that sits proud of that datum.
-  return wallPlaneRoutePoints(
-    scene,
-    orthogonalWallFootprint([[penetration.outside[0], penetration.outside[1]], ...route]),
-    radius,
-    preferredPlaneOffset,
-  );
-}
-
 function addContinuousJunctionCable(
   scene: THREE.Scene,
   insidePoints: VectorTuple[],
@@ -621,6 +835,7 @@ function addContinuousJunctionCable(
   color: number,
   radius: number,
   splitVisibility = true,
+  avoidCrossings = true,
 ) {
   const through = penetration.through;
   if (!splitVisibility) {
@@ -630,7 +845,7 @@ function addContinuousJunctionCable(
       color,
       radius,
       "junction",
-      false,
+      avoidCrossings,
     );
     return;
   }
@@ -663,7 +878,10 @@ function addContinuousJunctionCable(
   }
 
   if (!handoff || splitIndex < 0) {
-    addOrthogonalCable(scene, [...prefix, ...remaining], color, radius, "junction", false);
+    // Every short remaining segment was already appended while looking for a
+    // safe handoff run. Appending `remaining` again made the cable reach its
+    // terminal and then retrace the entire tail in reverse.
+    addOrthogonalCable(scene, prefix, color, radius, "junction", avoidCrossings);
     return;
   }
 
@@ -675,14 +893,14 @@ function addContinuousJunctionCable(
     handoff,
     remaining[splitIndex],
   );
-  addOrthogonalCable(scene, prefix, color, radius, "junction", false);
+  addOrthogonalCable(scene, prefix, color, radius, "junction", avoidCrossings);
   addOrthogonalCable(
     scene,
     [handoff, remaining[splitIndex], ...remaining.slice(splitIndex + 1)],
     color,
     radius,
     "context",
-    false,
+    avoidCrossings,
   );
 }
 
@@ -802,11 +1020,11 @@ function addGenerator(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   addOutlinedBox(group, [0.48, 0.32, 0.36], [0, 0, 0], COLORS.generator, { outline: 0x3d2f52 });
   addOutlinedBox(group, [0.2, 0.22, 0.22], [-0.08, 0, 0.19], 0x2e3435, { outline: 0x161b1d });
   const frameMaterial = material(0x343a3c, { metalness: 0.4 });
-  const frameGeometry = new THREE.CylinderGeometry(0.018, 0.018, 0.58, 8);
   [-0.23, 0.23].forEach((x) => {
     [-0.2, 0.2].forEach((z) => {
-      const post = new THREE.Mesh(frameGeometry, frameMaterial);
+      const post = new THREE.Mesh(UNIT_CYLINDER_8_GEOMETRY, frameMaterial);
       post.position.set(x, 0, z);
+      post.scale.set(0.018, 0.58, 0.018);
       group.add(post);
     });
   });
@@ -1021,77 +1239,71 @@ function addJunctionBox(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   scene.add(door);
 
   const z = JUNCTION_WIRE_Z;
-  const shuntSystem: VectorTuple = [3.438, 1.748, z];
-  const positiveStuds = [3.482, 3.509, 3.536, 3.563, 3.59].map((x) => [x, 1.775, z] as VectorTuple);
-  const negativeStuds = [3.482, 3.509, 3.536, 3.563, 3.59].map((x) => [x, 1.735, z] as VectorTuple);
+  const shuntSystem = junctionInsidePoint([3.438, 1.748, z]);
+  const positiveStuds = [3.482, 3.509, 3.536, 3.563, 3.59]
+    .map((x) => junctionInsidePoint([x, 1.775, z]));
+  const negativeStuds = [3.482, 3.509, 3.536, 3.563, 3.59]
+    .map((x) => junctionInsidePoint([x, 1.735, z]));
 
-  addOrthogonalCable(scene, [[3.372, 1.655, z], [3.445, 1.655, z], [3.445, 1.775, z], positiveStuds[0]], COLORS.red, 0.007, "junction");
+  addOrthogonalCable(scene, [...junctionInsidePath([[3.372, 1.655, z], [3.445, 1.655, z], [3.445, 1.775, z]]), positiveStuds[0]], COLORS.red, 0.007, "junction");
 
   addCable(scene, [shuntSystem, negativeStuds[0]], COLORS.black, 0.007, "junction");
 
-  addInlineFuse(scene, [3.582, 1.797, z], "mainDc", pickables);
-  addOrthogonalCable(scene, [positiveStuds[2], [3.536, 1.797, z], [3.563, 1.797, z]], COLORS.red, 0.0055, "junction");
+  addInlineFuse(scene, junctionInsidePoint([3.582, 1.797, z]), "mainDc", pickables);
+  addOrthogonalCable(scene, [positiveStuds[2], ...junctionInsidePath([[3.536, 1.797, z], [3.563, 1.797, z]])], COLORS.red, 0.0055, "junction");
 
-  addInlineFuse(scene, [3.592, 1.755, z], "mainDc", pickables, [0.028, 0.018, 0.018]);
-  addOrthogonalCable(scene, [positiveStuds[3], [3.563, 1.755, z], [3.578, 1.755, z]], COLORS.red, 0.005, "junction");
+  addInlineFuse(scene, junctionInsidePoint([3.592, 1.755, z]), "mainDc", pickables, [0.028, 0.018, 0.018]);
+  addOrthogonalCable(scene, [positiveStuds[3], ...junctionInsidePath([[3.563, 1.755, z], [3.578, 1.755, z]])], COLORS.red, 0.005, "junction");
 
-  addInlineFuse(scene, [3.588, 1.665, z], "fuseBlock", pickables);
-  addOrthogonalCable(scene, [[3.569, 1.665, z], [3.455, 1.665, z], [3.455, 1.679, z]], COLORS.red, 0.0045, "junction");
+  addInlineFuse(scene, junctionInsidePoint([3.588, 1.665, z]), "fuseBlock", pickables);
+  addOrthogonalCable(scene, junctionInsidePath([[3.569, 1.665, z], [3.455, 1.665, z], [3.455, 1.679, z]]), COLORS.red, 0.0045, "junction");
 
-  addInlineFuse(scene, [3.5, 1.812, z], "mainDc", pickables, [0.04, 0.018, 0.016]);
-  addOrthogonalCable(scene, [positiveStuds[4], [3.59, 1.812, z], [3.52, 1.812, z]], COLORS.red, 0.0038, "junction");
-  const ekranExterior = (
-    penetration: JunctionPenetration,
-    destination: VectorTuple,
-    cableRadius: number,
-    lane: number,
-  ): VectorTuple[] => {
-    const wallLaneZ = WALL_CABLE_Z + 0.012 + lane * (cableRadius * 2 + 0.006);
-    const approachY = 1.91 - lane * 0.018;
-    return [
-      // The three light-gauge GX leads are installed first and turn straight
-      // back to their shallow wall lanes as soon as they clear the top glands.
-      [penetration.outside[0], penetration.outside[1], wallLaneZ],
-      [penetration.outside[0], approachY, wallLaneZ],
-      [destination[0], approachY, wallLaneZ],
-      [destination[0], destination[1], wallLaneZ],
-      destination,
-    ];
-  };
-
+  addInlineFuse(scene, junctionInsidePoint([3.5, 1.812, z]), "mainDc", pickables, [0.04, 0.018, 0.016]);
+  addOrthogonalCable(scene, [positiveStuds[4], ...junctionInsidePath([[3.59, 1.812, z], [3.52, 1.812, z]])], COLORS.red, 0.0038, "junction");
   addContinuousJunctionCable(
     scene,
-    [[3.48, 1.812, z], [3.41, 1.812, z], JUNCTION_PORTS.ekranPos.terminal],
+    [...junctionInsidePath([[3.48, 1.812, z], [3.41, 1.812, z]]), JUNCTION_PORTS.ekranPos.terminal],
     JUNCTION_PORTS.ekranPos,
-    ekranExterior(JUNCTION_PORTS.ekranPos, DEVICE_PORTS.ekran.powerPositive, 0.0038, 0),
+    physicalLayout.routes["junction-to-ekrano-positive"].points.slice(1) as VectorTuple[],
     COLORS.red,
     0.0038,
+    true,
+    true,
   );
   addContinuousJunctionCable(
     scene,
-    [negativeStuds[4], [3.59, 1.825, z + 0.025], [3.45, 1.825, z + 0.025], JUNCTION_PORTS.ekranNeg.terminal],
+    [negativeStuds[4], ...junctionInsidePath([[3.59, 1.825, z + 0.025], [3.45, 1.825, z + 0.025]]), JUNCTION_PORTS.ekranNeg.terminal],
     JUNCTION_PORTS.ekranNeg,
-    ekranExterior(JUNCTION_PORTS.ekranNeg, DEVICE_PORTS.ekran.powerNegative, 0.0038, 1),
+    physicalLayout.routes["junction-to-ekrano-negative"].points.slice(1) as VectorTuple[],
     COLORS.black,
     0.0038,
+    true,
+    true,
   );
   addContinuousJunctionCable(
     scene,
-    [[3.395, 1.748, z + 0.04], [3.395, 1.825, z + 0.04], [3.49, 1.825, z + 0.04], JUNCTION_PORTS.ekranData.terminal],
+    [...junctionInsidePath([[3.395, 1.748, z + 0.04], [3.395, 1.825, z + 0.04], [3.49, 1.825, z + 0.04]]), JUNCTION_PORTS.ekranData.terminal],
     JUNCTION_PORTS.ekranData,
-    ekranExterior(JUNCTION_PORTS.ekranData, DEVICE_PORTS.ekran.veDirect, 0.0032, 2),
+    physicalLayout.routes["junction-to-ekrano-data"].points.slice(1) as VectorTuple[],
     COLORS.blue,
     0.0032,
+    true,
+    true,
   );
 }
 
 function addBuilding(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   physicalLayout.surfaces.floorPlanes.forEach((surface, index) => {
     addOutlinedBox(scene, surface.size as VectorTuple, surface.center as VectorTuple, index === 0 ? COLORS.outdoor : COLORS.indoor, {
+      castShadow: false,
       outline: index === 0 ? 0xc5bc99 : 0xb9afa0,
     });
   });
-  addOutlinedBox(scene, physicalLayout.surfaces.backWall.size as VectorTuple, physicalLayout.surfaces.backWall.center as VectorTuple, 0xe5dfd2, { opacity: 0.9, outline: 0xada596 });
+  addOutlinedBox(scene, physicalLayout.surfaces.backWall.size as VectorTuple, physicalLayout.surfaces.backWall.center as VectorTuple, 0xe5dfd2, {
+    castShadow: false,
+    opacity: 0.9,
+    outline: 0xada596,
+  });
   addOutlinedBox(scene, physicalLayout.surfaces.equipmentBoard.size as VectorTuple, physicalLayout.surfaces.equipmentBoard.center as VectorTuple, 0xc79c63, {
     componentId: "mounting",
     pickables,
@@ -1215,8 +1427,11 @@ function addWallEquipment(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   addFrontTerminal(scene, DEVICE_PORTS.pvEntry.mpptNegative, COLORS.black, 0.0045);
   addFrontTerminal(scene, DEVICE_PORTS.pvEntry.earth, COLORS.earth, 0.0045);
   addFrontTerminal(scene, DEVICE_PORTS.smartSolar.earth, COLORS.earth, 0.0045);
+  addOutlinedBox(scene, [0.014, 0.009, 0.006], DEVICE_PORTS.smartSolar.data, COLORS.blue, { outline: 0x244c71 });
   addFrontTerminal(scene, DEVICE_PORTS.multiPlus.chassisEarth, COLORS.earth, 0.0045);
+  addOutlinedBox(scene, [0.014, 0.009, 0.006], DEVICE_PORTS.multiPlus.data, COLORS.blue, { outline: 0x244c71 });
   addFrontTerminal(scene, DEVICE_PORTS.acBoard.earth, COLORS.earth, 0.0045);
+  addFrontTerminal(scene, DEVICE_PORTS.acBoard.toolCable, COLORS.threeCoreAc, 0.009);
   addFrontTerminal(scene, DEVICE_PORTS.ekran.earth, COLORS.earth, 0.0042);
   addOutlinedBox(scene, [0.014, 0.009, 0.006], DEVICE_PORTS.ekran.veDirect, COLORS.orange, { outline: 0x8f641f });
   addOutlinedBox(scene, [0.014, 0.009, 0.006], DEVICE_PORTS.ekran.veCan, COLORS.blue, { outline: 0x244c71 });
@@ -1231,6 +1446,7 @@ function addAcAndGenerator(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   const socket = addOutlinedBox(scene, devices.trailingSocket.size as VectorTuple, devices.trailingSocket.position as VectorTuple, 0x303638, { componentId: "toolOutlet", pickables, outline: 0x151a1c, rotation: [0, -18, 0] });
   addCylinder(socket, 0.01, 0.006, [-0.018, 0.015, 0.039], 0xd7ddd9, [90, 0, 0]);
   addCylinder(socket, 0.01, 0.006, [0.018, 0.015, 0.039], 0xd7ddd9, [90, 0, 0]);
+  addFrontTerminal(scene, physicalLayout.ports.trailingSocketAcCable as VectorTuple, COLORS.threeCoreAc, 0.009);
   addOrthogonalCable(scene, physicalLayout.routes["trailing-tool-flex"].points as VectorTuple[], COLORS.threeCoreAc, physicalLayout.routes["trailing-tool-flex"].radiusM);
 
   addOrthogonalCable(scene, physicalLayout.routes["generator-flex"].points as VectorTuple[], COLORS.threeCoreAc, physicalLayout.routes["generator-flex"].radiusM);
@@ -1244,21 +1460,20 @@ function addAcAndGenerator(scene: THREE.Scene, pickables: THREE.Object3D[]) {
       COLORS.threeCoreAc,
       route.radiusM,
       "context",
-      false,
+      true,
     );
   });
 }
 
 function addLights(scene: THREE.Scene, pickables: THREE.Object3D[]) {
-  const positions: VectorTuple[] = [
-    [2.25, 2.92, -0.75], [4.1, 2.92, -0.75], [5.95, 2.92, -0.75],
-    [2.25, 2.92, 0.8], [4.1, 2.92, 0.8], [5.95, 2.92, 0.8],
-  ];
-  positions.forEach((position) => {
-    const fixture = addOutlinedBox(scene, [0.52, 0.035, 0.075], position, 0xfff3c3, { componentId: "lights", pickables, outline: 0xa69d75 });
-    const glow = new THREE.PointLight(0xffe0a1, 0.35, 2.3, 2);
-    glow.position.set(position[0], position[1] - 0.05, position[2]);
-    fixture.add(glow);
+  [1, 2, 3, 4, 5, 6].forEach((index) => {
+    const light = physicalLayout.devices[`light${index}`];
+    addOutlinedBox(scene, light.size as VectorTuple, light.position as VectorTuple, 0xfff3c3, {
+      componentId: "lights",
+      emissive: 0x2d2411,
+      outline: 0xa69d75,
+      pickables,
+    });
   });
 }
 
@@ -1278,24 +1493,16 @@ function addBatterySystem(scene: THREE.Scene, pickables: THREE.Object3D[]) {
     addOrthogonalCable(scene, physicalLayout.routes[id].points as VectorTuple[], COLORS.red, physicalLayout.routes[id].radiusM);
   });
 
-  const positiveA = wallPathFromPenetration(scene, JUNCTION_PORTS.batteryPosA, [[3.31, 0.82], [DEVICE_PORTS.classT.stringAOutput[0], 0.82]], DEVICE_PORTS.classT.stringAOutput, 0.0085);
-  const positiveB = wallPathFromPenetration(scene, JUNCTION_PORTS.batteryPosB, [[3.342, 0.88], [DEVICE_PORTS.classT.stringBOutput[0], 0.88]], DEVICE_PORTS.classT.stringBOutput, 0.0085);
-  const negativeA = [
-    ...wallPathFromPenetration(scene, JUNCTION_PORTS.batteryNegA, [[3.374, 0.78], [2.78, 0.78]], [2.78, 0.28, -1.96], 0.0085),
-    [2.78, 0.28, ports.aNegative[2]] as VectorTuple,
-    ports.aNegative as VectorTuple,
-  ];
-  const negativeB = [
-    ...wallPathFromPenetration(scene, JUNCTION_PORTS.batteryNegB, [[3.406, 0.84], [2.73, 0.84]], [2.73, 0.24, -1.94], 0.0085),
-    [2.73, 0.24, ports.bNegative[2]] as VectorTuple,
-    ports.bNegative as VectorTuple,
-  ];
+  const positiveA = physicalLayout.routes["junction-to-class-t-a"].points.slice(1) as VectorTuple[];
+  const positiveB = physicalLayout.routes["junction-to-class-t-b"].points.slice(1) as VectorTuple[];
+  const negativeA = physicalLayout.routes["junction-to-battery-negative-a"].points.slice(1) as VectorTuple[];
+  const negativeB = physicalLayout.routes["junction-to-battery-negative-b"].points.slice(1) as VectorTuple[];
 
   [
-    [JUNCTION_PORTS.batteryPosA, [[3.305, 1.605, JUNCTION_FRONT_INTERNAL_Z], [3.305, 1.605, JUNCTION_WIRE_Z], JUNCTION_PORTS.batteryPosA.terminal], positiveA, COLORS.red],
-    [JUNCTION_PORTS.batteryPosB, [[3.335, 1.597, JUNCTION_FRONT_INTERNAL_Z], [3.335, 1.597, JUNCTION_WIRE_Z], JUNCTION_PORTS.batteryPosB.terminal], positiveB, COLORS.red],
-    [JUNCTION_PORTS.batteryNegA, [[3.352, 1.748, JUNCTION_WIRE_Z], [3.32, 1.748, JUNCTION_WIRE_Z], [3.32, 1.584, JUNCTION_WIRE_Z], JUNCTION_PORTS.batteryNegA.terminal], negativeA, COLORS.black],
-    [JUNCTION_PORTS.batteryNegB, [[3.352, 1.748, JUNCTION_WIRE_Z + 0.008], [3.33, 1.748, JUNCTION_WIRE_Z + 0.008], [3.33, 1.584, JUNCTION_WIRE_Z + 0.008], JUNCTION_PORTS.batteryNegB.terminal], negativeB, COLORS.black],
+    [JUNCTION_PORTS.batteryPosA, [...junctionInsidePath([[3.305, 1.605, JUNCTION_FRONT_INTERNAL_Z], [3.305, 1.605, JUNCTION_WIRE_Z]]), JUNCTION_PORTS.batteryPosA.terminal], positiveA, COLORS.red],
+    [JUNCTION_PORTS.batteryPosB, [...junctionInsidePath([[3.335, 1.597, JUNCTION_FRONT_INTERNAL_Z], [3.335, 1.597, JUNCTION_WIRE_Z]]), JUNCTION_PORTS.batteryPosB.terminal], positiveB, COLORS.red],
+    [JUNCTION_PORTS.batteryNegA, [...junctionInsidePath([[3.352, 1.748, JUNCTION_WIRE_Z], [3.32, 1.748, JUNCTION_WIRE_Z], [3.32, 1.584, JUNCTION_WIRE_Z]]), JUNCTION_PORTS.batteryNegA.terminal], negativeA, COLORS.black],
+    [JUNCTION_PORTS.batteryNegB, [...junctionInsidePath([[3.352, 1.748, JUNCTION_WIRE_Z + 0.008], [3.33, 1.748, JUNCTION_WIRE_Z + 0.008], [3.33, 1.584, JUNCTION_WIRE_Z + 0.008]]), JUNCTION_PORTS.batteryNegB.terminal], negativeB, COLORS.black],
   ].forEach(([penetration, inside, outside, color]) => addContinuousJunctionCable(
     scene,
     inside as VectorTuple[],
@@ -1305,53 +1512,36 @@ function addBatterySystem(scene: THREE.Scene, pickables: THREE.Object3D[]) {
     0.0085,
   ));
 
+  // Lay the lower negative branch first. The positive branch is then the
+  // candidate route at their one close approach, so the crossover solver can
+  // resolve it without folding the shorter negative terminal lead back.
   addContinuousJunctionCable(
     scene,
-    [[3.509, 1.775, JUNCTION_WIRE_Z], [3.509, 1.716, JUNCTION_WIRE_Z + 0.024], [3.598, 1.716, JUNCTION_WIRE_Z + 0.024], JUNCTION_PORTS.multiplusPos.terminal],
-    JUNCTION_PORTS.multiplusPos,
-    physicalLayout.routes["junction-to-multiplus-positive"].points.slice(1) as VectorTuple[],
-    COLORS.red,
-    0.0085,
-  );
-  addContinuousJunctionCable(
-    scene,
-    [[3.509, 1.735, JUNCTION_WIRE_Z], [3.509, 1.682, JUNCTION_WIRE_Z + 0.034], [3.598, 1.682, JUNCTION_WIRE_Z + 0.034], JUNCTION_PORTS.multiplusNeg.terminal],
+    [...junctionInsidePath([[3.509, 1.735, JUNCTION_WIRE_Z], [3.509, 1.682, JUNCTION_WIRE_Z + 0.034], [3.598, 1.682, JUNCTION_WIRE_Z + 0.034]]), JUNCTION_PORTS.multiplusNeg.terminal],
     JUNCTION_PORTS.multiplusNeg,
     physicalLayout.routes["junction-to-multiplus-negative"].points.slice(1) as VectorTuple[],
     COLORS.black,
     0.0085,
   );
+  addContinuousJunctionCable(
+    scene,
+    [...junctionInsidePath([[3.509, 1.775, JUNCTION_WIRE_Z], [3.509, 1.716, JUNCTION_WIRE_Z + 0.024], [3.598, 1.716, JUNCTION_WIRE_Z + 0.024]]), JUNCTION_PORTS.multiplusPos.terminal],
+    JUNCTION_PORTS.multiplusPos,
+    physicalLayout.routes["junction-to-multiplus-positive"].points.slice(1) as VectorTuple[],
+    COLORS.red,
+    0.0085,
+  );
 
-  const balancers = [devices.balancerA, devices.balancerB];
-  const stringPorts = [
-    [ports.aPositive, ports.aMidLeft, ports.aNegative],
-    [ports.bPositive, ports.bMidLeft, ports.bNegative],
-  ] as VectorTuple[][];
-  balancers.forEach((balancer, stringIndex) => {
-    [-0.04, 0, 0.04].forEach((offset, leadIndex) => {
-      const start: VectorTuple = [balancer.position[0] + offset, balancer.position[1] - balancer.size[1] / 2 - 0.006, balancer.position[2] + balancer.size[2] / 2 + 0.006];
-      const end = stringPorts[stringIndex][leadIndex];
-      const routeIndex = stringIndex * 3 + leadIndex;
-      // Positives stay outside the right edge, midpoint yellows use the clear
-      // central channel, and negatives use the left channel. Keeping those
-      // domains disjoint prevents the former yellow/red crossing on the right.
-      const sideX = leadIndex === 0
-        ? 4.18 + stringIndex * 0.07
-        : leadIndex === 1
-          ? 3.54 + stringIndex * 0.045
-          : 2.62 - stringIndex * 0.055;
-      const laneY = leadIndex === 2
-        ? 0.42 - stringIndex * 0.045
-        : start[1] - 0.045 - routeIndex * 0.022;
-      const lowerY = 0.285 + routeIndex * 0.009;
-      const preferredPlane = leadIndex === 1
-        ? 0.072 + stringIndex * 0.014
-        : 0.012 + routeIndex * 0.009;
-      addOrthogonalCable(scene, wallRoutedPoints(scene, start, [[start[0], laneY], [sideX, laneY], [sideX, lowerY]], [sideX, lowerY, -1.92], 0.0035, preferredPlane).concat([
-        [sideX, lowerY, end[2]],
-        end,
-      ]), [COLORS.red, COLORS.yellow, COLORS.black][leadIndex], 0.0035, "context", false);
-    });
+  [
+    ["balancer-a-positive", COLORS.red],
+    ["balancer-a-midpoint", COLORS.yellow],
+    ["balancer-a-negative", COLORS.black],
+    ["balancer-b-positive", COLORS.red],
+    ["balancer-b-midpoint", COLORS.yellow],
+    ["balancer-b-negative", COLORS.black],
+  ].forEach(([id, color]) => {
+    const route = physicalLayout.routes[id as string];
+    addOrthogonalCable(scene, route.points as VectorTuple[], color as number, route.radiusM, "context", true);
   });
 }
 
@@ -1377,12 +1567,12 @@ function addPvWiring(scene: THREE.Scene) {
     color,
     physicalLayout.routes[id].radiusM,
     "context",
-    false,
+    true,
   ));
 
   addContinuousJunctionCable(
     scene,
-    [[3.601, 1.797, JUNCTION_WIRE_Z], [3.608, 1.797, JUNCTION_WIRE_Z], [3.608, 1.772, JUNCTION_WIRE_Z], JUNCTION_PORTS.mpptPos.terminal],
+    [...junctionInsidePath([[3.601, 1.797, JUNCTION_WIRE_Z], [3.608, 1.797, JUNCTION_WIRE_Z], [3.608, 1.772, JUNCTION_WIRE_Z]]), JUNCTION_PORTS.mpptPos.terminal],
     JUNCTION_PORTS.mpptPos,
     physicalLayout.routes["junction-to-mppt-positive"].points.slice(1) as VectorTuple[],
     COLORS.red,
@@ -1390,7 +1580,7 @@ function addPvWiring(scene: THREE.Scene) {
   );
   addContinuousJunctionCable(
     scene,
-    [[3.536, 1.735, JUNCTION_WIRE_Z], [3.536, 1.746, JUNCTION_WIRE_Z], JUNCTION_PORTS.mpptNeg.terminal],
+    [...junctionInsidePath([[3.536, 1.735, JUNCTION_WIRE_Z], [3.536, 1.746, JUNCTION_WIRE_Z]]), JUNCTION_PORTS.mpptNeg.terminal],
     JUNCTION_PORTS.mpptNeg,
     physicalLayout.routes["junction-to-mppt-negative"].points.slice(1) as VectorTuple[],
     COLORS.black,
@@ -1399,103 +1589,69 @@ function addPvWiring(scene: THREE.Scene) {
 }
 
 function addDcLoadsAndData(scene: THREE.Scene) {
-  const orionFrontPath = (
-    penetration: JunctionPenetration,
-    destination: VectorTuple,
-    radius: number,
-    lane: number,
-  ): VectorTuple[] => {
-    const frontZ = JUNCTION_FRONT_CABLE_Z + 0.1 + lane * (radius * 2 + 0.007);
-    const escapeX = JUNCTION_RIGHT_X + 0.042 + lane * 0.014;
-    const approachY = JUNCTION_BOTTOM_Y - 0.055 - lane * 0.032;
-    return [
-      [penetration.outside[0], penetration.outside[1], frontZ],
-      [escapeX, penetration.outside[1], frontZ],
-      [escapeX, approachY, frontZ],
-      [destination[0], approachY, frontZ],
-      [destination[0], destination[1], frontZ],
-      destination,
-    ];
-  };
-
   addContinuousJunctionCable(
     scene,
-    [[3.606, 1.755, JUNCTION_WIRE_Z], [3.57, 1.755, JUNCTION_WIRE_Z + 0.052], [3.57, 1.652, JUNCTION_WIRE_Z + 0.052], [3.598, 1.652, JUNCTION_WIRE_Z + 0.052], JUNCTION_PORTS.orion24Pos.terminal],
+    [...junctionInsidePath([[3.606, 1.755, JUNCTION_WIRE_Z], [3.57, 1.755, JUNCTION_WIRE_Z + 0.052], [3.57, 1.652, JUNCTION_WIRE_Z + 0.052], [3.598, 1.652, JUNCTION_WIRE_Z + 0.052]]), JUNCTION_PORTS.orion24Pos.terminal],
     JUNCTION_PORTS.orion24Pos,
-    orionFrontPath(JUNCTION_PORTS.orion24Pos, DEVICE_PORTS.orion.inputPositive, 0.0055, 0),
+    physicalLayout.routes["junction-to-orion-input-positive"].points.slice(1) as VectorTuple[],
     COLORS.red,
     0.0055,
     false,
   );
   addContinuousJunctionCable(
     scene,
-    [[3.563, 1.735, JUNCTION_WIRE_Z], [3.552, 1.735, JUNCTION_WIRE_Z + 0.064], [3.552, 1.627, JUNCTION_WIRE_Z + 0.064], [3.598, 1.627, JUNCTION_WIRE_Z + 0.064], JUNCTION_PORTS.orion24Neg.terminal],
+    [...junctionInsidePath([[3.563, 1.735, JUNCTION_WIRE_Z], [3.552, 1.735, JUNCTION_WIRE_Z + 0.064], [3.552, 1.627, JUNCTION_WIRE_Z + 0.064], [3.598, 1.627, JUNCTION_WIRE_Z + 0.064]]), JUNCTION_PORTS.orion24Neg.terminal],
     JUNCTION_PORTS.orion24Neg,
-    orionFrontPath(JUNCTION_PORTS.orion24Neg, DEVICE_PORTS.orion.inputNegative, 0.0055, 1),
+    physicalLayout.routes["junction-to-orion-input-negative"].points.slice(1) as VectorTuple[],
     COLORS.black,
     0.0055,
     false,
   );
   addContinuousJunctionCable(
     scene,
-    [[3.607, 1.665, JUNCTION_WIRE_Z], [3.607, 1.665, JUNCTION_WIRE_Z + 0.1], [3.535, 1.665, JUNCTION_WIRE_Z + 0.1], [3.535, 1.603, JUNCTION_WIRE_Z + 0.1], [3.598, 1.603, JUNCTION_WIRE_Z + 0.1], JUNCTION_PORTS.orion12Pos.terminal],
+    [...junctionInsidePath([[3.607, 1.665, JUNCTION_WIRE_Z], [3.607, 1.665, JUNCTION_WIRE_Z + 0.1], [3.535, 1.665, JUNCTION_WIRE_Z + 0.1], [3.535, 1.603, JUNCTION_WIRE_Z + 0.1], [3.598, 1.603, JUNCTION_WIRE_Z + 0.1]]), JUNCTION_PORTS.orion12Pos.terminal],
     JUNCTION_PORTS.orion12Pos,
-    orionFrontPath(JUNCTION_PORTS.orion12Pos, DEVICE_PORTS.orion.outputPositive, 0.0048, 2),
+    physicalLayout.routes["junction-to-orion-output-positive"].points.slice(1) as VectorTuple[],
     COLORS.red,
     0.0048,
     false,
   );
   addContinuousJunctionCable(
     scene,
-    [[3.59, 1.591, JUNCTION_WIRE_Z], [3.59, 1.582, JUNCTION_WIRE_Z], JUNCTION_PORTS.orion12Neg.terminal],
+    [...junctionInsidePath([[3.59, 1.591, JUNCTION_WIRE_Z], [3.59, 1.582, JUNCTION_WIRE_Z]]), JUNCTION_PORTS.orion12Neg.terminal],
     JUNCTION_PORTS.orion12Neg,
-    orionFrontPath(JUNCTION_PORTS.orion12Neg, DEVICE_PORTS.orion.outputNegative, 0.0048, 3),
+    physicalLayout.routes["junction-to-orion-output-negative"].points.slice(1) as VectorTuple[],
     COLORS.black,
     0.0048,
     false,
   );
 
   const loadRadii = [0.0045, 0.0042, 0.0045];
-  const fuseOutputs = [3.4675, 3.4885, 3.5095];
-  const returnStuds = [3.467, 3.488, 3.509];
+  const junctionDeltaX = JUNCTION_CENTER[0] - DEFAULT_JUNCTION_CENTER[0];
+  const fuseOutputs = [3.4675, 3.4885, 3.5095].map((x) => x + junctionDeltaX);
+  const returnStuds = [3.467, 3.488, 3.509].map((x) => x + junctionDeltaX);
+  const leftLight = physicalLayout.devices.light4;
+  const rightLight = physicalLayout.devices.light6;
+  const positiveLightingFeed = physicalLayout.ports.lightingFeedPositive as VectorTuple;
+  const negativeLightingFeed = physicalLayout.ports.lightingFeedNegative as VectorTuple;
   const positiveExteriors: VectorTuple[][] = [
+    physicalLayout.routes["junction-to-starlink-positive"].points.slice(1) as VectorTuple[],
+    physicalLayout.routes["junction-to-usb-positive"].points.slice(1) as VectorTuple[],
     [
-      ...wallPathFromPenetrationToDeparture(
-        scene,
-        JUNCTION_PORTS.loadPos[0],
-        [[3.438, 1.32], [DEVICE_PORTS.starlink.powerPositive[0], 1.32], [DEVICE_PORTS.starlink.powerPositive[0], STARLINK_CEILING_Y]],
-        loadRadii[0],
-      ),
-      [DEVICE_PORTS.starlink.powerPositive[0], STARLINK_CEILING_Y, DEVICE_PORTS.starlink.powerPositive[2]],
-      DEVICE_PORTS.starlink.powerPositive,
-    ],
-    wallPathFromPenetration(scene, JUNCTION_PORTS.loadPos[1], [[3.482, 1.36], [DEVICE_PORTS.usb.dcPositive[0], 1.36]], DEVICE_PORTS.usb.dcPositive, loadRadii[1]),
-    [
-      ...wallPathFromPenetrationToDeparture(scene, JUNCTION_PORTS.loadPos[2], [[3.526, 1.4], [5.58, 1.4], [5.58, LIGHTING_TRUNK_Y]], loadRadii[2]),
-      [5.58, LIGHTING_TRUNK_Y, 0.94],
-      [2.15, LIGHTING_TRUNK_Y, 0.94],
-      [2.15, LIGHTING_TRUNK_Y, -0.9],
-      [5.95, LIGHTING_TRUNK_Y, -0.9],
+      ...physicalLayout.routes["junction-to-lighting-positive"].points.slice(1) as VectorTuple[],
+      [leftLight.position[0] - 0.1, positiveLightingFeed[1], positiveLightingFeed[2]],
+      [leftLight.position[0] - 0.1, positiveLightingFeed[1], physicalLayout.devices.light1.position[2] - 0.15],
+      [rightLight.position[0], positiveLightingFeed[1], physicalLayout.devices.light1.position[2] - 0.15],
     ],
   ];
   const negativeExteriors: VectorTuple[][] = [
+    physicalLayout.routes["junction-to-starlink-negative"].points.slice(1) as VectorTuple[],
+    physicalLayout.routes["junction-to-usb-negative"].points.slice(1) as VectorTuple[],
     [
-      ...wallPathFromPenetrationToDeparture(
-        scene,
-        JUNCTION_PORTS.loadNeg[0],
-        [[3.46, 1.34], [DEVICE_PORTS.starlink.powerNegative[0], 1.34], [DEVICE_PORTS.starlink.powerNegative[0], STARLINK_CEILING_Y - 0.03]],
-        loadRadii[0],
-      ),
-      [DEVICE_PORTS.starlink.powerNegative[0], STARLINK_CEILING_Y - 0.03, DEVICE_PORTS.starlink.powerNegative[2]],
-      DEVICE_PORTS.starlink.powerNegative,
-    ],
-    wallPathFromPenetration(scene, JUNCTION_PORTS.loadNeg[1], [[3.504, 1.38], [DEVICE_PORTS.usb.dcNegative[0], 1.38]], DEVICE_PORTS.usb.dcNegative, loadRadii[1]),
-    [
-      ...wallPathFromPenetrationToDeparture(scene, JUNCTION_PORTS.loadNeg[2], [[3.548, 1.42], [5.61, 1.42], [5.61, LIGHTING_TRUNK_Y - 0.03]], loadRadii[2]),
-      [5.61, LIGHTING_TRUNK_Y - 0.03, 0.98],
-      [2.11, LIGHTING_TRUNK_Y - 0.03, 0.98],
-      [2.11, LIGHTING_TRUNK_Y - 0.03, -0.94],
-      [5.95, LIGHTING_TRUNK_Y - 0.03, -0.94],
+      ...physicalLayout.routes["junction-to-lighting-negative"].points.slice(1) as VectorTuple[],
+      [leftLight.position[0] - 0.14, negativeLightingFeed[1], negativeLightingFeed[2]],
+      [leftLight.position[0] - 0.14, negativeLightingFeed[1], physicalLayout.devices.light1.position[2] - 0.19],
+      [rightLight.position[0], negativeLightingFeed[1], physicalLayout.devices.light1.position[2] - 0.19],
     ],
   ];
 
@@ -1504,7 +1660,7 @@ function addDcLoadsAndData(scene: THREE.Scene) {
     const negativePort = JUNCTION_PORTS.loadNeg[index];
     addContinuousJunctionCable(
       scene,
-      [[fuseOutputs[index], 1.632, JUNCTION_WIRE_Z], [fuseOutputs[index], 1.605, JUNCTION_WIRE_Z], [positivePort.terminal[0], 1.605, JUNCTION_WIRE_Z], positivePort.terminal],
+      [...junctionInsidePath([[fuseOutputs[index] - junctionDeltaX, 1.632, JUNCTION_WIRE_Z], [fuseOutputs[index] - junctionDeltaX, 1.605, JUNCTION_WIRE_Z], [positivePort.terminal[0] - junctionDeltaX, 1.605, JUNCTION_WIRE_Z]]), positivePort.terminal],
       positivePort,
       positiveExteriors[index],
       COLORS.red,
@@ -1512,7 +1668,7 @@ function addDcLoadsAndData(scene: THREE.Scene) {
     );
     addContinuousJunctionCable(
       scene,
-      [[returnStuds[index], 1.586, JUNCTION_WIRE_Z + 0.012], [negativePort.terminal[0], 1.586, JUNCTION_WIRE_Z + 0.012], negativePort.terminal],
+      [...junctionInsidePath([[returnStuds[index] - junctionDeltaX, 1.586, JUNCTION_WIRE_Z + 0.012], [negativePort.terminal[0] - junctionDeltaX, 1.586, JUNCTION_WIRE_Z + 0.012]]), negativePort.terminal],
       negativePort,
       negativeExteriors[index],
       COLORS.black,
@@ -1526,30 +1682,24 @@ function addDcLoadsAndData(scene: THREE.Scene) {
     COLORS.blue,
     physicalLayout.routes["starlink-to-unifi-data"].radiusM,
     "context",
-    false,
+    true,
   );
-  addWallRoutedCable(scene, DEVICE_PORTS.unifi.lan, [[DEVICE_PORTS.unifi.lan[0], 1.93], [DEVICE_PORTS.ekran.ethernet[0], 1.93]], DEVICE_PORTS.ekran.ethernet, 0x3f7cb8, 0.0032, "context", 0.075);
-  addWallRoutedCable(
-    scene,
-    [physicalLayout.devices.smartSolar.position[0] + 0.08, physicalLayout.devices.smartSolar.position[1] + 0.1, DEVICE_PORTS.smartSolar.pvPositive[2]],
-    [[2.3, 0.65], [2.3, 2.25], [3.3, 2.25], [3.3, 1.89], [DEVICE_PORTS.ekran.veCan[0], 1.89]],
-    DEVICE_PORTS.ekran.veCan,
-    0x3f7cb8,
-    0.0032,
-    "context",
-    0.09,
-  );
-  addWallRoutedCable(
-    scene,
-    [physicalLayout.devices.multiPlus.position[0] + 0.1, physicalLayout.devices.multiPlus.position[1], DEVICE_PORTS.multiPlus.dcPositive[2]],
-    [[2.32, 1.92], [2.32, 2.21], [3.32, 2.21], [3.32, 1.87], [DEVICE_PORTS.ekran.veBus[0], 1.87]],
-    DEVICE_PORTS.ekran.veBus,
-    0x3f7cb8,
-    0.0032,
-    "context",
-    0.105,
-  );
-  addWallRoutedCable(scene, DEVICE_PORTS.usb.reservedUsbC, [[DEVICE_PORTS.usb.reservedUsbC[0], 1.91], [DEVICE_PORTS.unifi.power[0], 1.91]], DEVICE_PORTS.unifi.power, 0x343a3d, 0.0035, "context", 0.085);
+  [
+    ["unifi-to-ekrano-data", 0x3f7cb8],
+    ["smartsolar-to-ekrano-data", 0x3f7cb8],
+    ["multiplus-to-ekrano-data", 0x3f7cb8],
+    ["usb-to-unifi-power", 0x343a3d],
+  ].forEach(([id, color]) => {
+    const route = physicalLayout.routes[id as string];
+    addOrthogonalCable(
+      scene,
+      route.points as VectorTuple[],
+      color as number,
+      route.radiusM,
+      "context",
+      true,
+    );
+  });
 }
 
 function addEarthing(scene: THREE.Scene, pickables: THREE.Object3D[]) {
@@ -1567,7 +1717,7 @@ function addEarthing(scene: THREE.Scene, pickables: THREE.Object3D[]) {
       COLORS.earth,
       route.radiusM,
       "context",
-      false,
+      true,
     ));
 }
 
@@ -1607,7 +1757,7 @@ function resolveLabelPositions(
 }
 
 function buildDseScene(scene: THREE.Scene) : SceneBuild {
-  const pickables: THREE.Object3D[] = [];
+  let pickables: THREE.Object3D[] = [];
   addBuilding(scene, pickables);
   addArrayStructure(scene, pickables);
   addStarlink(scene, pickables);
@@ -1619,6 +1769,7 @@ function buildDseScene(scene: THREE.Scene) : SceneBuild {
   addPvWiring(scene);
   addDcLoadsAndData(scene);
   addEarthing(scene, pickables);
+  flushCableMeshes(scene);
 
   const grid = new THREE.GridHelper(12, 24, 0x98a19c, 0xc7cbc4);
   grid.position.set(1.2, 0.011, 0);
@@ -1629,12 +1780,16 @@ function buildDseScene(scene: THREE.Scene) : SceneBuild {
   });
   scene.add(grid);
 
-  const routingReport = {
-    ...cableRouter(scene).report(),
-    ...wallLanePlanner(scene).report(),
-  };
+  const routingReport = cableRouter(scene).report();
+  const labelPositions = resolveLabelPositions(scene, pickables);
+  pickables = batchStaticPrimitives(scene, pickables);
+  deduplicateStaticMaterials(scene);
   return {
-    labelPositions: resolveLabelPositions(scene, pickables),
+    detailedCablePaths: (DETAILED_CABLE_PATHS.get(scene) ?? []).map((path) => ({
+      ...path,
+      points: path.points.map((point) => [...point] as VectorTuple),
+    })),
+    labelPositions,
     pickables,
     routingReport,
   };
@@ -1648,17 +1803,34 @@ function DseModel({
   const mountRef = useRef<HTMLDivElement>(null);
   const labelRefs = useRef(new Map<string, HTMLElement>());
   const cameraActionRef = useRef<(preset: CameraPreset) => void>(() => undefined);
-  const [activePreset, setActivePreset] = useState<CameraPreset["id"]>("site");
+  const [activePreset, setActivePreset] = useState<ActiveModelView>("site");
   const [labelsVisible, setLabelsVisible] = useState(false);
   const [showScaleNotes, setShowScaleNotes] = useState(false);
   const [hovered, setHovered] = useState("Drag to orbit · right/shift-drag to pan · touch: one finger orbit, two fingers pan / pinch");
   const [ready, setReady] = useState(false);
   const [routingReport, setRoutingReport] = useState<CableRoutingReport | null>(null);
+  const [detailedCablePaths, setDetailedCablePaths] = useState<DetailedCablePath[]>([]);
+  const [initialWallLayout] = useState(() => {
+    const overrides = readStoredWallLayout();
+    return {
+      layout: Object.keys(overrides).length > 0
+        ? solvePhysicalLayout({ deviceOverrides: overrides })
+        : defaultPhysicalLayout,
+      overrides,
+    };
+  });
+  const [committedOverrides, setCommittedOverrides] = useState<WallDeviceOverrides>(initialWallLayout.overrides);
+  const [draftOverrides, setDraftOverrides] = useState<WallDeviceOverrides>(initialWallLayout.overrides);
+  const [committedLayout, setCommittedLayout] = useState(initialWallLayout.layout);
+  const [draftLayout, setDraftLayout] = useState(initialWallLayout.layout);
+  const [layoutCommitCount, setLayoutCommitCount] = useState(0);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return undefined;
     const mountElement = mount;
+    const initializationStartedAt = performance.now();
+    configureSceneLayout(committedLayout);
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf3f1e9);
@@ -1667,7 +1839,13 @@ function DseModel({
     camera.position.set(...CAMERA_PRESETS[0].position);
     camera.lookAt(vector(CAMERA_PRESETS[0].target));
 
+    const rendererStartedAt = performance.now();
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    const rendererCreationMs = performance.now() - rendererStartedAt;
+    // The scene uses only Three.js built-in materials. Skipping synchronous
+    // shader log queries avoids forcing drivers without parallel compilation
+    // to block merely to retrieve empty diagnostics.
+    renderer.debug.checkShaderErrors = false;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.5));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -1680,7 +1858,10 @@ function DseModel({
     scene.add(new THREE.HemisphereLight(0xe9f3f2, 0x887c63, 2.15));
     const sun = new THREE.DirectionalLight(0xffffff, 2.6);
     sun.position.set(-6, 12, 10);
-    sun.castShadow = true;
+    // Draw a useful first frame before asking the driver for the expensive
+    // 4096² static shadow pass. The full-quality map is filled shortly after
+    // first paint and then cached for every camera movement.
+    sun.castShadow = false;
     sun.shadow.mapSize.set(4096, 4096);
     sun.shadow.camera.left = -10;
     sun.shadow.camera.right = 10;
@@ -1697,8 +1878,55 @@ function DseModel({
     fill.position.set(8, 4, -8);
     scene.add(fill);
 
-    const { labelPositions, pickables, routingReport: sceneRoutingReport } = buildDseScene(scene);
+    const sceneBuildStartedAt = performance.now();
+    const {
+      detailedCablePaths: sceneDetailedCablePaths,
+      labelPositions,
+      pickables,
+      routingReport: sceneRoutingReport,
+    } = buildDseScene(scene);
+    const sceneBuildMs = performance.now() - sceneBuildStartedAt;
+    const sceneStatistics = {
+      cableMeshes: 0,
+      lineSegments: 0,
+      meshes: 0,
+      shadowCasters: 0,
+    };
+    const uniqueGeometries = new Set<string>();
+    const uniqueMaterials = new Set<string>();
+    scene.traverse((object) => {
+      if (object instanceof THREE.Mesh) {
+        sceneStatistics.meshes += 1;
+        if (object.castShadow) sceneStatistics.shadowCasters += 1;
+        if (object.userData.modelCable) sceneStatistics.cableMeshes += 1;
+      } else if (object instanceof THREE.LineSegments) {
+        sceneStatistics.lineSegments += 1;
+      }
+      if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments) {
+        uniqueGeometries.add(object.geometry.uuid);
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        materials.forEach((objectMaterial) => uniqueMaterials.add(objectMaterial.uuid));
+      }
+    });
+    mountElement.dataset.profileRendererCreationMs = rendererCreationMs.toFixed(2);
+    mountElement.dataset.profileSceneBuildMs = sceneBuildMs.toFixed(2);
+    mountElement.dataset.sceneCableMeshes = String(sceneStatistics.cableMeshes);
+    mountElement.dataset.sceneGeometries = String(uniqueGeometries.size);
+    mountElement.dataset.sceneLineSegments = String(sceneStatistics.lineSegments);
+    mountElement.dataset.sceneMaterials = String(uniqueMaterials.size);
+    mountElement.dataset.sceneMeshes = String(sceneStatistics.meshes);
+    mountElement.dataset.sceneShadowCasters = String(sceneStatistics.shadowCasters);
+    mountElement.dataset.sceneDetailedCablePaths = String(sceneDetailedCablePaths.length);
+    mountElement.dataset.sceneDetailedCablePoints = String(sceneDetailedCablePaths.reduce(
+      (total, cable) => total + cable.points.length,
+      0,
+    ));
+    mountElement.dataset.sceneBatchedDrawCalls = String(scene.userData.staticBatching?.drawCallsSaved ?? 0);
+    mountElement.dataset.sceneMergedMeshGroups = String(scene.userData.staticBatching?.mergedMeshGroups ?? 0);
+    mountElement.dataset.sceneMergedLineGroups = String(scene.userData.staticBatching?.mergedLineGroups ?? 0);
+    mountElement.dataset.renderMode = "on-demand-static-shadows";
     setRoutingReport(sceneRoutingReport);
+    setDetailedCablePaths(sceneDetailedCablePaths);
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     const cameraPickables: THREE.Mesh[] = [];
@@ -1721,6 +1949,18 @@ function DseModel({
       active: false,
       startedAt: 0,
     };
+    let disposed = false;
+    let frame = 0;
+    let renderHeight = 0;
+    let renderWidth = 0;
+    let readyReported = false;
+    let deferredShadowRender = false;
+    let shadowTimer = 0;
+
+    function requestSceneRender() {
+      if (disposed || frame !== 0) return;
+      frame = requestAnimationFrame(renderFrame);
+    }
 
     function setPointer(clientX: number, clientY: number) {
       const rect = renderer.domElement.getBoundingClientRect();
@@ -1742,6 +1982,7 @@ function DseModel({
     const grabControls = new GrabPointCameraControls({
       camera,
       domElement: renderer.domElement,
+      onChange: requestSceneRender,
       pickSurface: cameraSurfaceAt,
       onInteractionStart: () => {
         cameraGoal.active = false;
@@ -1781,6 +2022,7 @@ function DseModel({
         hoverHelper.visible = false;
         setHovered("Drag to orbit · right/shift-drag to pan · touch: one finger orbit, two fingers pan / pinch");
       }
+      requestSceneRender();
     }
 
     function handlePointerDown(event: PointerEvent) {
@@ -1829,11 +2071,10 @@ function DseModel({
 
     cameraActionRef.current = (preset) => {
       const isolateJunction = preset.id === "junction";
-      const junctionComponentIds = new Set(["mounting", "systemMonitor", "batterySelector", "mainDc", "fuseBlock"]);
       scene.traverse((object) => {
         if (!(object instanceof THREE.Mesh || object instanceof THREE.LineSegments)) return;
         const componentId = object.userData.componentId as string | undefined;
-        const isExternalComponent = Boolean(componentId && !junctionComponentIds.has(componentId));
+        const isExternalComponent = Boolean(componentId && !JUNCTION_FOCUS_COMPONENT_IDS.has(componentId));
         const isContextCable = object.userData.modelCable === "context";
         const materials = Array.isArray(object.material) ? object.material : [object.material];
         materials.forEach((objectMaterial) => {
@@ -1861,23 +2102,29 @@ function DseModel({
         active: true,
         startedAt: performance.now(),
       };
+      requestSceneRender();
     };
 
     function resize() {
       const width = mountElement.clientWidth;
       const height = mountElement.clientHeight;
+      if (width < 2 || height < 2) return;
+      if (width === renderWidth && height === renderHeight) return;
+      renderWidth = width;
+      renderHeight = height;
       renderer.setSize(width, height, false);
       camera.aspect = width / Math.max(1, height);
       camera.updateProjectionMatrix();
+      if (readyReported) requestSceneRender();
     }
     const observer = new ResizeObserver(resize);
     observer.observe(mountElement);
     resize();
 
     const projected = new THREE.Vector3();
-    let frame = 0;
-    function animate() {
-      frame = requestAnimationFrame(animate);
+    function renderFrame() {
+      frame = 0;
+      const firstRenderStartedAt = readyReported ? 0 : performance.now();
       if (cameraGoal.active) {
         camera.position.lerp(cameraGoal.position, 0.2);
         camera.quaternion.slerp(cameraGoal.quaternion, 0.2);
@@ -1910,12 +2157,39 @@ function DseModel({
         element.dataset.onScreen = onScreen ? "true" : "false";
       });
       renderer.render(scene, camera);
+      if (deferredShadowRender) {
+        renderer.shadowMap.autoUpdate = false;
+        deferredShadowRender = false;
+        mountElement.dataset.shadowState = "cached";
+        mountElement.dataset.renderCallsWithShadows = String(renderer.info.render.calls);
+        mountElement.dataset.renderProgramsWithShadows = String(renderer.info.programs?.length ?? 0);
+      }
+      if (!readyReported) {
+        mountElement.dataset.profileFirstRenderMs = (performance.now() - firstRenderStartedAt).toFixed(2);
+        mountElement.dataset.profileInitializationMs = (performance.now() - initializationStartedAt).toFixed(2);
+        mountElement.dataset.renderCalls = String(renderer.info.render.calls);
+        mountElement.dataset.renderGeometries = String(renderer.info.memory.geometries);
+        mountElement.dataset.renderPrograms = String(renderer.info.programs?.length ?? 0);
+        mountElement.dataset.renderTriangles = String(renderer.info.render.triangles);
+        readyReported = true;
+        setReady(true);
+        mountElement.dataset.shadowState = "deferred";
+        shadowTimer = window.setTimeout(() => {
+          if (disposed) return;
+          sun.castShadow = true;
+          renderer.shadowMap.autoUpdate = true;
+          deferredShadowRender = true;
+          requestSceneRender();
+        }, 250);
+      }
+      if (cameraGoal.active) requestSceneRender();
     }
-    animate();
-    setReady(true);
+    renderFrame();
 
     return () => {
+      disposed = true;
       cancelAnimationFrame(frame);
+      window.clearTimeout(shadowTimer);
       observer.disconnect();
       grabControls.dispose();
       renderer.domElement.removeEventListener("pointermove", handlePointerMove);
@@ -1933,33 +2207,62 @@ function DseModel({
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [onSelect]);
+  }, [committedLayout, onSelect]);
 
   function choosePreset(preset: CameraPreset) {
     setActivePreset(preset.id);
     cameraActionRef.current(preset);
   }
 
+  function previewWallLayout(
+    overrides: WallDeviceOverrides,
+    layout: PhysicalLayoutSpecification,
+  ) {
+    setDraftOverrides(overrides);
+    setDraftLayout(layout);
+  }
+
+  function commitWallLayout(
+    overrides: WallDeviceOverrides,
+    layout: PhysicalLayoutSpecification,
+  ) {
+    storeWallLayout(overrides);
+    setReady(false);
+    setRoutingReport(null);
+    setDetailedCablePaths([]);
+    setDraftOverrides(overrides);
+    setDraftLayout(layout);
+    setCommittedOverrides(overrides);
+    setCommittedLayout(layout);
+    setLayoutCommitCount((count) => count + 1);
+  }
+
   return (
     <section
-      className={`model-shell ${labelsVisible ? "labels-visible" : "labels-hidden"} ${activePreset === "junction" ? "junction-focus" : ""}`}
+      className={`model-shell ${labelsVisible ? "labels-visible" : "labels-hidden"} ${activePreset === "junction" ? "junction-focus" : ""} ${activePreset === "layout" ? "layout-editing" : ""}`}
       data-active-model-view={activePreset}
       data-model-ready={ready ? "true" : "false"}
+      data-layout-editing={activePreset === "layout" ? "true" : "false"}
+      data-layout-commit-count={layoutCommitCount}
+      data-layout-committed-overrides={Object.keys(committedOverrides).length}
+      data-layout-storage-key={WALL_LAYOUT_STORAGE_KEY}
+      data-layout-storage-ready="true"
       data-routing-backtracking-corners={routingReport?.backtrackingCorners ?? "pending"}
       data-routing-discontinuous-handoffs={routingReport?.discontinuousHandoffs ?? "pending"}
       data-routing-obstacle-intersections={routingReport?.obstacleIntersections ?? "pending"}
-      data-routing-board-conflicts={routingReport?.boardLaneConflicts ?? "pending"}
-      data-routing-board-lanes={routingReport?.boardLaneCount ?? "pending"}
       data-routing-report={routingReport ? JSON.stringify(routingReport) : "pending"}
       data-routing-unresolved-crossings={routingReport?.unresolvedCableIntersections ?? "pending"}
-      data-layout-battery-arrangement={physicalLayout.constraints.batteryArrangement}
-      data-layout-junction-back-routes={physicalLayout.metrics.junctionBackRouteCount}
-      data-layout-roof-planes={physicalLayout.surfaces.roofPlanes.length}
-      data-layout-side-walls={physicalLayout.surfaces.sideWalls.length}
-      data-layout-solver-route-count={physicalLayout.metrics.solverRouteCount}
-      data-layout-generated-cable-m={physicalLayout.metrics.totalRenderedCableM}
-      data-layout-wall-overlaps={physicalLayout.metrics.wallOverlapCount}
-      data-layout-wall-span-m={physicalLayout.metrics.wallDeviceSpanM}
+      data-layout-battery-arrangement={committedLayout.constraints.batteryArrangement}
+      data-layout-automatic-routes={committedLayout.metrics.automaticRouteCount}
+      data-layout-authored-wall-waypoints={committedLayout.metrics.wallAuthoredWaypointCount}
+      data-layout-junction-back-routes={committedLayout.metrics.junctionBackRouteCount}
+      data-layout-roof-planes={committedLayout.surfaces.roofPlanes.length}
+      data-layout-side-walls={committedLayout.surfaces.sideWalls.length}
+      data-layout-solver-route-count={committedLayout.metrics.solverRouteCount}
+      data-layout-generated-cable-m={committedLayout.metrics.totalRenderedCableM}
+      data-layout-wall-overlaps={committedLayout.metrics.wallOverlapCount}
+      data-layout-wall-span-m={committedLayout.metrics.wallDeviceSpanM}
+      data-layout-wall-routing={committedLayout.constraints.wallRouting}
       data-shadow-map-size="4096"
     >
       <div className="model-toolbar">
@@ -1974,6 +2277,16 @@ function DseModel({
               {preset.label}
             </button>
           ))}
+          <button
+            type="button"
+            className={activePreset === "layout" ? "active layout-editor-button" : "layout-editor-button"}
+            onClick={() => {
+              setShowScaleNotes(false);
+              setActivePreset("layout");
+            }}
+          >
+            Edit wall layout
+          </button>
         </div>
         <div className="model-toolbar-meta">
           <button type="button" className={labelsVisible ? "active" : ""} onClick={() => setLabelsVisible((current) => !current)} aria-pressed={labelsVisible}>
@@ -1989,7 +2302,7 @@ function DseModel({
         <div ref={mountRef} className="model-canvas" />
         <div className="model-label-layer" aria-label="3D model components" aria-hidden={!labelsVisible}>
           {MODEL_LABELS.map((label) => {
-            const visibleForView =
+            const visibleForView = activePreset !== "layout" &&
               labelsVisible && (label.views?.includes(activePreset) || !label.views);
             const common = {
               className: `model-label ${visibleForView ? "view-visible" : "view-hidden"} ${label.zone ? "zone-label" : ""}`,
@@ -2011,6 +2324,22 @@ function DseModel({
             );
           })}
         </div>
+        {activePreset === "layout" && (
+          <WallLayoutEditor
+            committedLayout={committedLayout}
+            detailedCablePaths={detailedCablePaths}
+            draftLayout={draftLayout}
+            draftOverrides={draftOverrides}
+            detailedRouteIssues={routingReport
+              ? routingReport.obstacleIntersections +
+                routingReport.unresolvedCableIntersections +
+                routingReport.discontinuousHandoffs
+              : null}
+            rebuilding={!ready}
+            onCommit={commitWallLayout}
+            onDraftChange={previewWallLayout}
+          />
+        )}
         {showScaleNotes && (
           <aside className="model-scale-notes" aria-label="3D model scale notes">
             <div>
@@ -2022,12 +2351,12 @@ function DseModel({
               <div><dt>Verified</dt><dd>Panels, batteries, MultiPlus, SmartSolar, Ekrano, Orion, balancers, SmartShunt, Starlink and UniFi.</dd></div>
               <div><dt>User-sized</dt><dd>350 × 247 × 150 mm compact junction box.</dd></div>
               <div><dt>Assumed</dt><dd>5.8 m back-wall span, 3.4 × 2.5 m wall board, generator envelope and small protection boxes. Side walls and roof planes are intentionally omitted.</dd></div>
-              <div><dt>Layout solver</dt><dd>{physicalLayout.metrics.wallDeviceCount} wall devices occupy a {physicalLayout.metrics.wallDeviceSpanM.toFixed(2)} m span with {physicalLayout.metrics.wallOverlapCount} envelope overlaps. The four batteries form a floor-level 2 × 2 grid. Generated major routes total {physicalLayout.metrics.totalRenderedCableM.toFixed(1)} m before procurement allowances.</dd></div>
+              <div><dt>Layout solver</dt><dd>{committedLayout.metrics.wallDeviceCount} wall devices occupy a {committedLayout.metrics.wallDeviceSpanM.toFixed(2)} m span with {committedLayout.metrics.wallOverlapCount} envelope overlaps. The four batteries form a floor-level 2 × 2 grid. Generated major routes total {committedLayout.metrics.totalRenderedCableM.toFixed(1)} m before procurement allowances.</dd></div>
               <div><dt>Protective earth</dt><dd>The electrode, array frame and six wall-side bonds terminate at modeled studs. A visible main PE bar replaces the former floating green branch ends.</dd></div>
-              <div><dt>Routing</dt><dd>Ordinary power conductors begin about 35 mm off the plywood. Complete board routes receive stable depth lanes. The three GX leads leave the junction top and return to shallow wall lanes immediately; four heavy side leads stay in front of the enclosure, while the adjacent Orion leads take direct short routes. Nothing passes behind the flush-mounted enclosure.</dd></div>
-              <div><dt>Geometry</dt><dd>Each cable route is one continuous tube surface, so back-to-back bends share their polygon rings without gaps. Tangent, corner-contained bends cannot curl behind the intended turn. A minimum-conflict greedy planner selects one stable depth lane per board route instead of adding a hump at every crossing.</dd></div>
+              <div><dt>Routing</dt><dd>Wall connections are declared by their source port, destination port and device envelopes. A shortest-path visibility graph regenerates rectilinear routes whenever a device moves; there are no authored wall waypoints. Automatic depth lanes separate conflicting cable footprints, and junction routes stay in front of the flush enclosure.</dd></div>
+              <div><dt>Geometry</dt><dd>Each cable route is one continuous tube surface, so back-to-back bends share their polygon rings without gaps. Tangent, corner-contained bends cannot curl behind the intended turn. During a drag, the same solver path is shown as lightweight line geometry; release rebuilds only the rounded 3D surface.</dd></div>
               <div><dt>Camera</dt><dd>The visible XYZ point below the mouse or touch gesture becomes the grab point. Upright yaw/pitch rotation orbits around it without roll; scrolling or pinching zooms along its camera vector. One finger rotates, while two fingers pan and pinch-zoom at picked depth.</dd></div>
-              <div><dt>Routing audit</dt><dd>{routingReport ? `${routingReport.routeCount} route sections · ${routingReport.roundedCorners} rounded bends · ${routingReport.backtrackingCorners} reverse bends · ${routingReport.continuousHandoffs} tangent handoffs · ${routingReport.discontinuousHandoffs} discontinuous handoffs · ${routingReport.boardLaneAssignments} board routes across ${routingReport.boardLaneCount} lanes · ${routingReport.boardLaneConflicts} board-lane conflicts · ${routingReport.obstacleIntersections} solid intersections · ${routingReport.unresolvedCableIntersections} unresolved cable intersections.` : "Checking cable clearances…"}</dd></div>
+              <div><dt>Routing audit</dt><dd>{routingReport ? `${committedLayout.metrics.automaticRouteCount} endpoint-derived wall routes · ${routingReport.routeCount} rendered route sections · ${routingReport.roundedCorners} rounded bends · ${routingReport.automaticCrossovers} automatic crossover lifts · ${routingReport.backtrackingCorners} reverse bends · ${routingReport.continuousHandoffs} tangent handoffs · ${routingReport.discontinuousHandoffs} discontinuous handoffs · ${routingReport.obstacleIntersections} solid intersections · ${routingReport.unresolvedCableIntersections} unresolved cable intersections.` : "Checking cable clearances…"}</dd></div>
               <div><dt>Legibility</dt><dd>Small wires are widened slightly. Final bend radii, gland sizing and clearances still require the actual parts and a full-size mock-up.</dd></div>
             </dl>
           </aside>
@@ -2050,15 +2379,23 @@ function DseModel({
 
 export function SystemModel3D({
   system,
+  dseMounted,
   onSelect,
   onOpenDse,
 }: {
   system: PhysicalModelSystem;
+  dseMounted: boolean;
   onSelect: (componentId: string) => void;
   onOpenDse: () => void;
 }) {
-  if (system.id !== "dse") {
-    return (
+  return (
+    <>
+      {dseMounted && (
+        <div className="persisted-dse-model" hidden={system.id !== "dse"}>
+          <DseModel onSelect={onSelect} />
+        </div>
+      )}
+      {system.id !== "dse" && (
       <section className="model-unavailable">
         <div>
           <span>Physical fit model</span>
@@ -2067,7 +2404,7 @@ export function SystemModel3D({
           <button type="button" onClick={onOpenDse}>Open the DSE 3D model</button>
         </div>
       </section>
-    );
-  }
-  return <DseModel onSelect={onSelect} />;
+      )}
+    </>
+  );
 }

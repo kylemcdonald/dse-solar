@@ -1,8 +1,7 @@
 "use client";
 
 import {
-  lazy,
-  Suspense,
+  type ComponentType,
   type PointerEvent as ReactPointerEvent,
   useEffect,
   useMemo,
@@ -10,11 +9,12 @@ import {
   useState,
 } from "react";
 import dseRaw from "@/data/dse-system.json";
+import dseDeliveryRaw from "@/data/dse-delivery.json";
 import pgRaw from "@/data/pg-system.json";
+import { CustomsView } from "./CustomsView";
 
-const SystemModel3D = lazy(() =>
-  import("./SystemModel3D").then((module) => ({ default: module.SystemModel3D })),
-);
+const loadSystemModel3D = () =>
+  import("./SystemModel3D").then((module) => ({ default: module.SystemModel3D }));
 
 type FlowType =
   | "all"
@@ -102,6 +102,44 @@ type BomItem = {
   includedInTotal?: boolean;
 };
 
+type AmazonStatus =
+  | "available"
+  | "substitute"
+  | "partial"
+  | "unavailable"
+  | "not-applicable";
+
+type EbayStatus = "available" | "partial" | "unavailable";
+
+type EbayOption = {
+  status: EbayStatus;
+  sourceLabel: string;
+  sourceUrl?: string;
+  secondaryLabel?: string;
+  secondaryUrl?: string;
+  eta: string;
+  price: string;
+  condition: string;
+  shipsFrom: string;
+  note: string;
+};
+
+type DeliveryItem = {
+  amazonStatus: AmazonStatus;
+  sourceLabel: string;
+  sourceUrl?: string;
+  eta: string;
+  time: string;
+  note: string;
+  ebay?: EbayOption;
+};
+
+type DeliverySnapshot = {
+  checkedOn: string;
+  destination: string;
+  items: Record<string, DeliveryItem>;
+};
+
 type SystemData = {
   id: "dse" | "pg";
   shortName: string;
@@ -137,9 +175,27 @@ type SystemData = {
   research: Array<{ title: string; publisher: string; url: string }>;
 };
 
+type ViewerMode = "diagram" | "model" | "system" | "bom" | "customs" | "notes";
+
 const systems: Record<"dse" | "pg", SystemData> = {
   dse: dseRaw as SystemData,
   pg: pgRaw as SystemData,
+};
+
+const dseDelivery = dseDeliveryRaw as DeliverySnapshot;
+
+const amazonStatusLabels: Record<AmazonStatus, string> = {
+  available: "Amazon",
+  substitute: "Amazon substitute",
+  partial: "Amazon components",
+  unavailable: "Not on Amazon",
+  "not-applicable": "N/A",
+};
+
+const ebayStatusLabels: Record<EbayStatus, string> = {
+  available: "eBay U.S.",
+  partial: "eBay components",
+  unavailable: "No eBay match",
 };
 
 const NODE_W = 226;
@@ -1174,6 +1230,7 @@ function BomView({ system }: { system: SystemData }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
   const [displayCurrency, setDisplayCurrency] = useState<"USD" | "FJD">("USD");
+  const deliverySnapshot = system.id === "dse" ? dseDelivery : null;
   const filters = useMemo(() => {
     const locations = Array.from(new Set(system.bom.map((item) => item.location)));
     return ["All", "Purchased", ...locations.filter((item) => item !== "Excluded"), "Excluded"];
@@ -1188,7 +1245,16 @@ function BomView({ system }: { system: SystemData }) {
     .reduce((sum, item) => sum + item.totalUsd, 0);
   const localTotal = total - importTotal;
   const rows = system.bom.filter((item) => {
-    const needle = `${item.item} ${item.category} ${item.description}`.toLowerCase();
+    const delivery = deliverySnapshot?.items[item.id];
+    const needle = `${item.item} ${item.category} ${item.description} ${
+      delivery
+        ? `${amazonStatusLabels[delivery.amazonStatus]} ${delivery.sourceLabel} ${delivery.eta} ${delivery.note} ${
+            delivery.ebay
+              ? `${ebayStatusLabels[delivery.ebay.status]} ${delivery.ebay.sourceLabel} ${delivery.ebay.eta} ${delivery.ebay.price} ${delivery.ebay.note}`
+              : ""
+          }`
+        : ""
+    }`.toLowerCase();
     const queryMatch = needle.includes(query.trim().toLowerCase());
     const filterMatch =
       filter === "All" ||
@@ -1281,6 +1347,7 @@ function BomView({ system }: { system: SystemData }) {
               <th>Unit cost</th>
               <th>Line total</th>
               <th>Status</th>
+              <th>LA delivery</th>
               <th aria-label="Product links" />
             </tr>
           </thead>
@@ -1288,6 +1355,7 @@ function BomView({ system }: { system: SystemData }) {
             {rows.map((item) => {
               const originalUnit = preciseMoney(item.unitCost, item.currency);
               const excluded = item.includedInTotal === false;
+              const delivery = deliverySnapshot?.items[item.id];
               return (
                 <tr key={item.id} className={excluded ? "excluded-row" : ""}>
                   <td>
@@ -1317,6 +1385,60 @@ function BomView({ system }: { system: SystemData }) {
                     </span>
                   </td>
                   <td>
+                    {delivery ? (
+                      <div className="delivery-cell">
+                        <div className="delivery-option">
+                          <div className="delivery-option-heading">
+                            <span className={`delivery-pill delivery-${delivery.amazonStatus}`}>
+                              {amazonStatusLabels[delivery.amazonStatus]}
+                            </span>
+                            <strong>{delivery.eta}</strong>
+                          </div>
+                          {delivery.sourceUrl ? (
+                            <a href={delivery.sourceUrl} target="_blank" rel="noreferrer">
+                              {delivery.sourceLabel} <span aria-hidden="true">↗</span>
+                            </a>
+                          ) : (
+                            <span className="delivery-source">{delivery.sourceLabel}</span>
+                          )}
+                          <small>{delivery.time}</small>
+                          <small className="delivery-note">{delivery.note}</small>
+                        </div>
+                        {delivery.ebay && (
+                          <div className="delivery-option delivery-option-ebay">
+                            <div className="delivery-option-heading">
+                              <span className={`delivery-pill delivery-ebay-${delivery.ebay.status}`}>
+                                {ebayStatusLabels[delivery.ebay.status]}
+                              </span>
+                              <strong>{delivery.ebay.eta}</strong>
+                            </div>
+                            {delivery.ebay.sourceUrl ? (
+                              <a href={delivery.ebay.sourceUrl} target="_blank" rel="noreferrer">
+                                {delivery.ebay.sourceLabel} <span aria-hidden="true">↗</span>
+                              </a>
+                            ) : (
+                              <span className="delivery-source">{delivery.ebay.sourceLabel}</span>
+                            )}
+                            {delivery.ebay.secondaryUrl && delivery.ebay.secondaryLabel && (
+                              <a href={delivery.ebay.secondaryUrl} target="_blank" rel="noreferrer">
+                                {delivery.ebay.secondaryLabel} <span aria-hidden="true">↗</span>
+                              </a>
+                            )}
+                            <small>
+                              {delivery.ebay.price} · {delivery.ebay.condition} · {delivery.ebay.shipsFrom}
+                            </small>
+                            <small className="delivery-note">{delivery.ebay.note}</small>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="delivery-cell delivery-historical">
+                        <span className="delivery-pill delivery-not-applicable">Historical BOM</span>
+                        <small>No current shipping research</small>
+                      </div>
+                    )}
+                  </td>
+                  <td>
                     <div className="bom-links">
                       {item.productUrl && (
                         <a href={item.productUrl} target="_blank" rel="noreferrer" title="Open product or price source">
@@ -1340,7 +1462,7 @@ function BomView({ system }: { system: SystemData }) {
                 {rows.length} of {system.bom.length} rows shown
               </td>
               <td className="numeric-cell">{display(total)}</td>
-              <td colSpan={2}>Project total</td>
+              <td colSpan={3}>Project total</td>
             </tr>
           </tfoot>
         </table>
@@ -1351,6 +1473,18 @@ function BomView({ system }: { system: SystemData }) {
       <div className="bom-footnotes">
         <span>Planning FX: 1 USD = {system.currency.fjdPerUsd.toFixed(2)} FJD.</span>
         <span>Prices are planning values; verify before ordering.</span>
+        {deliverySnapshot && (
+          <span>
+            Delivery snapshot checked {deliverySnapshot.checkedOn} for {deliverySnapshot.destination};
+            Amazon inventory and arrival dates can change at checkout.
+          </span>
+        )}
+        {deliverySnapshot && (
+          <span>Exact matches, substitutes and multi-item Amazon kits are labeled separately.</span>
+        )}
+        {deliverySnapshot && (
+          <span>U.S.-origin eBay options were checked for the exact imported equipment where they could materially help.</span>
+        )}
         {system.budget.donorFundedIncrementUsd && (
           <span>{display(system.budget.donorFundedIncrementUsd)} net Ekrano upgrade is donor-funded.</span>
         )}
@@ -1428,7 +1562,15 @@ function FieldNotes({ system }: { system: SystemData }) {
 export function SystemViewer() {
   const shellRef = useRef<HTMLDivElement>(null);
   const [systemId, setSystemId] = useState<"dse" | "pg">("dse");
-  const [mode, setMode] = useState<"diagram" | "model" | "system" | "bom" | "notes">("diagram");
+  const [mode, setMode] = useState<ViewerMode>("diagram");
+  const [modelMounted, setModelMounted] = useState(false);
+  const [dseModelMounted, setDseModelMounted] = useState(false);
+  const [Model3D, setModel3D] = useState<ComponentType<{
+    system: SystemData;
+    dseMounted: boolean;
+    onSelect: (componentId: string) => void;
+    onOpenDse: () => void;
+  }> | null>(null);
   const [viewKey, setViewKey] = useState<"overview" | "detail">("overview");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const system = systems[systemId];
@@ -1437,7 +1579,31 @@ export function SystemViewer() {
     shellRef.current?.setAttribute("data-viewer-ready", "true");
   }, []);
 
+  useEffect(() => {
+    // Parse Three.js while the diagram is idle so the first deliberate switch
+    // to 3D does not make the user wait on the large lazy module. It remains a
+    // split chunk and therefore does not block the initial diagram render.
+    let cancelled = false;
+    const warmModel = () => void loadSystemModel3D().then(({ default: component }) => {
+      if (!cancelled) setModel3D(() => component);
+    });
+    if ("requestIdleCallback" in window) {
+      const idleId = window.requestIdleCallback(warmModel, { timeout: 1800 });
+      return () => {
+        cancelled = true;
+        window.cancelIdleCallback(idleId);
+      };
+    }
+    const timeoutId = window.setTimeout(warmModel, 350);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
   function changeSystem(id: "dse" | "pg") {
+    if (id === "dse" && mode === "model") setDseModelMounted(true);
+    if (id === "pg" && mode === "customs") setMode("system");
     setSystemId(id);
     setViewKey("overview");
     setSelectedId(null);
@@ -1454,7 +1620,15 @@ export function SystemViewer() {
     }
   }
 
-  function changeMode(nextMode: "diagram" | "model" | "system" | "bom" | "notes") {
+  function changeMode(nextMode: ViewerMode) {
+    if (nextMode === "model") {
+      setModelMounted(true);
+      if (systemId === "dse") setDseModelMounted(true);
+      if (!Model3D) {
+        void loadSystemModel3D().then(({ default: component }) => setModel3D(() => component));
+      }
+    }
+    if (nextMode === "customs" && systemId !== "dse") setSystemId("dse");
     setMode(nextMode);
     setSelectedId(null);
     window.scrollTo({ top: 0 });
@@ -1510,6 +1684,16 @@ export function SystemViewer() {
           </button>
           <button
             type="button"
+            className={mode === "customs" ? "active" : ""}
+            onClick={() => changeMode("customs")}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 3h10l4 4v14H5zM15 3v5h5M8 12h8M8 16h8" />
+            </svg>
+            Customs
+          </button>
+          <button
+            type="button"
             className={mode === "notes" ? "active" : ""}
             onClick={() => changeMode("notes")}
           >
@@ -1555,16 +1739,18 @@ export function SystemViewer() {
           </div>
         )}
 
-        {mode === "model" && (
-          <div className="model-workspace">
-            <Suspense fallback={<div className="model-loading">Preparing measured 3D scene…</div>}>
-              <SystemModel3D
-                key={system.id}
+        {modelMounted && (
+          <div className="model-workspace" hidden={mode !== "model"}>
+            {Model3D ? (
+              <Model3D
                 system={system}
+                dseMounted={dseModelMounted}
                 onSelect={setSelectedId}
                 onOpenDse={() => changeSystem("dse")}
               />
-            </Suspense>
+            ) : (
+              <div className="model-loading">Preparing measured 3D scene…</div>
+            )}
             {selectedId && (
               <div className="inspector-layer">
                 <button
@@ -1587,6 +1773,12 @@ export function SystemViewer() {
 
         {mode === "system" && <SystemOverview system={system} />}
         {mode === "bom" && <BomView key={system.id} system={system} />}
+        {mode === "customs" && (
+          <CustomsView
+            bom={systems.dse.bom}
+            planningFjdPerUsd={systems.dse.currency.fjdPerUsd}
+          />
+        )}
         {mode === "notes" && <FieldNotes system={system} />}
       </main>
     </div>

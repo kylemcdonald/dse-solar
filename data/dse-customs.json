@@ -1,0 +1,168 @@
+{
+  "checkedOn": "2026-08-15",
+  "manifestTitle": "Drua Sailing Experience solar-system equipment",
+  "declaredPurpose": "Permanent donated equipment for a remote Fiji school teaching Polynesian voyaging; not for resale.",
+  "defaultConsignee": "Drua Sailing Experience — confirm legal Fiji consignee",
+  "defaultDestination": "Lau Group, Fiji — confirm village and island",
+  "departureDate": "2026-08-29",
+  "vatRate": 0.125,
+  "itemMeta": {
+    "dse-battery-cable": {
+      "model": "Custom 1/0 AWG UL 1426 tinned-copper set",
+      "origin": "Confirm from invoice",
+      "serialRequired": false
+    },
+    "dse-multiplus": {
+      "model": "PMP242305010",
+      "origin": "Confirm from product label",
+      "serialRequired": true
+    },
+    "dse-ekrano-gx": {
+      "model": "BPP900480100",
+      "origin": "Confirm from product label",
+      "serialRequired": true,
+      "tafPermitRequired": true
+    },
+    "dse-smartsolar": {
+      "model": "SCC115085411",
+      "origin": "Confirm from product label",
+      "serialRequired": true,
+      "tafPermitRequired": true
+    },
+    "dse-mppt-wirebox": {
+      "model": "SCC950400210",
+      "origin": "Confirm from product label",
+      "serialRequired": false
+    },
+    "dse-orion": {
+      "model": "ORI241236120",
+      "origin": "Confirm from product label",
+      "serialRequired": true,
+      "tafPermitRequired": true
+    },
+    "dse-balancers": {
+      "model": "BBA000100100",
+      "origin": "Confirm from product label",
+      "serialRequired": true
+    },
+    "dse-shunt": {
+      "model": "SHU050150050",
+      "origin": "Confirm from product label",
+      "serialRequired": true,
+      "tafPermitRequired": true
+    },
+    "dse-class-t": {
+      "model": "2 × Blue Sea 5007100 holders; 3 × 5114 150 A fuses",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-selector": {
+      "model": "Blue Sea 6007",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-pv-protection": {
+      "model": "Mixed 150 VDC-rated protection set — itemize after purchase",
+      "origin": "Multiple — attach supplier invoices",
+      "serialRequired": false
+    },
+    "dse-fuse-block": {
+      "model": "Blue Sea 5025",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-usb": {
+      "model": "Anker A2737 + panel socket",
+      "origin": "Confirm from product labels",
+      "serialRequired": false
+    },
+    "dse-router": {
+      "model": "Ubiquiti UniFi Express UX-US",
+      "origin": "Confirm from product label",
+      "serialRequired": true,
+      "tafPermitRequired": true
+    },
+    "dse-dc-spares": {
+      "model": "Mixed tinned busbars, DC fuse holders, fuses and jumpers",
+      "origin": "Multiple — attach supplier invoices",
+      "serialRequired": false
+    },
+    "dse-victron-data": {
+      "model": "2 × VE.Direct 0.9 m; 1 × VE.Bus RJ45 3 m; 1 × Ethernet",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-junction-box": {
+      "model": "IP-rated 13.8 × 9.7 × 5.9 in enclosure",
+      "origin": "Confirm from product label",
+      "serialRequired": false
+    },
+    "dse-service-spares": {
+      "model": "Mixed electrical service spares — attach detailed sub-list",
+      "origin": "Multiple — attach supplier invoices",
+      "serialRequired": false
+    }
+  },
+  "sources": [
+    {
+      "id": "hand-carried-commercial",
+      "title": "Commercial shipments carried by passengers",
+      "publisher": "Fiji Revenue and Customs Service",
+      "url": "https://frcs.org.fj/public-notice/clearance-of-commercial-shipments-carried-by-travelling-passengers-via-nadi-and-nausori-international/"
+    },
+    {
+      "id": "project-equipment",
+      "title": "Commercial and project equipment clearance",
+      "publisher": "Fiji Revenue and Customs Service",
+      "url": "https://frcs.org.fj/public-notice/clearance-of-commercial-good-either-hand-carried-or-imported-as-cargo/"
+    },
+    {
+      "id": "import-restrictions",
+      "title": "Import restrictions and airport thresholds",
+      "publisher": "Fiji Revenue and Customs Service",
+      "url": "https://frcs.org.fj/our-services/customs/travellers/visiting-fiji/import-restrictions/"
+    },
+    {
+      "id": "arriving",
+      "title": "Arriving in Fiji",
+      "publisher": "Fiji Revenue and Customs Service",
+      "url": "https://frcs.org.fj/our-services/customs/travellers/visiting-fiji/arriving-in-fiji/"
+    },
+    {
+      "id": "brokers",
+      "title": "Approved customs brokers and agents",
+      "publisher": "Fiji Revenue and Customs Service",
+      "url": "https://frcs.org.fj/our-services/customs/customs-agents/customs-shipping-and-airline-agents/"
+    },
+    {
+      "id": "charity-concession",
+      "title": "Concession Code 215 for registered charitable or religious organisations",
+      "publisher": "Fiji Revenue and Customs Service",
+      "url": "https://frcs.org.fj/wp-content/uploads/2024/05/Code-215-and-215A-Customs-Tariff-Act-1986-SIG-2024-05.pdf"
+    },
+    {
+      "id": "vat",
+      "title": "Current 12.5% VAT rate",
+      "publisher": "Fiji Revenue and Customs Service",
+      "url": "https://frcs.org.fj/our-services/taxation-section/non-individuals/reporting-and-paying-taxes/vat-guide/"
+    },
+    {
+      "id": "taf-permit",
+      "title": "Telecommunications equipment import permit",
+      "publisher": "Telecommunications Authority of Fiji",
+      "url": "https://taf.org.fj/import-permit/"
+    },
+    {
+      "id": "taf-type-approval",
+      "title": "Telecommunications equipment type approval",
+      "publisher": "Telecommunications Authority of Fiji",
+      "url": "https://taf.org.fj/equipment-type-approval/"
+    },
+    {
+      "id": "taf-form",
+      "title": "TAF import-permit application form",
+      "publisher": "Telecommunications Authority of Fiji",
+      "url": "https://taf.org.fj/wp-content/uploads/2026/02/Application-for-Import-Permit-TAF.pdf"
+    }
+  ]
+}

@@ -145,16 +145,68 @@ test("DSE diagram, system summary, BOM and field notes are interactive", async (
   await page.getByRole("button", { name: /Bill of materials/ }).click();
   await expect(page.getByText("$8,758").first()).toBeVisible();
   await expect(page.getByText(/\$607 donor-funded/).first()).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "LA delivery" })).toBeVisible();
   await page.getByLabel("Search bill of materials").fill("Ekrano");
-  await expect(page.getByText("Victron Ekrano GX BPP900480100")).toBeVisible();
+  const ekranoRow = page.getByRole("row").filter({ hasText: "Victron Ekrano GX BPP900480100" });
+  await expect(ekranoRow).toBeVisible();
+  await expect(ekranoRow.getByText("Aug 16", { exact: true })).toBeVisible();
+  await expect(ekranoRow.getByRole("link", { name: /Amazon · exact model/ })).toBeVisible();
+  await expect(ekranoRow.getByRole("link", { name: /eBay · exact BPP900480100/ })).toBeVisible();
+  await expect(ekranoRow.getByText("$619.65 · New · United States", { exact: true })).toBeVisible();
+  await page.getByLabel("Search bill of materials").fill("PMP242305010");
+  await expect(page.getByText(/Victron MultiPlus-II 24\/3000\/70-32/)).toBeVisible();
+  await expect(page.getByText("Not on Amazon", { exact: true })).toBeVisible();
+  await expect(page.getByText("Aug 19–28", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Off-Grid Source · exact model/ })).toBeVisible();
+  await expect(page.getByText("No eBay match", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: /No exact U.S. listing/ })).toBeVisible();
   await page.getByLabel("Search bill of materials").fill("junction box");
   await expect(page.getByText(/Compact IP-rated junction box/)).toBeVisible();
   await page.getByLabel("Search bill of materials").fill("preterminated");
   await expect(page.getByText(/Custom preterminated 1\/0 AWG/)).toBeVisible();
 
+  await page.getByRole("button", { name: "Customs" }).click();
+  await expect(page.getByRole("heading", { name: "Customs & packing manifest" })).toBeVisible();
+  await expect(page.getByText("Licensed agent before arrival", { exact: true })).toBeVisible();
+  await expect(page.getByText(/goods over FJ\$1,000 will be detained/i)).toBeVisible();
+  await expect(page.getByText("Five radio models", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /School status is not automatic relief/ })).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "Description / model" })).toBeVisible();
+  await expect(page.getByLabel("Consignee TIN")).toBeVisible();
+  await expect(page.getByLabel(/Victron MultiPlus-II 24\/3000.*unit value/)).toHaveValue("939.00");
+  await expect(page.getByText("$3,835.80", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("PMP242305010", { exact: true })).toBeVisible();
+  await expect(page.getByText("Ubiquiti UniFi Express UX-US", { exact: true })).toBeVisible();
+  await expect(page.getByText("TAF radio permit", { exact: true })).toHaveCount(5);
+  await page.getByLabel("Consignee TIN").fill("TIN TO CONFIRM");
+  await expect(page.getByLabel("Consignee TIN")).toHaveValue("TIN TO CONFIRM");
+
   await page.getByRole("button", { name: "Field notes" }).click();
   await expect(page.getByRole("heading", { name: "Commissioning checklist" })).toBeVisible();
   await expect(page.getByText(/reduce the Ekrano DVCC charge-current limit from 100 A to 50 A/)).toBeVisible();
+});
+
+test("customs manifest is complete and print-ready on A4 landscape", async ({ page }) => {
+  await openViewer(page);
+  await page.getByRole("button", { name: "Customs" }).click();
+  await page.getByLabel("Consignee TIN").fill("TEST-TIN-123");
+  await page.getByLabel("Traveler / importer").fill("Test Traveler");
+
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator(".app-header")).toBeHidden();
+  await expect(page.locator(".customs-screen-only").first()).toBeHidden();
+  await expect(page.locator(".customs-manifest-section")).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "Description / model" })).toBeVisible();
+  await expect(page.getByLabel("Consignee TIN")).toHaveValue("TEST-TIN-123");
+  await expect(page.getByLabel("Traveler / importer")).toHaveValue("Test Traveler");
+
+  const pdf = await page.pdf({
+    format: "A4",
+    landscape: true,
+    printBackground: true,
+    preferCSSPageSize: true,
+  });
+  expect(pdf.byteLength).toBeGreaterThan(25_000);
 });
 
 test("DSE 3D model is scale-aware, navigable and connected to component details", async ({ page }) => {
@@ -165,9 +217,11 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.locator(".model-shell")).toHaveAttribute("data-routing-backtracking-corners", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-routing-discontinuous-handoffs", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-routing-obstacle-intersections", "0");
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-routing-board-conflicts", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-routing-unresolved-crossings", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-battery-arrangement", "floor-2x2");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-authored-wall-waypoints", "0");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-automatic-routes", /[2-9]\d/);
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-wall-routing", "shortest-rectilinear-visibility-graph");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-junction-back-routes", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-roof-planes", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-side-walls", "0");
@@ -175,6 +229,16 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.locator(".model-shell")).toHaveAttribute("data-shadow-map-size", "4096");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-solver-route-count", /[1-9]\d*/);
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-generated-cable-m", /\d+\.\d+/);
+  await expect(page.locator(".model-canvas")).toHaveAttribute("data-render-mode", "on-demand-static-shadows");
+  await expect(page.locator(".model-canvas")).toHaveAttribute("data-shadow-state", "cached");
+  const renderProfile = await page.locator(".model-canvas").evaluate((element) => ({
+    batchedDrawCalls: Number(element.dataset.sceneBatchedDrawCalls),
+    cableMeshes: Number(element.dataset.sceneCableMeshes),
+    renderCalls: Number(element.dataset.renderCalls),
+  }));
+  expect(renderProfile.batchedDrawCalls).toBeGreaterThan(250);
+  expect(renderProfile.cableMeshes).toBeLessThanOrEqual(12);
+  expect(renderProfile.renderCalls).toBeLessThanOrEqual(220);
 
   const canvas = page.getByRole("img", { name: /three-dimensional model of the Drua Sailing Experience/i });
   await expect(canvas).toBeVisible();
@@ -193,12 +257,12 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.getByText(/5.8 m back-wall span/)).toBeVisible();
   await expect(page.getByText(/Side walls and roof planes are intentionally omitted/)).toBeVisible();
   await expect(page.getByText(/four batteries form a floor-level 2 × 2 grid/i)).toBeVisible();
-  await expect(page.getByText(/Ordinary power conductors begin about 35 mm/)).toBeVisible();
+  await expect(page.getByText(/A shortest-path visibility graph regenerates rectilinear routes whenever a device moves/)).toBeVisible();
   await expect(page.getByText(/one continuous tube surface, so back-to-back bends share their polygon rings without gaps/i)).toBeVisible();
   await expect(page.getByText(/visible XYZ point below the mouse or touch gesture becomes the grab point/i)).toBeVisible();
   await expect(page.getByText(/0 reverse bends/)).toBeVisible();
   await expect(page.getByText(/14 tangent handoffs · 0 discontinuous handoffs/)).toBeVisible();
-  await expect(page.getByText(/0 board-lane conflicts/)).toBeVisible();
+  await expect(page.getByText(/endpoint-derived wall routes/)).toBeVisible();
   await expect(page.getByText(/0 solid intersections · 0 unresolved cable intersections/)).toBeVisible();
   await page.getByRole("button", { name: "Close scale notes" }).click();
   await page.getByRole("button", { name: "Show labels" }).click();
@@ -296,6 +360,131 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   expect(await page.evaluate(() => window.scrollY)).toBe(pageScrollBefore);
 });
 
+test("wall devices drag with live automatic routes, persist, and rebuild detailed tubes once", async ({ page }) => {
+  test.setTimeout(60_000);
+  await openViewer(page);
+  await page.getByRole("button", { name: "3D model" }).click();
+  const shell = page.locator(".model-shell");
+  const canvasHost = page.locator(".model-canvas");
+  await expect(shell).toHaveAttribute("data-model-ready", "true", { timeout: 15_000 });
+
+  await page.getByRole("button", { name: "Edit wall layout" }).click();
+  const editor = page.getByRole("region", { name: /editable two-dimensional equipment wall layout/i });
+  await expect(editor).toBeVisible();
+  await expect(shell).toHaveAttribute("data-layout-editing", "true");
+  await expect(editor.locator("[data-wall-device]")).toHaveCount(15);
+  await expect(editor).toHaveAttribute("data-route-projection-source", "final-threejs-centerlines");
+  await expect(editor.locator("[data-placeholder-route]")).toHaveCount(0);
+  const initialDetailedRoutes = editor.locator("[data-detailed-cable-path]");
+  const initialDetailedRouteCount = await initialDetailedRoutes.count();
+  const routingReport = JSON.parse(await shell.getAttribute("data-routing-report"));
+  expect(initialDetailedRouteCount).toBe(routingReport.routeCount);
+  expect(initialDetailedRouteCount).toBeGreaterThan(70);
+  expect(await editor.getAttribute("data-detailed-route-count")).toBe(
+    await canvasHost.getAttribute("data-scene-detailed-cable-paths"),
+  );
+  expect(await editor.getAttribute("data-detailed-route-point-count")).toBe(
+    await canvasHost.getAttribute("data-scene-detailed-cable-points"),
+  );
+  await expect(initialDetailedRoutes.first()).toHaveAttribute("data-final-3d-path", "true");
+  const initialDetailedPathData = await initialDetailedRoutes.evaluateAll((paths) => (
+    paths.map((path) => path.getAttribute("d")).join("|")
+  ));
+
+  const earthBar = editor.locator('[data-wall-device="earthBar"]');
+  const earthBarBox = await earthBar.boundingBox();
+  if (!earthBarBox) throw new Error("PE bar wall editor device did not render");
+  await page.mouse.click(earthBarBox.x + earthBarBox.width / 2, earthBarBox.y + earthBarBox.height / 2);
+  await expect(shell).toHaveAttribute("data-layout-commit-count", "0");
+
+  await canvasHost.evaluate((element) => {
+    element.querySelector("canvas")?.setAttribute("data-pre-drag-canvas", "true");
+    const state = { additions: 0, removals: 0 };
+    // @ts-expect-error test-only browser diagnostic
+    window.__wallLayoutCanvasMutations = state;
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        state.additions += record.addedNodes.length;
+        state.removals += record.removedNodes.length;
+      }
+    });
+    observer.observe(element, { childList: true });
+    // @ts-expect-error test-only browser diagnostic
+    window.__wallLayoutCanvasObserver = observer;
+  });
+
+  const device = editor.locator('[data-wall-device="smartSolar"]');
+  const deviceBox = await device.boundingBox();
+  if (!deviceBox) throw new Error("SmartSolar wall editor device did not render");
+  const originalX = Number(await device.getAttribute("data-layout-x"));
+  const originalY = Number(await device.getAttribute("data-layout-y"));
+  const automaticRouteCount = Number(await shell.getAttribute("data-layout-automatic-routes"));
+
+  await page.mouse.move(deviceBox.x + deviceBox.width / 2, deviceBox.y + deviceBox.height / 2);
+  await page.mouse.down();
+  await expect(editor).toHaveAttribute("data-route-projection-source", "automatic-rectilinear-preview");
+  const route = editor.locator('[data-placeholder-route="pv-entry-to-mppt-positive"]');
+  const originalPath = await route.getAttribute("d");
+  await page.mouse.move(deviceBox.x + deviceBox.width / 2 + 90, deviceBox.y + deviceBox.height / 2 - 55, { steps: 8 });
+
+  await expect(editor).toHaveAttribute("data-layout-dragging", "smartSolar");
+  await expect(editor).toHaveAttribute("data-layout-routing-mode", "placeholder");
+  await expect(editor.locator("[data-detailed-cable-path]")).toHaveCount(0);
+  await expect(editor.locator("[data-placeholder-route]")).toHaveCount(automaticRouteCount);
+  await expect(shell).toHaveAttribute("data-model-ready", "true");
+  await expect(canvasHost.locator('canvas[data-pre-drag-canvas="true"]')).toHaveCount(1);
+  expect(Number(await device.getAttribute("data-layout-x"))).toBeGreaterThan(originalX);
+  expect(Number(await device.getAttribute("data-layout-y"))).toBeGreaterThan(originalY);
+  expect(await route.getAttribute("d")).not.toBe(originalPath);
+
+  await page.mouse.up();
+  await expect(shell).toHaveAttribute("data-layout-commit-count", "1");
+  await expect(shell).toHaveAttribute("data-layout-committed-overrides", "1");
+  await expect(shell).toHaveAttribute("data-model-ready", "true", { timeout: 15_000 });
+  await expect(editor).toHaveAttribute("data-layout-routing-mode", "full-current");
+  await expect(editor).toHaveAttribute("data-route-projection-source", "final-threejs-centerlines");
+  await expect(editor).toHaveAttribute("data-detailed-route-issues", "0");
+  await expect(editor.locator("[data-placeholder-route]")).toHaveCount(0);
+  await expect(editor.locator("[data-detailed-cable-path]")).toHaveCount(initialDetailedRouteCount);
+  const rebuiltDetailedPathData = await editor.locator("[data-detailed-cable-path]").evaluateAll((paths) => (
+    paths.map((path) => path.getAttribute("d")).join("|")
+  ));
+  expect(rebuiltDetailedPathData).not.toBe(initialDetailedPathData);
+  await expect(canvasHost.locator('canvas[data-pre-drag-canvas="true"]')).toHaveCount(0);
+  const mutationCounts = await page.evaluate(() => {
+    // @ts-expect-error test-only browser diagnostic
+    window.__wallLayoutCanvasObserver?.disconnect();
+    // @ts-expect-error test-only browser diagnostic
+    return window.__wallLayoutCanvasMutations;
+  });
+  expect(mutationCounts).toEqual({ additions: 1, removals: 1 });
+
+  const savedPosition = {
+    x: await device.getAttribute("data-layout-x"),
+    y: await device.getAttribute("data-layout-y"),
+  };
+  const storedLayout = await page.evaluate(() => JSON.parse(
+    localStorage.getItem("dse-solar.wall-layout.v1") ?? "null",
+  ));
+  expect(storedLayout.version).toBe(1);
+  expect(storedLayout.overrides.smartSolar.position).toHaveLength(3);
+
+  await page.getByRole("button", { name: "Equipment wall" }).click();
+  await expect(editor).toHaveCount(0);
+  await expect(page.getByRole("img", { name: /three-dimensional model of the Drua Sailing Experience/i })).toBeVisible();
+
+  await page.reload();
+  await expect(page.locator('[data-viewer-ready="true"]')).toBeVisible();
+  await page.getByRole("button", { name: "3D model" }).click();
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-storage-ready", "true");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-committed-overrides", "1");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-model-ready", "true", { timeout: 15_000 });
+  await page.getByRole("button", { name: "Edit wall layout" }).click();
+  const restoredDevice = page.locator('[data-wall-device="smartSolar"]');
+  await expect(restoredDevice).toHaveAttribute("data-layout-x", savedPosition.x);
+  await expect(restoredDevice).toHaveAttribute("data-layout-y", savedPosition.y);
+});
+
 test("3D grab camera keeps the picked XYZ point fixed under cursor for zoom and orbit", async ({ page }) => {
   await openViewer(page);
   await page.getByRole("button", { name: "3D model" }).click();
@@ -353,11 +542,16 @@ test("3D grab camera keeps the picked XYZ point fixed under cursor for zoom and 
 test("PG selection does not invent an unverified three-dimensional site layout", async ({ page }) => {
   await openViewer(page);
   await page.getByRole("button", { name: "3D model" }).click();
+  await expect(page.locator('[data-model-ready="true"]')).toBeVisible({ timeout: 15_000 });
+  await page.locator(".model-canvas").evaluate((element) => {
+    element.dataset.persistenceProbe = "original-renderer";
+  });
   await page.getByRole("button", { name: /PG · PNG/ }).click();
   await expect(page.getByRole("heading", { name: /currently represents DSE/ })).toBeVisible();
   await expect(page.getByText(/has not been assigned speculative site geometry/)).toBeVisible();
   await page.getByRole("button", { name: "Open the DSE 3D model" }).click();
   await expect(page.locator('[data-model-ready="true"]')).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator(".model-canvas")).toHaveAttribute("data-persistence-probe", "original-renderer");
 });
 
 test("mobile layout fits iPhone Safari and the 3D camera supports one- and two-finger gestures", async ({ page }) => {
@@ -373,7 +567,7 @@ test("mobile layout fits iPhone Safari and the 3D camera supports one- and two-f
   expect(diagramMetrics.documentWidth).toBeLessThanOrEqual(diagramMetrics.viewportWidth + 1);
   expect(diagramMetrics.headerHeight).toBe(52);
   const modeTabs = page.locator(".mode-tabs");
-  for (const mode of ["Diagram", "3D model", "System", /Bill of materials/, "Field notes"]) {
+  for (const mode of ["Diagram", "3D model", "System", /Bill of materials/, "Customs", "Field notes"]) {
     await expect(modeTabs.getByRole("button", { name: mode, exact: typeof mode === "string" })).toBeVisible();
   }
 
@@ -461,6 +655,18 @@ test("mobile layout fits iPhone Safari and the 3D camera supports one- and two-f
   });
   expect(bomMetrics.documentWidth).toBeLessThanOrEqual(bomMetrics.viewportWidth + 1);
   expect(bomMetrics.tableScrollsInternally).toBe(true);
+
+  await modeTabs.getByRole("button", { name: "Customs" }).click();
+  const customsMetrics = await page.evaluate(() => {
+    const wrap = document.querySelector(".customs-table-wrap");
+    return {
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: document.documentElement.clientWidth,
+      tableScrollsInternally: Boolean(wrap && wrap.scrollWidth > wrap.clientWidth),
+    };
+  });
+  expect(customsMetrics.documentWidth).toBeLessThanOrEqual(customsMetrics.viewportWidth + 1);
+  expect(customsMetrics.tableScrollsInternally).toBe(true);
 
   await page.setViewportSize({ width: 844, height: 390 });
   await openViewer(page);

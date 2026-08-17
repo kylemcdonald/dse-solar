@@ -9,6 +9,7 @@ export type SurfaceGrab = {
 type GrabPointCameraOptions = {
   camera: THREE.PerspectiveCamera;
   domElement: HTMLCanvasElement;
+  onChange?: () => void;
   onInteractionStart?: () => void;
   pickSurface: (clientX: number, clientY: number) => SurfaceGrab | null;
 };
@@ -37,6 +38,7 @@ export class GrabPointCameraControls {
 
   private readonly camera: THREE.PerspectiveCamera;
   private readonly domElement: HTMLCanvasElement;
+  private readonly onChange?: () => void;
   private readonly onInteractionStart?: () => void;
   private readonly pickSurface: GrabPointCameraOptions["pickSurface"];
   private readonly grabPoint = new THREE.Vector3();
@@ -56,6 +58,7 @@ export class GrabPointCameraControls {
   constructor(options: GrabPointCameraOptions) {
     this.camera = options.camera;
     this.domElement = options.domElement;
+    this.onChange = options.onChange;
     this.onInteractionStart = options.onInteractionStart;
     this.pickSurface = options.pickSurface;
 
@@ -74,6 +77,7 @@ export class GrabPointCameraControls {
     this.focusPoint.copy(target);
     this.hasGrabPoint = false;
     this.lastProjectedDepth = this.projectedDepth(target);
+    this.onChange?.();
   }
 
   setFocusPoint(point: THREE.Vector3) {
@@ -189,6 +193,7 @@ export class GrabPointCameraControls {
       }
       this.configureTouchGesture(true);
       this.domElement.style.cursor = "grabbing";
+      this.onChange?.();
       return;
     }
     if (!event.isPrimary || event.button > 2 || this.activePointerId !== null) return;
@@ -205,6 +210,7 @@ export class GrabPointCameraControls {
       // See the touch fallback above.
     }
     this.domElement.style.cursor = "grabbing";
+    this.onChange?.();
   };
 
   private handlePointerMove = (event: PointerEvent) => {
@@ -251,6 +257,7 @@ export class GrabPointCameraControls {
       if (this.domElement.hasPointerCapture(event.pointerId)) this.domElement.releasePointerCapture(event.pointerId);
       this.configureTouchGesture(false);
       if (this.touchPoints.size === 0) this.domElement.style.cursor = "grab";
+      this.onChange?.();
       return;
     }
     if (event.pointerId !== this.activePointerId) return;
@@ -260,6 +267,7 @@ export class GrabPointCameraControls {
     this.activePointerId = null;
     this.dragMode = null;
     this.domElement.style.cursor = "grab";
+    this.onChange?.();
   };
 
   private handleLostPointerCapture = (event: PointerEvent) => {
@@ -268,12 +276,14 @@ export class GrabPointCameraControls {
       this.touchPoints.delete(event.pointerId);
       this.configureTouchGesture(false);
       if (this.touchPoints.size === 0) this.domElement.style.cursor = "grab";
+      this.onChange?.();
       return;
     }
     if (event.pointerId !== this.activePointerId) return;
     this.activePointerId = null;
     this.dragMode = null;
     this.domElement.style.cursor = "grab";
+    this.onChange?.();
   };
 
   private handleWheel = (event: WheelEvent) => {
@@ -326,6 +336,7 @@ export class GrabPointCameraControls {
     this.camera.position.copy(anchor).addScaledVector(offset, nextDistance / distance);
     this.focusPoint.copy(anchor);
     this.lastProjectedDepth = this.projectedDepth(anchor);
+    this.onChange?.();
   }
 
   private orbit(deltaX: number, deltaY: number) {
@@ -351,6 +362,7 @@ export class GrabPointCameraControls {
     this.camera.lookAt(this.camera.position.clone().add(forward));
     this.focusPoint.copy(this.grabPoint);
     this.lastProjectedDepth = this.projectedDepth(this.grabPoint);
+    this.onChange?.();
   }
 
   private pan(deltaX: number, deltaY: number) {
@@ -365,5 +377,6 @@ export class GrabPointCameraControls {
     this.camera.position.add(translation);
     this.focusPoint.add(translation);
     this.lastProjectedDepth = this.projectedDepth(this.grabPoint);
+    this.onChange?.();
   }
 }
