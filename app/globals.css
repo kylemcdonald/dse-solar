@@ -444,253 +444,6 @@ main {
   -webkit-touch-callout: none;
 }
 
-.wall-layout-editor {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  display: grid;
-  min-width: 0;
-  min-height: 0;
-  padding: 14px;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 10px;
-  color: var(--ink);
-  background: #f1eee5;
-}
-
-.wall-layout-status {
-  display: flex;
-  gap: 24px;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 45px;
-  padding: 8px 11px;
-  border: 1px solid rgb(99 113 107 / 0.28);
-  border-radius: 9px;
-  background: rgb(255 255 252 / 0.85);
-  box-shadow: 0 2px 7px rgb(32 45 42 / 0.06);
-}
-
-.wall-layout-status > div {
-  display: flex;
-  min-width: 0;
-  gap: 4px;
-  flex-direction: column;
-}
-
-.wall-layout-status strong,
-.wall-layout-live-state b {
-  color: var(--ink-strong);
-  font-size: 14px;
-  line-height: 1.2;
-}
-
-.wall-layout-status span {
-  color: #5d6b67;
-  font-size: 12px;
-  line-height: 1.25;
-}
-
-.wall-layout-live-state {
-  align-items: flex-end;
-  text-align: right;
-}
-
-.wall-layout-live-state b {
-  color: var(--teal);
-}
-
-.wall-layout-editor[data-detailed-route-issues]:not([data-detailed-route-issues="0"]):not([data-detailed-route-issues="pending"]) .wall-layout-live-state b {
-  color: #9f2832;
-}
-
-.wall-layout-board {
-  display: block;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-  border: 1px solid #806744;
-  border-radius: 8px;
-  background: #c79c63;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2), 0 5px 18px rgb(55 42 26 / 0.12);
-  cursor: default;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-
-.wall-layout-board-surface {
-  fill: #cda56f;
-}
-
-.wall-layout-grid-line {
-  fill: none;
-  stroke: rgb(82 61 36 / 0.18);
-  stroke-width: 0.006;
-}
-
-.wall-placeholder-route {
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 3px;
-  opacity: 0.78;
-  pointer-events: none;
-}
-
-.wall-layout-editor.is-dragging .wall-placeholder-route {
-  stroke-dasharray: 7 5;
-  opacity: 0.92;
-}
-
-.wall-placeholder-route.route-positive {
-  stroke: #c83f38;
-}
-
-.wall-placeholder-route.route-negative {
-  stroke: #20262a;
-}
-
-.wall-placeholder-route.route-midpoint {
-  stroke: #d3a72c;
-}
-
-.wall-placeholder-route.route-data {
-  stroke: #3e73a5;
-}
-
-.wall-placeholder-route.route-earth {
-  stroke: #397548;
-}
-
-.wall-placeholder-route.route-ac {
-  stroke: #f7f5ed;
-  filter: drop-shadow(0 0 1px #4f5754);
-}
-
-.wall-detailed-route {
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0.82;
-  pointer-events: none;
-}
-
-.wall-detailed-route.route-junction {
-  opacity: 0.96;
-}
-
-.wall-detailed-route.route-light {
-  filter: drop-shadow(0 0 1px #4f5754);
-}
-
-.wall-layout-device {
-  cursor: grab;
-  outline: none;
-}
-
-.wall-layout-device:active {
-  cursor: grabbing;
-}
-
-.wall-layout-device rect {
-  fill: #d8ddd8;
-  stroke: #43504d;
-  stroke-width: 2px;
-  vector-effect: non-scaling-stroke;
-}
-
-.wall-layout-device.device-victron rect {
-  fill: #2d6e9f;
-  stroke: #164568;
-}
-
-.wall-layout-device.device-junction rect {
-  fill: #d5dcd8;
-  stroke: #355652;
-}
-
-.wall-layout-device.device-monitor rect {
-  fill: #273e4b;
-  stroke: #101d24;
-}
-
-.wall-layout-device.device-network rect {
-  fill: #f2f1eb;
-  stroke: #687572;
-}
-
-.wall-layout-device.device-distribution rect {
-  fill: #343b3e;
-  stroke: #171d1f;
-}
-
-.wall-layout-device.device-earth rect {
-  fill: #4d8a5e;
-  stroke: #285439;
-}
-
-.wall-layout-device.is-selected rect,
-.wall-layout-device:focus rect {
-  stroke: #ef9e24;
-  stroke-width: 4px;
-}
-
-.wall-layout-device.has-overlap rect {
-  stroke: #b21f2d;
-  stroke-dasharray: 5 3;
-}
-
-.wall-layout-device text {
-  fill: #182321;
-  font-size: 0.043px;
-  font-weight: 850;
-  letter-spacing: 0.002em;
-  paint-order: stroke fill;
-  pointer-events: none;
-  stroke: rgb(248 247 240 / 0.92);
-  stroke-linejoin: round;
-  stroke-width: 0.012px;
-  text-anchor: middle;
-  dominant-baseline: middle;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.wall-layout-device.device-victron text,
-.wall-layout-device.device-monitor text,
-.wall-layout-device.device-distribution text,
-.wall-layout-device.device-earth text {
-  fill: #fff;
-  stroke: rgb(20 38 44 / 0.75);
-}
-
-.wall-layout-scale {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: flex-end;
-  color: #5c6763;
-  font-size: 12px;
-  font-weight: 750;
-}
-
-.wall-layout-scale i {
-  display: block;
-  width: 92px;
-  height: 7px;
-  border-right: 2px solid #52605c;
-  border-bottom: 2px solid #52605c;
-  border-left: 2px solid #52605c;
-}
-
-.layout-editing .model-label-layer,
-.layout-editing .model-wire-legend,
-.layout-editing .model-status {
-  display: none;
-}
-
 .model-label-layer {
   position: absolute;
   inset: 0;
@@ -2090,6 +1843,99 @@ main {
 .source-button:hover {
   color: #fff;
   background: var(--teal);
+}
+
+.model-procurement-list {
+  display: flex;
+  gap: 9px;
+  margin-top: 11px;
+  flex-direction: column;
+}
+
+.model-procurement-item {
+  padding: 12px;
+  border: 1px solid #d9ded8;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.model-procurement-heading {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.model-procurement-heading > strong {
+  color: var(--ink-strong);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.model-procurement-heading .delivery-pill {
+  min-height: 23px;
+  padding-inline: 8px;
+  flex: 0 0 auto;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.model-amazon-link {
+  display: flex;
+  min-height: 39px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--teal);
+  border-radius: 7px;
+  color: var(--teal-dark);
+  background: #f4faf7;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.model-amazon-link:hover {
+  color: #fff;
+  background: var(--teal);
+}
+
+.model-procurement-unavailable,
+.model-procurement-empty,
+.model-procurement-snapshot {
+  color: #65716f;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.model-procurement-unavailable {
+  margin: 9px 0 0;
+}
+
+.model-procurement-empty {
+  margin: 10px 0 0;
+  padding: 11px 12px;
+  border-radius: 8px;
+  background: #eeece6;
+}
+
+.model-fallback-link {
+  display: inline-block;
+  margin-top: 7px;
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-underline-offset: 2px;
+}
+
+.model-procurement-snapshot {
+  margin: 9px 0 0;
+  color: #7b8582;
 }
 
 .system-view {
@@ -3654,6 +3500,328 @@ main {
   font-size: 11px;
 }
 
+.junction-page {
+  width: min(100%, 1900px);
+  margin: 0 auto;
+  padding: 28px 30px 52px;
+  color: var(--ink);
+}
+
+.junction-page-heading {
+  display: flex;
+  gap: 28px;
+  align-items: end;
+  justify-content: space-between;
+}
+
+.junction-page-heading p {
+  margin: 0 0 4px;
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.junction-page-heading h1 {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 1;
+}
+
+.junction-page-summary {
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.junction-page-summary b {
+  color: var(--teal);
+  font-size: 17px;
+}
+
+.junction-page-summary span,
+.junction-page-intro {
+  color: #566762;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.junction-page-intro {
+  max-width: 1050px;
+  margin: 16px 0 20px;
+}
+
+.junction-schematic-scroll {
+  overflow: auto;
+  border: 1px solid rgb(35 76 70 / 0.24);
+  border-radius: 14px;
+  background: #f8f6ef;
+  box-shadow: 0 10px 30px rgb(34 52 47 / 0.09);
+}
+
+.junction-schematic {
+  display: block;
+  width: 100%;
+  min-width: 1560px;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.junction-enclosure {
+  fill: #f4f1e8;
+  stroke: #52635e;
+  stroke-width: 4;
+}
+
+.junction-zone-label {
+  fill: #60716c;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.junction-wire {
+  fill: none;
+  pointer-events: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  cursor: crosshair;
+  transition: opacity 120ms ease, stroke-width 120ms ease;
+}
+
+.junction-wire-halo {
+  fill: none;
+  pointer-events: none;
+  stroke: #f4f1e8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 11;
+  transition: opacity 120ms ease;
+}
+
+.junction-wire-halo.is-muted { opacity: 0.13; }
+
+.junction-wire.wire-positive24 { stroke: #b72e2b; }
+.junction-wire.wire-negative24 { stroke: #20262a; }
+.junction-wire.wire-data { stroke: #3978b7; stroke-dasharray: 10 7; }
+.junction-wire.is-active { stroke-width: 11; filter: drop-shadow(0 0 4px rgb(255 255 255 / 0.95)); }
+.junction-wire.is-muted { opacity: 0.13; }
+
+.junction-component rect,
+.junction-bus rect {
+  fill: #fffef9;
+  stroke: #52635e;
+  stroke-width: 3;
+}
+
+.junction-component.bus-positive rect {
+  fill: #f6d5d0;
+  stroke: #8e302c;
+}
+
+.junction-component.bus-negative rect {
+  fill: #dfe4e2;
+  stroke: #26302f;
+}
+
+.junction-component.fuse rect {
+  fill: #fff1d7;
+  stroke: #a96d25;
+}
+
+.junction-component.switches rect {
+  fill: #e5ece9;
+  stroke: #25564f;
+}
+
+.junction-terminal {
+  fill: #d29851;
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.junction-bottom-face {
+  stroke: #52635e;
+  stroke-dasharray: 10 8;
+  stroke-width: 3;
+}
+
+.junction-pair-sheath {
+  fill: none;
+  stroke: #e9e9e4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 17;
+  paint-order: stroke;
+  filter: drop-shadow(0 0 1px rgb(28 39 36 / 0.8));
+}
+
+.junction-component text,
+.junction-bus > text {
+  fill: #24332f;
+  font-size: 15px;
+  font-weight: 850;
+  text-anchor: middle;
+}
+
+.junction-component .sub {
+  fill: #62716d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.junction-component circle,
+.junction-bus circle {
+  fill: #b97038;
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.junction-component .data-port { fill: #3978b7; }
+.junction-bus.positive-bus rect { fill: #c8443d; stroke: #7f221f; }
+.junction-bus.negative-bus rect { fill: #283034; stroke: #101416; }
+.junction-bus.return-bus rect { fill: #4c555a; stroke: #202629; }
+.junction-bus.positive-bus > text { fill: #8d2924; }
+.junction-bus.negative-bus > text,
+.junction-bus.return-bus > text { fill: #27312e; }
+
+.junction-bus .stud-label {
+  fill: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
+.junction-component.fuse-block > rect { fill: #e8ece7; }
+.junction-component.fuse-block .used-fuse { fill: #e6813f; stroke: #944c23; }
+.junction-component.fuse-block .spare-fuse { fill: #cfd5d1; stroke: #89938f; }
+.junction-component.fuse-block .fuse-number { fill: #fff; font-size: 15px; font-weight: 900; text-anchor: middle; }
+.junction-component.fuse-block .fuse-map { fill: #5a6964; font-size: 10px; font-weight: 850; text-anchor: middle; }
+.junction-component.switch-block > rect { fill: #263034; }
+.junction-component.switch-block > text { fill: #263b36; }
+.junction-component.switch-block .sub { fill: #f3f1e9; }
+.junction-component.switch-block line { stroke: #e6ae59; stroke-width: 4; }
+
+.junction-inline-labels text {
+  fill: #8c552a;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.junction-boundary circle,
+.junction-boundary rect {
+  fill: #394340;
+  stroke: #a9b4b0;
+  stroke-width: 4;
+}
+
+.junction-boundary.connection-jack rect {
+  fill: #f1efe8;
+  stroke: #2d3536;
+}
+
+.junction-boundary text {
+  fill: #3c4b46;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+}
+
+.junction-zone-label,
+.junction-bus > text:not(.stud-label),
+.junction-component > text:not(.sub, .fuse-number, .fuse-map),
+.junction-inline-labels text,
+.junction-boundary text {
+  paint-order: stroke fill;
+  stroke: #f7f5ee;
+  stroke-linejoin: round;
+  stroke-width: 6px;
+}
+
+.junction-legend {
+  display: flex;
+  margin: 14px 0 26px;
+  gap: 18px;
+  flex-wrap: wrap;
+  color: #44544f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.junction-legend span {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.junction-legend i,
+.junction-wire-chip {
+  display: inline-block;
+  width: 22px;
+  height: 5px;
+  border-radius: 99px;
+}
+
+.junction-legend .wire-positive24,
+.junction-wire-chip.wire-positive24 { background: #b72e2b; }
+.junction-legend .wire-negative24,
+.junction-wire-chip.wire-negative24 { background: #20262a; }
+.junction-legend .wire-data,
+.junction-wire-chip.wire-data { background: #3978b7; }
+.junction-legend .wire-pair { height: 9px; background: #e9e9e4; box-shadow: inset 0 0 0 1px #79837f; }
+
+.junction-run-table-wrap {
+  overflow: auto;
+  border: 1px solid rgb(35 76 70 / 0.2);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.junction-run-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.junction-run-table th,
+.junction-run-table td {
+  padding: 11px 13px;
+  border-bottom: 1px solid #e6e9e5;
+  text-align: left;
+  vertical-align: top;
+}
+
+.junction-run-table th {
+  position: sticky;
+  top: 0;
+  color: #33423e;
+  background: #eaf0ec;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.junction-run-table tr.is-active td { background: #fff2d8; }
+.junction-run-table td:first-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.junction-wire-chip { width: 18px; margin-right: 8px; vertical-align: middle; }
+
+.junction-boundary-note {
+  margin-top: 18px;
+  padding: 15px 18px;
+  border-left: 4px solid #bb7a35;
+  border-radius: 0 9px 9px 0;
+  color: #4f5d59;
+  background: #f5ede0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
 @media (max-width: 1250px) {
   .diagram-workspace {
     grid-template-columns: 215px minmax(600px, 1fr) 270px;
@@ -3686,6 +3854,28 @@ main {
   body {
     min-width: 0;
     font-size: 16px;
+  }
+
+  .junction-page {
+    padding: 18px 12px 36px;
+  }
+
+  .junction-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .junction-page-summary {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .junction-schematic-scroll {
+    margin-inline: -12px;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
   }
 
   .app-header {
@@ -3870,33 +4060,6 @@ main {
   .model-canvas canvas {
     -webkit-user-select: none;
     user-select: none;
-  }
-
-  .wall-layout-editor {
-    padding: 7px;
-    gap: 6px;
-  }
-
-  .wall-layout-status {
-    min-height: 0;
-    padding: 6px 8px;
-  }
-
-  .wall-layout-status strong,
-  .wall-layout-live-state b {
-    font-size: 12px;
-  }
-
-  .wall-layout-status span {
-    font-size: 10px;
-  }
-
-  .wall-layout-scale {
-    font-size: 10px;
-  }
-
-  .wall-layout-scale i {
-    width: 62px;
   }
 
   .model-wire-legend {

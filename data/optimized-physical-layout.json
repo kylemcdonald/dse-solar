@@ -1,0 +1,7232 @@
+{
+  "schemaVersion": 1,
+  "status": "evolutionary-optimized-finalized",
+  "generatedAt": "2026-08-18T19:33:49.983Z",
+  "algorithm": "time-bounded seeded generational evolutionary placement search with tournament selection, blend crossover, Gaussian mutation, fast deterministic oriented-port route scoring, and one full-lane deterministic route finalization",
+  "seed": 20260817,
+  "requestedTimeBudgetSeconds": 60,
+  "elapsedSeconds": 60.172,
+  "finalizationSeconds": 56.196,
+  "totalProcessSeconds": 116.368,
+  "populationSize": 10,
+  "evaluations": 167,
+  "generations": 16,
+  "startedAt": "2026-08-18T19:31:53.613Z",
+  "constraints": {
+    "batteryArrangement": "floor-level 2x2; left column center X 1.48–1.62 m beside the array-side end of the building",
+    "indoorLight": "X 2.65–3.25 m; kept on the compact array-side half of the building",
+    "outdoorFlood": "X 2.80–3.40 m; kept on the compact array-side half of the building",
+    "ekranCenterHeightM": 1.58,
+    "maximumWallEquipmentRightEdgeM": 3.85,
+    "wallDeviceClearanceM": 0.2,
+    "boardEdgeClearanceM": 0.03,
+    "routing": "all routes regenerated from device terminals for every candidate; battery harness solved independently from unrelated outdoor geometry"
+  },
+  "objective": {
+    "priority": [
+      "zero wall component overlaps",
+      "zero cable centerlines or cable bodies routed across any device front",
+      "every device connection uses an explicit cylindrical port and a straight approach aligned to its outward normal",
+      "zero audited battery-harness cable conflicts",
+      "zero cables behind the flush junction box",
+      "floor-bank battery leads do not move more than 60 mm forward of their most-forward endpoint",
+      "no automatic cable makes an excessive forward excursion",
+      "thick cable length costs 2× thin cable length",
+      "minimum integrated cable distance from the wall",
+      "minimum unfused battery-positive lead length to each Class T fuse",
+      "every cable turn adds cost",
+      "compact wall span",
+      "left-biased wall centroid and minimum absolute right edge",
+      "few planar direction reversals"
+    ]
+  },
+  "baseline": {
+    "batteryForwardExcursionM": 0.0205,
+    "cableClearanceIssueCount": 10,
+    "deviceFrontCrossingCount": 0,
+    "forwardExcursionM": 2.653,
+    "junctionBackRouteCount": 0,
+    "junctionEgressTurnCount": 33,
+    "maximumForwardExcursionM": 0.2293,
+    "planarDirectionReversals": 60,
+    "portApproachIssueCount": 0,
+    "projectedCableConflictCount": 297,
+    "score": 5000028913146434,
+    "automaticRouteExcessLengthM": 8.3056,
+    "automaticRouteLengthM": 76.6034,
+    "automaticRouteTurnCount": 274,
+    "thickCableLengthM": 22.1321,
+    "totalRenderedCableM": 98.9266,
+    "unfusedBatteryPositiveLengthM": 3.8029,
+    "wallDistanceCostM2": 14.5844,
+    "wallBoundingAreaM2": 4.112009,
+    "wallDeviceSpanM": 2.1571,
+    "wallVerticalSpanM": 1.90631,
+    "wallMeanXM": 2.15284,
+    "wallRightEdgeM": 3.437052,
+    "wallOverlapCount": 5,
+    "weightedCableLengthM": 121.0587
+  },
+  "bestMetrics": {
+    "batteryForwardExcursionM": 0.0205,
+    "cableClearanceIssueCount": 0,
+    "deviceFrontCrossingCount": 0,
+    "forwardExcursionM": 2.4748,
+    "junctionBackRouteCount": 0,
+    "junctionEgressTurnCount": 38,
+    "maximumForwardExcursionM": 0.2197,
+    "planarDirectionReversals": 63,
+    "portApproachIssueCount": 0,
+    "projectedCableConflictCount": 193,
+    "score": 5793261466.443561,
+    "automaticRouteExcessLengthM": 9.2146,
+    "automaticRouteLengthM": 78.7015,
+    "automaticRouteTurnCount": 266,
+    "thickCableLengthM": 26.2084,
+    "totalRenderedCableM": 102.8755,
+    "unfusedBatteryPositiveLengthM": 3.2465,
+    "wallDistanceCostM2": 14.9054,
+    "wallBoundingAreaM2": 4.653498,
+    "wallDeviceSpanM": 2.4049,
+    "wallVerticalSpanM": 1.935043,
+    "wallMeanXM": 2.37577,
+    "wallRightEdgeM": 3.684855,
+    "wallOverlapCount": 0,
+    "weightedCableLengthM": 129.0839
+  },
+  "improvementPercent": 100,
+  "bestGenome": {
+    "batteryAnchor": [
+      1.5252920688512825,
+      -1.72805263065558
+    ],
+    "indoorLight": [
+      3.2174435901890455,
+      2.7115681781885344
+    ],
+    "outdoorFlood": [
+      3.1047767981365246,
+      2.4530826301215907
+    ],
+    "starlink": [
+      2.953193195645349,
+      3.357254139878754
+    ],
+    "wall": {
+      "pvEntry": [
+        1.4050000000000002,
+        0.95
+      ],
+      "smartSolar": [
+        2.4266445675094843,
+        0.9030601608515292
+      ],
+      "multiPlus": [
+        1.4140000000000001,
+        2.1069739184909353
+      ],
+      "acBoard": [
+        1.8589704118665402,
+        1.6995733919361622
+      ],
+      "junction": [
+        3.118855120317175,
+        1.1406416539394766
+      ],
+      "ekran": [
+        2.7199355517634953,
+        1.58
+      ],
+      "unifi": [
+        3.0634355517634955,
+        1.8328479721884565
+      ],
+      "usb": [
+        3.594855120317175,
+        1.4205442207084704
+      ],
+      "unifiPower": [
+        3.243054496450663,
+        1.5608479721884565
+      ],
+      "balancerA": [
+        2.1440348759456604,
+        0.47143076682297114
+      ],
+      "balancerB": [
+        2.7583496887678436,
+        0.5440601608515292
+      ],
+      "classTA": [
+        1.8115348759456606,
+        0.6852445765323271
+      ],
+      "classTB": [
+        1.9017921456002886,
+        1.0172089731288645
+      ],
+      "earthBar": [
+        1.8003189940460982,
+        1.2582089731288644
+      ]
+    }
+  },
+  "convergence": [
+    {
+      "elapsedSeconds": 0,
+      "evaluations": 10,
+      "score": 23793262822.04356
+    },
+    {
+      "elapsedSeconds": 33.693,
+      "evaluations": 100,
+      "score": 23793262822.04356
+    },
+    {
+      "elapsedSeconds": 60.172,
+      "evaluations": 167,
+      "score": 23793262822.04356
+    }
+  ],
+  "runtime": {
+    "deviceOverrides": {
+      "pvEntry": {
+        "position": [
+          1.4050000000000002,
+          0.95,
+          -2.057
+        ]
+      },
+      "smartSolar": {
+        "position": [
+          2.4266445675094843,
+          0.9030601608515292,
+          -2.0655
+        ]
+      },
+      "multiPlus": {
+        "position": [
+          1.4140000000000001,
+          2.1069739184909353,
+          -2.0465
+        ]
+      },
+      "acBoard": {
+        "position": [
+          1.8589704118665402,
+          1.6995733919361622,
+          -2.067
+        ]
+      },
+      "junction": {
+        "position": [
+          3.118855120317175,
+          1.1406416539394766,
+          -2.042
+        ]
+      },
+      "ekran": {
+        "position": [
+          2.7199355517634953,
+          1.58,
+          -2.1021
+        ]
+      },
+      "unifi": {
+        "position": [
+          3.0634355517634955,
+          1.8328479721884565,
+          -2.102
+        ]
+      },
+      "usb": {
+        "position": [
+          3.594855120317175,
+          1.4205442207084704,
+          -2.097
+        ]
+      },
+      "unifiPower": {
+        "position": [
+          3.243054496450663,
+          1.5608479721884565,
+          -2.102
+        ]
+      },
+      "balancerA": {
+        "position": [
+          2.1440348759456604,
+          0.47143076682297114,
+          -2.0935
+        ]
+      },
+      "balancerB": {
+        "position": [
+          2.7583496887678436,
+          0.5440601608515292,
+          -2.0935
+        ]
+      },
+      "classTA": {
+        "position": [
+          1.8115348759456606,
+          0.6852445765323271,
+          -2.087
+        ]
+      },
+      "classTB": {
+        "position": [
+          1.9017921456002886,
+          1.0172089731288645,
+          -2.087
+        ]
+      },
+      "earthBar": {
+        "position": [
+          1.8003189940460982,
+          1.2582089731288644,
+          -2.104
+        ]
+      },
+      "battery1": {
+        "position": [
+          1.5252920688512825,
+          0.11,
+          -1.72805263065558
+        ]
+      },
+      "battery2": {
+        "position": [
+          2.085292068851283,
+          0.11,
+          -1.72805263065558
+        ]
+      },
+      "battery3": {
+        "position": [
+          1.5252920688512825,
+          0.11,
+          -1.3980526306555798
+        ]
+      },
+      "battery4": {
+        "position": [
+          2.085292068851283,
+          0.11,
+          -1.3980526306555798
+        ]
+      },
+      "indoorLight": {
+        "position": [
+          3.2174435901890455,
+          2.7115681781885344,
+          -0.72
+        ]
+      },
+      "outdoorFlood": {
+        "position": [
+          3.1047767981365246,
+          2.4530826301215907,
+          -2.03
+        ]
+      },
+      "starlink": {
+        "position": [
+          2.953193195645349,
+          3.357254139878754,
+          -2.04
+        ]
+      }
+    },
+    "metrics": {
+      "automaticRouteCount": 47,
+      "totalRenderedCableM": 102.8755,
+      "weightedCableLengthM": 129.0839,
+      "thickCableLengthM": 26.2084,
+      "wallDistanceCostM2": 14.9054,
+      "cableByKindM": {
+        "pv-positive": 9.2796,
+        "pv-negative": 13.5952,
+        "three-core-ac": 4.3982,
+        "dc-positive": 23.5418,
+        "dc-negative": 23.2236,
+        "data": 15.3984,
+        "two-core-dc": 2.7713,
+        "earth": 10.6674
+      },
+      "wallDeviceSpanM": 2.4049,
+      "wallDeviceCount": 15,
+      "wallAuthoredWaypointCount": 0,
+      "wallOverlapCount": 0,
+      "wallOverlapIssues": [],
+      "cableClearanceIssueCount": 0,
+      "cableClearanceIssues": [],
+      "projectedCableConflictCount": 193,
+      "projectedCableConflictIssues": [
+        "pv-entry-to-mppt-positive:3 projects across pv-entry-to-mppt-negative:3 (0 mm < 7.9 mm)",
+        "pv-entry-to-mppt-positive:2 projects across battery-b-to-class-t:3 (0 mm < 11.2 mm)",
+        "pv-entry-to-mppt-positive:2 projects across multiplus-battery-temperature:4 (0 mm < 6.2 mm)",
+        "pv-entry-to-mppt-positive:2 projects across balancer-a-alarm:3 (0 mm < 6.2 mm)",
+        "pv-entry-to-mppt-positive:2 projects across earth-bar-to-smartsolar:2 (0 mm < 7.1 mm)",
+        "pv-entry-to-mppt-negative:3 projects across battery-b-to-class-t:3 (0 mm < 11.2 mm)",
+        "pv-entry-to-mppt-negative:3 projects across multiplus-battery-temperature:4 (0 mm < 6.2 mm)",
+        "pv-entry-to-mppt-negative:3 projects across balancer-a-alarm:3 (0 mm < 6.2 mm)",
+        "pv-entry-to-mppt-negative:3 projects across earth-bar-to-pv-entry:2 (4.9 mm < 7.1 mm)",
+        "pv-entry-to-mppt-negative:3 projects across earth-bar-to-smartsolar:2 (0 mm < 7.1 mm)",
+        "trailing-tool-flex:3 projects across multiplus-to-ekrano-data:3 (0 mm < 9.7 mm)",
+        "multiplus-to-ac-output-protection:4 projects across multiplus-battery-temperature:2 (0 mm < 9.5 mm)",
+        "multiplus-to-ac-output-protection:0 projects across junction-to-multiplus-negative:4 (0 mm < 14.5 mm)",
+        "multiplus-to-ac-output-protection:0 projects across junction-to-multiplus-positive:4 (0 mm < 14.5 mm)",
+        "multiplus-to-ac-output-protection:4 projects across multiplus-to-ekrano-data:2 (0 mm < 9.7 mm)",
+        "multiplus-to-ac-output-protection:4 projects across earth-bar-to-multiplus:3 (0 mm < 10.4 mm)",
+        "junction-to-battery-negative-a:0 projects across junction-to-battery-negative-b:3 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-a:0 projects across junction-to-class-t-a:3 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-a:0 projects across junction-to-class-t-b:2 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-a:3 projects across battery-a-to-class-t:0 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-a:3 projects across battery-b-to-class-t:0 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-a:3 projects across balancer-a-positive:2 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-a:3 projects across balancer-a-midpoint:5 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-a:3 projects across balancer-a-negative:2 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-a:3 projects across balancer-b-positive:5 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-a:3 projects across balancer-b-midpoint:5 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-a:3 projects across balancer-b-negative:5 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-a:0 projects across junction-to-multiplus-negative:2 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-a:0 projects across junction-to-multiplus-positive:2 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-a:0 projects across junction-to-mppt-positive:3 (0 mm < 13 mm)",
+        "junction-to-battery-negative-a:0 projects across junction-to-mppt-negative:3 (0 mm < 13 mm)",
+        "junction-to-battery-negative-a:0 projects across junction-to-ekrano-data:2 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-a:0 projects across junction-to-starlink-power-cable:2 (0 mm < 12 mm)",
+        "junction-to-battery-negative-b:0 projects across junction-to-class-t-a:3 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-b:0 projects across junction-to-class-t-b:2 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-b:3 projects across battery-a-to-class-t:3 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-b:3 projects across battery-b-to-class-t:3 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-b:3 projects across balancer-a-positive:2 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-b:3 projects across balancer-a-midpoint:5 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-b:3 projects across balancer-a-negative:2 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-b:3 projects across balancer-b-positive:5 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-b:3 projects across balancer-b-midpoint:5 (0 mm < 9.7 mm)",
+        "junction-to-battery-negative-b:3 projects across balancer-b-negative:2 (9 mm < 9.7 mm)",
+        "junction-to-battery-negative-b:3 projects across multiplus-battery-temperature:4 (0 mm < 9.5 mm)",
+        "junction-to-battery-negative-b:0 projects across junction-to-multiplus-negative:2 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-b:0 projects across junction-to-multiplus-positive:2 (0 mm < 14.5 mm)",
+        "junction-to-battery-negative-b:0 projects across junction-to-mppt-positive:3 (0 mm < 13 mm)",
+        "junction-to-battery-negative-b:0 projects across junction-to-mppt-negative:2 (5.5 mm < 13 mm)",
+        "junction-to-battery-negative-b:0 projects across junction-to-ekrano-data:2 (0 mm < 9.7 mm)",
+        "junction-to-class-t-a:3 projects across battery-a-to-class-t:3 (0 mm < 14.5 mm)",
+        "junction-to-class-t-a:3 projects across battery-b-to-class-t:3 (0 mm < 14.5 mm)",
+        "junction-to-class-t-a:0 projects across junction-to-mppt-positive:3 (0 mm < 13 mm)",
+        "junction-to-class-t-a:0 projects across junction-to-unifi-converter-positive:1 (5.5 mm < 9.8 mm)",
+        "junction-to-class-t-a:0 projects across junction-to-usb-positive:2 (0 mm < 10.2 mm)",
+        "junction-to-class-t-a:0 projects across junction-to-usb-negative:1 (0 mm < 10.2 mm)",
+        "junction-to-class-t-a:3 projects across balancer-a-alarm:3 (0 mm < 9.5 mm)",
+        "junction-to-class-t-a:3 projects across balancer-b-alarm:3 (0 mm < 9.5 mm)",
+        "junction-to-class-t-b:5 projects across battery-b-to-class-t:4 (0 mm < 14.5 mm)",
+        "junction-to-class-t-b:2 projects across junction-to-multiplus-negative:0 (0 mm < 14.5 mm)",
+        "junction-to-class-t-b:3 projects across junction-to-multiplus-positive:2 (0 mm < 14.5 mm)",
+        "junction-to-class-t-b:2 projects across junction-to-mppt-negative:0 (0 mm < 13 mm)",
+        "junction-to-class-t-b:2 projects across junction-to-ekrano-data:0 (0 mm < 9.7 mm)",
+        "junction-to-class-t-b:2 projects across junction-to-ekrano-positive:0 (0 mm < 9.8 mm)",
+        "junction-to-class-t-b:2 projects across smartsolar-to-ekrano-data:3 (0 mm < 9.7 mm)",
+        "junction-to-class-t-b:4 projects across balancer-a-alarm:3 (0 mm < 9.5 mm)",
+        "junction-to-class-t-b:2 projects across balancer-b-alarm:3 (0 mm < 9.5 mm)",
+        "battery-a-to-class-t:4 projects across battery-b-to-class-t:3 (0 mm < 14.5 mm)",
+        "battery-a-to-class-t:3 projects across balancer-b-positive:3 (0 mm < 9.7 mm)",
+        "battery-a-to-class-t:3 projects across balancer-b-midpoint:3 (0 mm < 9.7 mm)",
+        "battery-a-to-class-t:3 projects across balancer-b-negative:3 (0 mm < 9.7 mm)",
+        "battery-a-to-class-t:4 projects across balancer-a-alarm:3 (0 mm < 9.5 mm)",
+        "battery-b-to-class-t:3 projects across balancer-b-positive:3 (0 mm < 9.7 mm)",
+        "battery-b-to-class-t:3 projects across balancer-b-midpoint:3 (0 mm < 9.7 mm)",
+        "battery-b-to-class-t:3 projects across balancer-b-negative:3 (0 mm < 9.7 mm)",
+        "battery-b-to-class-t:4 projects across balancer-a-alarm:3 (0 mm < 9.5 mm)",
+        "battery-b-to-class-t:3 projects across earth-bar-to-smartsolar:3 (0 mm < 10.4 mm)",
+        "balancer-a-positive:2 projects across balancer-a-midpoint:3 (0 mm < 4.9 mm)",
+        "balancer-a-positive:2 projects across balancer-a-negative:3 (0 mm < 4.9 mm)",
+        "balancer-a-positive:3 projects across balancer-b-positive:5 (0 mm < 4.9 mm)",
+        "balancer-a-positive:2 projects across balancer-b-midpoint:3 (0 mm < 4.9 mm)",
+        "balancer-a-positive:2 projects across balancer-b-negative:3 (0 mm < 4.9 mm)",
+        "balancer-a-midpoint:5 projects across balancer-a-negative:3 (0 mm < 4.9 mm)",
+        "balancer-a-midpoint:2 projects across balancer-b-midpoint:3 (0 mm < 4.9 mm)",
+        "balancer-a-midpoint:5 projects across balancer-b-negative:3 (0 mm < 4.9 mm)",
+        "balancer-a-negative:2 projects across balancer-b-midpoint:3 (0 mm < 4.9 mm)",
+        "balancer-a-negative:2 projects across balancer-b-negative:3 (0 mm < 4.9 mm)",
+        "balancer-b-positive:2 projects across balancer-b-midpoint:3 (0 mm < 4.9 mm)",
+        "balancer-b-positive:5 projects across balancer-b-negative:3 (0 mm < 4.9 mm)",
+        "balancer-b-midpoint:5 projects across balancer-b-negative:3 (0 mm < 4.9 mm)",
+        "balancer-b-negative:3 projects across multiplus-battery-temperature:4 (0 mm < 4.7 mm)",
+        "multiplus-battery-temperature:0 projects across junction-to-multiplus-negative:4 (0.5 mm < 9.5 mm)",
+        "multiplus-battery-temperature:0 projects across junction-to-multiplus-positive:4 (0.5 mm < 9.5 mm)",
+        "multiplus-battery-temperature:2 projects across multiplus-to-ekrano-data:3 (0 mm < 4.7 mm)",
+        "multiplus-battery-temperature:2 projects across earth-electrode-to-main-bar:3 (0 mm < 6 mm)",
+        "multiplus-battery-temperature:4 projects across earth-bar-to-pv-entry:3 (0 mm < 5.4 mm)",
+        "junction-to-multiplus-negative:3 projects across junction-to-multiplus-positive:2 (0 mm < 14.5 mm)",
+        "junction-to-multiplus-negative:4 projects across generator-flex:6 (0 mm < 14.5 mm)",
+        "junction-to-multiplus-negative:2 projects across junction-to-mppt-negative:0 (0 mm < 13 mm)",
+        "junction-to-multiplus-negative:2 projects across smartsolar-to-ekrano-data:3 (0 mm < 9.7 mm)",
+        "junction-to-multiplus-negative:3 projects across multiplus-to-ekrano-data:3 (0 mm < 9.7 mm)",
+        "junction-to-multiplus-negative:3 projects across balancer-a-alarm:4 (0 mm < 9.5 mm)",
+        "junction-to-multiplus-negative:2 projects across balancer-b-alarm:3 (0 mm < 9.5 mm)",
+        "junction-to-multiplus-negative:4 projects across earth-bar-to-multiplus:3 (0 mm < 10.4 mm)",
+        "junction-to-multiplus-negative:3 projects across earth-bar-to-ekrano:2 (0 mm < 10.2 mm)",
+        "junction-to-multiplus-positive:4 projects across generator-flex:6 (0 mm < 14.5 mm)",
+        "junction-to-multiplus-positive:2 projects across junction-to-mppt-negative:0 (0 mm < 13 mm)",
+        "junction-to-multiplus-positive:2 projects across junction-to-ekrano-data:0 (2 mm < 9.7 mm)",
+        "junction-to-multiplus-positive:2 projects across junction-to-ekrano-negative:0 (0 mm < 9.8 mm)",
+        "junction-to-multiplus-positive:2 projects across junction-to-ekrano-positive:0 (0 mm < 9.8 mm)",
+        "junction-to-multiplus-positive:2 projects across junction-to-starlink-power-cable:0 (0 mm < 12 mm)",
+        "junction-to-multiplus-positive:2 projects across smartsolar-to-ekrano-data:3 (0 mm < 9.7 mm)",
+        "junction-to-multiplus-positive:3 projects across multiplus-to-ekrano-data:3 (0 mm < 9.7 mm)",
+        "junction-to-multiplus-positive:3 projects across balancer-a-alarm:4 (0 mm < 9.5 mm)",
+        "junction-to-multiplus-positive:2 projects across balancer-b-alarm:3 (0 mm < 9.5 mm)",
+        "junction-to-multiplus-positive:4 projects across earth-bar-to-multiplus:3 (0 mm < 10.4 mm)",
+        "junction-to-multiplus-positive:3 projects across earth-bar-to-ekrano:2 (0 mm < 10.2 mm)",
+        "junction-to-mppt-positive:3 projects across junction-to-mppt-negative:2 (0 mm < 11.5 mm)",
+        "junction-to-mppt-positive:2 projects across junction-to-outdoor-flood-negative:2 (0 mm < 8.3 mm)",
+        "junction-to-mppt-positive:2 projects across junction-to-outdoor-flood-positive:2 (0 mm < 8.3 mm)",
+        "junction-to-mppt-positive:2 projects across junction-to-indoor-light-negative:2 (0 mm < 8.3 mm)",
+        "junction-to-mppt-positive:2 projects across junction-to-indoor-light-positive:3 (0.5 mm < 8.3 mm)",
+        "junction-to-mppt-positive:2 projects across junction-to-unifi-converter-positive:3 (0 mm < 8.3 mm)",
+        "junction-to-mppt-positive:2 projects across junction-to-unifi-converter-negative:2 (0 mm < 8.3 mm)",
+        "junction-to-mppt-positive:0 projects across junction-to-usb-positive:2 (0 mm < 8.7 mm)",
+        "junction-to-mppt-positive:2 projects across junction-to-usb-negative:1 (0 mm < 8.7 mm)",
+        "junction-to-mppt-positive:3 projects across smartsolar-to-ekrano-data:0 (0 mm < 8.2 mm)",
+        "junction-to-mppt-positive:3 projects across balancer-b-alarm:3 (0 mm < 8 mm)",
+        "junction-to-mppt-positive:3 projects across earth-bar-to-smartsolar:5 (0 mm < 8.9 mm)",
+        "junction-to-mppt-negative:0 projects across junction-to-ekrano-data:2 (0 mm < 8.2 mm)",
+        "junction-to-mppt-negative:3 projects across balancer-b-alarm:3 (0 mm < 8 mm)",
+        "junction-to-mppt-negative:3 projects across earth-bar-to-smartsolar:5 (0 mm < 8.9 mm)",
+        "junction-to-outdoor-flood-negative:3 projects across junction-to-outdoor-flood-positive:4 (0 mm < 5.1 mm)",
+        "junction-to-outdoor-flood-negative:0 projects across junction-to-indoor-light-negative:2 (0 mm < 5.1 mm)",
+        "junction-to-outdoor-flood-negative:0 projects across junction-to-indoor-light-positive:3 (0 mm < 5.1 mm)",
+        "junction-to-outdoor-flood-negative:3 projects across junction-to-unifi-converter-positive:5 (0 mm < 5.1 mm)",
+        "junction-to-outdoor-flood-negative:0 projects across junction-to-unifi-converter-negative:2 (0 mm < 5.1 mm)",
+        "junction-to-outdoor-flood-negative:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+        "junction-to-outdoor-flood-positive:0 projects across junction-to-indoor-light-negative:2 (4 mm < 5.1 mm)",
+        "junction-to-outdoor-flood-positive:0 projects across junction-to-indoor-light-positive:2 (3 mm < 5.1 mm)",
+        "junction-to-outdoor-flood-positive:3 projects across junction-to-unifi-converter-positive:5 (0 mm < 5.1 mm)",
+        "junction-to-outdoor-flood-positive:0 projects across junction-to-unifi-converter-negative:2 (0 mm < 5.1 mm)",
+        "junction-to-outdoor-flood-positive:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+        "junction-to-indoor-light-negative:2 projects across junction-to-indoor-light-positive:3 (0.5 mm < 5.1 mm)",
+        "junction-to-indoor-light-negative:3 projects across junction-to-unifi-converter-positive:5 (0 mm < 5.1 mm)",
+        "junction-to-indoor-light-negative:2 projects across junction-to-unifi-converter-negative:2 (0 mm < 5.1 mm)",
+        "junction-to-indoor-light-negative:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+        "junction-to-indoor-light-positive:4 projects across junction-to-unifi-converter-positive:5 (0 mm < 5.1 mm)",
+        "junction-to-indoor-light-positive:0 projects across junction-to-unifi-converter-negative:2 (0 mm < 5.1 mm)",
+        "junction-to-indoor-light-positive:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+        "junction-to-ekrano-data:3 projects across junction-to-ekrano-negative:2 (0 mm < 5 mm)",
+        "junction-to-ekrano-data:2 projects across junction-to-ekrano-positive:0 (0 mm < 5 mm)",
+        "junction-to-ekrano-data:2 projects across smartsolar-to-ekrano-data:3 (0 mm < 4.9 mm)",
+        "junction-to-ekrano-data:3 projects across multiplus-to-ekrano-data:3 (0 mm < 4.9 mm)",
+        "junction-to-ekrano-data:3 projects across balancer-a-alarm:4 (0 mm < 4.7 mm)",
+        "junction-to-ekrano-data:2 projects across balancer-b-alarm:3 (0 mm < 4.7 mm)",
+        "junction-to-ekrano-data:3 projects across earth-bar-to-ekrano:2 (0 mm < 5.4 mm)",
+        "junction-to-ekrano-negative:2 projects across junction-to-ekrano-positive:0 (0 mm < 5.1 mm)",
+        "junction-to-ekrano-negative:0 projects across junction-to-starlink-power-cable:2 (0 mm < 7.3 mm)",
+        "junction-to-ekrano-negative:2 projects across smartsolar-to-ekrano-data:3 (0 mm < 5 mm)",
+        "junction-to-ekrano-negative:3 projects across multiplus-to-ekrano-data:3 (0 mm < 5 mm)",
+        "junction-to-ekrano-negative:3 projects across balancer-a-alarm:4 (0 mm < 4.8 mm)",
+        "junction-to-ekrano-negative:2 projects across balancer-b-alarm:3 (0 mm < 4.8 mm)",
+        "junction-to-ekrano-negative:3 projects across earth-bar-to-ekrano:2 (0 mm < 5.5 mm)",
+        "junction-to-ekrano-positive:0 projects across junction-to-starlink-power-cable:2 (0 mm < 7.3 mm)",
+        "junction-to-ekrano-positive:1 projects across smartsolar-to-ekrano-data:3 (0 mm < 5 mm)",
+        "junction-to-ekrano-positive:3 projects across multiplus-to-ekrano-data:3 (0 mm < 5 mm)",
+        "junction-to-ekrano-positive:3 projects across balancer-a-alarm:4 (0 mm < 4.8 mm)",
+        "junction-to-ekrano-positive:1 projects across balancer-b-alarm:3 (0 mm < 4.8 mm)",
+        "junction-to-ekrano-positive:3 projects across earth-bar-to-ekrano:2 (0 mm < 5.5 mm)",
+        "junction-to-starlink-power-cable:3 projects across unifi-to-ekrano-data:3 (0 mm < 7.2 mm)",
+        "junction-to-unifi-converter-positive:5 projects across junction-to-unifi-converter-negative:6 (0 mm < 5.1 mm)",
+        "junction-to-unifi-converter-positive:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+        "junction-to-unifi-converter-positive:5 projects across unifi-converter-to-unifi-power:0 (0 mm < 5 mm)",
+        "junction-to-unifi-converter-negative:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+        "junction-to-unifi-converter-negative:4 projects across unifi-converter-to-unifi-power:0 (0 mm < 5 mm)",
+        "junction-to-usb-positive:2 projects across junction-to-usb-negative:0 (0 mm < 5.9 mm)",
+        "unifi-converter-to-unifi-power:3 projects across unifi-to-ekrano-data:3 (0 mm < 4.9 mm)",
+        "unifi-converter-to-unifi-power:3 projects across starlink-to-unifi-data:3 (0 mm < 5.1 mm)",
+        "unifi-to-ekrano-data:3 projects across balancer-a-alarm:6 (0 mm < 4.7 mm)",
+        "unifi-to-ekrano-data:3 projects across balancer-b-alarm:3 (0 mm < 4.7 mm)",
+        "unifi-to-ekrano-data:3 projects across earth-bar-to-ekrano:5 (0 mm < 5.4 mm)",
+        "smartsolar-to-ekrano-data:3 projects across multiplus-to-ekrano-data:3 (0 mm < 4.9 mm)",
+        "smartsolar-to-ekrano-data:3 projects across balancer-a-alarm:4 (0 mm < 4.7 mm)",
+        "smartsolar-to-ekrano-data:2 projects across earth-bar-to-smartsolar:5 (0 mm < 5.6 mm)",
+        "smartsolar-to-ekrano-data:3 projects across earth-bar-to-ekrano:2 (0 mm < 5.4 mm)",
+        "multiplus-to-ekrano-data:3 projects across earth-bar-to-multiplus:3 (0 mm < 5.6 mm)",
+        "multiplus-to-ekrano-data:3 projects across earth-bar-to-ac-board:3 (0 mm < 5.6 mm)",
+        "balancer-a-alarm:3 projects across earth-bar-to-smartsolar:3 (0 mm < 5.4 mm)",
+        "balancer-a-alarm:3 projects across earth-bar-to-ekrano:2 (0 mm < 5.2 mm)",
+        "earth-electrode-to-main-bar:3 projects across earth-bar-to-multiplus:2 (0 mm < 6.9 mm)",
+        "earth-bar-to-pv-entry:0 projects across earth-bar-to-multiplus:2 (0 mm < 6.3 mm)",
+        "earth-bar-to-smartsolar:0 projects across earth-bar-to-multiplus:2 (0 mm < 6.3 mm)",
+        "earth-bar-to-ac-board:2 projects across earth-bar-to-ekrano:0 (0 mm < 6.1 mm)"
+      ],
+      "deviceFrontCrossingCount": 0,
+      "deviceFrontCrossingIssues": [],
+      "junctionBackRouteCount": 0,
+      "planarDirectionReversals": 63,
+      "planarReversalIssues": [
+        "pv-home-run-a-positive:1",
+        "pv-home-run-a-negative:1",
+        "pv-home-run-b-positive:1",
+        "pv-home-run-b-negative:1",
+        "pv-entry-to-mppt-positive:1",
+        "pv-entry-to-mppt-negative:1",
+        "trailing-tool-flex:1",
+        "multiplus-to-ac-output-protection:1",
+        "battery-series-a:1",
+        "battery-series-b:1",
+        "junction-to-battery-negative-a:2",
+        "junction-to-battery-negative-b:2",
+        "junction-to-class-t-a:1",
+        "junction-to-class-t-b:3",
+        "battery-a-to-class-t:4",
+        "battery-b-to-class-t:4",
+        "multiplus-battery-temperature:1",
+        "junction-to-multiplus-negative:1",
+        "junction-to-multiplus-positive:1",
+        "junction-to-mppt-positive:1",
+        "junction-to-mppt-negative:1",
+        "junction-to-outdoor-flood-negative:2",
+        "junction-to-outdoor-flood-positive:2",
+        "junction-to-indoor-light-negative:2",
+        "junction-to-indoor-light-positive:2",
+        "junction-to-ekrano-data:1",
+        "junction-to-ekrano-negative:1",
+        "junction-to-ekrano-positive:1",
+        "junction-to-starlink-power-cable:2",
+        "junction-to-unifi-converter-positive:2",
+        "junction-to-unifi-converter-negative:2",
+        "junction-to-usb-positive:1",
+        "junction-to-usb-negative:1",
+        "unifi-converter-to-unifi-power:1",
+        "unifi-to-ekrano-data:1",
+        "smartsolar-to-ekrano-data:1",
+        "multiplus-to-ekrano-data:1",
+        "balancer-a-alarm:1",
+        "balancer-b-alarm:2",
+        "starlink-to-unifi-data:1",
+        "earth-bar-to-pv-entry:1",
+        "earth-bar-to-smartsolar:1",
+        "earth-bar-to-multiplus:1",
+        "earth-bar-to-ac-board:1",
+        "earth-bar-to-ekrano:1"
+      ],
+      "portApproachIssueCount": 0,
+      "portApproachIssues": [],
+      "automaticRouteLengthM": 78.7015,
+      "automaticRouteExcessLengthM": 9.2146,
+      "automaticRouteTurnCount": 266,
+      "junctionEgressTurnCount": 38,
+      "solverRouteCount": 58,
+      "wallSpanPenaltyM": 0.8417,
+      "score": 1239.7428
+    },
+    "routeDepths": {
+      "pv-entry-to-mppt-positive": {
+        "forwardExcursionM": 0.0092,
+        "lengthM": 0.9576,
+        "maximumZ": -2.0478
+      },
+      "pv-entry-to-mppt-negative": {
+        "forwardExcursionM": 0.0236,
+        "lengthM": 0.9792,
+        "maximumZ": -2.0334
+      },
+      "trailing-tool-flex": {
+        "forwardExcursionM": 0,
+        "lengthM": 0.321,
+        "maximumZ": -1.94
+      },
+      "multiplus-to-ac-output-protection": {
+        "forwardExcursionM": 0.0125,
+        "lengthM": 0.6954,
+        "maximumZ": -2.034
+      },
+      "junction-to-battery-negative-a": {
+        "forwardExcursionM": 0,
+        "lengthM": 2.8341,
+        "maximumZ": -1.6731
+      },
+      "junction-to-battery-negative-b": {
+        "forwardExcursionM": 0,
+        "lengthM": 3.2071,
+        "maximumZ": -1.3431
+      },
+      "junction-to-class-t-a": {
+        "forwardExcursionM": 0.059,
+        "lengthM": 1.8883,
+        "maximumZ": -1.949
+      },
+      "junction-to-class-t-b": {
+        "forwardExcursionM": 0.059,
+        "lengthM": 1.597,
+        "maximumZ": -1.949
+      },
+      "battery-a-to-class-t": {
+        "forwardExcursionM": 0.0205,
+        "lengthM": 1.3374,
+        "maximumZ": -1.6526
+      },
+      "battery-b-to-class-t": {
+        "forwardExcursionM": 0.0205,
+        "lengthM": 1.9091,
+        "maximumZ": -1.3226
+      },
+      "balancer-a-positive": {
+        "forwardExcursionM": 0,
+        "lengthM": 0.7461,
+        "maximumZ": -1.6481
+      },
+      "balancer-a-midpoint": {
+        "forwardExcursionM": 0,
+        "lengthM": 1.0515,
+        "maximumZ": -1.6481
+      },
+      "balancer-a-negative": {
+        "forwardExcursionM": 0,
+        "lengthM": 1.3935,
+        "maximumZ": -1.6481
+      },
+      "balancer-b-positive": {
+        "forwardExcursionM": 0,
+        "lengthM": 1.4785,
+        "maximumZ": -1.3181
+      },
+      "balancer-b-midpoint": {
+        "forwardExcursionM": 0,
+        "lengthM": 2.0685,
+        "maximumZ": -1.3181
+      },
+      "balancer-b-negative": {
+        "forwardExcursionM": 0,
+        "lengthM": 2.4105,
+        "maximumZ": -1.3181
+      },
+      "multiplus-battery-temperature": {
+        "forwardExcursionM": 0,
+        "lengthM": 2.1866,
+        "maximumZ": -1.6981
+      },
+      "junction-to-multiplus-negative": {
+        "forwardExcursionM": 0.1185,
+        "lengthM": 3.0583,
+        "maximumZ": -1.928
+      },
+      "junction-to-multiplus-positive": {
+        "forwardExcursionM": 0.101,
+        "lengthM": 2.9363,
+        "maximumZ": -1.907
+      },
+      "generator-flex": {
+        "forwardExcursionM": 0.0125,
+        "lengthM": 3.3818,
+        "maximumZ": -2.034
+      },
+      "junction-to-mppt-positive": {
+        "forwardExcursionM": 0.136,
+        "lengthM": 1.3318,
+        "maximumZ": -1.9295
+      },
+      "junction-to-mppt-negative": {
+        "forwardExcursionM": 0.1205,
+        "lengthM": 1.1948,
+        "maximumZ": -1.8875
+      },
+      "junction-to-outdoor-flood-negative": {
+        "forwardExcursionM": 0.081,
+        "lengthM": 2.0901,
+        "maximumZ": -1.949
+      },
+      "junction-to-outdoor-flood-positive": {
+        "forwardExcursionM": 0.1153,
+        "lengthM": 2.2657,
+        "maximumZ": -1.9147
+      },
+      "junction-to-indoor-light-negative": {
+        "forwardExcursionM": 0,
+        "lengthM": 3.211,
+        "maximumZ": -0.72
+      },
+      "junction-to-indoor-light-positive": {
+        "forwardExcursionM": 0,
+        "lengthM": 3.31,
+        "maximumZ": -0.72
+      },
+      "junction-to-ekrano-data": {
+        "forwardExcursionM": 0.1432,
+        "lengthM": 1.3799,
+        "maximumZ": -1.9328
+      },
+      "junction-to-ekrano-negative": {
+        "forwardExcursionM": 0.127,
+        "lengthM": 1.208,
+        "maximumZ": -1.949
+      },
+      "junction-to-ekrano-positive": {
+        "forwardExcursionM": 0.1853,
+        "lengthM": 1.4226,
+        "maximumZ": -1.8907
+      },
+      "junction-to-starlink-power-cable": {
+        "forwardExcursionM": 0.0728,
+        "lengthM": 2.7713,
+        "maximumZ": -1.9352
+      },
+      "junction-to-unifi-converter-positive": {
+        "forwardExcursionM": 0.1961,
+        "lengthM": 1.4927,
+        "maximumZ": -1.8799
+      },
+      "junction-to-unifi-converter-negative": {
+        "forwardExcursionM": 0.2077,
+        "lengthM": 1.2499,
+        "maximumZ": -1.8683
+      },
+      "junction-to-usb-positive": {
+        "forwardExcursionM": 0.2197,
+        "lengthM": 1.3103,
+        "maximumZ": -1.8563
+      },
+      "junction-to-usb-negative": {
+        "forwardExcursionM": 0.1617,
+        "lengthM": 1.3663,
+        "maximumZ": -1.9143
+      },
+      "unifi-converter-to-unifi-power": {
+        "forwardExcursionM": 0.016,
+        "lengthM": 0.6157,
+        "maximumZ": -2.086
+      },
+      "unifi-to-ekrano-data": {
+        "forwardExcursionM": 0.0274,
+        "lengthM": 0.7112,
+        "maximumZ": -2.0746
+      },
+      "smartsolar-to-ekrano-data": {
+        "forwardExcursionM": 0.0077,
+        "lengthM": 1.0142,
+        "maximumZ": -2.0578
+      },
+      "multiplus-to-ekrano-data": {
+        "forwardExcursionM": 0.0287,
+        "lengthM": 1.7564,
+        "maximumZ": -2.0178
+      },
+      "balancer-a-alarm": {
+        "forwardExcursionM": 0.0075,
+        "lengthM": 1.7291,
+        "maximumZ": -2.086
+      },
+      "balancer-b-alarm": {
+        "forwardExcursionM": 0.0075,
+        "lengthM": 1.1629,
+        "maximumZ": -2.086
+      },
+      "starlink-to-unifi-data": {
+        "forwardExcursionM": 0,
+        "lengthM": 1.7224,
+        "maximumZ": -2.04
+      },
+      "earth-electrode-to-main-bar": {
+        "forwardExcursionM": 0.018,
+        "lengthM": 2.679,
+        "maximumZ": -2.086
+      },
+      "earth-bar-to-pv-entry": {
+        "forwardExcursionM": 0.0084,
+        "lengthM": 0.8005,
+        "maximumZ": -2.0486
+      },
+      "earth-bar-to-smartsolar": {
+        "forwardExcursionM": 0.0457,
+        "lengthM": 1.4314,
+        "maximumZ": -2.0198
+      },
+      "earth-bar-to-multiplus": {
+        "forwardExcursionM": 0.0408,
+        "lengthM": 1.0632,
+        "maximumZ": -2.0057
+      },
+      "earth-bar-to-ac-board": {
+        "forwardExcursionM": 0.0084,
+        "lengthM": 0.5547,
+        "maximumZ": -2.0586
+      },
+      "earth-bar-to-ekrano": {
+        "forwardExcursionM": 0.0561,
+        "lengthM": 1.4186,
+        "maximumZ": -2.046
+      }
+    },
+    "specification": {
+      "revision": "layout-solver-r12-oriented-device-ports",
+      "coordinateSystem": "metres; +X right along wall, +Y up, +Z toward viewer/south",
+      "devices": {
+        "equipmentBoard": {
+          "id": "equipmentBoard",
+          "position": [
+            2.95,
+            1.5,
+            -2.13
+          ],
+          "size": [
+            3.4,
+            2.5,
+            0.018
+          ],
+          "mounting": "wall"
+        },
+        "pvEntry": {
+          "id": "pvEntry",
+          "position": [
+            1.4050000000000002,
+            0.95,
+            -2.057
+          ],
+          "size": [
+            0.25,
+            0.3,
+            0.12
+          ],
+          "mounting": "wall"
+        },
+        "smartSolar": {
+          "id": "smartSolar",
+          "position": [
+            2.4266445675094843,
+            0.9030601608515292,
+            -2.0655
+          ],
+          "size": [
+            0.295,
+            0.216,
+            0.103
+          ],
+          "mounting": "wall"
+        },
+        "multiPlus": {
+          "id": "multiPlus",
+          "position": [
+            1.4140000000000001,
+            2.1069739184909353,
+            -2.0465
+          ],
+          "size": [
+            0.268,
+            0.499,
+            0.141
+          ],
+          "mounting": "wall"
+        },
+        "acBoard": {
+          "id": "acBoard",
+          "position": [
+            1.8589704118665402,
+            1.6995733919361622,
+            -2.067
+          ],
+          "size": [
+            0.22,
+            0.18,
+            0.1
+          ],
+          "mounting": "wall"
+        },
+        "junction": {
+          "id": "junction",
+          "position": [
+            3.118855120317175,
+            1.1406416539394766,
+            -2.042
+          ],
+          "size": [
+            0.37,
+            0.265,
+            0.15
+          ],
+          "mounting": "wall"
+        },
+        "ekran": {
+          "id": "ekran",
+          "position": [
+            2.7199355517634953,
+            1.58,
+            -2.1021
+          ],
+          "size": [
+            0.187,
+            0.124,
+            0.0298
+          ],
+          "mounting": "wall"
+        },
+        "unifi": {
+          "id": "unifi",
+          "position": [
+            3.0634355517634955,
+            1.8328479721884565,
+            -2.102
+          ],
+          "size": [
+            0.098,
+            0.098,
+            0.03
+          ],
+          "mounting": "wall"
+        },
+        "usb": {
+          "id": "usb",
+          "position": [
+            3.594855120317175,
+            1.4205442207084704,
+            -2.097
+          ],
+          "size": [
+            0.18,
+            0.075,
+            0.075
+          ],
+          "mounting": "wall"
+        },
+        "unifiPower": {
+          "id": "unifiPower",
+          "position": [
+            3.243054496450663,
+            1.5608479721884565,
+            -2.102
+          ],
+          "size": [
+            0.1,
+            0.044,
+            0.03
+          ],
+          "mounting": "wall"
+        },
+        "balancerA": {
+          "id": "balancerA",
+          "position": [
+            2.1440348759456604,
+            0.47143076682297114,
+            -2.0935
+          ],
+          "size": [
+            0.113,
+            0.1,
+            0.047
+          ],
+          "mounting": "wall"
+        },
+        "balancerB": {
+          "id": "balancerB",
+          "position": [
+            2.7583496887678436,
+            0.5440601608515292,
+            -2.0935
+          ],
+          "size": [
+            0.113,
+            0.1,
+            0.047
+          ],
+          "mounting": "wall"
+        },
+        "classTA": {
+          "id": "classTA",
+          "position": [
+            1.8115348759456606,
+            0.6852445765323271,
+            -2.087
+          ],
+          "size": [
+            0.15,
+            0.055,
+            0.06
+          ],
+          "mounting": "wall"
+        },
+        "classTB": {
+          "id": "classTB",
+          "position": [
+            1.9017921456002886,
+            1.0172089731288645,
+            -2.087
+          ],
+          "size": [
+            0.15,
+            0.055,
+            0.06
+          ],
+          "mounting": "wall"
+        },
+        "earthBar": {
+          "id": "earthBar",
+          "position": [
+            1.8003189940460982,
+            1.2582089731288644,
+            -2.104
+          ],
+          "size": [
+            0.14,
+            0.025,
+            0.026
+          ],
+          "mounting": "wall"
+        },
+        "trailingSocket": {
+          "id": "trailingSocket",
+          "position": [
+            1.859,
+            1.5196,
+            -1.94
+          ],
+          "size": [
+            0.09,
+            0.13,
+            0.07
+          ],
+          "mounting": "hanging"
+        },
+        "generator": {
+          "id": "generator",
+          "position": [
+            0.15,
+            0.28,
+            -2.8
+          ],
+          "size": [
+            0.6,
+            0.56,
+            0.48
+          ],
+          "mounting": "exterior"
+        },
+        "battery1": {
+          "id": "battery1",
+          "position": [
+            1.5252920688512825,
+            0.11,
+            -1.72805263065558
+          ],
+          "size": [
+            0.52,
+            0.22,
+            0.238
+          ],
+          "mounting": "floor"
+        },
+        "battery2": {
+          "id": "battery2",
+          "position": [
+            2.085292068851283,
+            0.11,
+            -1.72805263065558
+          ],
+          "size": [
+            0.52,
+            0.22,
+            0.238
+          ],
+          "mounting": "floor"
+        },
+        "battery3": {
+          "id": "battery3",
+          "position": [
+            1.5252920688512825,
+            0.11,
+            -1.3980526306555798
+          ],
+          "size": [
+            0.52,
+            0.22,
+            0.238
+          ],
+          "mounting": "floor"
+        },
+        "battery4": {
+          "id": "battery4",
+          "position": [
+            2.085292068851283,
+            0.11,
+            -1.3980526306555798
+          ],
+          "size": [
+            0.52,
+            0.22,
+            0.238
+          ],
+          "mounting": "floor"
+        },
+        "starlink": {
+          "id": "starlink",
+          "position": [
+            2.953193195645349,
+            3.357254139878754,
+            -2.04
+          ],
+          "size": [
+            0.2985,
+            0.0385,
+            0.259
+          ],
+          "mounting": "exterior"
+        },
+        "indoorLight": {
+          "id": "indoorLight",
+          "position": [
+            3.2174435901890455,
+            2.7115681781885344,
+            -0.72
+          ],
+          "size": [
+            0.127,
+            0.1,
+            0.055
+          ],
+          "mounting": "hanging"
+        },
+        "outdoorFlood": {
+          "id": "outdoorFlood",
+          "position": [
+            3.1047767981365246,
+            2.4530826301215907,
+            -2.03
+          ],
+          "size": [
+            0.127,
+            0.1,
+            0.055
+          ],
+          "mounting": "exterior"
+        },
+        "junctionControls": {
+          "id": "junctionControls",
+          "position": [
+            2.9169,
+            1.2036,
+            -2.034
+          ],
+          "size": [
+            0.034,
+            0.116,
+            0.064
+          ],
+          "mounting": "wall"
+        }
+      },
+      "ports": {
+        "pvEntryStringAPositive": [
+          1.3,
+          0.794,
+          -2.057
+        ],
+        "pvEntryStringANegative": [
+          1.335,
+          0.794,
+          -2.057
+        ],
+        "pvEntryStringBPositive": [
+          1.37,
+          0.794,
+          -2.057
+        ],
+        "pvEntryStringBNegative": [
+          1.405,
+          0.794,
+          -2.057
+        ],
+        "pvEntryMpptPositive": [
+          1.44,
+          0.794,
+          -2.057
+        ],
+        "pvEntryMpptNegative": [
+          1.475,
+          0.794,
+          -2.057
+        ],
+        "smartSolarPvPositive": [
+          2.3116,
+          0.7891,
+          -2.0655
+        ],
+        "smartSolarPvNegative": [
+          2.3576,
+          0.7891,
+          -2.0655
+        ],
+        "smartSolarBatteryPositive": [
+          2.4036,
+          0.7891,
+          -2.0655
+        ],
+        "smartSolarBatteryNegative": [
+          2.4496,
+          0.7891,
+          -2.0655
+        ],
+        "multiPlusDcPositive": [
+          1.304,
+          1.8515,
+          -2.0465
+        ],
+        "multiPlusDcNegative": [
+          1.348,
+          1.8515,
+          -2.0465
+        ],
+        "multiPlusAcInputCable": [
+          1.392,
+          1.8515,
+          -2.0465
+        ],
+        "multiPlusAcOutputCable": [
+          1.436,
+          1.8515,
+          -2.0465
+        ],
+        "multiPlusTemperatureSense": [
+          1.502,
+          1.8515,
+          -2.0465
+        ],
+        "acBoardAcCable": [
+          1.799,
+          1.6036,
+          -2.067
+        ],
+        "acBoardToolCable": [
+          1.859,
+          1.6036,
+          -2.067
+        ],
+        "trailingSocketAcCable": [
+          1.859,
+          1.4486,
+          -1.94
+        ],
+        "generatorAcCable": [
+          0.462,
+          0.1792,
+          -2.8
+        ],
+        "ekranPowerPositive": [
+          2.6359,
+          1.512,
+          -2.1021
+        ],
+        "ekranPowerNegative": [
+          2.6569,
+          1.512,
+          -2.1021
+        ],
+        "ekranVeDirect1": [
+          2.6779,
+          1.512,
+          -2.1021
+        ],
+        "ekranVeDirect2": [
+          2.6989,
+          1.512,
+          -2.1021
+        ],
+        "ekranVeBus": [
+          2.7199,
+          1.512,
+          -2.1021
+        ],
+        "ekranEthernet": [
+          2.7409,
+          1.512,
+          -2.1021
+        ],
+        "ekranDigitalInput1": [
+          2.7619,
+          1.512,
+          -2.1021
+        ],
+        "ekranDigitalInput2": [
+          2.7829,
+          1.512,
+          -2.1021
+        ],
+        "unifiPower": [
+          3.0314,
+          1.7778,
+          -2.102
+        ],
+        "unifiWan": [
+          3.0634,
+          1.7778,
+          -2.102
+        ],
+        "unifiLan": [
+          3.0954,
+          1.7778,
+          -2.102
+        ],
+        "usbPositive": [
+          3.5749,
+          1.377,
+          -2.097
+        ],
+        "usbNegative": [
+          3.6149,
+          1.377,
+          -2.097
+        ],
+        "unifiConverterPositive": [
+          3.2081,
+          1.5328,
+          -2.102
+        ],
+        "unifiConverterNegative": [
+          3.2431,
+          1.5328,
+          -2.102
+        ],
+        "unifiConverterUsb": [
+          3.2781,
+          1.5328,
+          -2.102
+        ],
+        "starlinkEthernet": [
+          2.9932,
+          3.332,
+          -2.04
+        ],
+        "starlinkPowerCable": [
+          2.9282,
+          3.332,
+          -2.04
+        ],
+        "indoorLightPositive": [
+          3.1994,
+          2.6556,
+          -0.72
+        ],
+        "indoorLightNegative": [
+          3.2354,
+          2.6556,
+          -0.72
+        ],
+        "outdoorFloodPositive": [
+          3.0828,
+          2.3971,
+          -2.03
+        ],
+        "outdoorFloodNegative": [
+          3.1268,
+          2.3971,
+          -2.03
+        ],
+        "earthElectrode": [
+          0.72,
+          0.1,
+          -2.58
+        ],
+        "arrayFrameEarth": [
+          -1.67,
+          0.13,
+          -2.28
+        ],
+        "pvEntryEarth": [
+          1.51,
+          0.794,
+          -2.057
+        ],
+        "smartSolarEarth": [
+          2.5416,
+          0.7891,
+          -2.0655
+        ],
+        "smartSolarData": [
+          2.4956,
+          0.7891,
+          -2.0655
+        ],
+        "multiPlusChassisEarth": [
+          1.524,
+          1.8515,
+          -2.0465
+        ],
+        "multiPlusData": [
+          1.48,
+          1.8515,
+          -2.0465
+        ],
+        "acBoardEarth": [
+          1.919,
+          1.6036,
+          -2.067
+        ],
+        "ekranEarth": [
+          2.8039,
+          1.512,
+          -2.1021
+        ],
+        "classTAInput": [
+          1.7715,
+          0.6517,
+          -2.087
+        ],
+        "classTAOutput": [
+          1.8515,
+          0.6517,
+          -2.087
+        ],
+        "classTBInput": [
+          1.8618,
+          0.9837,
+          -2.087
+        ],
+        "classTBOutput": [
+          1.9418,
+          0.9837,
+          -2.087
+        ],
+        "panelStringAPositive": [
+          0.559,
+          0.925,
+          -1.18
+        ],
+        "panelStringANegative": [
+          -1.659,
+          0.205,
+          -1.18
+        ],
+        "panelStringBPositive": [
+          0.559,
+          0.925,
+          1.18
+        ],
+        "panelStringBNegative": [
+          -1.659,
+          0.205,
+          1.18
+        ],
+        "earthBar1": [
+          1.7473,
+          1.2397,
+          -2.104
+        ],
+        "earthBar2": [
+          1.765,
+          1.2397,
+          -2.104
+        ],
+        "earthBar3": [
+          1.7827,
+          1.2397,
+          -2.104
+        ],
+        "earthBar4": [
+          1.8003,
+          1.2397,
+          -2.104
+        ],
+        "earthBar5": [
+          1.818,
+          1.2397,
+          -2.104
+        ],
+        "earthBar6": [
+          1.8357,
+          1.2397,
+          -2.104
+        ],
+        "earthBar7": [
+          1.8533,
+          1.2397,
+          -2.104
+        ],
+        "junctionEkranPositive": [
+          3.0194,
+          0.9936,
+          -2.076
+        ],
+        "junctionEkranNegative": [
+          3.0264,
+          0.9936,
+          -2.076
+        ],
+        "junctionBatteryNegativeA": [
+          3.0479,
+          0.9936,
+          -2.076
+        ],
+        "junctionBatteryNegativeB": [
+          3.0789,
+          0.9936,
+          -2.076
+        ],
+        "junctionEkranData": [
+          3.1029,
+          0.9936,
+          -2.076
+        ],
+        "junctionMultiPlusNegative": [
+          3.1269,
+          0.9936,
+          -2.076
+        ],
+        "junctionLoadPositive3": [
+          3.1484,
+          0.9936,
+          -2.076
+        ],
+        "junctionLoadNegative3": [
+          3.1564,
+          0.9936,
+          -2.076
+        ],
+        "junctionLoadPositive2": [
+          3.1684,
+          0.9936,
+          -2.076
+        ],
+        "junctionLoadNegative2": [
+          3.1754,
+          0.9936,
+          -2.076
+        ],
+        "junctionLoadPositive5": [
+          3.1874,
+          0.9936,
+          -2.076
+        ],
+        "junctionLoadNegative5": [
+          3.1944,
+          0.9936,
+          -2.076
+        ],
+        "junctionMpptPositive": [
+          3.2124,
+          0.9936,
+          -2.076
+        ],
+        "junctionStarlinkCable": [
+          3.0509,
+          0.9936,
+          -2.008
+        ],
+        "junctionMpptNegative": [
+          3.0734,
+          0.9936,
+          -2.008
+        ],
+        "junctionMultiPlusPositive": [
+          3.1009,
+          0.9936,
+          -2.008
+        ],
+        "junctionBatteryPositiveB": [
+          3.1319,
+          0.9936,
+          -2.008
+        ],
+        "junctionBatteryPositiveA": [
+          3.1629,
+          0.9936,
+          -2.008
+        ],
+        "junctionLoadPositive4": [
+          3.1844,
+          0.9936,
+          -2.008
+        ],
+        "junctionLoadNegative4": [
+          3.1914,
+          0.9936,
+          -2.008
+        ],
+        "balancerAPositive": [
+          2.099,
+          0.4154,
+          -2.0935
+        ],
+        "balancerAMidpoint": [
+          2.129,
+          0.4154,
+          -2.0935
+        ],
+        "balancerANegative": [
+          2.159,
+          0.4154,
+          -2.0935
+        ],
+        "balancerAAlarm": [
+          2.189,
+          0.4154,
+          -2.0935
+        ],
+        "balancerBPositive": [
+          2.7133,
+          0.4881,
+          -2.0935
+        ],
+        "balancerBMidpoint": [
+          2.7433,
+          0.4881,
+          -2.0935
+        ],
+        "balancerBNegative": [
+          2.7733,
+          0.4881,
+          -2.0935
+        ],
+        "balancerBAlarm": [
+          2.8033,
+          0.4881,
+          -2.0935
+        ],
+        "aNegative": [
+          1.3553,
+          0.257,
+          -1.6731
+        ],
+        "aMidLeft": [
+          1.6953,
+          0.257,
+          -1.6731
+        ],
+        "aMidRight": [
+          1.9153,
+          0.257,
+          -1.6731
+        ],
+        "aPositive": [
+          2.2553,
+          0.257,
+          -1.6731
+        ],
+        "bNegative": [
+          1.3553,
+          0.257,
+          -1.3431
+        ],
+        "bMidLeft": [
+          1.6953,
+          0.257,
+          -1.3431
+        ],
+        "bMidRight": [
+          1.9153,
+          0.257,
+          -1.3431
+        ],
+        "bPositive": [
+          2.2553,
+          0.257,
+          -1.3431
+        ],
+        "aNegativeBalancer": [
+          1.3693,
+          0.257,
+          -1.6481
+        ],
+        "aMidLeftBalancer": [
+          1.6813,
+          0.257,
+          -1.6481
+        ],
+        "aPositiveBalancer": [
+          2.2413,
+          0.257,
+          -1.6481
+        ],
+        "bNegativeBalancer": [
+          1.3693,
+          0.257,
+          -1.3181
+        ],
+        "bMidLeftBalancer": [
+          1.6813,
+          0.257,
+          -1.3181
+        ],
+        "bPositiveBalancer": [
+          2.2413,
+          0.257,
+          -1.3181
+        ],
+        "aNegativeTemperature": [
+          1.3413,
+          0.257,
+          -1.6981
+        ]
+      },
+      "portSpecifications": {
+        "panelStringAPositive": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "solarPanels",
+          "direction": [
+            1,
+            0,
+            0
+          ],
+          "face": [
+            0.547,
+            0.925,
+            -1.18
+          ],
+          "lengthM": 0.012,
+          "position": [
+            0.559,
+            0.925,
+            -1.18
+          ]
+        },
+        "panelStringANegative": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "solarPanels",
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "face": [
+            -1.659,
+            0.205,
+            -1.168
+          ],
+          "lengthM": 0.012,
+          "position": [
+            -1.659,
+            0.205,
+            -1.18
+          ]
+        },
+        "panelStringBPositive": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "solarPanels",
+          "direction": [
+            1,
+            0,
+            0
+          ],
+          "face": [
+            0.547,
+            0.925,
+            1.18
+          ],
+          "lengthM": 0.012,
+          "position": [
+            0.559,
+            0.925,
+            1.18
+          ]
+        },
+        "panelStringBNegative": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "solarPanels",
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "face": [
+            -1.659,
+            0.205,
+            1.192
+          ],
+          "lengthM": 0.012,
+          "position": [
+            -1.659,
+            0.205,
+            1.18
+          ]
+        },
+        "pvEntryStringAPositive": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "pvEntry",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.3,
+            0.8,
+            -2.057
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.3,
+            0.794,
+            -2.057
+          ]
+        },
+        "pvEntryStringANegative": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "pvEntry",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.335,
+            0.8,
+            -2.057
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.335,
+            0.794,
+            -2.057
+          ]
+        },
+        "pvEntryStringBPositive": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "pvEntry",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.37,
+            0.8,
+            -2.057
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.37,
+            0.794,
+            -2.057
+          ]
+        },
+        "pvEntryStringBNegative": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "pvEntry",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.405,
+            0.8,
+            -2.057
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.405,
+            0.794,
+            -2.057
+          ]
+        },
+        "pvEntryMpptPositive": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "pvEntry",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.44,
+            0.8,
+            -2.057
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.44,
+            0.794,
+            -2.057
+          ]
+        },
+        "smartSolarPvPositive": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "smartSolar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.3116,
+            0.7951,
+            -2.0655
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.3116,
+            0.7891,
+            -2.0655
+          ]
+        },
+        "pvEntryMpptNegative": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "pvEntry",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.475,
+            0.8,
+            -2.057
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.475,
+            0.794,
+            -2.057
+          ]
+        },
+        "smartSolarPvNegative": {
+          "cableRadiusM": 0.0032,
+          "deviceId": "smartSolar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.3576,
+            0.7951,
+            -2.0655
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.3576,
+            0.7891,
+            -2.0655
+          ]
+        },
+        "acBoardToolCable": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "acBoard",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.859,
+            1.6096,
+            -2.067
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.859,
+            1.6036,
+            -2.067
+          ]
+        },
+        "trailingSocketAcCable": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "trailingSocket",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.859,
+            1.4546,
+            -1.94
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.859,
+            1.4486,
+            -1.94
+          ]
+        },
+        "multiPlusAcOutputCable": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "multiPlus",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.436,
+            1.8575,
+            -2.0465
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.436,
+            1.8515,
+            -2.0465
+          ]
+        },
+        "acBoardAcCable": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "acBoard",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.799,
+            1.6096,
+            -2.067
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.799,
+            1.6036,
+            -2.067
+          ]
+        },
+        "aMidLeft": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "battery1",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.6953,
+            0.22,
+            -1.6731
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.6953,
+            0.257,
+            -1.6731
+          ]
+        },
+        "aMidRight": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "battery2",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.9153,
+            0.22,
+            -1.6731
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.9153,
+            0.257,
+            -1.6731
+          ]
+        },
+        "bMidLeft": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "battery3",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.6953,
+            0.22,
+            -1.3431
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.6953,
+            0.257,
+            -1.3431
+          ]
+        },
+        "bMidRight": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "battery4",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.9153,
+            0.22,
+            -1.3431
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.9153,
+            0.257,
+            -1.3431
+          ]
+        },
+        "junctionBatteryNegativeA": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.0479,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.0479,
+            0.9936,
+            -2.076
+          ]
+        },
+        "aNegative": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "battery1",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.3553,
+            0.22,
+            -1.6731
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.3553,
+            0.257,
+            -1.6731
+          ]
+        },
+        "junctionBatteryNegativeB": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.0789,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.0789,
+            0.9936,
+            -2.076
+          ]
+        },
+        "bNegative": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "battery3",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.3553,
+            0.22,
+            -1.3431
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.3553,
+            0.257,
+            -1.3431
+          ]
+        },
+        "junctionBatteryPositiveA": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1629,
+            1.0081,
+            -2.008
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1629,
+            0.9936,
+            -2.008
+          ]
+        },
+        "classTAOutput": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "classTA",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.8515,
+            0.6577,
+            -2.087
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.8515,
+            0.6517,
+            -2.087
+          ]
+        },
+        "junctionBatteryPositiveB": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1319,
+            1.0081,
+            -2.008
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1319,
+            0.9936,
+            -2.008
+          ]
+        },
+        "classTBOutput": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "classTB",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.9418,
+            0.9897,
+            -2.087
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.9418,
+            0.9837,
+            -2.087
+          ]
+        },
+        "aPositive": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "battery2",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            2.2553,
+            0.22,
+            -1.6731
+          ],
+          "lengthM": 0.037,
+          "position": [
+            2.2553,
+            0.257,
+            -1.6731
+          ]
+        },
+        "classTAInput": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "classTA",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.7715,
+            0.6577,
+            -2.087
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.7715,
+            0.6517,
+            -2.087
+          ]
+        },
+        "bPositive": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "battery4",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            2.2553,
+            0.22,
+            -1.3431
+          ],
+          "lengthM": 0.037,
+          "position": [
+            2.2553,
+            0.257,
+            -1.3431
+          ]
+        },
+        "classTBInput": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "classTB",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.8618,
+            0.9897,
+            -2.087
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.8618,
+            0.9837,
+            -2.087
+          ]
+        },
+        "balancerAPositive": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "balancerA",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.099,
+            0.4214,
+            -2.0935
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.099,
+            0.4154,
+            -2.0935
+          ]
+        },
+        "aPositiveBalancer": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "battery2",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            2.2413,
+            0.22,
+            -1.6481
+          ],
+          "lengthM": 0.037,
+          "position": [
+            2.2413,
+            0.257,
+            -1.6481
+          ]
+        },
+        "balancerAMidpoint": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "balancerA",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.129,
+            0.4214,
+            -2.0935
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.129,
+            0.4154,
+            -2.0935
+          ]
+        },
+        "aMidLeftBalancer": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "battery1",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.6813,
+            0.22,
+            -1.6481
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.6813,
+            0.257,
+            -1.6481
+          ]
+        },
+        "balancerANegative": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "balancerA",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.159,
+            0.4214,
+            -2.0935
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.159,
+            0.4154,
+            -2.0935
+          ]
+        },
+        "aNegativeBalancer": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "battery1",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.3693,
+            0.22,
+            -1.6481
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.3693,
+            0.257,
+            -1.6481
+          ]
+        },
+        "balancerBPositive": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "balancerB",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.7133,
+            0.4941,
+            -2.0935
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.7133,
+            0.4881,
+            -2.0935
+          ]
+        },
+        "bPositiveBalancer": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "battery4",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            2.2413,
+            0.22,
+            -1.3181
+          ],
+          "lengthM": 0.037,
+          "position": [
+            2.2413,
+            0.257,
+            -1.3181
+          ]
+        },
+        "balancerBMidpoint": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "balancerB",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.7433,
+            0.4941,
+            -2.0935
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.7433,
+            0.4881,
+            -2.0935
+          ]
+        },
+        "bMidLeftBalancer": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "battery3",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.6813,
+            0.22,
+            -1.3181
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.6813,
+            0.257,
+            -1.3181
+          ]
+        },
+        "balancerBNegative": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "balancerB",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.7733,
+            0.4941,
+            -2.0935
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.7733,
+            0.4881,
+            -2.0935
+          ]
+        },
+        "bNegativeBalancer": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "battery3",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.3693,
+            0.22,
+            -1.3181
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.3693,
+            0.257,
+            -1.3181
+          ]
+        },
+        "multiPlusTemperatureSense": {
+          "cableRadiusM": 0.0015,
+          "deviceId": "multiPlus",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.502,
+            1.8575,
+            -2.0465
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.502,
+            1.8515,
+            -2.0465
+          ]
+        },
+        "aNegativeTemperature": {
+          "cableRadiusM": 0.0015,
+          "deviceId": "battery1",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            1.3413,
+            0.22,
+            -1.6981
+          ],
+          "lengthM": 0.037,
+          "position": [
+            1.3413,
+            0.257,
+            -1.6981
+          ]
+        },
+        "junctionMultiPlusNegative": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1269,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1269,
+            0.9936,
+            -2.076
+          ]
+        },
+        "multiPlusDcNegative": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "multiPlus",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.348,
+            1.8575,
+            -2.0465
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.348,
+            1.8515,
+            -2.0465
+          ]
+        },
+        "junctionMultiPlusPositive": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1009,
+            1.0081,
+            -2.008
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1009,
+            0.9936,
+            -2.008
+          ]
+        },
+        "multiPlusDcPositive": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "multiPlus",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.304,
+            1.8575,
+            -2.0465
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.304,
+            1.8515,
+            -2.0465
+          ]
+        },
+        "generatorAcCable": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "generator",
+          "direction": [
+            1,
+            0,
+            0
+          ],
+          "face": [
+            0.45,
+            0.1792,
+            -2.8
+          ],
+          "lengthM": 0.012,
+          "position": [
+            0.462,
+            0.1792,
+            -2.8
+          ]
+        },
+        "multiPlusAcInputCable": {
+          "cableRadiusM": 0.0065,
+          "deviceId": "multiPlus",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.392,
+            1.8575,
+            -2.0465
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.392,
+            1.8515,
+            -2.0465
+          ]
+        },
+        "junctionMpptPositive": {
+          "cableRadiusM": 0.005,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.2124,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.2124,
+            0.9936,
+            -2.076
+          ]
+        },
+        "smartSolarBatteryPositive": {
+          "cableRadiusM": 0.005,
+          "deviceId": "smartSolar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.4036,
+            0.7951,
+            -2.0655
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.4036,
+            0.7891,
+            -2.0655
+          ]
+        },
+        "junctionMpptNegative": {
+          "cableRadiusM": 0.005,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.0734,
+            1.0081,
+            -2.008
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.0734,
+            0.9936,
+            -2.008
+          ]
+        },
+        "smartSolarBatteryNegative": {
+          "cableRadiusM": 0.005,
+          "deviceId": "smartSolar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.4496,
+            0.7951,
+            -2.0655
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.4496,
+            0.7891,
+            -2.0655
+          ]
+        },
+        "junctionLoadNegative5": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1944,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1944,
+            0.9936,
+            -2.076
+          ]
+        },
+        "outdoorFloodNegative": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "outdoorFlood",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1268,
+            2.4031,
+            -2.03
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.1268,
+            2.3971,
+            -2.03
+          ]
+        },
+        "junctionLoadPositive5": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1874,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1874,
+            0.9936,
+            -2.076
+          ]
+        },
+        "outdoorFloodPositive": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "outdoorFlood",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.0828,
+            2.4031,
+            -2.03
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.0828,
+            2.3971,
+            -2.03
+          ]
+        },
+        "junctionLoadNegative4": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1914,
+            1.0081,
+            -2.008
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1914,
+            0.9936,
+            -2.008
+          ]
+        },
+        "indoorLightNegative": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "indoorLight",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.2354,
+            2.6616,
+            -0.72
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.2354,
+            2.6556,
+            -0.72
+          ]
+        },
+        "junctionLoadPositive4": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1844,
+            1.0081,
+            -2.008
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1844,
+            0.9936,
+            -2.008
+          ]
+        },
+        "indoorLightPositive": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "indoorLight",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1994,
+            2.6616,
+            -0.72
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.1994,
+            2.6556,
+            -0.72
+          ]
+        },
+        "junctionEkranData": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1029,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1029,
+            0.9936,
+            -2.076
+          ]
+        },
+        "ekranVeDirect1": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "ekran",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.6779,
+            1.518,
+            -2.1021
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.6779,
+            1.512,
+            -2.1021
+          ]
+        },
+        "junctionEkranNegative": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.0264,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.0264,
+            0.9936,
+            -2.076
+          ]
+        },
+        "ekranPowerNegative": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "ekran",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.6569,
+            1.518,
+            -2.1021
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.6569,
+            1.512,
+            -2.1021
+          ]
+        },
+        "junctionEkranPositive": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.0194,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.0194,
+            0.9936,
+            -2.076
+          ]
+        },
+        "ekranPowerPositive": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "ekran",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.6359,
+            1.518,
+            -2.1021
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.6359,
+            1.512,
+            -2.1021
+          ]
+        },
+        "junctionStarlinkCable": {
+          "cableRadiusM": 0.004,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.0509,
+            1.0081,
+            -2.008
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.0509,
+            0.9936,
+            -2.008
+          ]
+        },
+        "starlinkPowerCable": {
+          "cableRadiusM": 0.004,
+          "deviceId": "starlink",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.9282,
+            3.338,
+            -2.04
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.9282,
+            3.332,
+            -2.04
+          ]
+        },
+        "junctionLoadPositive2": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1684,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1684,
+            0.9936,
+            -2.076
+          ]
+        },
+        "unifiConverterPositive": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "unifiPower",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.2081,
+            1.5388,
+            -2.102
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.2081,
+            1.5328,
+            -2.102
+          ]
+        },
+        "junctionLoadNegative2": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1754,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1754,
+            0.9936,
+            -2.076
+          ]
+        },
+        "unifiConverterNegative": {
+          "cableRadiusM": 0.0018,
+          "deviceId": "unifiPower",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.2431,
+            1.5388,
+            -2.102
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.2431,
+            1.5328,
+            -2.102
+          ]
+        },
+        "junctionLoadPositive3": {
+          "cableRadiusM": 0.0022,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1484,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1484,
+            0.9936,
+            -2.076
+          ]
+        },
+        "usbPositive": {
+          "cableRadiusM": 0.0022,
+          "deviceId": "usb",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.5749,
+            1.383,
+            -2.097
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.5749,
+            1.377,
+            -2.097
+          ]
+        },
+        "junctionLoadNegative3": {
+          "cableRadiusM": 0.0022,
+          "deviceId": "junction",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.1564,
+            1.0081,
+            -2.076
+          ],
+          "lengthM": 0.0145,
+          "position": [
+            3.1564,
+            0.9936,
+            -2.076
+          ]
+        },
+        "usbNegative": {
+          "cableRadiusM": 0.0022,
+          "deviceId": "usb",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.6149,
+            1.383,
+            -2.097
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.6149,
+            1.377,
+            -2.097
+          ]
+        },
+        "unifiConverterUsb": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "unifiPower",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.2781,
+            1.5388,
+            -2.102
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.2781,
+            1.5328,
+            -2.102
+          ]
+        },
+        "unifiPower": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "unifi",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.0314,
+            1.7838,
+            -2.102
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.0314,
+            1.7778,
+            -2.102
+          ]
+        },
+        "unifiLan": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "unifi",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.0954,
+            1.7838,
+            -2.102
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.0954,
+            1.7778,
+            -2.102
+          ]
+        },
+        "ekranEthernet": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "ekran",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.7409,
+            1.518,
+            -2.1021
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.7409,
+            1.512,
+            -2.1021
+          ]
+        },
+        "smartSolarData": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "smartSolar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.4956,
+            0.7951,
+            -2.0655
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.4956,
+            0.7891,
+            -2.0655
+          ]
+        },
+        "ekranVeDirect2": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "ekran",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.6989,
+            1.518,
+            -2.1021
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.6989,
+            1.512,
+            -2.1021
+          ]
+        },
+        "multiPlusData": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "multiPlus",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.48,
+            1.8575,
+            -2.0465
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.48,
+            1.8515,
+            -2.0465
+          ]
+        },
+        "ekranVeBus": {
+          "cableRadiusM": 0.0017,
+          "deviceId": "ekran",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.7199,
+            1.518,
+            -2.1021
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.7199,
+            1.512,
+            -2.1021
+          ]
+        },
+        "balancerAAlarm": {
+          "cableRadiusM": 0.0015,
+          "deviceId": "balancerA",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.189,
+            0.4214,
+            -2.0935
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.189,
+            0.4154,
+            -2.0935
+          ]
+        },
+        "ekranDigitalInput1": {
+          "cableRadiusM": 0.0015,
+          "deviceId": "ekran",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.7619,
+            1.518,
+            -2.1021
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.7619,
+            1.512,
+            -2.1021
+          ]
+        },
+        "balancerBAlarm": {
+          "cableRadiusM": 0.0015,
+          "deviceId": "balancerB",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.8033,
+            0.4941,
+            -2.0935
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.8033,
+            0.4881,
+            -2.0935
+          ]
+        },
+        "ekranDigitalInput2": {
+          "cableRadiusM": 0.0015,
+          "deviceId": "ekran",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.7829,
+            1.518,
+            -2.1021
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.7829,
+            1.512,
+            -2.1021
+          ]
+        },
+        "starlinkEthernet": {
+          "cableRadiusM": 0.0019,
+          "deviceId": "starlink",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.9932,
+            3.338,
+            -2.04
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.9932,
+            3.332,
+            -2.04
+          ]
+        },
+        "unifiWan": {
+          "cableRadiusM": 0.0019,
+          "deviceId": "unifi",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            3.0634,
+            1.7838,
+            -2.102
+          ],
+          "lengthM": 0.006,
+          "position": [
+            3.0634,
+            1.7778,
+            -2.102
+          ]
+        },
+        "earthElectrode": {
+          "cableRadiusM": 0.003,
+          "deviceId": "earthElectrode",
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "face": [
+            0.72,
+            0.088,
+            -2.58
+          ],
+          "lengthM": 0.012,
+          "position": [
+            0.72,
+            0.1,
+            -2.58
+          ]
+        },
+        "earthBar1": {
+          "cableRadiusM": 0.003,
+          "deviceId": "earthBar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.7473,
+            1.2457,
+            -2.104
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.7473,
+            1.2397,
+            -2.104
+          ]
+        },
+        "arrayFrameEarth": {
+          "cableRadiusM": 0.003,
+          "deviceId": "solarPanels",
+          "direction": [
+            1,
+            0,
+            0
+          ],
+          "face": [
+            -1.682,
+            0.13,
+            -2.28
+          ],
+          "lengthM": 0.012,
+          "position": [
+            -1.67,
+            0.13,
+            -2.28
+          ]
+        },
+        "earthBar2": {
+          "cableRadiusM": 0.0024,
+          "deviceId": "earthBar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.765,
+            1.2457,
+            -2.104
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.765,
+            1.2397,
+            -2.104
+          ]
+        },
+        "pvEntryEarth": {
+          "cableRadiusM": 0.0024,
+          "deviceId": "pvEntry",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.51,
+            0.8,
+            -2.057
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.51,
+            0.794,
+            -2.057
+          ]
+        },
+        "earthBar3": {
+          "cableRadiusM": 0.0024,
+          "deviceId": "earthBar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.7827,
+            1.2457,
+            -2.104
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.7827,
+            1.2397,
+            -2.104
+          ]
+        },
+        "smartSolarEarth": {
+          "cableRadiusM": 0.0024,
+          "deviceId": "smartSolar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.5416,
+            0.7951,
+            -2.0655
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.5416,
+            0.7891,
+            -2.0655
+          ]
+        },
+        "earthBar4": {
+          "cableRadiusM": 0.0024,
+          "deviceId": "earthBar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.8003,
+            1.2457,
+            -2.104
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.8003,
+            1.2397,
+            -2.104
+          ]
+        },
+        "multiPlusChassisEarth": {
+          "cableRadiusM": 0.0024,
+          "deviceId": "multiPlus",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.524,
+            1.8575,
+            -2.0465
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.524,
+            1.8515,
+            -2.0465
+          ]
+        },
+        "earthBar5": {
+          "cableRadiusM": 0.0024,
+          "deviceId": "earthBar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.818,
+            1.2457,
+            -2.104
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.818,
+            1.2397,
+            -2.104
+          ]
+        },
+        "acBoardEarth": {
+          "cableRadiusM": 0.0024,
+          "deviceId": "acBoard",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.919,
+            1.6096,
+            -2.067
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.919,
+            1.6036,
+            -2.067
+          ]
+        },
+        "earthBar6": {
+          "cableRadiusM": 0.0022,
+          "deviceId": "earthBar",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            1.8357,
+            1.2457,
+            -2.104
+          ],
+          "lengthM": 0.006,
+          "position": [
+            1.8357,
+            1.2397,
+            -2.104
+          ]
+        },
+        "ekranEarth": {
+          "cableRadiusM": 0.0022,
+          "deviceId": "ekran",
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "face": [
+            2.8039,
+            1.518,
+            -2.1021
+          ],
+          "lengthM": 0.006,
+          "position": [
+            2.8039,
+            1.512,
+            -2.1021
+          ]
+        }
+      },
+      "routes": {
+        "pv-string-a-positive": {
+          "id": "pv-string-a-positive",
+          "kind": "pv-positive",
+          "points": [
+            [
+              0.559,
+              0.925,
+              -1.18
+            ],
+            [
+              0.69,
+              0.925,
+              -1.18
+            ],
+            [
+              0.69,
+              0.925,
+              -1.62
+            ],
+            [
+              0.69,
+              0.68,
+              -1.62
+            ]
+          ],
+          "radiusM": 0.0032,
+          "conductors": 1,
+          "lengthM": 0.816,
+          "planarDirectionReversals": 0,
+          "routing": "fixed-site",
+          "sourceDeviceId": "solarPanels",
+          "sourcePortId": "panelStringAPositive"
+        },
+        "pv-string-a-negative": {
+          "id": "pv-string-a-negative",
+          "kind": "pv-negative",
+          "points": [
+            [
+              -1.659,
+              0.205,
+              -1.18
+            ],
+            [
+              -1.659,
+              0.205,
+              -1.55
+            ],
+            [
+              -1.659,
+              0.58,
+              -1.55
+            ],
+            [
+              0.69,
+              0.58,
+              -1.55
+            ],
+            [
+              0.69,
+              0.58,
+              -1.62
+            ]
+          ],
+          "radiusM": 0.0032,
+          "conductors": 1,
+          "lengthM": 3.164,
+          "planarDirectionReversals": 0,
+          "routing": "fixed-site",
+          "sourceDeviceId": "solarPanels",
+          "sourcePortId": "panelStringANegative"
+        },
+        "pv-string-b-positive": {
+          "id": "pv-string-b-positive",
+          "kind": "pv-positive",
+          "points": [
+            [
+              0.559,
+              0.925,
+              1.18
+            ],
+            [
+              0.72,
+              0.925,
+              1.18
+            ],
+            [
+              0.72,
+              0.925,
+              -1.55
+            ],
+            [
+              0.72,
+              0.72,
+              -1.55
+            ]
+          ],
+          "radiusM": 0.0032,
+          "conductors": 1,
+          "lengthM": 3.096,
+          "planarDirectionReversals": 0,
+          "routing": "fixed-site",
+          "sourceDeviceId": "solarPanels",
+          "sourcePortId": "panelStringBPositive"
+        },
+        "pv-string-b-negative": {
+          "id": "pv-string-b-negative",
+          "kind": "pv-negative",
+          "points": [
+            [
+              -1.659,
+              0.205,
+              1.18
+            ],
+            [
+              -1.659,
+              0.205,
+              -1.5
+            ],
+            [
+              -1.659,
+              0.52,
+              -1.5
+            ],
+            [
+              0.69,
+              0.52,
+              -1.5
+            ],
+            [
+              0.69,
+              0.52,
+              -1.62
+            ]
+          ],
+          "radiusM": 0.0032,
+          "conductors": 1,
+          "lengthM": 5.464,
+          "planarDirectionReversals": 0,
+          "routing": "fixed-site",
+          "sourceDeviceId": "solarPanels",
+          "sourcePortId": "panelStringBNegative"
+        },
+        "pv-home-run-a-positive": {
+          "id": "pv-home-run-a-positive",
+          "kind": "pv-positive",
+          "points": [
+            [
+              0.69,
+              0.68,
+              -1.62
+            ],
+            [
+              1.06,
+              0.68,
+              -1.62
+            ],
+            [
+              1.06,
+              0.18,
+              -1.62
+            ],
+            [
+              1.06,
+              0.18,
+              -2.086
+            ],
+            [
+              1.28,
+              0.18,
+              -2.086
+            ],
+            [
+              1.28,
+              0.764,
+              -2.086
+            ],
+            [
+              1.28,
+              0.764,
+              -2.057
+            ],
+            [
+              1.3,
+              0.764,
+              -2.057
+            ],
+            [
+              1.3,
+              0.794,
+              -2.057
+            ]
+          ],
+          "radiusM": 0.0032,
+          "conductors": 1,
+          "lengthM": 2.219,
+          "planarDirectionReversals": 1,
+          "routing": "fixed-site",
+          "targetDeviceId": "pvEntry",
+          "targetPortId": "pvEntryStringAPositive"
+        },
+        "pv-home-run-a-negative": {
+          "id": "pv-home-run-a-negative",
+          "kind": "pv-negative",
+          "points": [
+            [
+              0.69,
+              0.58,
+              -1.62
+            ],
+            [
+              1.09,
+              0.58,
+              -1.62
+            ],
+            [
+              1.09,
+              0.21,
+              -1.62
+            ],
+            [
+              1.09,
+              0.21,
+              -2.07
+            ],
+            [
+              1.31,
+              0.21,
+              -2.07
+            ],
+            [
+              1.31,
+              0.749,
+              -2.07
+            ],
+            [
+              1.335,
+              0.749,
+              -2.07
+            ],
+            [
+              1.335,
+              0.749,
+              -2.057
+            ],
+            [
+              1.335,
+              0.794,
+              -2.057
+            ]
+          ],
+          "radiusM": 0.0032,
+          "conductors": 1,
+          "lengthM": 2.062,
+          "planarDirectionReversals": 1,
+          "routing": "fixed-site",
+          "targetDeviceId": "pvEntry",
+          "targetPortId": "pvEntryStringANegative"
+        },
+        "pv-home-run-b-positive": {
+          "id": "pv-home-run-b-positive",
+          "kind": "pv-positive",
+          "points": [
+            [
+              0.72,
+              0.72,
+              -1.55
+            ],
+            [
+              1.12,
+              0.72,
+              -1.55
+            ],
+            [
+              1.12,
+              0.24,
+              -1.55
+            ],
+            [
+              1.12,
+              0.24,
+              -2.054
+            ],
+            [
+              1.34,
+              0.24,
+              -2.054
+            ],
+            [
+              1.34,
+              0.734,
+              -2.054
+            ],
+            [
+              1.37,
+              0.734,
+              -2.054
+            ],
+            [
+              1.37,
+              0.734,
+              -2.057
+            ],
+            [
+              1.37,
+              0.794,
+              -2.057
+            ]
+          ],
+          "radiusM": 0.0032,
+          "conductors": 1,
+          "lengthM": 2.191,
+          "planarDirectionReversals": 1,
+          "routing": "fixed-site",
+          "targetDeviceId": "pvEntry",
+          "targetPortId": "pvEntryStringBPositive"
+        },
+        "pv-home-run-b-negative": {
+          "id": "pv-home-run-b-negative",
+          "kind": "pv-negative",
+          "points": [
+            [
+              0.69,
+              0.52,
+              -1.62
+            ],
+            [
+              1.15,
+              0.52,
+              -1.62
+            ],
+            [
+              1.15,
+              0.27,
+              -1.62
+            ],
+            [
+              1.15,
+              0.27,
+              -2.038
+            ],
+            [
+              1.37,
+              0.27,
+              -2.038
+            ],
+            [
+              1.37,
+              0.719,
+              -2.038
+            ],
+            [
+              1.405,
+              0.719,
+              -2.038
+            ],
+            [
+              1.405,
+              0.719,
+              -2.057
+            ],
+            [
+              1.405,
+              0.794,
+              -2.057
+            ]
+          ],
+          "radiusM": 0.0032,
+          "conductors": 1,
+          "lengthM": 1.926,
+          "planarDirectionReversals": 1,
+          "routing": "fixed-site",
+          "targetDeviceId": "pvEntry",
+          "targetPortId": "pvEntryStringBNegative"
+        },
+        "pv-entry-to-mppt-positive": {
+          "id": "pv-entry-to-mppt-positive",
+          "kind": "pv-positive",
+          "points": [
+            [
+              1.44,
+              0.794,
+              -2.057
+            ],
+            [
+              1.44,
+              0.762,
+              -2.057
+            ],
+            [
+              1.44,
+              0.762,
+              -2.0478
+            ],
+            [
+              2.3116,
+              0.762,
+              -2.0478
+            ],
+            [
+              2.3116,
+              0.7711,
+              -2.0478
+            ],
+            [
+              2.3116,
+              0.7711,
+              -2.0655
+            ],
+            [
+              2.3116,
+              0.7891,
+              -2.0655
+            ]
+          ],
+          "radiusM": 0.0032,
+          "conductors": 1,
+          "lengthM": 0.9576,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "pvEntry",
+          "sourcePortId": "pvEntryMpptPositive",
+          "targetDeviceId": "smartSolar",
+          "targetPortId": "smartSolarPvPositive"
+        },
+        "pv-entry-to-mppt-negative": {
+          "id": "pv-entry-to-mppt-negative",
+          "kind": "pv-negative",
+          "points": [
+            [
+              1.475,
+              0.794,
+              -2.057
+            ],
+            [
+              1.475,
+              0.776,
+              -2.057
+            ],
+            [
+              1.475,
+              0.776,
+              -2.0334
+            ],
+            [
+              1.475,
+              0.7711,
+              -2.0334
+            ],
+            [
+              2.3576,
+              0.7711,
+              -2.0334
+            ],
+            [
+              2.3576,
+              0.7711,
+              -2.0655
+            ],
+            [
+              2.3576,
+              0.7891,
+              -2.0655
+            ]
+          ],
+          "radiusM": 0.0032,
+          "conductors": 1,
+          "lengthM": 0.9792,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "pvEntry",
+          "sourcePortId": "pvEntryMpptNegative",
+          "targetDeviceId": "smartSolar",
+          "targetPortId": "smartSolarPvNegative"
+        },
+        "trailing-tool-flex": {
+          "id": "trailing-tool-flex",
+          "kind": "three-core-ac",
+          "points": [
+            [
+              1.859,
+              1.6036,
+              -2.067
+            ],
+            [
+              1.859,
+              1.5846,
+              -2.067
+            ],
+            [
+              1.859,
+              1.5846,
+              -2.0545
+            ],
+            [
+              1.859,
+              1.5851,
+              -2.0545
+            ],
+            [
+              1.859,
+              1.4301,
+              -2.0545
+            ],
+            [
+              1.859,
+              1.4301,
+              -1.94
+            ],
+            [
+              1.859,
+              1.4296,
+              -1.94
+            ],
+            [
+              1.859,
+              1.4486,
+              -1.94
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 3,
+          "lengthM": 0.321,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "acBoard",
+          "sourcePortId": "acBoardToolCable",
+          "targetDeviceId": "trailingSocket",
+          "targetPortId": "trailingSocketAcCable"
+        },
+        "multiplus-to-ac-output-protection": {
+          "id": "multiplus-to-ac-output-protection",
+          "kind": "three-core-ac",
+          "points": [
+            [
+              1.436,
+              1.8515,
+              -2.0465
+            ],
+            [
+              1.436,
+              1.8325,
+              -2.0465
+            ],
+            [
+              1.436,
+              1.8325,
+              -2.034
+            ],
+            [
+              1.436,
+              1.833,
+              -2.034
+            ],
+            [
+              1.436,
+              1.5851,
+              -2.034
+            ],
+            [
+              1.799,
+              1.5851,
+              -2.034
+            ],
+            [
+              1.799,
+              1.5851,
+              -2.067
+            ],
+            [
+              1.799,
+              1.5846,
+              -2.067
+            ],
+            [
+              1.799,
+              1.6036,
+              -2.067
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 3,
+          "lengthM": 0.6954,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "multiPlus",
+          "sourcePortId": "multiPlusAcOutputCable",
+          "targetDeviceId": "acBoard",
+          "targetPortId": "acBoardAcCable"
+        },
+        "battery-series-a": {
+          "id": "battery-series-a",
+          "kind": "dc-positive",
+          "points": [
+            [
+              1.6953,
+              0.257,
+              -1.6731
+            ],
+            [
+              1.6953,
+              0.276,
+              -1.6731
+            ],
+            [
+              1.9153,
+              0.276,
+              -1.6731
+            ],
+            [
+              1.9153,
+              0.257,
+              -1.6731
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 1,
+          "lengthM": 0.258,
+          "planarDirectionReversals": 1,
+          "routing": "fixed-site",
+          "sourceDeviceId": "battery1",
+          "sourcePortId": "aMidLeft",
+          "targetDeviceId": "battery2",
+          "targetPortId": "aMidRight"
+        },
+        "battery-series-b": {
+          "id": "battery-series-b",
+          "kind": "dc-positive",
+          "points": [
+            [
+              1.6953,
+              0.257,
+              -1.3431
+            ],
+            [
+              1.6953,
+              0.276,
+              -1.3431
+            ],
+            [
+              1.9153,
+              0.276,
+              -1.3431
+            ],
+            [
+              1.9153,
+              0.257,
+              -1.3431
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 1,
+          "lengthM": 0.258,
+          "planarDirectionReversals": 1,
+          "routing": "fixed-site",
+          "sourceDeviceId": "battery3",
+          "sourcePortId": "bMidLeft",
+          "targetDeviceId": "battery4",
+          "targetPortId": "bMidRight"
+        },
+        "junction-to-battery-negative-a": {
+          "id": "junction-to-battery-negative-a",
+          "kind": "dc-negative",
+          "points": [
+            [
+              3.0479,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.0479,
+              0.287,
+              -2.076
+            ],
+            [
+              3.0479,
+              0.287,
+              -1.949
+            ],
+            [
+              3.0479,
+              0.275,
+              -1.949
+            ],
+            [
+              1.3553,
+              0.275,
+              -1.949
+            ],
+            [
+              1.3553,
+              0.275,
+              -1.6731
+            ],
+            [
+              1.3553,
+              0.276,
+              -1.6731
+            ],
+            [
+              1.3553,
+              0.257,
+              -1.6731
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 1,
+          "lengthM": 2.8341,
+          "planarDirectionReversals": 2,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionBatteryNegativeA",
+          "targetDeviceId": "battery1",
+          "targetPortId": "aNegative"
+        },
+        "junction-to-battery-negative-b": {
+          "id": "junction-to-battery-negative-b",
+          "kind": "dc-negative",
+          "points": [
+            [
+              3.0789,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.0789,
+              0.287,
+              -2.076
+            ],
+            [
+              3.0789,
+              0.287,
+              -1.93
+            ],
+            [
+              3.0789,
+              0.294,
+              -1.93
+            ],
+            [
+              1.3553,
+              0.294,
+              -1.93
+            ],
+            [
+              1.3553,
+              0.294,
+              -1.3431
+            ],
+            [
+              1.3553,
+              0.257,
+              -1.3431
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 1,
+          "lengthM": 3.2071,
+          "planarDirectionReversals": 2,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionBatteryNegativeB",
+          "targetDeviceId": "battery3",
+          "targetPortId": "bNegative"
+        },
+        "junction-to-class-t-a": {
+          "id": "junction-to-class-t-a",
+          "kind": "dc-positive",
+          "points": [
+            [
+              3.1629,
+              0.9936,
+              -2.008
+            ],
+            [
+              3.1629,
+              0.6817,
+              -2.008
+            ],
+            [
+              3.1629,
+              0.6817,
+              -1.949
+            ],
+            [
+              3.1629,
+              0.6337,
+              -1.949
+            ],
+            [
+              1.8515,
+              0.6337,
+              -1.949
+            ],
+            [
+              1.8515,
+              0.6337,
+              -2.087
+            ],
+            [
+              1.8515,
+              0.6327,
+              -2.087
+            ],
+            [
+              1.8515,
+              0.6517,
+              -2.087
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 1,
+          "lengthM": 1.8883,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionBatteryPositiveA",
+          "targetDeviceId": "classTA",
+          "targetPortId": "classTAOutput"
+        },
+        "junction-to-class-t-b": {
+          "id": "junction-to-class-t-b",
+          "kind": "dc-positive",
+          "points": [
+            [
+              3.1319,
+              0.9936,
+              -2.008
+            ],
+            [
+              3.1319,
+              0.9486,
+              -2.008
+            ],
+            [
+              3.1319,
+              0.9486,
+              -1.949
+            ],
+            [
+              2.5926,
+              0.9486,
+              -1.949
+            ],
+            [
+              2.5926,
+              1.0296,
+              -1.949
+            ],
+            [
+              1.9953,
+              1.0296,
+              -1.949
+            ],
+            [
+              1.9953,
+              0.9657,
+              -1.949
+            ],
+            [
+              1.9418,
+              0.9657,
+              -1.949
+            ],
+            [
+              1.9418,
+              0.9657,
+              -2.087
+            ],
+            [
+              1.9418,
+              0.9647,
+              -2.087
+            ],
+            [
+              1.9418,
+              0.9837,
+              -2.087
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 1,
+          "lengthM": 1.597,
+          "planarDirectionReversals": 3,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionBatteryPositiveB",
+          "targetDeviceId": "classTB",
+          "targetPortId": "classTBOutput"
+        },
+        "battery-a-to-class-t": {
+          "id": "battery-a-to-class-t",
+          "kind": "dc-positive",
+          "points": [
+            [
+              2.2553,
+              0.257,
+              -1.6731
+            ],
+            [
+              2.2553,
+              0.276,
+              -1.6731
+            ],
+            [
+              2.2553,
+              0.276,
+              -1.6526
+            ],
+            [
+              2.2553,
+              0.275,
+              -1.6526
+            ],
+            [
+              2.2553,
+              0.6337,
+              -1.6526
+            ],
+            [
+              1.7715,
+              0.6337,
+              -1.6526
+            ],
+            [
+              1.7715,
+              0.6337,
+              -2.087
+            ],
+            [
+              1.7715,
+              0.6327,
+              -2.087
+            ],
+            [
+              1.7715,
+              0.6517,
+              -2.087
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 1,
+          "lengthM": 1.3374,
+          "planarDirectionReversals": 4,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "battery2",
+          "sourcePortId": "aPositive",
+          "targetDeviceId": "classTA",
+          "targetPortId": "classTAInput"
+        },
+        "battery-b-to-class-t": {
+          "id": "battery-b-to-class-t",
+          "kind": "dc-positive",
+          "points": [
+            [
+              2.2553,
+              0.257,
+              -1.3431
+            ],
+            [
+              2.2553,
+              0.276,
+              -1.3431
+            ],
+            [
+              2.2553,
+              0.276,
+              -1.3226
+            ],
+            [
+              2.2553,
+              0.275,
+              -1.3226
+            ],
+            [
+              2.2553,
+              0.9657,
+              -1.3226
+            ],
+            [
+              1.8618,
+              0.9657,
+              -1.3226
+            ],
+            [
+              1.8618,
+              0.9657,
+              -2.087
+            ],
+            [
+              1.8618,
+              0.9647,
+              -2.087
+            ],
+            [
+              1.8618,
+              0.9837,
+              -2.087
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 1,
+          "lengthM": 1.9091,
+          "planarDirectionReversals": 4,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "battery4",
+          "sourcePortId": "bPositive",
+          "targetDeviceId": "classTB",
+          "targetPortId": "classTBInput"
+        },
+        "balancer-a-positive": {
+          "id": "balancer-a-positive",
+          "kind": "dc-positive",
+          "points": [
+            [
+              2.099,
+              0.4154,
+              -2.0935
+            ],
+            [
+              2.099,
+              0.3974,
+              -2.0935
+            ],
+            [
+              2.099,
+              0.3974,
+              -1.907
+            ],
+            [
+              2.099,
+              0.275,
+              -1.907
+            ],
+            [
+              2.2413,
+              0.275,
+              -1.907
+            ],
+            [
+              2.2413,
+              0.275,
+              -1.6481
+            ],
+            [
+              2.2413,
+              0.257,
+              -1.6481
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 0.7461,
+          "planarDirectionReversals": 0,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "balancerA",
+          "sourcePortId": "balancerAPositive",
+          "targetDeviceId": "battery2",
+          "targetPortId": "aPositiveBalancer"
+        },
+        "balancer-a-midpoint": {
+          "id": "balancer-a-midpoint",
+          "kind": "data",
+          "points": [
+            [
+              2.129,
+              0.4154,
+              -2.0935
+            ],
+            [
+              2.129,
+              0.3974,
+              -2.0935
+            ],
+            [
+              2.129,
+              0.3974,
+              -1.949
+            ],
+            [
+              2.129,
+              0.317,
+              -1.949
+            ],
+            [
+              1.6813,
+              0.317,
+              -1.949
+            ],
+            [
+              1.6813,
+              0.317,
+              -1.6481
+            ],
+            [
+              1.6813,
+              0.257,
+              -1.6481
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 1.0515,
+          "planarDirectionReversals": 0,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "balancerA",
+          "sourcePortId": "balancerAMidpoint",
+          "targetDeviceId": "battery1",
+          "targetPortId": "aMidLeftBalancer"
+        },
+        "balancer-a-negative": {
+          "id": "balancer-a-negative",
+          "kind": "dc-negative",
+          "points": [
+            [
+              2.159,
+              0.4154,
+              -2.0935
+            ],
+            [
+              2.159,
+              0.3974,
+              -2.0935
+            ],
+            [
+              2.159,
+              0.3974,
+              -1.893
+            ],
+            [
+              2.159,
+              0.275,
+              -1.893
+            ],
+            [
+              1.3693,
+              0.275,
+              -1.893
+            ],
+            [
+              1.3693,
+              0.275,
+              -1.6481
+            ],
+            [
+              1.3693,
+              0.257,
+              -1.6481
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 1.3935,
+          "planarDirectionReversals": 0,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "balancerA",
+          "sourcePortId": "balancerANegative",
+          "targetDeviceId": "battery1",
+          "targetPortId": "aNegativeBalancer"
+        },
+        "balancer-b-positive": {
+          "id": "balancer-b-positive",
+          "kind": "dc-positive",
+          "points": [
+            [
+              2.7133,
+              0.4881,
+              -2.0935
+            ],
+            [
+              2.7133,
+              0.4701,
+              -2.0935
+            ],
+            [
+              2.7133,
+              0.4701,
+              -1.949
+            ],
+            [
+              2.7133,
+              0.317,
+              -1.949
+            ],
+            [
+              2.2413,
+              0.317,
+              -1.949
+            ],
+            [
+              2.2413,
+              0.317,
+              -1.3181
+            ],
+            [
+              2.2413,
+              0.257,
+              -1.3181
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 1.4785,
+          "planarDirectionReversals": 0,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "balancerB",
+          "sourcePortId": "balancerBPositive",
+          "targetDeviceId": "battery4",
+          "targetPortId": "bPositiveBalancer"
+        },
+        "balancer-b-midpoint": {
+          "id": "balancer-b-midpoint",
+          "kind": "data",
+          "points": [
+            [
+              2.7433,
+              0.4881,
+              -2.0935
+            ],
+            [
+              2.7433,
+              0.4701,
+              -2.0935
+            ],
+            [
+              2.7433,
+              0.4701,
+              -1.935
+            ],
+            [
+              2.7433,
+              0.331,
+              -1.935
+            ],
+            [
+              1.6813,
+              0.331,
+              -1.935
+            ],
+            [
+              1.6813,
+              0.331,
+              -1.3181
+            ],
+            [
+              1.6813,
+              0.257,
+              -1.3181
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 2.0685,
+          "planarDirectionReversals": 0,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "balancerB",
+          "sourcePortId": "balancerBMidpoint",
+          "targetDeviceId": "battery3",
+          "targetPortId": "bMidLeftBalancer"
+        },
+        "balancer-b-negative": {
+          "id": "balancer-b-negative",
+          "kind": "dc-negative",
+          "points": [
+            [
+              2.7733,
+              0.4881,
+              -2.0935
+            ],
+            [
+              2.7733,
+              0.4701,
+              -2.0935
+            ],
+            [
+              2.7733,
+              0.4701,
+              -1.921
+            ],
+            [
+              2.7733,
+              0.303,
+              -1.921
+            ],
+            [
+              1.3693,
+              0.303,
+              -1.921
+            ],
+            [
+              1.3693,
+              0.303,
+              -1.3181
+            ],
+            [
+              1.3693,
+              0.257,
+              -1.3181
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 2.4105,
+          "planarDirectionReversals": 0,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "balancerB",
+          "sourcePortId": "balancerBNegative",
+          "targetDeviceId": "battery3",
+          "targetPortId": "bNegativeBalancer"
+        },
+        "multiplus-battery-temperature": {
+          "id": "multiplus-battery-temperature",
+          "kind": "data",
+          "points": [
+            [
+              1.502,
+              1.8515,
+              -2.0465
+            ],
+            [
+              1.502,
+              1.8335,
+              -2.0465
+            ],
+            [
+              1.502,
+              1.8335,
+              -1.949
+            ],
+            [
+              1.502,
+              1.1135,
+              -1.949
+            ],
+            [
+              1.5435,
+              1.1135,
+              -1.949
+            ],
+            [
+              1.5435,
+              0.289,
+              -1.949
+            ],
+            [
+              1.3413,
+              0.289,
+              -1.949
+            ],
+            [
+              1.3413,
+              0.289,
+              -1.6981
+            ],
+            [
+              1.3413,
+              0.257,
+              -1.6981
+            ]
+          ],
+          "radiusM": 0.0015,
+          "conductors": 1,
+          "lengthM": 2.1866,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "multiPlus",
+          "sourcePortId": "multiPlusTemperatureSense",
+          "targetDeviceId": "battery1",
+          "targetPortId": "aNegativeTemperature"
+        },
+        "junction-to-multiplus-negative": {
+          "id": "junction-to-multiplus-negative",
+          "kind": "dc-negative",
+          "points": [
+            [
+              3.1269,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.1269,
+              0.9166,
+              -2.076
+            ],
+            [
+              3.1269,
+              0.9166,
+              -1.928
+            ],
+            [
+              2.5926,
+              0.9166,
+              -1.928
+            ],
+            [
+              2.5926,
+              1.833,
+              -1.928
+            ],
+            [
+              1.348,
+              1.833,
+              -1.928
+            ],
+            [
+              1.348,
+              1.833,
+              -2.0465
+            ],
+            [
+              1.348,
+              1.8325,
+              -2.0465
+            ],
+            [
+              1.348,
+              1.8515,
+              -2.0465
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 1,
+          "lengthM": 3.0583,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionMultiPlusNegative",
+          "targetDeviceId": "multiPlus",
+          "targetPortId": "multiPlusDcNegative"
+        },
+        "junction-to-multiplus-positive": {
+          "id": "junction-to-multiplus-positive",
+          "kind": "dc-positive",
+          "points": [
+            [
+              3.1009,
+              0.9936,
+              -2.008
+            ],
+            [
+              3.1009,
+              0.9736,
+              -2.008
+            ],
+            [
+              3.1009,
+              0.9736,
+              -1.907
+            ],
+            [
+              2.5926,
+              0.9736,
+              -1.907
+            ],
+            [
+              2.5926,
+              1.833,
+              -1.907
+            ],
+            [
+              1.304,
+              1.833,
+              -1.907
+            ],
+            [
+              1.304,
+              1.833,
+              -2.0465
+            ],
+            [
+              1.304,
+              1.8325,
+              -2.0465
+            ],
+            [
+              1.304,
+              1.8515,
+              -2.0465
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 1,
+          "lengthM": 2.9363,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionMultiPlusPositive",
+          "targetDeviceId": "multiPlus",
+          "targetPortId": "multiPlusDcPositive"
+        },
+        "generator-flex": {
+          "id": "generator-flex",
+          "kind": "three-core-ac",
+          "points": [
+            [
+              0.462,
+              0.1792,
+              -2.8
+            ],
+            [
+              0.481,
+              0.1792,
+              -2.8
+            ],
+            [
+              0.481,
+              0.1792,
+              -2.034
+            ],
+            [
+              0.4805,
+              0.1792,
+              -2.034
+            ],
+            [
+              0.4805,
+              1.814,
+              -2.034
+            ],
+            [
+              1.392,
+              1.814,
+              -2.034
+            ],
+            [
+              1.392,
+              1.814,
+              -2.0465
+            ],
+            [
+              1.392,
+              1.8515,
+              -2.0465
+            ]
+          ],
+          "radiusM": 0.0065,
+          "conductors": 3,
+          "lengthM": 3.3818,
+          "planarDirectionReversals": 0,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "generator",
+          "sourcePortId": "generatorAcCable",
+          "targetDeviceId": "multiPlus",
+          "targetPortId": "multiPlusAcInputCable"
+        },
+        "junction-to-mppt-positive": {
+          "id": "junction-to-mppt-positive",
+          "kind": "dc-positive",
+          "points": [
+            [
+              3.2124,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.2124,
+              0.9736,
+              -2.076
+            ],
+            [
+              3.2124,
+              0.9736,
+              -1.9295
+            ],
+            [
+              3.2124,
+              0.7711,
+              -1.9295
+            ],
+            [
+              2.4036,
+              0.7711,
+              -1.9295
+            ],
+            [
+              2.4036,
+              0.7711,
+              -2.0655
+            ],
+            [
+              2.4036,
+              0.7891,
+              -2.0655
+            ]
+          ],
+          "radiusM": 0.005,
+          "conductors": 1,
+          "lengthM": 1.3318,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionMpptPositive",
+          "targetDeviceId": "smartSolar",
+          "targetPortId": "smartSolarBatteryPositive"
+        },
+        "junction-to-mppt-negative": {
+          "id": "junction-to-mppt-negative",
+          "kind": "dc-negative",
+          "points": [
+            [
+              3.0734,
+              0.9936,
+              -2.008
+            ],
+            [
+              3.0734,
+              0.8936,
+              -2.008
+            ],
+            [
+              3.0734,
+              0.8936,
+              -1.8875
+            ],
+            [
+              3.0734,
+              0.7551,
+              -1.8875
+            ],
+            [
+              2.4496,
+              0.7551,
+              -1.8875
+            ],
+            [
+              2.4496,
+              0.7551,
+              -2.0655
+            ],
+            [
+              2.4496,
+              0.7891,
+              -2.0655
+            ]
+          ],
+          "radiusM": 0.005,
+          "conductors": 1,
+          "lengthM": 1.1948,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionMpptNegative",
+          "targetDeviceId": "smartSolar",
+          "targetPortId": "smartSolarBatteryNegative"
+        },
+        "junction-to-outdoor-flood-negative": {
+          "id": "junction-to-outdoor-flood-negative",
+          "kind": "dc-negative",
+          "points": [
+            [
+              3.1944,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.1944,
+              0.9456,
+              -2.076
+            ],
+            [
+              3.1944,
+              0.9456,
+              -1.949
+            ],
+            [
+              3.3519,
+              0.9456,
+              -1.949
+            ],
+            [
+              3.3519,
+              2.3791,
+              -1.949
+            ],
+            [
+              3.1268,
+              2.3791,
+              -1.949
+            ],
+            [
+              3.1268,
+              2.3791,
+              -2.03
+            ],
+            [
+              3.1268,
+              2.3971,
+              -2.03
+            ]
+          ],
+          "radiusM": 0.0018,
+          "conductors": 1,
+          "lengthM": 2.0901,
+          "planarDirectionReversals": 2,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionLoadNegative5",
+          "targetDeviceId": "outdoorFlood",
+          "targetPortId": "outdoorFloodNegative"
+        },
+        "junction-to-outdoor-flood-positive": {
+          "id": "junction-to-outdoor-flood-positive",
+          "kind": "dc-positive",
+          "points": [
+            [
+              3.1874,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.1874,
+              0.9316,
+              -2.076
+            ],
+            [
+              3.1874,
+              0.9316,
+              -1.9147
+            ],
+            [
+              3.3659,
+              0.9316,
+              -1.9147
+            ],
+            [
+              3.3659,
+              2.3791,
+              -1.9147
+            ],
+            [
+              3.0828,
+              2.3791,
+              -1.9147
+            ],
+            [
+              3.0828,
+              2.3791,
+              -2.03
+            ],
+            [
+              3.0828,
+              2.3971,
+              -2.03
+            ]
+          ],
+          "radiusM": 0.0018,
+          "conductors": 1,
+          "lengthM": 2.2657,
+          "planarDirectionReversals": 2,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionLoadPositive5",
+          "targetDeviceId": "outdoorFlood",
+          "targetPortId": "outdoorFloodPositive"
+        },
+        "junction-to-indoor-light-negative": {
+          "id": "junction-to-indoor-light-negative",
+          "kind": "dc-negative",
+          "points": [
+            [
+              3.1914,
+              0.9936,
+              -2.008
+            ],
+            [
+              3.1914,
+              0.9736,
+              -2.008
+            ],
+            [
+              3.1914,
+              0.9736,
+              -1.9031
+            ],
+            [
+              3.3239,
+              0.9736,
+              -1.9031
+            ],
+            [
+              3.3239,
+              2.6376,
+              -1.9031
+            ],
+            [
+              3.2354,
+              2.6376,
+              -1.9031
+            ],
+            [
+              3.2354,
+              2.6376,
+              -0.72
+            ],
+            [
+              3.2354,
+              2.6556,
+              -0.72
+            ]
+          ],
+          "radiusM": 0.0018,
+          "conductors": 1,
+          "lengthM": 3.211,
+          "planarDirectionReversals": 2,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionLoadNegative4",
+          "targetDeviceId": "indoorLight",
+          "targetPortId": "indoorLightNegative"
+        },
+        "junction-to-indoor-light-positive": {
+          "id": "junction-to-indoor-light-positive",
+          "kind": "dc-positive",
+          "points": [
+            [
+              3.1844,
+              0.9936,
+              -2.008
+            ],
+            [
+              3.1844,
+              0.9596,
+              -2.008
+            ],
+            [
+              3.1844,
+              0.9596,
+              -1.8915
+            ],
+            [
+              3.1844,
+              0.9741,
+              -1.8915
+            ],
+            [
+              3.3379,
+              0.9741,
+              -1.8915
+            ],
+            [
+              3.3379,
+              2.6236,
+              -1.8915
+            ],
+            [
+              3.1994,
+              2.6236,
+              -1.8915
+            ],
+            [
+              3.1994,
+              2.6236,
+              -0.72
+            ],
+            [
+              3.1994,
+              2.6556,
+              -0.72
+            ]
+          ],
+          "radiusM": 0.0018,
+          "conductors": 1,
+          "lengthM": 3.31,
+          "planarDirectionReversals": 2,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionLoadPositive4",
+          "targetDeviceId": "indoorLight",
+          "targetPortId": "indoorLightPositive"
+        },
+        "junction-to-ekrano-data": {
+          "id": "junction-to-ekrano-data",
+          "kind": "data",
+          "points": [
+            [
+              3.1029,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.1029,
+              0.9316,
+              -2.076
+            ],
+            [
+              3.1029,
+              0.9316,
+              -1.9328
+            ],
+            [
+              2.6779,
+              0.9316,
+              -1.9328
+            ],
+            [
+              2.6779,
+              1.494,
+              -1.9328
+            ],
+            [
+              2.6779,
+              1.494,
+              -2.1021
+            ],
+            [
+              2.6779,
+              1.512,
+              -2.1021
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 1.3799,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionEkranData",
+          "targetDeviceId": "ekran",
+          "targetPortId": "ekranVeDirect1"
+        },
+        "junction-to-ekrano-negative": {
+          "id": "junction-to-ekrano-negative",
+          "kind": "dc-negative",
+          "points": [
+            [
+              3.0264,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.0264,
+              0.9736,
+              -2.076
+            ],
+            [
+              3.0264,
+              0.9736,
+              -1.949
+            ],
+            [
+              2.6569,
+              0.9736,
+              -1.949
+            ],
+            [
+              2.6569,
+              1.494,
+              -1.949
+            ],
+            [
+              2.6569,
+              1.494,
+              -2.1021
+            ],
+            [
+              2.6569,
+              1.512,
+              -2.1021
+            ]
+          ],
+          "radiusM": 0.0018,
+          "conductors": 1,
+          "lengthM": 1.208,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionEkranNegative",
+          "targetDeviceId": "ekran",
+          "targetPortId": "ekranPowerNegative"
+        },
+        "junction-to-ekrano-positive": {
+          "id": "junction-to-ekrano-positive",
+          "kind": "dc-positive",
+          "points": [
+            [
+              3.0194,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.0194,
+              0.9316,
+              -2.076
+            ],
+            [
+              2.6359,
+              0.9316,
+              -2.076
+            ],
+            [
+              2.6359,
+              0.9316,
+              -1.8907
+            ],
+            [
+              2.6359,
+              1.494,
+              -1.8907
+            ],
+            [
+              2.6359,
+              1.494,
+              -2.1021
+            ],
+            [
+              2.6359,
+              1.512,
+              -2.1021
+            ]
+          ],
+          "radiusM": 0.0018,
+          "conductors": 1,
+          "lengthM": 1.4226,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionEkranPositive",
+          "targetDeviceId": "ekran",
+          "targetPortId": "ekranPowerPositive"
+        },
+        "junction-to-starlink-power-cable": {
+          "id": "junction-to-starlink-power-cable",
+          "kind": "two-core-dc",
+          "points": [
+            [
+              3.0509,
+              0.9936,
+              -2.008
+            ],
+            [
+              3.0509,
+              0.9736,
+              -2.008
+            ],
+            [
+              3.0509,
+              0.9736,
+              -1.9352
+            ],
+            [
+              2.8819,
+              0.9736,
+              -1.9352
+            ],
+            [
+              2.8819,
+              3.314,
+              -1.9352
+            ],
+            [
+              2.9282,
+              3.314,
+              -1.9352
+            ],
+            [
+              2.9282,
+              3.314,
+              -2.04
+            ],
+            [
+              2.9282,
+              3.332,
+              -2.04
+            ]
+          ],
+          "radiusM": 0.004,
+          "conductors": 2,
+          "lengthM": 2.7713,
+          "planarDirectionReversals": 2,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionStarlinkCable",
+          "targetDeviceId": "starlink",
+          "targetPortId": "starlinkPowerCable"
+        },
+        "junction-to-unifi-converter-positive": {
+          "id": "junction-to-unifi-converter-positive",
+          "kind": "dc-positive",
+          "points": [
+            [
+              3.1684,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.1684,
+              0.9176,
+              -2.076
+            ],
+            [
+              3.1824,
+              0.9176,
+              -2.076
+            ],
+            [
+              3.1824,
+              0.9176,
+              -1.8799
+            ],
+            [
+              3.3799,
+              0.9176,
+              -1.8799
+            ],
+            [
+              3.3799,
+              1.5148,
+              -1.8799
+            ],
+            [
+              3.2081,
+              1.5148,
+              -1.8799
+            ],
+            [
+              3.2081,
+              1.5148,
+              -2.102
+            ],
+            [
+              3.2081,
+              1.5328,
+              -2.102
+            ]
+          ],
+          "radiusM": 0.0018,
+          "conductors": 1,
+          "lengthM": 1.4927,
+          "planarDirectionReversals": 2,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionLoadPositive2",
+          "targetDeviceId": "unifiPower",
+          "targetPortId": "unifiConverterPositive"
+        },
+        "junction-to-unifi-converter-negative": {
+          "id": "junction-to-unifi-converter-negative",
+          "kind": "dc-negative",
+          "points": [
+            [
+              3.1754,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.1754,
+              0.9736,
+              -2.076
+            ],
+            [
+              3.1754,
+              0.9736,
+              -1.8683
+            ],
+            [
+              3.3239,
+              0.9736,
+              -1.8683
+            ],
+            [
+              3.3239,
+              1.5008,
+              -1.8683
+            ],
+            [
+              3.2431,
+              1.5008,
+              -1.8683
+            ],
+            [
+              3.2431,
+              1.5008,
+              -2.102
+            ],
+            [
+              3.2431,
+              1.5328,
+              -2.102
+            ]
+          ],
+          "radiusM": 0.0018,
+          "conductors": 1,
+          "lengthM": 1.2499,
+          "planarDirectionReversals": 2,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionLoadNegative2",
+          "targetDeviceId": "unifiPower",
+          "targetPortId": "unifiConverterNegative"
+        },
+        "junction-to-usb-positive": {
+          "id": "junction-to-usb-positive",
+          "kind": "dc-positive",
+          "points": [
+            [
+              3.1484,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.1484,
+              0.9736,
+              -2.076
+            ],
+            [
+              3.1484,
+              0.9736,
+              -1.8563
+            ],
+            [
+              3.5749,
+              0.9736,
+              -1.8563
+            ],
+            [
+              3.5749,
+              1.359,
+              -1.8563
+            ],
+            [
+              3.5749,
+              1.359,
+              -2.097
+            ],
+            [
+              3.5749,
+              1.377,
+              -2.097
+            ]
+          ],
+          "radiusM": 0.0022,
+          "conductors": 1,
+          "lengthM": 1.3103,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionLoadPositive3",
+          "targetDeviceId": "usb",
+          "targetPortId": "usbPositive"
+        },
+        "junction-to-usb-negative": {
+          "id": "junction-to-usb-negative",
+          "kind": "dc-negative",
+          "points": [
+            [
+              3.1564,
+              0.9936,
+              -2.076
+            ],
+            [
+              3.1564,
+              0.9036,
+              -2.076
+            ],
+            [
+              3.6149,
+              0.9036,
+              -2.076
+            ],
+            [
+              3.6149,
+              0.9036,
+              -1.9143
+            ],
+            [
+              3.6149,
+              1.359,
+              -1.9143
+            ],
+            [
+              3.6149,
+              1.359,
+              -2.097
+            ],
+            [
+              3.6149,
+              1.377,
+              -2.097
+            ]
+          ],
+          "radiusM": 0.0022,
+          "conductors": 1,
+          "lengthM": 1.3663,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "junction",
+          "sourcePortId": "junctionLoadNegative3",
+          "targetDeviceId": "usb",
+          "targetPortId": "usbNegative"
+        },
+        "unifi-converter-to-unifi-power": {
+          "id": "unifi-converter-to-unifi-power",
+          "kind": "data",
+          "points": [
+            [
+              3.2781,
+              1.5328,
+              -2.102
+            ],
+            [
+              3.2781,
+              1.4868,
+              -2.102
+            ],
+            [
+              3.2781,
+              1.4868,
+              -2.086
+            ],
+            [
+              3.0314,
+              1.4868,
+              -2.086
+            ],
+            [
+              3.0314,
+              1.7598,
+              -2.086
+            ],
+            [
+              3.0314,
+              1.7598,
+              -2.102
+            ],
+            [
+              3.0314,
+              1.7778,
+              -2.102
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 0.6157,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "unifiPower",
+          "sourcePortId": "unifiConverterUsb",
+          "targetDeviceId": "unifi",
+          "targetPortId": "unifiPower"
+        },
+        "unifi-to-ekrano-data": {
+          "id": "unifi-to-ekrano-data",
+          "kind": "data",
+          "points": [
+            [
+              3.0954,
+              1.7778,
+              -2.102
+            ],
+            [
+              3.0954,
+              1.7598,
+              -2.102
+            ],
+            [
+              3.0954,
+              1.7598,
+              -2.0746
+            ],
+            [
+              3.0954,
+              1.494,
+              -2.0746
+            ],
+            [
+              2.7409,
+              1.494,
+              -2.0746
+            ],
+            [
+              2.7409,
+              1.494,
+              -2.1021
+            ],
+            [
+              2.7409,
+              1.512,
+              -2.1021
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 0.7112,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "unifi",
+          "sourcePortId": "unifiLan",
+          "targetDeviceId": "ekran",
+          "targetPortId": "ekranEthernet"
+        },
+        "smartsolar-to-ekrano-data": {
+          "id": "smartsolar-to-ekrano-data",
+          "kind": "data",
+          "points": [
+            [
+              2.4956,
+              0.7891,
+              -2.0655
+            ],
+            [
+              2.4956,
+              0.7711,
+              -2.0655
+            ],
+            [
+              2.4956,
+              0.7711,
+              -2.0578
+            ],
+            [
+              2.6989,
+              0.7711,
+              -2.0578
+            ],
+            [
+              2.6989,
+              1.494,
+              -2.0578
+            ],
+            [
+              2.6989,
+              1.494,
+              -2.1021
+            ],
+            [
+              2.6989,
+              1.512,
+              -2.1021
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 1.0142,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "smartSolar",
+          "sourcePortId": "smartSolarData",
+          "targetDeviceId": "ekran",
+          "targetPortId": "ekranVeDirect2"
+        },
+        "multiplus-to-ekrano-data": {
+          "id": "multiplus-to-ekrano-data",
+          "kind": "data",
+          "points": [
+            [
+              1.48,
+              1.8515,
+              -2.0465
+            ],
+            [
+              1.48,
+              1.8335,
+              -2.0465
+            ],
+            [
+              1.48,
+              1.8335,
+              -2.0178
+            ],
+            [
+              1.48,
+              1.48,
+              -2.0178
+            ],
+            [
+              2.7199,
+              1.48,
+              -2.0178
+            ],
+            [
+              2.7199,
+              1.48,
+              -2.1021
+            ],
+            [
+              2.7199,
+              1.512,
+              -2.1021
+            ]
+          ],
+          "radiusM": 0.0017,
+          "conductors": 1,
+          "lengthM": 1.7564,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "multiPlus",
+          "sourcePortId": "multiPlusData",
+          "targetDeviceId": "ekran",
+          "targetPortId": "ekranVeBus"
+        },
+        "balancer-a-alarm": {
+          "id": "balancer-a-alarm",
+          "kind": "data",
+          "points": [
+            [
+              2.189,
+              0.4154,
+              -2.0935
+            ],
+            [
+              2.189,
+              0.3974,
+              -2.0935
+            ],
+            [
+              2.189,
+              0.3974,
+              -2.086
+            ],
+            [
+              2.2185,
+              0.3974,
+              -2.086
+            ],
+            [
+              2.2185,
+              1.466,
+              -2.086
+            ],
+            [
+              2.7619,
+              1.466,
+              -2.086
+            ],
+            [
+              2.7619,
+              1.466,
+              -2.1021
+            ],
+            [
+              2.7619,
+              1.512,
+              -2.1021
+            ]
+          ],
+          "radiusM": 0.0015,
+          "conductors": 2,
+          "lengthM": 1.7291,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "balancerA",
+          "sourcePortId": "balancerAAlarm",
+          "targetDeviceId": "ekran",
+          "targetPortId": "ekranDigitalInput1"
+        },
+        "balancer-b-alarm": {
+          "id": "balancer-b-alarm",
+          "kind": "data",
+          "points": [
+            [
+              2.8033,
+              0.4881,
+              -2.0935
+            ],
+            [
+              2.8033,
+              0.4701,
+              -2.0935
+            ],
+            [
+              2.8033,
+              0.4701,
+              -2.086
+            ],
+            [
+              2.8328,
+              0.4701,
+              -2.086
+            ],
+            [
+              2.8328,
+              1.494,
+              -2.086
+            ],
+            [
+              2.7829,
+              1.494,
+              -2.086
+            ],
+            [
+              2.7829,
+              1.494,
+              -2.1021
+            ],
+            [
+              2.7829,
+              1.512,
+              -2.1021
+            ]
+          ],
+          "radiusM": 0.0015,
+          "conductors": 2,
+          "lengthM": 1.1629,
+          "planarDirectionReversals": 2,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "balancerB",
+          "sourcePortId": "balancerBAlarm",
+          "targetDeviceId": "ekran",
+          "targetPortId": "ekranDigitalInput2"
+        },
+        "starlink-to-unifi-data": {
+          "id": "starlink-to-unifi-data",
+          "kind": "data",
+          "points": [
+            [
+              2.9932,
+              3.332,
+              -2.04
+            ],
+            [
+              2.9932,
+              3.314,
+              -2.04
+            ],
+            [
+              2.9932,
+              3.314,
+              -2.0744
+            ],
+            [
+              2.9932,
+              1.7598,
+              -2.0744
+            ],
+            [
+              3.0634,
+              1.7598,
+              -2.0744
+            ],
+            [
+              3.0634,
+              1.7598,
+              -2.102
+            ],
+            [
+              3.0634,
+              1.7778,
+              -2.102
+            ]
+          ],
+          "radiusM": 0.0019,
+          "conductors": 1,
+          "lengthM": 1.7224,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "starlink",
+          "sourcePortId": "starlinkEthernet",
+          "targetDeviceId": "unifi",
+          "targetPortId": "unifiWan"
+        },
+        "earth-electrode-to-main-bar": {
+          "id": "earth-electrode-to-main-bar",
+          "kind": "earth",
+          "points": [
+            [
+              0.72,
+              0.1,
+              -2.58
+            ],
+            [
+              0.72,
+              0.118,
+              -2.58
+            ],
+            [
+              0.72,
+              0.118,
+              -2.086
+            ],
+            [
+              0.72,
+              1.2217,
+              -2.086
+            ],
+            [
+              1.7473,
+              1.2217,
+              -2.086
+            ],
+            [
+              1.7473,
+              1.2217,
+              -2.104
+            ],
+            [
+              1.7473,
+              1.2397,
+              -2.104
+            ]
+          ],
+          "radiusM": 0.003,
+          "conductors": 1,
+          "lengthM": 2.679,
+          "planarDirectionReversals": 0,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "earthElectrode",
+          "sourcePortId": "earthElectrode",
+          "targetDeviceId": "earthBar",
+          "targetPortId": "earthBar1"
+        },
+        "earth-electrode-to-array-frame": {
+          "id": "earth-electrode-to-array-frame",
+          "kind": "earth",
+          "points": [
+            [
+              0.72,
+              0.1,
+              -2.58
+            ],
+            [
+              0.72,
+              0.13,
+              -2.58
+            ],
+            [
+              0.72,
+              0.13,
+              -2.28
+            ],
+            [
+              -1.67,
+              0.13,
+              -2.28
+            ]
+          ],
+          "radiusM": 0.003,
+          "conductors": 1,
+          "lengthM": 2.72,
+          "planarDirectionReversals": 0,
+          "routing": "fixed-site",
+          "sourceDeviceId": "earthElectrode",
+          "sourcePortId": "earthElectrode",
+          "targetDeviceId": "solarPanels",
+          "targetPortId": "arrayFrameEarth"
+        },
+        "earth-bar-to-pv-entry": {
+          "id": "earth-bar-to-pv-entry",
+          "kind": "earth",
+          "points": [
+            [
+              1.765,
+              1.2397,
+              -2.104
+            ],
+            [
+              1.765,
+              1.2217,
+              -2.104
+            ],
+            [
+              1.765,
+              1.2217,
+              -2.0486
+            ],
+            [
+              1.765,
+              0.776,
+              -2.0486
+            ],
+            [
+              1.51,
+              0.776,
+              -2.0486
+            ],
+            [
+              1.51,
+              0.776,
+              -2.057
+            ],
+            [
+              1.51,
+              0.794,
+              -2.057
+            ]
+          ],
+          "radiusM": 0.0024,
+          "conductors": 1,
+          "lengthM": 0.8005,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "earthBar",
+          "sourcePortId": "earthBar2",
+          "targetDeviceId": "pvEntry",
+          "targetPortId": "pvEntryEarth"
+        },
+        "earth-bar-to-smartsolar": {
+          "id": "earth-bar-to-smartsolar",
+          "kind": "earth",
+          "points": [
+            [
+              1.7827,
+              1.2397,
+              -2.104
+            ],
+            [
+              1.7827,
+              1.2217,
+              -2.104
+            ],
+            [
+              1.7827,
+              1.2217,
+              -2.0198
+            ],
+            [
+              1.7827,
+              0.7431,
+              -2.0198
+            ],
+            [
+              2.5416,
+              0.7431,
+              -2.0198
+            ],
+            [
+              2.5416,
+              0.7431,
+              -2.0655
+            ],
+            [
+              2.5416,
+              0.7891,
+              -2.0655
+            ]
+          ],
+          "radiusM": 0.0024,
+          "conductors": 1,
+          "lengthM": 1.4314,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "earthBar",
+          "sourcePortId": "earthBar3",
+          "targetDeviceId": "smartSolar",
+          "targetPortId": "smartSolarEarth"
+        },
+        "earth-bar-to-multiplus": {
+          "id": "earth-bar-to-multiplus",
+          "kind": "earth",
+          "points": [
+            [
+              1.8003,
+              1.2397,
+              -2.104
+            ],
+            [
+              1.8003,
+              1.2217,
+              -2.104
+            ],
+            [
+              1.8003,
+              1.2217,
+              -2.0057
+            ],
+            [
+              1.524,
+              1.2217,
+              -2.0057
+            ],
+            [
+              1.524,
+              1.8335,
+              -2.0057
+            ],
+            [
+              1.524,
+              1.8335,
+              -2.0465
+            ],
+            [
+              1.524,
+              1.8515,
+              -2.0465
+            ]
+          ],
+          "radiusM": 0.0024,
+          "conductors": 1,
+          "lengthM": 1.0632,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "earthBar",
+          "sourcePortId": "earthBar4",
+          "targetDeviceId": "multiPlus",
+          "targetPortId": "multiPlusChassisEarth"
+        },
+        "earth-bar-to-ac-board": {
+          "id": "earth-bar-to-ac-board",
+          "kind": "earth",
+          "points": [
+            [
+              1.818,
+              1.2397,
+              -2.104
+            ],
+            [
+              1.818,
+              1.2217,
+              -2.104
+            ],
+            [
+              1.818,
+              1.2217,
+              -2.0586
+            ],
+            [
+              1.919,
+              1.2217,
+              -2.0586
+            ],
+            [
+              1.919,
+              1.5856,
+              -2.0586
+            ],
+            [
+              1.919,
+              1.5856,
+              -2.067
+            ],
+            [
+              1.919,
+              1.6036,
+              -2.067
+            ]
+          ],
+          "radiusM": 0.0024,
+          "conductors": 1,
+          "lengthM": 0.5547,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "earthBar",
+          "sourcePortId": "earthBar5",
+          "targetDeviceId": "acBoard",
+          "targetPortId": "acBoardEarth"
+        },
+        "earth-bar-to-ekrano": {
+          "id": "earth-bar-to-ekrano",
+          "kind": "earth",
+          "points": [
+            [
+              1.8357,
+              1.2397,
+              -2.104
+            ],
+            [
+              1.8357,
+              1.2077,
+              -2.104
+            ],
+            [
+              1.8357,
+              1.2077,
+              -2.046
+            ],
+            [
+              2.8039,
+              1.2077,
+              -2.046
+            ],
+            [
+              2.8039,
+              1.48,
+              -2.046
+            ],
+            [
+              2.8039,
+              1.48,
+              -2.1021
+            ],
+            [
+              2.8039,
+              1.512,
+              -2.1021
+            ]
+          ],
+          "radiusM": 0.0022,
+          "conductors": 1,
+          "lengthM": 1.4186,
+          "planarDirectionReversals": 1,
+          "routing": "automatic-rectilinear",
+          "sourceDeviceId": "earthBar",
+          "sourcePortId": "earthBar6",
+          "targetDeviceId": "ekran",
+          "targetPortId": "ekranEarth"
+        }
+      },
+      "surfaces": {
+        "backWall": {
+          "center": [
+            4.1,
+            1.5,
+            -2.2
+          ],
+          "size": [
+            5.8,
+            3,
+            0.08
+          ]
+        },
+        "equipmentBoard": {
+          "center": [
+            2.95,
+            1.5,
+            -2.13
+          ],
+          "size": [
+            3.4,
+            2.5,
+            0.018
+          ],
+          "frontZ": -2.121
+        },
+        "floorPlanes": [
+          {
+            "center": [
+              -1.55,
+              -0.03,
+              0
+            ],
+            "size": [
+              5.5,
+              0.04,
+              8
+            ]
+          },
+          {
+            "center": [
+              4.1,
+              -0.02,
+              0
+            ],
+            "size": [
+              5.8,
+              0.06,
+              4.4
+            ]
+          }
+        ],
+        "sideWalls": [],
+        "roofPlanes": []
+      },
+      "metrics": {
+        "automaticRouteCount": 47,
+        "totalRenderedCableM": 102.8755,
+        "weightedCableLengthM": 129.0839,
+        "thickCableLengthM": 26.2084,
+        "wallDistanceCostM2": 14.9054,
+        "cableByKindM": {
+          "pv-positive": 9.2796,
+          "pv-negative": 13.5952,
+          "three-core-ac": 4.3982,
+          "dc-positive": 23.5418,
+          "dc-negative": 23.2236,
+          "data": 15.3984,
+          "two-core-dc": 2.7713,
+          "earth": 10.6674
+        },
+        "wallDeviceSpanM": 2.4049,
+        "wallDeviceCount": 15,
+        "wallAuthoredWaypointCount": 0,
+        "wallOverlapCount": 0,
+        "wallOverlapIssues": [],
+        "cableClearanceIssueCount": 0,
+        "cableClearanceIssues": [],
+        "projectedCableConflictCount": 193,
+        "projectedCableConflictIssues": [
+          "pv-entry-to-mppt-positive:3 projects across pv-entry-to-mppt-negative:3 (0 mm < 7.9 mm)",
+          "pv-entry-to-mppt-positive:2 projects across battery-b-to-class-t:3 (0 mm < 11.2 mm)",
+          "pv-entry-to-mppt-positive:2 projects across multiplus-battery-temperature:4 (0 mm < 6.2 mm)",
+          "pv-entry-to-mppt-positive:2 projects across balancer-a-alarm:3 (0 mm < 6.2 mm)",
+          "pv-entry-to-mppt-positive:2 projects across earth-bar-to-smartsolar:2 (0 mm < 7.1 mm)",
+          "pv-entry-to-mppt-negative:3 projects across battery-b-to-class-t:3 (0 mm < 11.2 mm)",
+          "pv-entry-to-mppt-negative:3 projects across multiplus-battery-temperature:4 (0 mm < 6.2 mm)",
+          "pv-entry-to-mppt-negative:3 projects across balancer-a-alarm:3 (0 mm < 6.2 mm)",
+          "pv-entry-to-mppt-negative:3 projects across earth-bar-to-pv-entry:2 (4.9 mm < 7.1 mm)",
+          "pv-entry-to-mppt-negative:3 projects across earth-bar-to-smartsolar:2 (0 mm < 7.1 mm)",
+          "trailing-tool-flex:3 projects across multiplus-to-ekrano-data:3 (0 mm < 9.7 mm)",
+          "multiplus-to-ac-output-protection:4 projects across multiplus-battery-temperature:2 (0 mm < 9.5 mm)",
+          "multiplus-to-ac-output-protection:0 projects across junction-to-multiplus-negative:4 (0 mm < 14.5 mm)",
+          "multiplus-to-ac-output-protection:0 projects across junction-to-multiplus-positive:4 (0 mm < 14.5 mm)",
+          "multiplus-to-ac-output-protection:4 projects across multiplus-to-ekrano-data:2 (0 mm < 9.7 mm)",
+          "multiplus-to-ac-output-protection:4 projects across earth-bar-to-multiplus:3 (0 mm < 10.4 mm)",
+          "junction-to-battery-negative-a:0 projects across junction-to-battery-negative-b:3 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-a:0 projects across junction-to-class-t-a:3 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-a:0 projects across junction-to-class-t-b:2 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-a:3 projects across battery-a-to-class-t:0 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-a:3 projects across battery-b-to-class-t:0 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-a:3 projects across balancer-a-positive:2 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-a:3 projects across balancer-a-midpoint:5 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-a:3 projects across balancer-a-negative:2 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-a:3 projects across balancer-b-positive:5 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-a:3 projects across balancer-b-midpoint:5 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-a:3 projects across balancer-b-negative:5 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-a:0 projects across junction-to-multiplus-negative:2 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-a:0 projects across junction-to-multiplus-positive:2 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-a:0 projects across junction-to-mppt-positive:3 (0 mm < 13 mm)",
+          "junction-to-battery-negative-a:0 projects across junction-to-mppt-negative:3 (0 mm < 13 mm)",
+          "junction-to-battery-negative-a:0 projects across junction-to-ekrano-data:2 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-a:0 projects across junction-to-starlink-power-cable:2 (0 mm < 12 mm)",
+          "junction-to-battery-negative-b:0 projects across junction-to-class-t-a:3 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-b:0 projects across junction-to-class-t-b:2 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-b:3 projects across battery-a-to-class-t:3 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-b:3 projects across battery-b-to-class-t:3 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-b:3 projects across balancer-a-positive:2 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-b:3 projects across balancer-a-midpoint:5 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-b:3 projects across balancer-a-negative:2 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-b:3 projects across balancer-b-positive:5 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-b:3 projects across balancer-b-midpoint:5 (0 mm < 9.7 mm)",
+          "junction-to-battery-negative-b:3 projects across balancer-b-negative:2 (9 mm < 9.7 mm)",
+          "junction-to-battery-negative-b:3 projects across multiplus-battery-temperature:4 (0 mm < 9.5 mm)",
+          "junction-to-battery-negative-b:0 projects across junction-to-multiplus-negative:2 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-b:0 projects across junction-to-multiplus-positive:2 (0 mm < 14.5 mm)",
+          "junction-to-battery-negative-b:0 projects across junction-to-mppt-positive:3 (0 mm < 13 mm)",
+          "junction-to-battery-negative-b:0 projects across junction-to-mppt-negative:2 (5.5 mm < 13 mm)",
+          "junction-to-battery-negative-b:0 projects across junction-to-ekrano-data:2 (0 mm < 9.7 mm)",
+          "junction-to-class-t-a:3 projects across battery-a-to-class-t:3 (0 mm < 14.5 mm)",
+          "junction-to-class-t-a:3 projects across battery-b-to-class-t:3 (0 mm < 14.5 mm)",
+          "junction-to-class-t-a:0 projects across junction-to-mppt-positive:3 (0 mm < 13 mm)",
+          "junction-to-class-t-a:0 projects across junction-to-unifi-converter-positive:1 (5.5 mm < 9.8 mm)",
+          "junction-to-class-t-a:0 projects across junction-to-usb-positive:2 (0 mm < 10.2 mm)",
+          "junction-to-class-t-a:0 projects across junction-to-usb-negative:1 (0 mm < 10.2 mm)",
+          "junction-to-class-t-a:3 projects across balancer-a-alarm:3 (0 mm < 9.5 mm)",
+          "junction-to-class-t-a:3 projects across balancer-b-alarm:3 (0 mm < 9.5 mm)",
+          "junction-to-class-t-b:5 projects across battery-b-to-class-t:4 (0 mm < 14.5 mm)",
+          "junction-to-class-t-b:2 projects across junction-to-multiplus-negative:0 (0 mm < 14.5 mm)",
+          "junction-to-class-t-b:3 projects across junction-to-multiplus-positive:2 (0 mm < 14.5 mm)",
+          "junction-to-class-t-b:2 projects across junction-to-mppt-negative:0 (0 mm < 13 mm)",
+          "junction-to-class-t-b:2 projects across junction-to-ekrano-data:0 (0 mm < 9.7 mm)",
+          "junction-to-class-t-b:2 projects across junction-to-ekrano-positive:0 (0 mm < 9.8 mm)",
+          "junction-to-class-t-b:2 projects across smartsolar-to-ekrano-data:3 (0 mm < 9.7 mm)",
+          "junction-to-class-t-b:4 projects across balancer-a-alarm:3 (0 mm < 9.5 mm)",
+          "junction-to-class-t-b:2 projects across balancer-b-alarm:3 (0 mm < 9.5 mm)",
+          "battery-a-to-class-t:4 projects across battery-b-to-class-t:3 (0 mm < 14.5 mm)",
+          "battery-a-to-class-t:3 projects across balancer-b-positive:3 (0 mm < 9.7 mm)",
+          "battery-a-to-class-t:3 projects across balancer-b-midpoint:3 (0 mm < 9.7 mm)",
+          "battery-a-to-class-t:3 projects across balancer-b-negative:3 (0 mm < 9.7 mm)",
+          "battery-a-to-class-t:4 projects across balancer-a-alarm:3 (0 mm < 9.5 mm)",
+          "battery-b-to-class-t:3 projects across balancer-b-positive:3 (0 mm < 9.7 mm)",
+          "battery-b-to-class-t:3 projects across balancer-b-midpoint:3 (0 mm < 9.7 mm)",
+          "battery-b-to-class-t:3 projects across balancer-b-negative:3 (0 mm < 9.7 mm)",
+          "battery-b-to-class-t:4 projects across balancer-a-alarm:3 (0 mm < 9.5 mm)",
+          "battery-b-to-class-t:3 projects across earth-bar-to-smartsolar:3 (0 mm < 10.4 mm)",
+          "balancer-a-positive:2 projects across balancer-a-midpoint:3 (0 mm < 4.9 mm)",
+          "balancer-a-positive:2 projects across balancer-a-negative:3 (0 mm < 4.9 mm)",
+          "balancer-a-positive:3 projects across balancer-b-positive:5 (0 mm < 4.9 mm)",
+          "balancer-a-positive:2 projects across balancer-b-midpoint:3 (0 mm < 4.9 mm)",
+          "balancer-a-positive:2 projects across balancer-b-negative:3 (0 mm < 4.9 mm)",
+          "balancer-a-midpoint:5 projects across balancer-a-negative:3 (0 mm < 4.9 mm)",
+          "balancer-a-midpoint:2 projects across balancer-b-midpoint:3 (0 mm < 4.9 mm)",
+          "balancer-a-midpoint:5 projects across balancer-b-negative:3 (0 mm < 4.9 mm)",
+          "balancer-a-negative:2 projects across balancer-b-midpoint:3 (0 mm < 4.9 mm)",
+          "balancer-a-negative:2 projects across balancer-b-negative:3 (0 mm < 4.9 mm)",
+          "balancer-b-positive:2 projects across balancer-b-midpoint:3 (0 mm < 4.9 mm)",
+          "balancer-b-positive:5 projects across balancer-b-negative:3 (0 mm < 4.9 mm)",
+          "balancer-b-midpoint:5 projects across balancer-b-negative:3 (0 mm < 4.9 mm)",
+          "balancer-b-negative:3 projects across multiplus-battery-temperature:4 (0 mm < 4.7 mm)",
+          "multiplus-battery-temperature:0 projects across junction-to-multiplus-negative:4 (0.5 mm < 9.5 mm)",
+          "multiplus-battery-temperature:0 projects across junction-to-multiplus-positive:4 (0.5 mm < 9.5 mm)",
+          "multiplus-battery-temperature:2 projects across multiplus-to-ekrano-data:3 (0 mm < 4.7 mm)",
+          "multiplus-battery-temperature:2 projects across earth-electrode-to-main-bar:3 (0 mm < 6 mm)",
+          "multiplus-battery-temperature:4 projects across earth-bar-to-pv-entry:3 (0 mm < 5.4 mm)",
+          "junction-to-multiplus-negative:3 projects across junction-to-multiplus-positive:2 (0 mm < 14.5 mm)",
+          "junction-to-multiplus-negative:4 projects across generator-flex:6 (0 mm < 14.5 mm)",
+          "junction-to-multiplus-negative:2 projects across junction-to-mppt-negative:0 (0 mm < 13 mm)",
+          "junction-to-multiplus-negative:2 projects across smartsolar-to-ekrano-data:3 (0 mm < 9.7 mm)",
+          "junction-to-multiplus-negative:3 projects across multiplus-to-ekrano-data:3 (0 mm < 9.7 mm)",
+          "junction-to-multiplus-negative:3 projects across balancer-a-alarm:4 (0 mm < 9.5 mm)",
+          "junction-to-multiplus-negative:2 projects across balancer-b-alarm:3 (0 mm < 9.5 mm)",
+          "junction-to-multiplus-negative:4 projects across earth-bar-to-multiplus:3 (0 mm < 10.4 mm)",
+          "junction-to-multiplus-negative:3 projects across earth-bar-to-ekrano:2 (0 mm < 10.2 mm)",
+          "junction-to-multiplus-positive:4 projects across generator-flex:6 (0 mm < 14.5 mm)",
+          "junction-to-multiplus-positive:2 projects across junction-to-mppt-negative:0 (0 mm < 13 mm)",
+          "junction-to-multiplus-positive:2 projects across junction-to-ekrano-data:0 (2 mm < 9.7 mm)",
+          "junction-to-multiplus-positive:2 projects across junction-to-ekrano-negative:0 (0 mm < 9.8 mm)",
+          "junction-to-multiplus-positive:2 projects across junction-to-ekrano-positive:0 (0 mm < 9.8 mm)",
+          "junction-to-multiplus-positive:2 projects across junction-to-starlink-power-cable:0 (0 mm < 12 mm)",
+          "junction-to-multiplus-positive:2 projects across smartsolar-to-ekrano-data:3 (0 mm < 9.7 mm)",
+          "junction-to-multiplus-positive:3 projects across multiplus-to-ekrano-data:3 (0 mm < 9.7 mm)",
+          "junction-to-multiplus-positive:3 projects across balancer-a-alarm:4 (0 mm < 9.5 mm)",
+          "junction-to-multiplus-positive:2 projects across balancer-b-alarm:3 (0 mm < 9.5 mm)",
+          "junction-to-multiplus-positive:4 projects across earth-bar-to-multiplus:3 (0 mm < 10.4 mm)",
+          "junction-to-multiplus-positive:3 projects across earth-bar-to-ekrano:2 (0 mm < 10.2 mm)",
+          "junction-to-mppt-positive:3 projects across junction-to-mppt-negative:2 (0 mm < 11.5 mm)",
+          "junction-to-mppt-positive:2 projects across junction-to-outdoor-flood-negative:2 (0 mm < 8.3 mm)",
+          "junction-to-mppt-positive:2 projects across junction-to-outdoor-flood-positive:2 (0 mm < 8.3 mm)",
+          "junction-to-mppt-positive:2 projects across junction-to-indoor-light-negative:2 (0 mm < 8.3 mm)",
+          "junction-to-mppt-positive:2 projects across junction-to-indoor-light-positive:3 (0.5 mm < 8.3 mm)",
+          "junction-to-mppt-positive:2 projects across junction-to-unifi-converter-positive:3 (0 mm < 8.3 mm)",
+          "junction-to-mppt-positive:2 projects across junction-to-unifi-converter-negative:2 (0 mm < 8.3 mm)",
+          "junction-to-mppt-positive:0 projects across junction-to-usb-positive:2 (0 mm < 8.7 mm)",
+          "junction-to-mppt-positive:2 projects across junction-to-usb-negative:1 (0 mm < 8.7 mm)",
+          "junction-to-mppt-positive:3 projects across smartsolar-to-ekrano-data:0 (0 mm < 8.2 mm)",
+          "junction-to-mppt-positive:3 projects across balancer-b-alarm:3 (0 mm < 8 mm)",
+          "junction-to-mppt-positive:3 projects across earth-bar-to-smartsolar:5 (0 mm < 8.9 mm)",
+          "junction-to-mppt-negative:0 projects across junction-to-ekrano-data:2 (0 mm < 8.2 mm)",
+          "junction-to-mppt-negative:3 projects across balancer-b-alarm:3 (0 mm < 8 mm)",
+          "junction-to-mppt-negative:3 projects across earth-bar-to-smartsolar:5 (0 mm < 8.9 mm)",
+          "junction-to-outdoor-flood-negative:3 projects across junction-to-outdoor-flood-positive:4 (0 mm < 5.1 mm)",
+          "junction-to-outdoor-flood-negative:0 projects across junction-to-indoor-light-negative:2 (0 mm < 5.1 mm)",
+          "junction-to-outdoor-flood-negative:0 projects across junction-to-indoor-light-positive:3 (0 mm < 5.1 mm)",
+          "junction-to-outdoor-flood-negative:3 projects across junction-to-unifi-converter-positive:5 (0 mm < 5.1 mm)",
+          "junction-to-outdoor-flood-negative:0 projects across junction-to-unifi-converter-negative:2 (0 mm < 5.1 mm)",
+          "junction-to-outdoor-flood-negative:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+          "junction-to-outdoor-flood-positive:0 projects across junction-to-indoor-light-negative:2 (4 mm < 5.1 mm)",
+          "junction-to-outdoor-flood-positive:0 projects across junction-to-indoor-light-positive:2 (3 mm < 5.1 mm)",
+          "junction-to-outdoor-flood-positive:3 projects across junction-to-unifi-converter-positive:5 (0 mm < 5.1 mm)",
+          "junction-to-outdoor-flood-positive:0 projects across junction-to-unifi-converter-negative:2 (0 mm < 5.1 mm)",
+          "junction-to-outdoor-flood-positive:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+          "junction-to-indoor-light-negative:2 projects across junction-to-indoor-light-positive:3 (0.5 mm < 5.1 mm)",
+          "junction-to-indoor-light-negative:3 projects across junction-to-unifi-converter-positive:5 (0 mm < 5.1 mm)",
+          "junction-to-indoor-light-negative:2 projects across junction-to-unifi-converter-negative:2 (0 mm < 5.1 mm)",
+          "junction-to-indoor-light-negative:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+          "junction-to-indoor-light-positive:4 projects across junction-to-unifi-converter-positive:5 (0 mm < 5.1 mm)",
+          "junction-to-indoor-light-positive:0 projects across junction-to-unifi-converter-negative:2 (0 mm < 5.1 mm)",
+          "junction-to-indoor-light-positive:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+          "junction-to-ekrano-data:3 projects across junction-to-ekrano-negative:2 (0 mm < 5 mm)",
+          "junction-to-ekrano-data:2 projects across junction-to-ekrano-positive:0 (0 mm < 5 mm)",
+          "junction-to-ekrano-data:2 projects across smartsolar-to-ekrano-data:3 (0 mm < 4.9 mm)",
+          "junction-to-ekrano-data:3 projects across multiplus-to-ekrano-data:3 (0 mm < 4.9 mm)",
+          "junction-to-ekrano-data:3 projects across balancer-a-alarm:4 (0 mm < 4.7 mm)",
+          "junction-to-ekrano-data:2 projects across balancer-b-alarm:3 (0 mm < 4.7 mm)",
+          "junction-to-ekrano-data:3 projects across earth-bar-to-ekrano:2 (0 mm < 5.4 mm)",
+          "junction-to-ekrano-negative:2 projects across junction-to-ekrano-positive:0 (0 mm < 5.1 mm)",
+          "junction-to-ekrano-negative:0 projects across junction-to-starlink-power-cable:2 (0 mm < 7.3 mm)",
+          "junction-to-ekrano-negative:2 projects across smartsolar-to-ekrano-data:3 (0 mm < 5 mm)",
+          "junction-to-ekrano-negative:3 projects across multiplus-to-ekrano-data:3 (0 mm < 5 mm)",
+          "junction-to-ekrano-negative:3 projects across balancer-a-alarm:4 (0 mm < 4.8 mm)",
+          "junction-to-ekrano-negative:2 projects across balancer-b-alarm:3 (0 mm < 4.8 mm)",
+          "junction-to-ekrano-negative:3 projects across earth-bar-to-ekrano:2 (0 mm < 5.5 mm)",
+          "junction-to-ekrano-positive:0 projects across junction-to-starlink-power-cable:2 (0 mm < 7.3 mm)",
+          "junction-to-ekrano-positive:1 projects across smartsolar-to-ekrano-data:3 (0 mm < 5 mm)",
+          "junction-to-ekrano-positive:3 projects across multiplus-to-ekrano-data:3 (0 mm < 5 mm)",
+          "junction-to-ekrano-positive:3 projects across balancer-a-alarm:4 (0 mm < 4.8 mm)",
+          "junction-to-ekrano-positive:1 projects across balancer-b-alarm:3 (0 mm < 4.8 mm)",
+          "junction-to-ekrano-positive:3 projects across earth-bar-to-ekrano:2 (0 mm < 5.5 mm)",
+          "junction-to-starlink-power-cable:3 projects across unifi-to-ekrano-data:3 (0 mm < 7.2 mm)",
+          "junction-to-unifi-converter-positive:5 projects across junction-to-unifi-converter-negative:6 (0 mm < 5.1 mm)",
+          "junction-to-unifi-converter-positive:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+          "junction-to-unifi-converter-positive:5 projects across unifi-converter-to-unifi-power:0 (0 mm < 5 mm)",
+          "junction-to-unifi-converter-negative:0 projects across junction-to-usb-positive:2 (0 mm < 5.5 mm)",
+          "junction-to-unifi-converter-negative:4 projects across unifi-converter-to-unifi-power:0 (0 mm < 5 mm)",
+          "junction-to-usb-positive:2 projects across junction-to-usb-negative:0 (0 mm < 5.9 mm)",
+          "unifi-converter-to-unifi-power:3 projects across unifi-to-ekrano-data:3 (0 mm < 4.9 mm)",
+          "unifi-converter-to-unifi-power:3 projects across starlink-to-unifi-data:3 (0 mm < 5.1 mm)",
+          "unifi-to-ekrano-data:3 projects across balancer-a-alarm:6 (0 mm < 4.7 mm)",
+          "unifi-to-ekrano-data:3 projects across balancer-b-alarm:3 (0 mm < 4.7 mm)",
+          "unifi-to-ekrano-data:3 projects across earth-bar-to-ekrano:5 (0 mm < 5.4 mm)",
+          "smartsolar-to-ekrano-data:3 projects across multiplus-to-ekrano-data:3 (0 mm < 4.9 mm)",
+          "smartsolar-to-ekrano-data:3 projects across balancer-a-alarm:4 (0 mm < 4.7 mm)",
+          "smartsolar-to-ekrano-data:2 projects across earth-bar-to-smartsolar:5 (0 mm < 5.6 mm)",
+          "smartsolar-to-ekrano-data:3 projects across earth-bar-to-ekrano:2 (0 mm < 5.4 mm)",
+          "multiplus-to-ekrano-data:3 projects across earth-bar-to-multiplus:3 (0 mm < 5.6 mm)",
+          "multiplus-to-ekrano-data:3 projects across earth-bar-to-ac-board:3 (0 mm < 5.6 mm)",
+          "balancer-a-alarm:3 projects across earth-bar-to-smartsolar:3 (0 mm < 5.4 mm)",
+          "balancer-a-alarm:3 projects across earth-bar-to-ekrano:2 (0 mm < 5.2 mm)",
+          "earth-electrode-to-main-bar:3 projects across earth-bar-to-multiplus:2 (0 mm < 6.9 mm)",
+          "earth-bar-to-pv-entry:0 projects across earth-bar-to-multiplus:2 (0 mm < 6.3 mm)",
+          "earth-bar-to-smartsolar:0 projects across earth-bar-to-multiplus:2 (0 mm < 6.3 mm)",
+          "earth-bar-to-ac-board:2 projects across earth-bar-to-ekrano:0 (0 mm < 6.1 mm)"
+        ],
+        "deviceFrontCrossingCount": 0,
+        "deviceFrontCrossingIssues": [],
+        "junctionBackRouteCount": 0,
+        "planarDirectionReversals": 63,
+        "planarReversalIssues": [
+          "pv-home-run-a-positive:1",
+          "pv-home-run-a-negative:1",
+          "pv-home-run-b-positive:1",
+          "pv-home-run-b-negative:1",
+          "pv-entry-to-mppt-positive:1",
+          "pv-entry-to-mppt-negative:1",
+          "trailing-tool-flex:1",
+          "multiplus-to-ac-output-protection:1",
+          "battery-series-a:1",
+          "battery-series-b:1",
+          "junction-to-battery-negative-a:2",
+          "junction-to-battery-negative-b:2",
+          "junction-to-class-t-a:1",
+          "junction-to-class-t-b:3",
+          "battery-a-to-class-t:4",
+          "battery-b-to-class-t:4",
+          "multiplus-battery-temperature:1",
+          "junction-to-multiplus-negative:1",
+          "junction-to-multiplus-positive:1",
+          "junction-to-mppt-positive:1",
+          "junction-to-mppt-negative:1",
+          "junction-to-outdoor-flood-negative:2",
+          "junction-to-outdoor-flood-positive:2",
+          "junction-to-indoor-light-negative:2",
+          "junction-to-indoor-light-positive:2",
+          "junction-to-ekrano-data:1",
+          "junction-to-ekrano-negative:1",
+          "junction-to-ekrano-positive:1",
+          "junction-to-starlink-power-cable:2",
+          "junction-to-unifi-converter-positive:2",
+          "junction-to-unifi-converter-negative:2",
+          "junction-to-usb-positive:1",
+          "junction-to-usb-negative:1",
+          "unifi-converter-to-unifi-power:1",
+          "unifi-to-ekrano-data:1",
+          "smartsolar-to-ekrano-data:1",
+          "multiplus-to-ekrano-data:1",
+          "balancer-a-alarm:1",
+          "balancer-b-alarm:2",
+          "starlink-to-unifi-data:1",
+          "earth-bar-to-pv-entry:1",
+          "earth-bar-to-smartsolar:1",
+          "earth-bar-to-multiplus:1",
+          "earth-bar-to-ac-board:1",
+          "earth-bar-to-ekrano:1"
+        ],
+        "portApproachIssueCount": 0,
+        "portApproachIssues": [],
+        "automaticRouteLengthM": 78.7015,
+        "automaticRouteExcessLengthM": 9.2146,
+        "automaticRouteTurnCount": 266,
+        "junctionEgressTurnCount": 38,
+        "solverRouteCount": 58,
+        "wallSpanPenaltyM": 0.8417,
+        "score": 1239.7428
+      },
+      "constraints": {
+        "batteryArrangement": "floor-2x2",
+        "batteryRouting": "collision-aware-terminal-derived-bundle",
+        "junctionBackClearance": "flush-no-cables",
+        "removableSurfaces": {
+          "sideWalls": true,
+          "roof": true
+        },
+        "wallLayout": "evolutionary-optimized-layout",
+        "wallRouting": "bottom-port-downward-breakout-visibility-graph"
+      }
+    }
+  },
+  "finalizedAt": "2026-08-18T19:36:31.079Z"
+}

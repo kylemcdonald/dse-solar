@@ -13,6 +13,7 @@ if (process.argv.includes("--json")) {
     totalRenderedCableM: specification.metrics.totalRenderedCableM,
     cableByKindM: specification.metrics.cableByKindM,
     wallOverlapCount: specification.metrics.wallOverlapCount,
+    deviceFrontCrossingCount: specification.metrics.deviceFrontCrossingCount,
     junctionBackRouteCount: specification.metrics.junctionBackRouteCount,
     planarDirectionReversals: specification.metrics.planarDirectionReversals,
     planarReversalIssues: specification.metrics.planarReversalIssues,

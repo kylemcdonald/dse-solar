@@ -1,5 +1,5 @@
 {
-  "revision": "Physical fit model R14 · 14 Aug 2026",
+  "revision": "Physical fit model R23 · 18 Aug 2026",
   "units": "metres",
   "scale": "1 scene unit = 1 metre",
   "scene": {
@@ -16,11 +16,11 @@
     "wallCableStandOffMm": 35,
     "wallCableRoutingEnvelopeMm": [35, 245],
     "classTFuseMounting": "two holders mount directly to the plywood wall above the floor battery bank; no separate backplate",
-    "heavyBatteryCableRoute": "around the outside of the floor battery footprint, then directly onto plywood",
-    "junctionCableEntries": "23 continuous inside / gland / outside centerlines through registered enclosure walls",
-    "junctionMounting": "back of enclosure flush to plywood; zero cable routes behind it; three light-gauge Ekrano leads turn immediately into shallow wall lanes, four heavy upper right-side routes remain in front of the enclosure, and four short Orion leads cross directly to the adjacent unit",
-    "layoutSolver": "layout-solver-r4 independently generates device envelopes, port coordinates, major cable centerlines, cable reversals, route lengths, overlap checks and optimization score before Three.js rendering",
-    "ceilingCableRouting": "Starlink power and both lighting rows turn directly from each assigned wall-clearance lane toward the ceiling. Starlink Ethernet descends on the Starlink side and travels directly left to UniFi in a clear forward plane, without the former rightward overshoot. No route snaps back to the plywood datum before departing, and there are no perpendicular mesh handoffs.",
+    "heavyBatteryCableRoute": "terminal-derived rectilinear lead-outs around the floor battery footprint, selected together with the balancer leads by a cable-clearance solver",
+    "junctionCableEntries": "33 service circuits comprise 35 optimized terminal-to-terminal wire segments through 14 cable glands plus one Starlink bulkhead DC jack, arranged by the optimizer in two rows on the bottom face. The 100 A MPPT breaker and six service breakers are resettable; only the two battery Class T devices and Victron-specified small inline fuses remain non-resettable. The SmartShunt's supplied 1 A fused Vbatt+ lead occupies the seventh positive-bus connection. UniFi, USB and both light runs each arrive as one positive/negative pair through one gland and split only inside the box",
+    "junctionMounting": "back of enclosure flush to plywood with zero cable routes behind it; every external DC, data and service connection exits through the bottom face, while the three-rocker control frame passes through the otherwise unused fixed left sidewall",
+    "layoutSolver": "The offline layout solver independently generates device envelopes, port coordinates and major cable centerlines from a saved evolutionary placement before Three.js rendering; its collision-aware bundle keeps direct battery runs in low wall-adjacent corridors, while a separate seeded evolutionary junction optimizer evolves the internal component positions, arbitrary two-row bottom-gland order and wire-routing order",
+    "ceilingCableRouting": "One thin white two-conductor Starlink OEM cable leaves the junction bulkhead jack and turns directly toward the Mini; it is not abstracted into separate rooftop red/black runs. Two identical five-inch utility lights each use one positive and one negative conductor from source-side switching; the indoor unit is suspended with its lens down, while the exterior unit is wall-mounted. Starlink Ethernet descends on the Starlink side and travels directly left to UniFi without the former rightward overshoot.",
     "cameraControls": "ofxGrabCam-inspired perspective camera: ray-pick the XYZ surface point under mouse or touch, use upright world-Y yaw and pitch around that off-axis point with roll locked out, and scale zoom/pan at its depth; one touch orbits and two touches pan plus pinch-zoom",
     "cableGeometry": "one continuous tube surface per route with tangent corner-contained bends, seamless adjacent corners, tangent render handoffs and stable greedy board-depth lanes"
   },
@@ -29,66 +29,88 @@
     "The array is shown close to the north side of the building. The two 4 mm² PV pairs retain a conservative 15 m one-way design allowance even though the illustrated route is shorter.",
     "Both PV strings retain independent positive and negative home-run conductors all the way to one indoor entry enclosure. For this two-string array, the other string can contribute only about one module Isc (14.20 A) into a faulted string, below the Suntech module's 25 A maximum series-fuse rating; the base design therefore omits the separate outdoor fuse/combiner. The indoor enclosure still provides protected parallel terminals, a two-pole 40 A DC disconnect and Type 2 SPD. Final cable ampacity and local-code review remain mandatory.",
     "The array faces north at an 18° planning tilt, consistent with Fiji's latitude and government residential-solar guidance; final angle and shading require site verification.",
-    "Small conductors are slightly widened so individual polarity, fused positives, unfused negative returns and data paths remain visible.",
+    "Small conductors are slightly widened so individual polarity, protected positives, unswitched negative returns and data paths remain visible.",
     "Ordinary power conductors begin approximately 35 mm in front of the plywood and receive stable wall lanes. Flush-junction bypasses briefly stand farther forward—up to about 245 mm from plywood—to clear the enclosure face before returning toward their terminal; no route occupies the inaccessible space behind the box.",
     "All battery shelving is omitted. Four batteries sit directly on the floor in two side-by-side series strings, arranged as a 2 × 2 footprint. The two Class T holders mount directly to the plywood and heavy conductors route around the battery footprint.",
-    "Every illustrated junction-box boundary crossing uses one continuous centerline from its internal termination, through a modeled cable gland, around the complete exterior bend and into the outgoing run. Render-visibility handoffs occur only on audited tangent straight sections.",
+    "The four main battery leads and six battery-balancer leads are routed as one ordered terminal-derived bundle. Candidate terminal lead-outs, bend orders and depth lanes are accepted only after a three-dimensional cable-to-cable audit, including parallel overlaps and endpoint-to-interior contacts. The modeled harness retains at least 3 mm surface clearance except where conductors intentionally share a battery terminal.",
+    "Every gland crossing uses one continuous centerline from its internal termination through the enclosure wall into the outgoing run. The Starlink exception is intentionally connectorized: separate internal red/black wires terminate on a two-pin bulkhead jack, and one white OEM cable begins outside it.",
+    "The 86.4 × 58.4 mm three-position switch frame is shown through the fixed enclosure sidewall. INTERNET is DPST, independently switching the separately breakered 24 V Starlink and UniFi positives; INSIDE and OUTSIDE are SPST source-side light controls. Every load negative bypasses the rockers. A separate small black return serves only the embedded indicator LEDs.",
     "Every green conductor terminates at a modeled stud: the electrode and array frame share the electrode connection, and dedicated studs on a visible main PE bar feed PV protection, SmartSolar chassis, MultiPlus chassis, AC output protection and Ekrano GX. Protective earth is not tied to the DC-negative bus in this planning model.",
+    "The SmartShunt's supplied fused Vbatt+ lead is routed from the protected positive bus to its voltage-sense terminal. Its single Aux input is reserved rather than presented as whole-bank midpoint monitoring because one input cannot independently supervise both parallel 24 V strings.",
+    "The supplied MultiPlus battery-temperature sensor runs to Battery 1's negative terminal. Ekrano DVCC uses SmartShunt voltage/current for Shared Voltage Sense and Shared Current Sense and the MultiPlus sensor for Shared Temperature Sense, so no separate Smart Battery Sense is included.",
+    "Each battery balancer has an independent two-conductor dry-contact alarm cable to one Ekrano digital input; the two units remain necessary because the two series strings must be balanced and diagnosed independently.",
     "Each complete cable route renders as one continuous tube surface rather than separate open cylinders and bend pieces. This removes polygon-ring gaps when two bends are close together. Bends use tangent, corner-contained quadratic geometry; each curve stays within the intended turn and cannot curl backwards in perspective. A greedy minimum-conflict planner gives each complete board route one stable depth lane; ceiling departures retain that lane instead of snapping back to a shared wall datum. The geometry audit checks both reverse bends and non-terminal crossings.",
     "Camera interactions ray-pick the visible XYZ point beneath the mouse or touch centroid. Upright orbit and zoom preserve that off-axis point's screen position; roll is locked to world-up and pan scale derives from picked depth. One finger orbits, two fingers pan and pinch-zoom, and empty-space interactions reuse the last valid projected depth, following the ofxGrabCam interaction model.",
+    "The junction result is generated by scripts/optimize-junction-layout.ts with a deterministic seed and a default 600-second time budget. It warm-starts from the saved result unless --fresh is specified, evolves all internal component centers, both bottom-face gland rows and route order, checkpoints atomically, and saves the complete genome, convergence history, metrics and renderer-ready routes in data/junction-optimized-layout.json. Routing depth is measured forward from the inner back panel. Every conductor begins on a common 60 mm service plane; radius-aware bridge intervals are merged across the whole rectilinear polyline, may move toward or away from the back panel, and account for each bottom gland row's physical depth. A reserved bottom gutter keeps ordinary cross-box runs away from gland breakouts.",
     "Gland positions and bend radii remain a planning layout and require a full-size mock-up with the actual parts before drilling or ordering preterminated cables."
   ],
   "connectionAudit": {
-    "rule": "Every rendered conductor terminates at an explicit device port or terminal; no 12 V conductor lands directly on the 5 V UniFi Express and no protective-earth conductor ends in open space.",
+    "rule": "Every rendered conductor terminates at an explicit device port or terminal; no nominal-24 V conductor lands directly on the 5 V UniFi Express and no protective-earth conductor ends in open space.",
     "smartSolar": {
-      "ports": ["PV +", "PV −", "BAT +", "BAT −"],
-      "connections": ["PV entry protection", "24 V positive bus through 100 A fuse", "24 V negative bus"]
+      "ports": ["PV +", "PV −", "BAT +", "BAT −", "VE.Direct", "chassis earth"],
+      "connections": ["PV entry protection", "24 V positive bus through MNEDC100 resettable breaker", "24 V negative bus", "Ekrano VE.Direct port 2", "main PE bar"],
+      "availableUnused": ["VE.Can", "remote on/off", "programmable relay"]
     },
     "multiPlus": {
-      "ports": ["DC +", "DC −", "AC-in L / N / PE", "AC-out L / N / PE"],
-      "connections": ["24 V bus", "generator inlet", "AC output protection"],
+      "ports": ["DC +", "DC −", "AC-in L / N / PE", "AC-out L / N / PE", "VE.Bus", "battery-temperature sensor", "chassis earth"],
+      "connections": ["24 V bus", "direct field-matched generator lead", "AC output protection", "Ekrano VE.Bus", "Battery 1 negative terminal", "main PE bar"],
+      "availableUnused": ["AC-out-2", "remote on/off", "programmable relay", "auxiliary inputs", "direct voltage sense", "external current sensor"],
       "routing": "Each AC trio is represented by one thick white three-core cable; the internal brown, blue and green conductors are not broken out in the wall-layout view."
     },
     "ekrano": {
-      "ports": ["DC +", "DC −", "VE.Direct", "VE.Can", "VE.Bus", "Ethernet", "protective earth"],
-      "connections": ["3.15 A protected 24 V branch", "SmartShunt", "SmartSolar", "MultiPlus-II", "UniFi Express LAN", "main PE bar"]
+      "ports": ["DC +", "DC −", "VE.Direct 1", "VE.Direct 2", "VE.Bus", "Ethernet", "digital input 1", "digital input 2", "protective earth"],
+      "connections": ["3.15 A protected 24 V branch", "SmartShunt", "SmartSolar", "MultiPlus-II", "UniFi Express LAN", "balancer A alarm", "balancer B alarm", "main PE bar"],
+      "dvcc": ["SVS from SmartShunt", "SCS from SmartShunt", "STS from MultiPlus battery-temperature sensor"],
+      "availableUnused": ["VE.Direct 3", "VE.Can 1/2", "temperature inputs 1/2", "relays 1/2", "USB host"]
     },
-    "orion": {
-      "ports": ["24 V input + / −", "12 V output + / −"],
-      "connections": ["protected 24 V bus", "35 A output protection and 12 V distribution"]
+    "smartShunt": {
+      "ports": ["BATTERY MINUS", "SYSTEM MINUS", "Vbatt+", "VE.Direct"],
+      "connections": ["both battery-string negatives", "negative bus", "protected positive bus through supplied 1 A fused lead", "Ekrano VE.Direct port 1"],
+      "availableUnused": ["Aux input · reserved; one input cannot monitor both string midpoints"]
     },
     "usbCharger": {
-      "ports": ["12 V +", "12 V −", "reserved USB-C output"],
-      "connections": ["15 A fused 12 V branch", "unfused negative-return bus", "UniFi Express USB-C power"]
+      "ports": ["24 V +", "24 V −", "4 × USB-C PD", "2 × USB-A"],
+      "connections": ["one 15 A breakered unswitched 24 V pair through one gland", "local split through 3 × Blue Sea 2132 resettable 10 A module breakers", "unbroken negative-return bus", "phones and other user devices"],
+      "routing": "The wall unit is one compact three-module Scanstrut TILE panel. The positive and negative remain paired to the station, then split locally rather than inside the junction box."
+    },
+    "unifiPowerConverter": {
+      "ports": ["24 V +", "24 V −", "5 V USB output"],
+      "connections": ["2 A resettable-breaker branch through INTERNET pole B", "unbroken negative-return bus", "UniFi Express USB-C power"],
+      "routing": "The potted converter is mounted immediately below UniFi; one sheathed two-core 24 V cable reaches the shared gland, then separates into positive and negative only inside the enclosure. The short USB lead terminates at the registered UniFi power port."
     },
     "unifiExpress": {
       "ports": ["USB-C power", "WAN", "LAN"],
-      "connections": ["USB charger at 5 V / 3 A", "Starlink Ethernet", "Ekrano GX Ethernet"],
+      "connections": ["dedicated Powerwerx converter at 5 V / 3 A", "Starlink Ethernet", "Ekrano GX Ethernet"],
       "routing": "All three leads approach from below or around the enclosure, leaving the front face unobscured."
     },
     "starlinkMini": {
-      "ports": ["12 V +", "12 V −", "Ethernet"],
-      "connections": ["10 A fused 12 V branch", "unfused negative-return bus", "UniFi Express WAN"],
-      "routing": "Each run remains continuous through the high-wall turn and terminates at an explicit Starlink port."
+      "ports": ["single 12–48 V DC jack", "Ethernet"],
+      "connections": ["dedicated 24 V / 5 A resettable-breaker branch through INTERNET pole A", "single OEM 15 m white DC cable", "UniFi Express WAN"],
+      "routing": "One thin white sheathed power cable remains continuous from the junction bulkhead interface through the high-wall turn to the Mini; red and black conductors are visible only inside the junction box."
     },
     "lighting": {
-      "ports": ["12 V + trunk", "12 V − trunk"],
-      "connections": ["10 A fused 12 V branch", "unfused negative-return bus", "six fixtures across both ceiling rows"],
-      "routing": "Positive and negative conductors each remain one continuous rounded centerline from the junction box through both ceiling rows. The two unused wall-side task-light objects were removed."
+      "ports": ["indoor 24 V + / −", "outdoor 24 V + / −"],
+      "connections": ["1 A resettable-breaker positive through INSIDE rocker and two series silicon diodes", "1 A resettable-breaker positive through OUTSIDE rocker and two series silicon diodes", "two independent negatives to the unbroken return bus", "two identical QHLightlux 3000 K utility lights"],
+      "routing": "Each fixture has one sheathed two-core cable outside the enclosure; its positive and negative separate only inside the shared gland. Both switches interrupt power at the source; neither negative nor a separate switch leg runs to the fixture."
+    },
+    "externalControls": {
+      "ports": ["24 V Starlink protected + in / switched + out", "24 V UniFi protected + in / switched + out", "indoor-light protected + in / switched + out", "outdoor-light protected + in / switched + out"],
+      "connections": ["Blue Sea 8287 DPST INTERNET rocker", "Blue Sea 8282 SPST INSIDE rocker", "Blue Sea 8282 SPST OUTSIDE rocker", "Blue Sea 8259 three-position frame through fixed enclosure sidewall"],
+      "routing": "The independent Starlink and UniFi positives remain isolated across the two DPST poles. General USB bypasses the control panel. Light positives are switched at the source. Load negatives bypass all switch contacts; one low-current black lead returns the embedded indicators."
     },
     "protectiveEarth": {
-      "ports": ["earth electrode", "array-frame lug", "seven-stud main PE bar", "equipment PE / chassis lugs"],
+      "ports": ["earth electrode", "array-frame lug", "Blue Sea 2128 earth bar", "equipment PE / chassis lugs"],
       "connections": ["array frame", "PV protection / SPD", "SmartSolar chassis", "MultiPlus chassis", "AC output protection", "Ekrano GX"],
       "routing": "Every branch is generated by the independent layout solver and terminates exactly at a visible stud or device lug."
     },
     "batteryBalancers": {
-      "ports": ["string +", "series midpoint", "string −"],
-      "connections": ["one independent three-conductor set per 24 V battery string"],
-      "routing": "Both balancers sit low and right of the junction box. Positive leads use an outer-right channel, yellow midpoint leads use a separate central channel and negatives use the left channel."
+      "ports": ["string +", "series midpoint", "string −", "alarm relay COM/NO"],
+      "connections": ["one independent three-conductor set per 24 V battery string", "one independent two-conductor alarm cable per unit to separate Ekrano digital inputs"],
+      "routing": "Both balancers sit low and right of the junction box. Their red positive, yellow midpoint and black negative leads are generated from the actual device terminals; a collision-aware solver selects lead-out direction, bend order and depth lane while enforcing 4 mm modeled surface clearance from previously placed battery conductors, except at an intentionally shared terminal."
     },
     "batteryStringProtection": {
-      "ports": ["String A battery side", "String A selector side", "String B battery side", "String B selector side"],
-      "connections": ["each string positive to its own 150 A Class T holder", "each protected output to the A / B selector"],
+      "ports": ["String A battery side", "String A master-disconnect side", "String B battery side", "String B master-disconnect side"],
+      "connections": ["each string positive to its own 150 A Class T holder", "both equal-length protected outputs to the single Blue Sea 6006 input stud", "whole bank switched together"],
       "mounting": "two holders fixed directly to the plywood above the floor battery bank; no intermediate backplate"
     }
   },
@@ -134,14 +156,6 @@
       "sourceUrl": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/technical-specifications.html"
     },
     {
-      "id": "orion",
-      "componentIds": ["dcConverter"],
-      "quantity": 1,
-      "dimensionsMm": { "width": 186, "height": 130, "depth": 80 },
-      "status": "verified",
-      "sourceUrl": "https://www.victronenergy.com/media/pg/Orion-Tr_Smart_DC-DC_Charger_-_Isolated/en/specifications.html"
-    },
-    {
       "id": "battery-balancer",
       "componentIds": ["balancers"],
       "quantity": 2,
@@ -166,12 +180,12 @@
       "sourceUrl": ""
     },
     {
-      "id": "battery-selector",
+      "id": "battery-disconnect",
       "componentIds": ["batterySelector"],
       "quantity": 1,
       "dimensionsMm": { "width": 74.9, "height": 74.9, "depth": 84.3 },
       "status": "verified",
-      "sourceUrl": "https://www.bluesea.com/products/6007"
+      "sourceUrl": "https://www.bluesea.com/products/6006"
     },
     {
       "id": "unifi-express",
@@ -180,6 +194,46 @@
       "dimensionsMm": { "width": 98, "height": 98, "depth": 30 },
       "status": "verified",
       "sourceUrl": "https://techspecs.ui.com/unifi/cloud-gateways/ux"
+    },
+    {
+      "id": "unifi-power-converter",
+      "componentIds": ["unifiPower"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 100, "height": 44, "depth": 30 },
+      "status": "assumed",
+      "sourceUrl": "https://powerwerx.com/usbbuddy2-powerpole-usb-device-charger"
+    },
+    {
+      "id": "scanstrut-usb-panel",
+      "componentIds": ["usb"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 180, "height": 75, "depth": 75 },
+      "status": "planning-envelope",
+      "sourceUrl": "https://www.scanstrut.com/file/inline/upload/TILE/SC-TILE-20/SC-TILE-20_amp_21_Technical_Drawing.pdf"
+    },
+    {
+      "id": "external-switch-panel",
+      "componentIds": ["loadSwitches"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 86.36, "height": 58.42, "depth": 45 },
+      "status": "partially-verified",
+      "sourceUrl": "https://www.bluesea.com/products/8259/Contura_Switch_Mounting_Panel_-_3_Position"
+    },
+    {
+      "id": "indoor-light",
+      "componentIds": ["indoorLight"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 127, "height": 100, "depth": 55 },
+      "status": "assumed",
+      "sourceUrl": "https://www.amazon.com/dp/B0F1V59NXC"
+    },
+    {
+      "id": "outdoor-flood",
+      "componentIds": ["outdoorLight"],
+      "quantity": 1,
+      "dimensionsMm": { "width": 127, "height": 100, "depth": 55 },
+      "status": "assumed",
+      "sourceUrl": "https://www.amazon.com/dp/B0F1V59NXC"
     },
     {
       "id": "starlink-mini",
@@ -211,15 +265,15 @@
       "quantity": 1,
       "dimensionsMm": { "width": 600, "height": 460, "depth": 450 },
       "status": "assumed",
-      "sourceUrl": "https://www.husqvarna.com/au/generators/g3200p/"
+      "sourceUrl": "https://www.vinodpatel.com.fj/husqvarna-generator-g3200p-3-2kva-1-phase-petrol"
     },
     {
-      "id": "fuse-block",
+      "id": "breaker-block",
       "componentIds": ["fuseBlock"],
       "quantity": 1,
-      "dimensionsMm": { "width": 125, "height": 85, "depth": 35 },
-      "status": "assumed",
-      "sourceUrl": ""
+      "dimensionsMm": { "width": 92, "height": 85, "depth": 60 },
+      "status": "planning-envelope",
+      "sourceUrl": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=759&sortOrder=1"
     },
     {
       "id": "class-t-holder",

@@ -1,5 +1,5 @@
 {
-  "checkedOn": "2026-08-15",
+  "checkedOn": "2026-08-17",
   "destination": "Los Angeles, CA 90065",
   "items": {
     "dse-panels": {
@@ -50,26 +50,59 @@
     },
     "dse-ac-board": {
       "amazonStatus": "unavailable",
-      "sourceLabel": "WI Automation · RCBO fallback",
-      "sourceUrl": "https://us.wiautomation.com/schneider-electric/drives-motors-circuits-protection/r9d01610-schneider-electric",
-      "eta": "1–10 business days",
-      "time": "DHL Express; confirm at checkout",
-      "note": "Amazon had no suitable complete Fiji Type I kit. Its exact Type A 10 A RCBO choices arrived after departure; the linked Schneider 10 A / 30 mA Type A unit is in stock, but local Fiji sourcing is preferred."
+      "sourceLabel": "Bunnings Pacific Fiji · HPM 5 m workshop lead",
+      "sourceUrl": "https://bunningspacific.com.fj/collections/extension-cords-1",
+      "eta": "Buy in Fiji",
+      "time": "Local stock shown; confirm before travel",
+      "note": "Amazon U.S. does not supply a trustworthy complete Fiji Type I / AS-NZS kit. The primary local lead is the HPM 5 m, 10 A, 3-core 1.0 mm² workshop extension lead at FJD 56.86. Source a 10 A / 30 mA Type A RCBO and compact enclosure locally and have a qualified person terminate the lead."
     },
     "dse-gen-input": {
       "amazonStatus": "unavailable",
-      "sourceLabel": "Assemble in Fiji",
+      "sourceLabel": "Verify the actual G3200P, then assemble in Fiji",
+      "sourceUrl": "https://www.vinodpatel.com.fj/husqvarna-generator-g3200p-3-2kva-1-phase-petrol",
       "eta": "Buy locally",
       "time": "No LA shipment",
-      "note": "No suitable single Amazon kit matched the G3200P, Fiji plug format, weather-protected inlet, lead and two-pole protection."
+      "note": "Do not order an assumed Type I lead from Amazon. This G3200P model is sold with market-specific receptacles and the Fiji listing image is not conclusive. Inspect the actual outlet, then fit one matching male plug to a three-core lead whose other end is hardwired to MultiPlus AC-in. No inlet box is required."
     },
-    "dse-lights": {
-      "amazonStatus": "substitute",
-      "sourceLabel": "Amazon · comparable 6-pack",
-      "sourceUrl": "https://www.amazon.com/dp/B0C331RDPN",
-      "eta": "Aug 16",
-      "time": "1 day to LA",
-      "note": "Comparable regulated-12 V six-light pack only; confirm damp rating and source the switches and building cable separately."
+    "dse-switch-panel": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Fisheries Supply · exact Blue Sea parts",
+      "sourceUrl": "https://www.fisheriessupply.com/blue-sea-systems-black-water-resistant-contura-rocker-switches/8287",
+      "eta": "Ships immediately",
+      "time": "Confirm LA date at checkout",
+      "note": "Exact 8287 DPST and 8282 SPST Contura rockers were listed in stock and shipping immediately; buy one 8287, two 8282s and the 8259 three-position frame, then add labels, the separately mounted 5 A MidNite Starlink breaker, bulkhead DC jack, perimeter gasket and terminals. Amazon did not provide a trustworthy exact three-switch set.",
+      "ebay": {
+        "status": "unavailable",
+        "sourceLabel": "No verified complete exact set",
+        "eta": "Not verified",
+        "price": "—",
+        "condition": "—",
+        "shipsFrom": "U.S.-only search",
+        "note": "Individual Contura parts appear intermittently, but no complete exact 8287 + two 8282 + 8259 U.S. set was verified."
+      }
+    },
+    "dse-indoor-light": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · QHLightlux 3000 K utility light",
+      "sourceUrl": "https://www.amazon.com/dp/B0F1V59NXC",
+      "eta": "Aug 19",
+      "time": "2 days to LA when checked",
+      "note": "Primary recommendation. Use the same ASIN B0F1V59NXC fixture indoors, suspended from a short dry bracket with the lens aimed down. The listing showed $23.99 and 12–28 V input. Add two series 3 A silicon diodes to keep its input below 28 V during GEL absorption."
+    },
+    "dse-outdoor-light": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · QHLightlux 3000 K IP67 utility light",
+      "sourceUrl": "https://www.amazon.com/dp/B0F1V59NXC",
+      "eta": "Aug 19",
+      "time": "2 days to LA when checked",
+      "note": "Primary recommendation. ASIN B0F1V59NXC was in stock at $23.99; the listing specifies 12–28 V, 900 lm, 3000 K and IP67. Add two series 3 A silicon diodes for charge-voltage margin. Use it under an eave with 316 stainless replacement fasteners and sealed bedding; this low-cost fixture has no demonstrated Hella-equivalent salt-spray rating."
+    },
+    "dse-light-install": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Purchase in Fiji after measuring",
+      "eta": "Buy locally",
+      "time": "No LA shipment",
+      "note": "Site-measured cable and mounting consumables are intentionally local; confirm UV, moisture and corrosion suitability."
     },
     "dse-earth": {
       "amazonStatus": "partial",
@@ -174,24 +207,6 @@
       "time": "Replace with checkout quotes",
       "note": "This row budgets inbound freight; it is not a purchasable item."
     },
-    "dse-orion": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · exact model",
-      "sourceUrl": "https://www.amazon.com/dp/B086R9ZVK5",
-      "eta": "Aug 16",
-      "time": "1 day to LA",
-      "note": "Exact Smart 24/12-30 A 360 W isolated model; do not choose the visually similar non-isolated listing.",
-      "ebay": {
-        "status": "available",
-        "sourceLabel": "eBay · exact ORI241236120",
-        "sourceUrl": "https://www.ebay.com/itm/116489159799",
-        "eta": "2–4 days",
-        "price": "$243.95",
-        "condition": "New",
-        "shipsFrom": "Ranchita, California",
-        "note": "Exact isolated 24/12-30 A model; item page displayed free 2–4 day delivery to 90065."
-      }
-    },
     "dse-balancers": {
       "amazonStatus": "available",
       "sourceLabel": "Amazon · exact model",
@@ -251,19 +266,19 @@
     "dse-selector": {
       "amazonStatus": "available",
       "sourceLabel": "Amazon · exact model",
-      "sourceUrl": "https://www.amazon.com/dp/B000MMFJH0",
-      "eta": "Aug 15",
-      "time": "Same-day to LA",
-      "note": "Exact Blue Sea 6007 four-position m-Series selector.",
+      "sourceUrl": "https://www.amazon.com/dp/B00445KFZ2",
+      "eta": "Check at checkout",
+      "time": "Live delivery date varies",
+      "note": "Exact Blue Sea 6006 m-Series whole-bank ON/OFF disconnect; no one-string selector positions.",
       "ebay": {
         "status": "available",
-        "sourceLabel": "eBay · exact Blue Sea 6007",
-        "sourceUrl": "https://www.ebay.com/itm/155534611272",
-        "eta": "2–4 days",
-        "price": "$39.95",
+        "sourceLabel": "eBay · Blue Sea 6006 search",
+        "sourceUrl": "https://www.ebay.com/sch/i.html?_nkw=Blue+Sea+6006",
+        "eta": "Varies by U.S. seller",
+        "price": "Check listing",
         "condition": "New",
         "shipsFrom": "United States",
-        "note": "Exact selector; displayed free 2–4 day delivery to 90065."
+        "note": "Use only the exact 6006 ON/OFF model; verify U.S. shipping origin and delivery date before ordering."
       }
     },
     "dse-pv-protection": {
@@ -275,30 +290,55 @@
       "note": "A two-string 40 A combiner/SPD box is available, but it is not an approved drop-in selection. Verify disconnect poles, SPD Ucpv, enclosure, terminals and all DC ratings before purchase."
     },
     "dse-fuse-block": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · exact model",
-      "sourceUrl": "https://www.amazon.com/dp/B000THQ0CQ",
-      "eta": "Aug 15",
-      "time": "Same-day to LA",
-      "note": "Exact Blue Sea 5025 six-circuit covered fuse block with negative bus.",
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon · MidNite breaker search",
+      "sourceUrl": "https://www.amazon.com/s?k=MidNite+Solar+MNEPV+breakers",
+      "eta": "Check each rating",
+      "time": "Exact amperages may need a solar distributor",
+      "note": "Buy exact MidNite MNEDC100 and MNEPV20/15/5/2/1 resettable DC breakers. Amazon does not reliably stock the complete rating set; use an authorized solar distributor for missing values.",
       "ebay": {
-        "status": "available",
-        "sourceLabel": "eBay · exact Blue Sea 5025",
-        "sourceUrl": "https://www.ebay.com/itm/168227609552",
-        "eta": "2–4 days",
-        "price": "$33.14",
+        "status": "partial",
+        "sourceLabel": "eBay · MidNite MNEPV search",
+        "sourceUrl": "https://www.ebay.com/sch/i.html?_nkw=MidNite+Solar+MNEPV+breaker",
+        "eta": "Varies by U.S. seller",
+        "price": "Check exact ratings",
         "condition": "New",
         "shipsFrom": "United States",
-        "note": "Exact six-circuit block with negative bus and cover; displayed free 2–4 day delivery to 90065."
+        "note": "Do not substitute unbranded automotive breakers; match the exact DC voltage, interrupt rating and amperage."
       }
     },
     "dse-usb": {
-      "amazonStatus": "partial",
-      "sourceLabel": "Amazon · exact charger",
-      "sourceUrl": "https://www.amazon.com/dp/B0CZ7BL16W",
-      "eta": "Aug 15",
-      "time": "Same-day to LA",
-      "note": "Exact Anker 167.5 W charger is available; the panel-mount 12 V socket and its wiring/protection are separate."
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · Scanstrut SC-TILE-20",
+      "sourceUrl": "https://www.amazon.com/dp/B0F24W6G7P",
+      "eta": "Aug 19",
+      "time": "2 days to LA when checked",
+      "note": "Primary dual-USB-C module. The listing showed in stock at $51.01 with Aug 19 delivery. Combine it with two SC-TILE-10 modules in one interior charging panel."
+    },
+    "dse-usb-mixed": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · Scanstrut SC-TILE-10",
+      "sourceUrl": "https://www.amazon.com/dp/B0F24T348G",
+      "eta": "Aug 19",
+      "time": "2 days to LA when checked",
+      "note": "Buy two. The listing showed in stock at $50.63 each with Aug 19 delivery. Combined with one SC-TILE-20, the station total is $152.27 before tax and provides four USB-C plus two USB-A ports."
+    },
+    "dse-unifi-power": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Powerwerx · exact USBbuddy2",
+      "sourceUrl": "https://powerwerx.com/usbbuddy2-powerpole-usb-device-charger",
+      "eta": "In stock",
+      "time": "Confirm LA date at checkout",
+      "note": "The potted 8–35 V input, 5 V / 3 A converter is the preferred compact marine-friendly option. Add a short known-good USB-A-to-USB-C lead and bench-test the purchased UniFi Express.",
+      "ebay": {
+        "status": "unavailable",
+        "sourceLabel": "No verified exact U.S. listing",
+        "eta": "Not found",
+        "price": "—",
+        "condition": "—",
+        "shipsFrom": "U.S.-only search",
+        "note": "Generic converters were excluded because their potting, protection and USB current advertisement were not documented."
+      }
     },
     "dse-router": {
       "amazonStatus": "available",
@@ -309,12 +349,36 @@
       "note": "Already purchased. Amazon currently has the exact UniFi Express, but its delivery is slower and its listed price was high."
     },
     "dse-dc-spares": {
-      "amazonStatus": "partial",
-      "sourceLabel": "Amazon · busbar component",
-      "sourceUrl": "https://www.amazon.com/dp/B0BBZDTHWH",
-      "eta": "Aug 15–17",
-      "time": "Same day to 2 days",
-      "note": "Covered 300 A M10 busbars are available; the 100 A MPPT and 30/35 A Orion protection and 25 mm² jumpers remain separate selections."
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact Blue Sea 2104",
+      "sourceUrl": "https://www.amazon.com/dp/B000XBB758",
+      "eta": "Check at checkout",
+      "time": "Buy 2 busbars + 2 Blue Sea 2708 covers",
+      "note": "Exact 600 A four-stud/four-screw PowerBar. Each polarity has six actual conductors and retains one spare stud plus one spare screw."
+    },
+    "dse-service-return-bus": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact Blue Sea 2314",
+      "sourceUrl": "https://www.amazon.com/dp/B000OTJ89Q",
+      "eta": "Check at checkout",
+      "time": "Live delivery date varies",
+      "note": "Exact covered 100 A bus with two studs and five screws. Six positions are used and one remains spare."
+    },
+    "dse-earth-bus": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · Blue Sea 2128 search",
+      "sourceUrl": "https://www.amazon.com/s?k=Blue+Sea+Systems+2128+MaxiBus",
+      "eta": "Check seller at checkout",
+      "time": "Buy with Blue Sea 2719 cover",
+      "note": "Exact 250 A MaxiBus has two studs and six screws. Six bonds are used, leaving one stud and one screw spare."
+    },
+    "dse-usb-breakers": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · Blue Sea 2132 search",
+      "sourceUrl": "https://www.amazon.com/s?k=Blue+Sea+2132+10A+push+button+circuit+breaker",
+      "eta": "Check seller at checkout",
+      "time": "Buy 3 exact 10 A units",
+      "note": "Three resettable marine push-button breakers replace the three local USB-module fuses."
     },
     "dse-victron-data": {
       "amazonStatus": "partial",
@@ -335,7 +399,7 @@
     "dse-service-spares": {
       "amazonStatus": "partial",
       "sourceLabel": "Amazon · separate spares",
-      "sourceUrl": "https://www.amazon.com/s?k=Class+T+150A+PV+fuse+blade+fuse+MC4+spares",
+      "sourceUrl": "https://www.amazon.com/s?k=Blue+Sea+5114+150A+Class+T+fuse+MC4+spares",
       "eta": "Aug 15–21",
       "time": "Same day to 6 days",
       "note": "No single service kit exists. The 150 A Class T fuse is the slowest identified component, arriving Aug 21."
@@ -361,7 +425,7 @@
       "sourceLabel": "Outside scope",
       "eta": "Not researched",
       "time": "No project purchase",
-      "note": "Starlink Mini purchase is expressly outside this BOM."
+      "note": "Starlink Mini purchase is expressly outside this BOM. Confirm that its complete OEM 15 m DC power cable is present before travel; the DSE design uses it as one unspliced exterior run."
     },
     "dse-ex-mount": {
       "amazonStatus": "not-applicable",

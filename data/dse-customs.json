@@ -1,5 +1,5 @@
 {
-  "checkedOn": "2026-08-15",
+  "checkedOn": "2026-08-17",
   "manifestTitle": "Drua Sailing Experience solar-system equipment",
   "declaredPurpose": "Permanent donated equipment for a remote Fiji school teaching Polynesian voyaging; not for resale.",
   "defaultConsignee": "Drua Sailing Experience — confirm legal Fiji consignee",
@@ -34,12 +34,6 @@
       "origin": "Confirm from product label",
       "serialRequired": false
     },
-    "dse-orion": {
-      "model": "ORI241236120",
-      "origin": "Confirm from product label",
-      "serialRequired": true,
-      "tafPermitRequired": true
-    },
     "dse-balancers": {
       "model": "BBA000100100",
       "origin": "Confirm from product label",
@@ -57,7 +51,7 @@
       "serialRequired": false
     },
     "dse-selector": {
-      "model": "Blue Sea 6007",
+      "model": "Blue Sea 6006 m-Series ON/OFF battery switch",
       "origin": "Confirm from packaging",
       "serialRequired": false
     },
@@ -67,12 +61,37 @@
       "serialRequired": false
     },
     "dse-fuse-block": {
-      "model": "Blue Sea 5025",
+      "model": "MidNite MNEDC100 + MNEPV20/15/5/2/1 DC breaker set",
+      "origin": "United States — confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-switch-panel": {
+      "model": "Blue Sea 8287 + 2 × 8282 + 8259; Starlink DC jack",
       "origin": "Confirm from packaging",
       "serialRequired": false
     },
+    "dse-indoor-light": {
+      "model": "QHLightlux 12–28 V utility light, 3000 K · Amazon B0F1V59NXC",
+      "origin": "Confirm from product label",
+      "serialRequired": false
+    },
+    "dse-outdoor-light": {
+      "model": "QHLightlux 12–28 V utility light, 3000 K · Amazon B0F1V59NXC",
+      "origin": "Confirm from product label",
+      "serialRequired": false
+    },
     "dse-usb": {
-      "model": "Anker A2737 + panel socket",
+      "model": "Scanstrut SC-TILE-20 dual USB-C module",
+      "origin": "Confirm from product labels",
+      "serialRequired": false
+    },
+    "dse-usb-mixed": {
+      "model": "2 × Scanstrut SC-TILE-10 USB-C + USB-A modules",
+      "origin": "Confirm from product labels",
+      "serialRequired": false
+    },
+    "dse-unifi-power": {
+      "model": "Powerwerx USBbuddy2 + USB-A-to-USB-C lead",
       "origin": "Confirm from product labels",
       "serialRequired": false
     },
@@ -83,8 +102,23 @@
       "tafPermitRequired": true
     },
     "dse-dc-spares": {
-      "model": "Mixed tinned busbars, DC fuse holders, fuses and jumpers",
-      "origin": "Multiple — attach supplier invoices",
+      "model": "2 × Blue Sea 2104 PowerBar 600 A + 2 × 2708 covers",
+      "origin": "United States — confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-service-return-bus": {
+      "model": "Blue Sea 2314 MiniBus 100 A covered busbar",
+      "origin": "United States — confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-earth-bus": {
+      "model": "Blue Sea 2128 MaxiBus 250 A + 2719 cover",
+      "origin": "United States — confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-usb-breakers": {
+      "model": "3 × Blue Sea 2132 10 A push-reset circuit breakers",
+      "origin": "United States — confirm from packaging",
       "serialRequired": false
     },
     "dse-victron-data": {
@@ -93,7 +127,7 @@
       "serialRequired": false
     },
     "dse-junction-box": {
-      "model": "IP-rated 13.8 × 9.7 × 5.9 in enclosure",
+      "model": "IP-rated enclosure · about 14.6 × 10.4 × 5.9 in",
       "origin": "Confirm from product label",
       "serialRequired": false
     },

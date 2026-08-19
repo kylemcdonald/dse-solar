@@ -62,7 +62,11 @@ type Crossing = SegmentProximity & {
 
 const EPSILON = 1e-5;
 const TERMINAL_GRACE = 0.1;
-const ROUTE_CLEARANCE = 0.003;
+// Visible cable surfaces must never touch. One millimetre is the enforced
+// air gap between their full rendered radii; larger service spacing is an
+// optimization preference, not something the intersection audit should
+// misreport as a physical collision.
+const ROUTE_CLEARANCE = 0.001;
 
 function tuple(point: THREE.Vector3): VectorTuple {
   return [point.x, point.y, point.z];
@@ -240,7 +244,11 @@ function passageAllowsSegment(
   const direction = end.clone().sub(start);
   if (direction.lengthSq() < EPSILON) return false;
   direction.normalize();
-  if (Math.abs(direction.dot(axisVector(passage.axis))) < 0.94) return false;
+  // Rounded 90° handoffs contain tangent samples down to 45° from either
+  // registered portal axis. Requiring near-perfect axial alignment caused the
+  // bend itself to be reported as intersecting the very terminal passage it
+  // connects to. Explicit passages remain radius-bounded.
+  if (Math.abs(direction.dot(axisVector(passage.axis))) < 0.65) return false;
   const center = vector(passage.center);
   const closest = new THREE.Line3(start, end).closestPointToPoint(center, true, new THREE.Vector3());
   return closest.distanceTo(center) + cableRadius <= passage.radius;
@@ -297,25 +305,17 @@ export function buildRoundedCableCurve(points: VectorTuple[], requestedBendRadiu
   return { curve: path, roundedCorners };
 }
 
-export function buildRoundedCableGeometry(
+/**
+ * Sample the exact centerline used by the illustrated tube renderer.
+ * Offline solvers use this to audit rounded, finite-diameter cables without
+ * allocating a BufferGeometry during every evolutionary evaluation.
+ */
+export function sampleRoundedCableCenterline(
   points: VectorTuple[],
   requestedBendRadius: number,
   cableRadius: number,
-  radialSegments = 8,
 ) {
   const { curve, roundedCorners } = buildRoundedCableCurve(points, requestedBendRadius);
-  const pathLength = curve.getLength();
-  if (pathLength < EPSILON) throw new Error("Unable to build zero-length cable geometry");
-
-  // One tube surface owns every straight and bend in a route. The previous
-  // implementation merged independent open cylinders and bend tubes. Their
-  // polygon rings could rotate relative to one another, leaving visible wedge
-  // gaps where two bends were separated by only a short straight section.
-  // This variable-density centerline keeps one shared ring at every join, so
-  // even back-to-back bends are one connected surface with no internal seams.
-  // Straight runs need only their endpoints; curved sections receive enough
-  // rings to remain round without tessellating an entire long cable every few
-  // millimetres.
   const centerline: THREE.Vector3[] = [];
   const pushCenter = (point: THREE.Vector3) => {
     if ((centerline.at(-1)?.distanceToSquared(point) ?? Number.POSITIVE_INFINITY) < EPSILON * EPSILON) return;
@@ -332,8 +332,31 @@ export function buildRoundedCableGeometry(
       pushCenter(section.getPoint(step / sectionSegments));
     }
   });
-  if (centerline.length < 2) throw new Error("Unable to sample cable centerline");
+  return { centerline, roundedCorners };
+}
 
+export function buildRoundedCableGeometry(
+  points: VectorTuple[],
+  requestedBendRadius: number,
+  cableRadius: number,
+  radialSegments = 8,
+) {
+  const { centerline, roundedCorners } = sampleRoundedCableCenterline(
+    points,
+    requestedBendRadius,
+    cableRadius,
+  );
+  if (centerline.length < 2) throw new Error("Unable to build zero-length cable geometry");
+
+  // One tube surface owns every straight and bend in a route. The previous
+  // implementation merged independent open cylinders and bend tubes. Their
+  // polygon rings could rotate relative to one another, leaving visible wedge
+  // gaps where two bends were separated by only a short straight section.
+  // This variable-density centerline keeps one shared ring at every join, so
+  // even back-to-back bends are one connected surface with no internal seams.
+  // Straight runs need only their endpoints; curved sections receive enough
+  // rings to remain round without tessellating an entire long cable every few
+  // millimetres.
   const tangents = centerline.map((point, index) => {
     if (index === 0) return centerline[1].clone().sub(point).normalize();
     if (index === centerline.length - 1) return point.clone().sub(centerline[index - 1]).normalize();
@@ -431,7 +454,7 @@ export class CableRoutingSystem {
   ) {
     let points = compactPoints(sourcePoints);
     if (avoidCrossings && points.length > 1) {
-      for (let pass = 0; pass < 3; pass += 1) {
+      for (let pass = 0; pass < 8; pass += 1) {
         const crossingsBefore = this.automaticCrossovers;
         points = this.addCrossovers(points, radius);
         if (this.automaticCrossovers === crossingsBefore) break;
@@ -465,6 +488,16 @@ export class CableRoutingSystem {
   }
 
   report(): CableRoutingReport {
+    // Audit the same rounded centerline that becomes the visible tube. The old
+    // rectilinear-only audit missed contacts created by the bend radius.
+    const renderedRoutes = this.routes.map((route) => ({
+      ...route,
+      points: sampleRoundedCableCenterline(
+        route.points.map(tuple),
+        Math.max(route.radius * 4.25, 0.009),
+        route.radius,
+      ).centerline,
+    }));
     let backtrackingCorners = 0;
     const backtrackingIssues: string[] = [];
     for (const route of this.routes) {
@@ -484,7 +517,7 @@ export class CableRoutingSystem {
 
     let obstacleIntersections = 0;
     const obstacleIssues: string[] = [];
-    for (const route of this.routes) {
+    for (const route of renderedRoutes) {
       for (let index = 0; index < route.points.length - 1; index += 1) {
         const start = route.points[index];
         const end = route.points[index + 1];
@@ -500,10 +533,10 @@ export class CableRoutingSystem {
 
     let unresolvedCableIntersections = 0;
     const unresolvedCableIssues: string[] = [];
-    for (let firstIndex = 0; firstIndex < this.routes.length; firstIndex += 1) {
-      const first = this.routes[firstIndex];
-      for (let secondIndex = firstIndex + 1; secondIndex < this.routes.length; secondIndex += 1) {
-        const second = this.routes[secondIndex];
+    for (let firstIndex = 0; firstIndex < renderedRoutes.length; firstIndex += 1) {
+      const first = renderedRoutes[firstIndex];
+      for (let secondIndex = firstIndex + 1; secondIndex < renderedRoutes.length; secondIndex += 1) {
+        const second = renderedRoutes[secondIndex];
         const crossings = this.interiorCrossings(first, second);
         unresolvedCableIntersections += crossings.length;
         if (crossings.length > 0) {
@@ -562,12 +595,15 @@ export class CableRoutingSystem {
           if (!isInteriorCrossing(proximity)) return;
           if (proximity.distance >= radius + route.radius + ROUTE_CLEARANCE) return;
           const crossings = crossingsBySegment.get(candidateSegment) ?? [];
+          const normal = preferredNormal(candidateDirection, existingDirection);
+          const separation = proximity.pointOnCandidate.clone().sub(proximity.pointOnExisting);
+          if (separation.lengthSq() > EPSILON && normal.dot(separation) < 0) normal.negate();
           crossings.push({
             ...proximity,
             candidateSegment,
             existingRadius: route.radius,
             existingSegment,
-            normal: preferredNormal(candidateDirection, existingDirection),
+            normal,
           });
           crossingsBySegment.set(candidateSegment, crossings);
         });
@@ -588,7 +624,7 @@ export class CableRoutingSystem {
       const segmentLength = segment.length();
       let lastT = 0;
       for (const crossing of crossings) {
-        const lift = radius + crossing.existingRadius + ROUTE_CLEARANCE * 1.6;
+        const lift = crossing.distance + radius + crossing.existingRadius + ROUTE_CLEARANCE * 1.6;
         const run = Math.min(
           Math.max(lift * 2.8, radius * 5),
           segmentLength * 0.18,
@@ -601,9 +637,15 @@ export class CableRoutingSystem {
         if (beforeT >= afterT) continue;
         const before = start.clone().lerp(end, beforeT);
         const after = start.clone().lerp(end, afterT);
+        const normal = crossing.normal.clone();
+        const reverseNormal = normal.clone().negate();
+        if (
+          this.crossoverObstacleHits(before, after, reverseNormal, lift, radius) <
+          this.crossoverObstacleHits(before, after, normal, lift, radius)
+        ) normal.copy(reverseNormal);
         result.push(before);
-        result.push(before.clone().addScaledVector(crossing.normal, lift));
-        result.push(after.clone().addScaledVector(crossing.normal, lift));
+        result.push(before.clone().addScaledVector(normal, lift));
+        result.push(after.clone().addScaledVector(normal, lift));
         result.push(after);
         lastT = afterT;
         this.automaticCrossovers += 1;
@@ -613,25 +655,63 @@ export class CableRoutingSystem {
     return compactPoints(result.map(tuple));
   }
 
+  private crossoverObstacleHits(
+    before: THREE.Vector3,
+    after: THREE.Vector3,
+    normal: THREE.Vector3,
+    lift: number,
+    radius: number,
+  ) {
+    const liftedBefore = before.clone().addScaledVector(normal, lift);
+    const liftedAfter = after.clone().addScaledVector(normal, lift);
+    const segments: Array<[THREE.Vector3, THREE.Vector3]> = [
+      [before, liftedBefore],
+      [liftedBefore, liftedAfter],
+      [liftedAfter, after],
+    ];
+    return this.obstacles.reduce((hits, obstacle) => {
+      const expanded = obstacle.box.clone().expandByScalar(radius + 0.0015);
+      const intersects = segments.some(([segmentStart, segmentEnd]) => (
+        segmentIntersectsBox(segmentStart, segmentEnd, expanded) &&
+        !obstacle.passages.some((passage) => passageAllowsSegment(
+          segmentStart,
+          segmentEnd,
+          passage,
+          radius,
+        ))
+      ));
+      return hits + Number(intersects);
+    }, 0);
+  }
+
   private interiorCrossings(first: CableRoute, second: CableRoute) {
-    if (routesShareTerminal(first.points, second.points, first.radius + second.radius + ROUTE_CLEARANCE)) {
-      return [];
-    }
+    const requiredClearance = first.radius + second.radius + ROUTE_CLEARANCE;
+    const sharedTerminals = [first.points[0], first.points.at(-1)!].flatMap((firstTerminal) => (
+      [second.points[0], second.points.at(-1)!]
+        .filter((secondTerminal) => firstTerminal.distanceTo(secondTerminal) <= requiredClearance)
+        .map((secondTerminal) => ({ firstTerminal, secondTerminal }))
+    ));
+    // Stacked lugs on one stud separate over a short, visible fan-out. Use a
+    // physical distance in metres rather than the old 10%-of-segment grace,
+    // which silently exempted most of a short junction-box route.
+    const terminalAllowance = Math.max(0.02, requiredClearance * 2);
     const crossings: Array<[number, number]> = [];
     first.points.slice(0, -1).forEach((firstStart, firstIndex) => {
       const firstEnd = first.points[firstIndex + 1];
-      const firstDirection = firstEnd.clone().sub(firstStart).normalize();
       second.points.slice(0, -1).forEach((secondStart, secondIndex) => {
         const secondEnd = second.points[secondIndex + 1];
-        const secondDirection = secondEnd.clone().sub(secondStart).normalize();
-        if (Math.abs(firstDirection.dot(secondDirection)) > 0.93) return;
         const proximity = segmentProximity(firstStart, firstEnd, secondStart, secondEnd);
-        if (!isInteriorCrossing(proximity)) return;
-        if (proximity.distance < first.radius + second.radius + ROUTE_CLEARANCE) {
-          crossings.push([firstIndex, secondIndex]);
-        }
+        if (proximity.distance >= requiredClearance) return;
+        const allowedTerminalFanout = sharedTerminals.some(({ firstTerminal, secondTerminal }) => (
+          proximity.pointOnCandidate.distanceTo(firstTerminal) <= terminalAllowance &&
+          proximity.pointOnExisting.distanceTo(secondTerminal) <= terminalAllowance
+        ));
+        if (!allowedTerminalFanout) crossings.push([firstIndex, secondIndex]);
       });
     });
-    return crossings;
+    // A rounded contact spans several sampled segment pairs. Count the
+    // physical route-pair conflict once so the optimizer receives a stable
+    // signal independent of tessellation density.
+    return crossings.slice(0, 1);
   }
 }

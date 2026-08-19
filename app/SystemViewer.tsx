@@ -12,6 +12,7 @@ import dseRaw from "@/data/dse-system.json";
 import dseDeliveryRaw from "@/data/dse-delivery.json";
 import pgRaw from "@/data/pg-system.json";
 import { CustomsView } from "./CustomsView";
+import { JunctionBoxDiagram } from "./JunctionBoxDiagram";
 
 const loadSystemModel3D = () =>
   import("./SystemModel3D").then((module) => ({ default: module.SystemModel3D }));
@@ -66,6 +67,8 @@ type DiagramEdge = {
   type: Exclude<FlowType, "all">;
   label: string;
   portOffset?: number;
+  fromPortOffset?: number;
+  toPortOffset?: number;
   waypoints?: Array<{ x: number; y: number }>;
   labelAt?: { x: number; y: number };
 };
@@ -175,7 +178,7 @@ type SystemData = {
   research: Array<{ title: string; publisher: string; url: string }>;
 };
 
-type ViewerMode = "diagram" | "model" | "system" | "bom" | "customs" | "notes";
+type ViewerMode = "diagram" | "model" | "junction" | "system" | "bom" | "customs" | "notes";
 
 const systems: Record<"dse" | "pg", SystemData> = {
   dse: dseRaw as SystemData,
@@ -197,6 +200,58 @@ const ebayStatusLabels: Record<EbayStatus, string> = {
   partial: "eBay components",
   unavailable: "No eBay match",
 };
+
+// The 3D model uses system-component IDs while purchasing research is keyed to
+// BOM rows. Keep this bridge explicit so selecting modeled hardware always
+// resolves to the intended purchase, including assemblies made from several
+// BOM items such as the main DC distribution.
+const modelComponentBomIds: Record<string, readonly string[]> = {
+  array: ["dse-panels"],
+  panel1: ["dse-panels"],
+  panel2: ["dse-panels"],
+  panel3: ["dse-panels"],
+  panel4: ["dse-panels"],
+  pvSafety: ["dse-pv-protection"],
+  solarController: ["dse-smartsolar"],
+  inverter: ["dse-multiplus"],
+  systemMonitor: ["dse-ekrano-gx"],
+  batteryBank: ["dse-batteries"],
+  battery1: ["dse-batteries"],
+  battery2: ["dse-batteries"],
+  battery3: ["dse-batteries"],
+  battery4: ["dse-batteries"],
+  mainDc: ["dse-shunt", "dse-class-t", "dse-dc-spares"],
+  classTFuseA: ["dse-class-t"],
+  classTFuseB: ["dse-class-t"],
+  positiveBus: ["dse-dc-spares"],
+  smartShunt: ["dse-shunt"],
+  negativeBus: ["dse-dc-spares"],
+  batterySelector: ["dse-selector"],
+  balancers: ["dse-balancers"],
+  generatorInput: ["dse-gen-input"],
+  acBoard: ["dse-ac-board"],
+  toolOutlet: ["dse-ac-board"],
+  fuseBlock: ["dse-fuse-block", "dse-service-return-bus"],
+  starlink: ["dse-ex-starlink"],
+  router: ["dse-router"],
+  unifiPower: ["dse-unifi-power"],
+  usb: ["dse-usb", "dse-usb-mixed", "dse-usb-breakers"],
+  loadSwitches: ["dse-switch-panel"],
+  indoorLight: ["dse-indoor-light"],
+  outdoorLight: ["dse-outdoor-light"],
+  mounting: ["dse-junction-box"],
+  earth: ["dse-earth", "dse-earth-bus"],
+};
+
+function isAmazonUrl(url: string | undefined): url is string {
+  if (!url) return false;
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    return hostname === "amazon.com" || hostname.endsWith(".amazon.com");
+  } catch {
+    return false;
+  }
+}
 
 const NODE_W = 226;
 const NODE_H = 104;
@@ -513,14 +568,15 @@ function nodeBoundaryPoint(
 function edgeGeometry(from: DiagramNode, to: DiagramNode, edge: DiagramEdge) {
   const fromCenter = { x: from.x + NODE_W / 2, y: from.y + NODE_H / 2 };
   const toCenter = { x: to.x + NODE_W / 2, y: to.y + NODE_H / 2 };
-  const portOffset = edge.portOffset ?? 0;
+  const fromPortOffset = edge.fromPortOffset ?? edge.portOffset ?? 0;
+  const toPortOffset = edge.toPortOffset ?? edge.portOffset ?? 0;
 
   if (edge.waypoints?.length) {
-    const start = nodeBoundaryPoint(from, edge.waypoints[0], portOffset);
+    const start = nodeBoundaryPoint(from, edge.waypoints[0], fromPortOffset);
     const end = nodeBoundaryPoint(
       to,
       edge.waypoints[edge.waypoints.length - 1],
-      portOffset,
+      toPortOffset,
     );
     const points = [start, ...edge.waypoints, end];
     const longestSegment = points.slice(1).reduce(
@@ -553,16 +609,16 @@ function edgeGeometry(from: DiagramNode, to: DiagramNode, edge: DiagramEdge) {
   if (Math.abs(dx) >= Math.abs(dy) * 0.62) {
     const direction = dx >= 0 ? 1 : -1;
     sx = fromCenter.x + (NODE_W / 2) * direction;
-    sy = fromCenter.y + portOffset;
+    sy = fromCenter.y + fromPortOffset;
     tx = toCenter.x - (NODE_W / 2) * direction;
-    ty = toCenter.y + portOffset;
+    ty = toCenter.y + toPortOffset;
     const curve = Math.max(54, Math.abs(tx - sx) * 0.42);
     d = `M ${sx} ${sy} C ${sx + curve * direction} ${sy}, ${tx - curve * direction} ${ty}, ${tx} ${ty}`;
   } else {
     const direction = dy >= 0 ? 1 : -1;
-    sx = fromCenter.x + portOffset;
+    sx = fromCenter.x + fromPortOffset;
     sy = fromCenter.y + (NODE_H / 2) * direction;
-    tx = toCenter.x + portOffset;
+    tx = toCenter.x + toPortOffset;
     ty = toCenter.y - (NODE_H / 2) * direction;
     const curve = Math.max(42, Math.abs(ty - sy) * 0.42);
     d = `M ${sx} ${sy} C ${sx} ${sy + curve * direction}, ${tx} ${ty - curve * direction}, ${tx} ${ty}`;
@@ -1029,6 +1085,8 @@ function DiagramCanvas({
                     key={edge.id}
                     className={`diagram-edge edge-${edge.type} ${muted ? "muted" : ""} ${selectedEdge ? "selected" : ""} ${hovered ? "is-hovered" : ""}`}
                     data-edge-id={edge.id}
+                    data-edge-from={edge.from}
+                    data-edge-to={edge.to}
                     onMouseEnter={() => setHoveredEdgeId(edge.id)}
                     onMouseLeave={() =>
                       setHoveredEdgeId((current) => (current === edge.id ? null : current))
@@ -1135,12 +1193,14 @@ function Inspector({
   selectedId,
   onSelect,
   onClose,
+  showProcurement = false,
 }: {
   system: SystemData;
   viewKey: "overview" | "detail";
   selectedId: string;
   onSelect: (id: string) => void;
   onClose: () => void;
+  showProcurement?: boolean;
 }) {
   const component = system.components.find((item) => item.id === selectedId);
   const view = system.diagram.views[viewKey];
@@ -1160,6 +1220,19 @@ function Inspector({
     .filter((item): item is ComponentData => Boolean(item));
 
   if (!component) return null;
+
+  const procurementItems = showProcurement && system.id === "dse"
+    ? (modelComponentBomIds[component.id] ?? []).flatMap((bomId) => {
+        const bom = system.bom.find((item) => item.id === bomId);
+        if (!bom) return [];
+        const delivery = dseDelivery.items[bomId];
+        return [{
+          bom,
+          delivery,
+          amazonUrl: isAmazonUrl(delivery?.sourceUrl) ? delivery.sourceUrl : undefined,
+        }];
+      })
+    : [];
 
   return (
     <aside className="inspector" aria-label="Component details" role="dialog">
@@ -1188,6 +1261,67 @@ function Inspector({
           ))}
         </ul>
       </div>
+      {showProcurement && system.id === "dse" && (
+        <div
+          className="inspector-section model-procurement"
+          data-model-procurement={component.id}
+        >
+          <div className="rail-section-label">Amazon &amp; purchasing</div>
+          {procurementItems.length > 0 ? (
+            <div className="model-procurement-list">
+              {procurementItems.map(({ bom, delivery, amazonUrl }) => (
+                <article className="model-procurement-item" key={bom.id}>
+                  <div className="model-procurement-heading">
+                    <strong>{bom.item}</strong>
+                    <span
+                      className={`delivery-pill delivery-${delivery?.amazonStatus ?? "not-applicable"}`}
+                    >
+                      {delivery ? amazonStatusLabels[delivery.amazonStatus] : "No listing data"}
+                    </span>
+                  </div>
+                  {amazonUrl && delivery ? (
+                    <a
+                      className="model-amazon-link"
+                      href={amazonUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Open Amazon listing for ${bom.item}`}
+                    >
+                      <span>{delivery.sourceLabel}</span>
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                  ) : (
+                    <>
+                      <p className="model-procurement-unavailable">
+                        {delivery?.amazonStatus === "not-applicable"
+                          ? "Amazon sourcing is not applicable to this item."
+                          : "No Amazon listing is recorded for this item."}
+                      </p>
+                      {delivery?.sourceUrl && (
+                        <a
+                          className="model-fallback-link"
+                          href={delivery.sourceUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Alternative: {delivery.sourceLabel} <span aria-hidden="true">↗</span>
+                        </a>
+                      )}
+                    </>
+                  )}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="model-procurement-empty">
+              This is existing or site-supplied equipment; no Amazon purchase is specified in the BOM.
+            </p>
+          )}
+          <p className="model-procurement-snapshot">
+            Links checked {dseDelivery.checkedOn}. Confirm stock and delivery at checkout.
+          </p>
+        </div>
+      )}
       {component.note && (
         <div className="engineering-note">
           <div className="engineering-note-title">
@@ -1603,7 +1737,7 @@ export function SystemViewer() {
 
   function changeSystem(id: "dse" | "pg") {
     if (id === "dse" && mode === "model") setDseModelMounted(true);
-    if (id === "pg" && mode === "customs") setMode("system");
+    if (id === "pg" && (mode === "customs" || mode === "junction")) setMode("system");
     setSystemId(id);
     setViewKey("overview");
     setSelectedId(null);
@@ -1628,7 +1762,7 @@ export function SystemViewer() {
         void loadSystemModel3D().then(({ default: component }) => setModel3D(() => component));
       }
     }
-    if (nextMode === "customs" && systemId !== "dse") setSystemId("dse");
+    if ((nextMode === "customs" || nextMode === "junction") && systemId !== "dse") setSystemId("dse");
     setMode(nextMode);
     setSelectedId(null);
     window.scrollTo({ top: 0 });
@@ -1660,6 +1794,17 @@ export function SystemViewer() {
               <path d="m4 7.5 8 4.5 8-4.5M12 12v9" />
             </svg>
             3D model
+          </button>
+          <button
+            type="button"
+            className={mode === "junction" ? "active" : ""}
+            onClick={() => changeMode("junction")}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M7 8h4v3H7zM13 8h4v3h-4zM7 14h10M9 17h6" />
+            </svg>
+            Junction box
           </button>
           <button
             type="button"
@@ -1765,12 +1910,14 @@ export function SystemViewer() {
                   selectedId={selectedId}
                   onSelect={setSelectedId}
                   onClose={() => setSelectedId(null)}
+                  showProcurement
                 />
               </div>
             )}
           </div>
         )}
 
+        {mode === "junction" && <JunctionBoxDiagram />}
         {mode === "system" && <SystemOverview system={system} />}
         {mode === "bom" && <BomView key={system.id} system={system} />}
         {mode === "customs" && (

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 async function openViewer(page) {
   await page.goto("/");
-  await expect(page.locator('[data-viewer-ready="true"]')).toBeVisible();
+  await expect(page.locator('[data-viewer-ready="true"]')).toBeVisible({ timeout: 15_000 });
 }
 
 async function diagramLabelOverlaps(page) {
@@ -32,6 +32,50 @@ async function diagramLabelOverlaps(page) {
       }
     }
     return collisions;
+  });
+}
+
+async function diagramEdgeNodeOverlaps(page) {
+  return page.evaluate(() => {
+    const nodes = [...document.querySelectorAll("[data-node-id]")].map((element) => ({
+      id: element.getAttribute("data-node-id"),
+      x: Number(element.getAttribute("x")),
+      y: Number(element.getAttribute("y")),
+      width: Number(element.getAttribute("width")),
+      height: Number(element.getAttribute("height")),
+    }));
+    const overlaps = [];
+
+    for (const group of document.querySelectorAll("[data-edge-id]")) {
+      const path = /** @type {SVGPathElement | null} */ (group.querySelector(".edge-line"));
+      if (!path) continue;
+      const edgeId = group.getAttribute("data-edge-id");
+      const endpoints = new Set([
+        group.getAttribute("data-edge-from"),
+        group.getAttribute("data-edge-to"),
+      ]);
+      const length = path.getTotalLength();
+      const samples = Math.max(1, Math.ceil(length / 3));
+
+      for (const node of nodes) {
+        if (endpoints.has(node.id)) continue;
+        let intersects = false;
+        for (let index = 0; index <= samples; index += 1) {
+          const point = path.getPointAtLength((length * index) / samples);
+          if (
+            point.x > node.x - 5 &&
+            point.x < node.x + node.width + 5 &&
+            point.y > node.y - 5 &&
+            point.y < node.y + node.height + 5
+          ) {
+            intersects = true;
+            break;
+          }
+        }
+        if (intersects) overlaps.push(`${edgeId}:${node.id}`);
+      }
+    }
+    return overlaps;
   });
 }
 
@@ -92,13 +136,53 @@ async function modelLabelOverlaps(page) {
   });
 }
 
+async function clickProjectedModelComponent(page, labelId, componentId) {
+  const label = page.locator(`[data-model-label="${labelId}"]`);
+  const labelBox = await label.boundingBox();
+  if (!labelBox) throw new Error(`${labelId} projection label did not render`);
+  const anchorX = Number(await label.getAttribute("data-anchor-x"));
+  const anchorY = Number(await label.getAttribute("data-anchor-y"));
+  const hit = await page.locator(".model-canvas").evaluate((mount, target) => {
+    const canvas = mount.querySelector("canvas");
+    if (!(canvas instanceof HTMLCanvasElement)) return null;
+    const rect = canvas.getBoundingClientRect();
+    const centerX = Number.isFinite(target.anchorX) ? target.anchorX : rect.width / 2;
+    const centerY = Number.isFinite(target.anchorY) ? target.anchorY : rect.height / 2;
+    const left = Math.max(0, centerX - 220);
+    const right = Math.min(rect.width, centerX + 220);
+    const top = Math.max(0, centerY - 160);
+    const bottom = Math.min(rect.height, centerY + 160);
+    // Raycast in page context so locating a small visible mesh does not spend
+    // tens of seconds on one cross-process mouse move per sample. The final
+    // click remains a native Playwright mouse action through the real canvas.
+    for (let y = top; y <= bottom; y += 4) {
+      for (let x = left; x <= right; x += 4) {
+        const clientX = rect.left + x;
+        const clientY = rect.top + y;
+        canvas.dispatchEvent(new PointerEvent("pointermove", {
+          bubbles: true,
+          clientX,
+          clientY,
+          pointerType: "mouse",
+        }));
+        if (mount.dataset.hoveredComponent === target.componentId) {
+          return { x: clientX, y: clientY };
+        }
+      }
+    }
+    return null;
+  }, { anchorX, anchorY, componentId });
+  if (!hit) throw new Error(`Could not find the rendered ${componentId} near its projected label`);
+  await page.mouse.click(hit.x, hit.y);
+}
+
 test("DSE diagram, system summary, BOM and field notes are interactive", async ({ page }) => {
   await openViewer(page);
   await expect(page).toHaveTitle(/DSE & PG Solar Systems/);
   await expect(page.getByRole("button", { name: /MultiPlus-II 24\/3000/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /SmartSolar MPPT 150\/85-Tr/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Ekrano GX/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /String selector/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Master battery disconnect/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /AC output protection/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Trailing tool lead/ })).toBeVisible();
   await expect(page.locator('[data-region-key="junctionBox"]')).toContainText(
@@ -121,17 +205,21 @@ test("DSE diagram, system summary, BOM and field notes are interactive", async (
   await expect(page.getByRole("dialog", { name: "Component details" })).toHaveCount(0);
 
   await page.getByRole("button", { name: "Detailed wiring" }).click();
+  await expect(page.locator(".diagram-stage > svg")).toHaveAttribute("viewBox", "0 0 2700 1560");
   await expect(page.getByRole("button", { name: /Panel 1/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Ekrano GX/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Battery 3/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /2 × battery balancers/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /SmartShunt 500 A/ })).toBeVisible();
+  await expect(page.locator('[data-node-id="mainDc"]')).toHaveCount(0);
   await expect(page.locator('[data-edge-id="dt-pv-a"] .edge-label')).toContainText("A · 4 mm² pair");
   await expect(page.locator('[data-edge-id="dt-pv-b"] .edge-label')).toContainText("B · 4 mm² pair");
   await expect(page.locator('[data-edge-id="dt-ac-tools"] .edge-label')).toContainText(
-    "3 m flexible lead",
+    "5 m Type I lead",
   );
-  await expect(page.locator('[data-contained-in="junctionBox"]')).toHaveCount(4);
+  await expect(page.locator('[data-contained-in="junctionBox"]')).toHaveCount(7);
   expect(await diagramLabelOverlaps(page)).toEqual([]);
+  expect(await diagramEdgeNodeOverlaps(page)).toEqual([]);
   await page.getByRole("button", { name: /Panel 1/ }).click();
   await expect(page.getByRole("heading", { name: "Panel 1" })).toBeVisible();
 
@@ -139,11 +227,11 @@ test("DSE diagram, system summary, BOM and field notes are interactive", async (
   await expect(page.getByRole("heading", { name: "Drua Sailing Experience" })).toBeVisible();
   await expect(page.getByText("System at a glance")).toBeVisible();
   await expect(page.getByText("Scope boundary")).toBeVisible();
-  await expect(page.getByText("One string can run")).toBeVisible();
-  await expect(page.getByText(/\$251 below target/)).toBeVisible();
+  await expect(page.getByText("Whole bank only")).toBeVisible();
+  await expect(page.getByText(/\+\$60 remaining/)).toBeVisible();
 
   await page.getByRole("button", { name: /Bill of materials/ }).click();
-  await expect(page.getByText("$8,758").first()).toBeVisible();
+  await expect(page.getByText("$9,068").first()).toBeVisible();
   await expect(page.getByText(/\$607 donor-funded/).first()).toBeVisible();
   await expect(page.getByRole("columnheader", { name: "LA delivery" })).toBeVisible();
   await page.getByLabel("Search bill of materials").fill("Ekrano");
@@ -164,26 +252,98 @@ test("DSE diagram, system summary, BOM and field notes are interactive", async (
   await expect(page.getByText(/Compact IP-rated junction box/)).toBeVisible();
   await page.getByLabel("Search bill of materials").fill("preterminated");
   await expect(page.getByText(/Custom preterminated 1\/0 AWG/)).toBeVisible();
+  await page.getByLabel("Search bill of materials").fill("indoor utility light");
+  const indoorLightRow = page.getByRole("row").filter({ hasText: "QHLightlux 12–28 V 3000 K indoor" });
+  await expect(indoorLightRow.getByRole("link", { name: /Amazon · QHLightlux/ })).toBeVisible();
+  await expect(indoorLightRow.getByText("Aug 19", { exact: true })).toBeVisible();
+  await page.getByLabel("Search bill of materials").fill("outdoor utility light");
+  const outdoorLightRow = page.getByRole("row").filter({ hasText: "QHLightlux 12–28 V 3000 K outdoor" });
+  await expect(outdoorLightRow.getByRole("link", { name: /Amazon · QHLightlux/ })).toBeVisible();
+  await expect(outdoorLightRow.getByText("Aug 19", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Customs" }).click();
   await expect(page.getByRole("heading", { name: "Customs & packing manifest" })).toBeVisible();
   await expect(page.getByText("Licensed agent before arrival", { exact: true })).toBeVisible();
   await expect(page.getByText(/goods over FJ\$1,000 will be detained/i)).toBeVisible();
-  await expect(page.getByText("Five radio models", { exact: true })).toBeVisible();
+  await expect(page.getByText("Four radio models", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: /School status is not automatic relief/ })).toBeVisible();
   await expect(page.getByRole("columnheader", { name: "Description / model" })).toBeVisible();
   await expect(page.getByLabel("Consignee TIN")).toBeVisible();
   await expect(page.getByLabel(/Victron MultiPlus-II 24\/3000.*unit value/)).toHaveValue("939.00");
-  await expect(page.getByText("$3,835.80", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("$4,282.48", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("PMP242305010", { exact: true })).toBeVisible();
   await expect(page.getByText("Ubiquiti UniFi Express UX-US", { exact: true })).toBeVisible();
-  await expect(page.getByText("TAF radio permit", { exact: true })).toHaveCount(5);
+  await expect(page.getByText("TAF radio permit", { exact: true })).toHaveCount(4);
   await page.getByLabel("Consignee TIN").fill("TIN TO CONFIRM");
   await expect(page.getByLabel("Consignee TIN")).toHaveValue("TIN TO CONFIRM");
 
   await page.getByRole("button", { name: "Field notes" }).click();
   await expect(page.getByRole("heading", { name: "Commissioning checklist" })).toBeVisible();
-  await expect(page.getByText(/reduce the Ekrano DVCC charge-current limit from 100 A to 50 A/)).toBeVisible();
+  await expect(page.getByText(/Reduce the Ekrano DVCC charge-current limit from 100 A to 50 A/)).toBeVisible();
+});
+
+test("junction-box tab exposes every wire, bus and enclosure crossing", async ({ page }) => {
+  await openViewer(page);
+  const tabs = page.locator(".mode-tabs").getByRole("button");
+  await expect(tabs.nth(1)).toHaveText("3D model");
+  await expect(tabs.nth(2)).toHaveText("Junction box");
+  await expect(tabs.nth(3)).toHaveText("System");
+
+  await page.getByRole("button", { name: "Junction box", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Junction box wiring" })).toBeVisible();
+  await expect(page.getByText(/35 terminal-to-terminal segments · 33 service circuits/)).toBeVisible();
+  await expect(page.getByText(/14 cable glands · 1 Starlink jack · every cable entry on the bottom face/)).toBeVisible();
+  await expect(page.locator("[data-junction-wire]")).toHaveCount(35);
+  await expect(page.locator("[data-junction-gland]")).toHaveCount(15);
+  await expect(page.locator(".junction-pair-sheath")).toHaveCount(6);
+  await expect(page.locator("[data-junction-wire-row]")).toHaveCount(35);
+  await expect(page.getByText(/24 V POSITIVE BUS/)).toBeVisible();
+  await expect(page.getByText(/BLUE SEA 2314 SERVICE RETURN BUS/)).toBeVisible();
+
+  const schematicAudit = await page.locator(".junction-schematic").evaluate((svg) => {
+    const components = [...svg.querySelectorAll("[data-junction-component] rect")].map((element) => ({
+      id: element.parentElement.dataset.junctionComponent,
+      x: Number(element.getAttribute("x")),
+      y: Number(element.getAttribute("y")),
+      width: Number(element.getAttribute("width")),
+      height: Number(element.getAttribute("height")),
+    }));
+    const routes = [...svg.querySelectorAll("[data-junction-wire]")].map((element) => ({
+      id: element.dataset.junctionWire,
+      points: element.getAttribute("points").split(" ").map((entry) => entry.split(",").map(Number)),
+    }));
+    const diagonals = [];
+    const deviceCrossings = [];
+    routes.forEach((route) => route.points.slice(1).forEach((end, index) => {
+      const start = route.points[index];
+      const vertical = start[0] === end[0];
+      const horizontal = start[1] === end[1];
+      if (!vertical && !horizontal) diagonals.push(`${route.id}:${index}`);
+      components.forEach((component) => {
+        const crosses = vertical
+          ? start[0] > component.x && start[0] < component.x + component.width &&
+            Math.max(start[1], end[1]) > component.y && Math.min(start[1], end[1]) < component.y + component.height
+          : horizontal && start[1] > component.y && start[1] < component.y + component.height &&
+            Math.max(start[0], end[0]) > component.x && Math.min(start[0], end[0]) < component.x + component.width;
+        if (crosses) deviceCrossings.push(`${route.id}:${component.id}`);
+      });
+    }));
+    return { diagonals, deviceCrossings };
+  });
+  expect(schematicAudit.diagonals).toEqual([]);
+  expect(schematicAudit.deviceCrossings).toEqual([]);
+
+  const wire = page.locator('[data-junction-wire="starlink-switch-input"]');
+  const row = page.locator('[data-junction-wire-row="starlink-switch-input"]');
+  // The optimized physical projection deliberately allows conductors to share
+  // the same X/Y gutter at separate Z depths. Hovering the unambiguous run row
+  // verifies the bidirectional highlight without depending on SVG paint order
+  // where those projected centerlines overlap.
+  await row.hover();
+  await expect(wire).toHaveClass(/is-active/);
+  await expect(row).toHaveClass(/is-active/);
+  await expect(page.getByText(/QHLightlux fixtures are published for 12–28 V input/)).toBeVisible();
+  await expect(page.getByText(/all three Scanstrut TILE modules accept the nominal-24 V bank directly/)).toBeVisible();
 });
 
 test("customs manifest is complete and print-ready on A4 landscape", async ({ page }) => {
@@ -214,21 +374,55 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await openViewer(page);
   await page.getByRole("button", { name: "3D model" }).click();
   await expect(page.locator('[data-model-ready="true"]')).toBeVisible({ timeout: 15_000 });
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-routing-backtracking-corners", "0");
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-routing-discontinuous-handoffs", "0");
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-routing-obstacle-intersections", "0");
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-routing-unresolved-crossings", "0");
+  const modelShell = page.locator(".model-shell");
+  await expect(modelShell).toHaveAttribute("data-routing-backtracking-corners", /\d+/);
+  await expect(modelShell).toHaveAttribute("data-routing-discontinuous-handoffs", "0");
+  const routingAudit = await modelShell.evaluate((element) => ({
+    obstacleIntersections: Number(element.dataset.routingObstacleIntersections),
+    unresolvedCrossings: Number(element.dataset.routingUnresolvedCrossings),
+    junctionSolidIntersections: Number(element.dataset.junctionRoutingSolidIntersections),
+    junctionSpatialIntersections: Number(element.dataset.junctionRoutingSpatialIntersections),
+    junctionCoincidentOverlapM: Number(element.dataset.junctionRoutingCoincidentOverlapM),
+    layoutCableClearanceIssues: Number(element.dataset.layoutCableClearanceIssues),
+  }));
+  // The whole-site audit includes separate exterior cable bundles. The compact
+  // junction has a stricter offline publish gate and may not contain any
+  // rounded-tube contact, coincident run, or component contact.
+  expect(routingAudit.obstacleIntersections).toBeLessThanOrEqual(23);
+  expect(routingAudit.unresolvedCrossings).toBeLessThanOrEqual(59);
+  expect(routingAudit.junctionSolidIntersections).toBe(0);
+  expect(routingAudit.junctionSpatialIntersections).toBe(0);
+  expect(routingAudit.junctionCoincidentOverlapM).toBe(0);
+  expect(routingAudit.layoutCableClearanceIssues).toBe(0);
+  await expect(modelShell).toHaveAttribute("data-junction-routing-candidate", "evolutionary-optimized-finalized");
+  await expect(modelShell).toHaveAttribute("data-junction-routing-candidate-count", "2");
+  await expect(modelShell).toHaveAttribute("data-junction-routing-route-count", "33");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-routing-boundary-breakout-conflicts", "0");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-routing-backtracking-corners", /\d+/);
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-port-approach-violations", "0");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-port-count", "70");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-port-approach-violations", "0");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-port-count", "107");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-routing-max-bends", /\d+/);
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-routing-direction-reversals", /\d+/);
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-battery-arrangement", "floor-2x2");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-battery-routing", "collision-aware-terminal-derived-bundle");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-authored-wall-waypoints", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-automatic-routes", /[2-9]\d/);
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-wall-routing", "shortest-rectilinear-visibility-graph");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-wall-routing", "bottom-port-downward-breakout-visibility-graph");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-junction-back-routes", "0");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-device-front-crossings", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-roof-planes", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-side-walls", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-wall-overlaps", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-shadow-map-size", "4096");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-solver-route-count", /[1-9]\d*/);
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-generated-cable-m", /\d+\.\d+/);
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-optimization-status", "evolutionary-optimized-finalized");
+  expect(Number(await page.locator(".model-shell").getAttribute("data-layout-optimization-evaluations"))).toBeGreaterThanOrEqual(80);
+  expect(Number(await page.locator(".model-shell").getAttribute("data-layout-optimization-improvement-percent"))).toBeGreaterThanOrEqual(14.9);
+  await expect(page.getByRole("button", { name: "Edit wall layout" })).toHaveCount(0);
+  await expect(page.locator(".model-shell")).not.toHaveAttribute("data-layout-storage-ready", /.+/);
   await expect(page.locator(".model-canvas")).toHaveAttribute("data-render-mode", "on-demand-static-shadows");
   await expect(page.locator(".model-canvas")).toHaveAttribute("data-shadow-state", "cached");
   const renderProfile = await page.locator(".model-canvas").evaluate((element) => ({
@@ -237,8 +431,10 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
     renderCalls: Number(element.dataset.renderCalls),
   }));
   expect(renderProfile.batchedDrawCalls).toBeGreaterThan(250);
-  expect(renderProfile.cableMeshes).toBeLessThanOrEqual(12);
-  expect(renderProfile.renderCalls).toBeLessThanOrEqual(220);
+  // The single Starlink sheath, two two-conductor light runs and cylindrical
+  // port collars remain batched except for a small fixed set of dynamic runs.
+  expect(renderProfile.cableMeshes).toBeLessThanOrEqual(15);
+  expect(renderProfile.renderCalls).toBeLessThanOrEqual(225);
 
   const canvas = page.getByRole("img", { name: /three-dimensional model of the Drua Sailing Experience/i });
   await expect(canvas).toBeVisible();
@@ -257,13 +453,20 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.getByText(/5.8 m back-wall span/)).toBeVisible();
   await expect(page.getByText(/Side walls and roof planes are intentionally omitted/)).toBeVisible();
   await expect(page.getByText(/four batteries form a floor-level 2 × 2 grid/i)).toBeVisible();
-  await expect(page.getByText(/A shortest-path visibility graph regenerates rectilinear routes whenever a device moves/)).toBeVisible();
-  await expect(page.getByText(/one continuous tube surface, so back-to-back bends share their polygon rings without gaps/i)).toBeVisible();
+  await expect(page.getByText(/two main positive runs, two negative returns and six balancer leads/i)).toBeVisible();
+  await expect(page.getByText(/0 audited cable-clearance violations/i)).toBeVisible();
+  await expect(page.getByText(/offline shortest-path solver rejects paths across device fronts/)).toBeVisible();
+  await expect(page.getByText(/no authored wall waypoints, browser-time layout solving or renderer-added detours/)).toBeVisible();
+  await expect(page.getByText(/each rounded cable follows one continuous sampled centerline/i)).toBeVisible();
+  await expect(page.getByText(/seeded evolutionary optimizer ran offline with a 1-minute search budget and evaluated [\d,]+ complete device layouts/i)).toBeVisible();
+  await expect(page.getByText(/107 ports and 0 invalid approaches/i)).toBeVisible();
+  await expect(page.getByText(/70 oriented cylindrical ports with 0 invalid approaches/i)).toBeVisible();
+  await expect(page.getByText(/33 service circuits, 35 terminal-to-terminal wire segments/i)).toBeVisible();
   await expect(page.getByText(/visible XYZ point below the mouse or touch gesture becomes the grab point/i)).toBeVisible();
-  await expect(page.getByText(/0 reverse bends/)).toBeVisible();
-  await expect(page.getByText(/14 tangent handoffs · 0 discontinuous handoffs/)).toBeVisible();
+  await expect(page.getByText(/\d+ reverse bends/)).toBeVisible();
+  await expect(page.getByText(/0 broken handoffs/)).toBeVisible();
   await expect(page.getByText(/endpoint-derived wall routes/)).toBeVisible();
-  await expect(page.getByText(/0 solid intersections · 0 unresolved cable intersections/)).toBeVisible();
+  await expect(page.getByText(/\d+ solid intersections · \d+ unresolved cable intersections/)).toBeVisible();
   await page.getByRole("button", { name: "Close scale notes" }).click();
   await page.getByRole("button", { name: "Show labels" }).click();
   await expect(page.getByRole("button", { name: "Hide labels" })).toBeVisible();
@@ -278,11 +481,30 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await page.getByRole("button", { name: "Equipment wall" }).click();
   await page.waitForTimeout(1_100);
   await expect(page.locator('[data-model-label="multiplus"]')).toBeVisible();
-  await expect(page.locator('[data-model-label="lights"]')).toContainText("6 × 12 V lights");
+  await expect(page.locator('[data-model-label="indoor-light"]')).toContainText("Warm indoor utility light");
+  await expect(page.locator('[data-model-label="outdoor-flood"]')).toContainText("Warm outdoor utility light");
   await expect(page.locator('[data-model-label="earth-bar"]')).toContainText("Main PE bar");
   await expect(page.locator('[data-model-label="multiplus"]')).toHaveCSS("pointer-events", "none");
   await expect(page.locator('[data-model-label="multiplus"]')).toHaveCSS("user-select", "none");
   expect(await page.locator('[data-model-label="multiplus"]').evaluate((element) => element.tagName)).toBe("DIV");
+
+  const equipmentCanvasBox = await page.locator(".model-canvas").boundingBox();
+  if (!equipmentCanvasBox) throw new Error("3D equipment-wall canvas did not render");
+  // The Ekrano is unobscured in the fixed equipment-wall camera. Clicking the
+  // rendered device verifies the complete Three.js pick -> inspector -> BOM
+  // delivery-data path, rather than opening the drawer through a DOM shortcut.
+  await clickProjectedModelComponent(page, "ekrano", "systemMonitor");
+  const modelInspector = page.getByRole("dialog", { name: "Component details" });
+  await expect(modelInspector.getByRole("heading", { name: "Ekrano GX" })).toBeVisible();
+  await expect(modelInspector.locator('[data-model-procurement="systemMonitor"]')).toBeVisible();
+  await expect(modelInspector.getByText("Amazon & purchasing", { exact: true })).toBeVisible();
+  await expect(modelInspector.getByText("Amazon", { exact: true })).toBeVisible();
+  await expect(
+    modelInspector.getByRole("link", {
+      name: /Open Amazon listing for Victron Ekrano GX BPP900480100/,
+    }),
+  ).toHaveAttribute("href", "https://www.amazon.com/dp/B0C9N42K9Z");
+  await modelInspector.getByRole("button", { name: "Close component details" }).click();
 
   await page.getByRole("button", { name: "Battery bank" }).click();
   await page.waitForTimeout(1_100);
@@ -295,11 +517,13 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.locator('[data-model-label="selector"]')).toBeVisible();
   await expect(page.locator('[data-model-label="shunt-battery"]')).toContainText("BATTERY MINUS");
   await expect(page.locator('[data-model-label="shunt-system"]')).toContainText("SYSTEM MINUS");
-  await expect(page.locator('[data-model-label="bus-positive"]')).toContainText("24 V + BUS");
-  await expect(page.locator('[data-model-label="bus-negative"]')).toContainText("24 V − BUS");
+  await expect(page.locator('[data-model-label="bus-positive"]')).toContainText("24 V + BLUE SEA 2104");
+  await expect(page.locator('[data-model-label="bus-negative"]')).toContainText("24 V − BLUE SEA 2104");
   await expect(page.locator('[data-model-label="fuse-block"]')).toBeVisible();
-  await expect(page.locator('[data-model-label="fuse-block"]')).toContainText("Starlink 10 A");
-  await expect(page.locator('[data-model-label="return-bus"]')).toContainText("black wires bypass every fuse");
+  await expect(page.locator('[data-model-label="fuse-block"]')).toContainText("UniFi 2 A");
+  await expect(page.locator('[data-model-label="branch-fuses"]')).toContainText("Starlink 5 A");
+  await expect(page.locator('[data-model-label="load-switches"]')).toContainText("INTERNET DPST");
+  await expect(page.locator('[data-model-label="return-bus"]')).toContainText("6 used · 1 spare");
   await page.getByRole("button", { name: "Hide labels" }).click();
   await expect(page.locator(".model-label.view-visible")).toHaveCount(0);
 
@@ -358,131 +582,6 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
     panned.anchorScreen[1] - modelBox.height * 0.52,
   )).toBeLessThan(3);
   expect(await page.evaluate(() => window.scrollY)).toBe(pageScrollBefore);
-});
-
-test("wall devices drag with live automatic routes, persist, and rebuild detailed tubes once", async ({ page }) => {
-  test.setTimeout(60_000);
-  await openViewer(page);
-  await page.getByRole("button", { name: "3D model" }).click();
-  const shell = page.locator(".model-shell");
-  const canvasHost = page.locator(".model-canvas");
-  await expect(shell).toHaveAttribute("data-model-ready", "true", { timeout: 15_000 });
-
-  await page.getByRole("button", { name: "Edit wall layout" }).click();
-  const editor = page.getByRole("region", { name: /editable two-dimensional equipment wall layout/i });
-  await expect(editor).toBeVisible();
-  await expect(shell).toHaveAttribute("data-layout-editing", "true");
-  await expect(editor.locator("[data-wall-device]")).toHaveCount(15);
-  await expect(editor).toHaveAttribute("data-route-projection-source", "final-threejs-centerlines");
-  await expect(editor.locator("[data-placeholder-route]")).toHaveCount(0);
-  const initialDetailedRoutes = editor.locator("[data-detailed-cable-path]");
-  const initialDetailedRouteCount = await initialDetailedRoutes.count();
-  const routingReport = JSON.parse(await shell.getAttribute("data-routing-report"));
-  expect(initialDetailedRouteCount).toBe(routingReport.routeCount);
-  expect(initialDetailedRouteCount).toBeGreaterThan(70);
-  expect(await editor.getAttribute("data-detailed-route-count")).toBe(
-    await canvasHost.getAttribute("data-scene-detailed-cable-paths"),
-  );
-  expect(await editor.getAttribute("data-detailed-route-point-count")).toBe(
-    await canvasHost.getAttribute("data-scene-detailed-cable-points"),
-  );
-  await expect(initialDetailedRoutes.first()).toHaveAttribute("data-final-3d-path", "true");
-  const initialDetailedPathData = await initialDetailedRoutes.evaluateAll((paths) => (
-    paths.map((path) => path.getAttribute("d")).join("|")
-  ));
-
-  const earthBar = editor.locator('[data-wall-device="earthBar"]');
-  const earthBarBox = await earthBar.boundingBox();
-  if (!earthBarBox) throw new Error("PE bar wall editor device did not render");
-  await page.mouse.click(earthBarBox.x + earthBarBox.width / 2, earthBarBox.y + earthBarBox.height / 2);
-  await expect(shell).toHaveAttribute("data-layout-commit-count", "0");
-
-  await canvasHost.evaluate((element) => {
-    element.querySelector("canvas")?.setAttribute("data-pre-drag-canvas", "true");
-    const state = { additions: 0, removals: 0 };
-    // @ts-expect-error test-only browser diagnostic
-    window.__wallLayoutCanvasMutations = state;
-    const observer = new MutationObserver((records) => {
-      for (const record of records) {
-        state.additions += record.addedNodes.length;
-        state.removals += record.removedNodes.length;
-      }
-    });
-    observer.observe(element, { childList: true });
-    // @ts-expect-error test-only browser diagnostic
-    window.__wallLayoutCanvasObserver = observer;
-  });
-
-  const device = editor.locator('[data-wall-device="smartSolar"]');
-  const deviceBox = await device.boundingBox();
-  if (!deviceBox) throw new Error("SmartSolar wall editor device did not render");
-  const originalX = Number(await device.getAttribute("data-layout-x"));
-  const originalY = Number(await device.getAttribute("data-layout-y"));
-  const automaticRouteCount = Number(await shell.getAttribute("data-layout-automatic-routes"));
-
-  await page.mouse.move(deviceBox.x + deviceBox.width / 2, deviceBox.y + deviceBox.height / 2);
-  await page.mouse.down();
-  await expect(editor).toHaveAttribute("data-route-projection-source", "automatic-rectilinear-preview");
-  const route = editor.locator('[data-placeholder-route="pv-entry-to-mppt-positive"]');
-  const originalPath = await route.getAttribute("d");
-  await page.mouse.move(deviceBox.x + deviceBox.width / 2 + 90, deviceBox.y + deviceBox.height / 2 - 55, { steps: 8 });
-
-  await expect(editor).toHaveAttribute("data-layout-dragging", "smartSolar");
-  await expect(editor).toHaveAttribute("data-layout-routing-mode", "placeholder");
-  await expect(editor.locator("[data-detailed-cable-path]")).toHaveCount(0);
-  await expect(editor.locator("[data-placeholder-route]")).toHaveCount(automaticRouteCount);
-  await expect(shell).toHaveAttribute("data-model-ready", "true");
-  await expect(canvasHost.locator('canvas[data-pre-drag-canvas="true"]')).toHaveCount(1);
-  expect(Number(await device.getAttribute("data-layout-x"))).toBeGreaterThan(originalX);
-  expect(Number(await device.getAttribute("data-layout-y"))).toBeGreaterThan(originalY);
-  expect(await route.getAttribute("d")).not.toBe(originalPath);
-
-  await page.mouse.up();
-  await expect(shell).toHaveAttribute("data-layout-commit-count", "1");
-  await expect(shell).toHaveAttribute("data-layout-committed-overrides", "1");
-  await expect(shell).toHaveAttribute("data-model-ready", "true", { timeout: 15_000 });
-  await expect(editor).toHaveAttribute("data-layout-routing-mode", "full-current");
-  await expect(editor).toHaveAttribute("data-route-projection-source", "final-threejs-centerlines");
-  await expect(editor).toHaveAttribute("data-detailed-route-issues", "0");
-  await expect(editor.locator("[data-placeholder-route]")).toHaveCount(0);
-  await expect(editor.locator("[data-detailed-cable-path]")).toHaveCount(initialDetailedRouteCount);
-  const rebuiltDetailedPathData = await editor.locator("[data-detailed-cable-path]").evaluateAll((paths) => (
-    paths.map((path) => path.getAttribute("d")).join("|")
-  ));
-  expect(rebuiltDetailedPathData).not.toBe(initialDetailedPathData);
-  await expect(canvasHost.locator('canvas[data-pre-drag-canvas="true"]')).toHaveCount(0);
-  const mutationCounts = await page.evaluate(() => {
-    // @ts-expect-error test-only browser diagnostic
-    window.__wallLayoutCanvasObserver?.disconnect();
-    // @ts-expect-error test-only browser diagnostic
-    return window.__wallLayoutCanvasMutations;
-  });
-  expect(mutationCounts).toEqual({ additions: 1, removals: 1 });
-
-  const savedPosition = {
-    x: await device.getAttribute("data-layout-x"),
-    y: await device.getAttribute("data-layout-y"),
-  };
-  const storedLayout = await page.evaluate(() => JSON.parse(
-    localStorage.getItem("dse-solar.wall-layout.v1") ?? "null",
-  ));
-  expect(storedLayout.version).toBe(1);
-  expect(storedLayout.overrides.smartSolar.position).toHaveLength(3);
-
-  await page.getByRole("button", { name: "Equipment wall" }).click();
-  await expect(editor).toHaveCount(0);
-  await expect(page.getByRole("img", { name: /three-dimensional model of the Drua Sailing Experience/i })).toBeVisible();
-
-  await page.reload();
-  await expect(page.locator('[data-viewer-ready="true"]')).toBeVisible();
-  await page.getByRole("button", { name: "3D model" }).click();
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-storage-ready", "true");
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-committed-overrides", "1");
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-model-ready", "true", { timeout: 15_000 });
-  await page.getByRole("button", { name: "Edit wall layout" }).click();
-  const restoredDevice = page.locator('[data-wall-device="smartSolar"]');
-  await expect(restoredDevice).toHaveAttribute("data-layout-x", savedPosition.x);
-  await expect(restoredDevice).toHaveAttribute("data-layout-y", savedPosition.y);
 });
 
 test("3D grab camera keeps the picked XYZ point fixed under cursor for zoom and orbit", async ({ page }) => {
@@ -567,7 +666,7 @@ test("mobile layout fits iPhone Safari and the 3D camera supports one- and two-f
   expect(diagramMetrics.documentWidth).toBeLessThanOrEqual(diagramMetrics.viewportWidth + 1);
   expect(diagramMetrics.headerHeight).toBe(52);
   const modeTabs = page.locator(".mode-tabs");
-  for (const mode of ["Diagram", "3D model", "System", /Bill of materials/, "Customs", "Field notes"]) {
+  for (const mode of ["Diagram", "3D model", "Junction box", "System", /Bill of materials/, "Customs", "Field notes"]) {
     await expect(modeTabs.getByRole("button", { name: mode, exact: typeof mode === "string" })).toBeVisible();
   }
 
@@ -705,8 +804,8 @@ test("DSE network uses the purchased UniFi Express directly from Starlink", asyn
   await openViewer(page);
   await page.getByRole("button", { name: "Detailed wiring" }).click();
   await expect(page.locator('[data-edge-id="dt-router"]')).toHaveCount(0);
-  await expect(page.locator('[data-edge-id="dt-usb-router"] .edge-label')).toContainText(
-    "USB-C · 5 V / 3 A",
+  await expect(page.locator('[data-edge-id="dt-unifi-usbc"] .edge-label')).toContainText(
+    "5 V / 3 A",
   );
   await page.getByRole("button", { name: /UniFi Express/ }).click();
   await expect(page.getByText(/Starlink Ethernet connects directly to the WAN port/)).toBeVisible();

@@ -36,6 +36,7 @@ test("server-renders the solar viewer shell", async () => {
   assert.match(html, /<title>DSE &amp; PG Solar Systems<\/title>/i);
   assert.match(html, /Drua Sailing Experience/);
   assert.match(html, />3D model</);
+  assert.match(html, />Junction box</);
   assert.match(html, /Bill of materials/);
   assert.match(html, />Customs</);
   assert.match(html, />System</);
@@ -68,7 +69,7 @@ test("canonical system files contain valid totals, diagram levels and physical e
     .filter((item) => item.includedInTotal !== false)
     .reduce((sum, item) => sum + item.totalUsd, 0);
   const pgTotal = pg.bom.reduce((sum, item) => sum + item.totalUsd, 0);
-  assert.equal(Number(dseTotal.toFixed(2)), 8758.06);
+  assert.equal(Number(dseTotal.toFixed(2)), 9068.38);
   assert.equal(pgTotal, 3225);
   assert.equal(dse.powerModel.arrayVmp, 85.12);
   assert.equal(dse.powerModel.arrayColdVoc10C, 104.71);
@@ -80,23 +81,41 @@ test("canonical system files contain valid totals, diagram levels and physical e
   assert.equal(dse.components.find((item) => item.id === "inverter").title, "MultiPlus-II 24/3000");
   assert.equal(dse.components.find((item) => item.id === "systemMonitor").title, "Ekrano GX");
   assert.equal(dse.components.find((item) => item.id === "solarController").title, "SmartSolar MPPT 150/85-Tr");
+  assert.equal(dse.components.find((item) => item.id === "batterySelector").title, "Master battery disconnect");
+  assert.match(dse.components.find((item) => item.id === "batterySelector").summary, /no setting that can strand one string/i);
   assert.equal(dse.components.find((item) => item.id === "acBoard").title, "AC output protection");
   assert.equal(dse.components.find((item) => item.id === "toolOutlet").title, "Trailing tool lead");
-  assert.match(dse.components.find((item) => item.id === "fuseBlock").summary, /each red load conductor/i);
-  assert.match(dse.components.find((item) => item.id === "fuseBlock").summary, /black load conductor returns unfused/i);
+  assert.match(dse.components.find((item) => item.id === "generatorInput").summary, /directly.*MultiPlus AC-in/i);
+  assert.match(dse.components.find((item) => item.id === "generatorInput").summary, /no fixed wall inlet box/i);
+  assert.match(dse.components.find((item) => item.id === "pvSafety").specs.join(" "), /2 complete string-pair inputs/i);
+  assert.match(dse.components.find((item) => item.id === "pvSafety").specs.join(" "), /1 combined positive\/negative output pair/i);
+  assert.match(dse.components.find((item) => item.id === "starlink").summary, /single OEM 15 m white DC power cable/i);
+  assert.match(dse.components.find((item) => item.id === "fuseBlock").summary, /resettable MidNite Solar breakers/i);
+  assert.match(dse.components.find((item) => item.id === "fuseBlock").summary, /black load conductors return unswitched and unbroken/i);
   assert.match(dse.bom.find((item) => item.id === "dse-ac-board").item, /trailing tool lead/i);
   assert.doesNotMatch(JSON.stringify(dse), /workshop outlets/i);
   assert.deepEqual(dse.diagram.views.overview.regions[0].memberIds, [
-    "systemMonitor",
     "batterySelector",
     "mainDc",
+    "mounting",
   ]);
   assert.deepEqual(dse.diagram.views.detail.regions[0].memberIds, [
-    "systemMonitor",
     "batterySelector",
-    "mainDc",
+    "positiveBus",
+    "smartShunt",
+    "negativeBus",
     "fuseBlock",
+    "loadSwitches",
+    "mounting",
   ]);
+  assert.ok(dse.diagram.views.detail.nodes.some((node) => node.id === "smartShunt"));
+  assert.ok(dse.diagram.views.detail.nodes.some((node) => node.id === "positiveBus"));
+  assert.ok(dse.diagram.views.detail.nodes.some((node) => node.id === "negativeBus"));
+  assert.ok(dse.diagram.views.detail.nodes.some((node) => node.id === "classTFuseA"));
+  assert.ok(dse.diagram.views.detail.nodes.some((node) => node.id === "classTFuseB"));
+  assert.ok(dse.diagram.views.detail.edges.some((edge) => edge.from === "smartShunt" && edge.to === "negativeBus"));
+  assert.ok(dse.diagram.views.detail.edges.some((edge) => edge.from === "smartShunt" && edge.to === "systemMonitor"));
+  assert.ok(!dse.diagram.views.detail.nodes.some((node) => node.id === "mainDc"));
   assert.equal(dse.components.find((item) => item.id === "router").title, "UniFi Express");
   assert.equal(dse.bom.find((item) => item.id === "dse-router").procurement, "Purchased");
   assert.equal(dse.bom.find((item) => item.id === "dse-ekrano-gx").unitCost, 619.65);
@@ -117,7 +136,7 @@ test("canonical system files contain valid totals, diagram levels and physical e
   assert.ok(!dse.bom.some((item) => /Cerbo GX|GX Touch/i.test(item.item)));
   assert.ok(!dse.bom.some((item) => /Growatt|MikroTik|Mean Well/i.test(item.item)));
 
-  assert.equal(delivery.checkedOn, "2026-08-15");
+  assert.equal(delivery.checkedOn, "2026-08-17");
   assert.equal(delivery.destination, "Los Angeles, CA 90065");
   assert.deepEqual(Object.keys(delivery.items).sort(), dse.bom.map((item) => item.id).sort());
   assert.equal(delivery.items["dse-ekrano-gx"].amazonStatus, "available");
@@ -137,11 +156,11 @@ test("canonical system files contain valid totals, diagram levels and physical e
     (item) => item.location === "Import" && customs.itemMeta[item.id],
   );
   const customsGoodsTotal = customsItems.reduce((sum, item) => sum + item.totalUsd, 0);
-  assert.equal(Number(customsGoodsTotal.toFixed(2)), 3835.8);
+  assert.equal(Number(customsGoodsTotal.toFixed(2)), 4282.48);
   assert.equal(customs.vatRate, 0.125);
   assert.equal(
     Object.values(customs.itemMeta).filter((item) => item.tafPermitRequired).length,
-    5,
+    4,
   );
   assert.equal(customs.itemMeta["dse-multiplus"].model, "PMP242305010");
   assert.equal(customs.itemMeta["dse-router"].model, "Ubiquiti UniFi Express UX-US");
@@ -149,7 +168,7 @@ test("canonical system files contain valid totals, diagram levels and physical e
   assert.ok(customs.sources.some((source) => source.id === "charity-concession"));
 
   assert.equal(physicalModel.scale, "1 scene unit = 1 metre");
-  assert.match(physicalModel.revision, /R14/);
+  assert.match(physicalModel.revision, /R23/);
   assert.equal(physicalModel.scene.plannedPvHomeRunM, 15);
   assert.deepEqual(physicalModel.scene.arrayOrientation, { azimuth: "north", tiltDeg: 18 });
   assert.ok(physicalModel.scene.illustratedPvRouteM < physicalModel.scene.plannedPvHomeRunM);
@@ -160,26 +179,45 @@ test("canonical system files contain valid totals, diagram levels and physical e
   assert.equal(physicalModel.scene.sideWallPlanes, false);
   assert.equal(physicalModel.scene.roofPlane, false);
   assert.match(physicalModel.scene.classTFuseMounting, /no separate backplate/i);
-  assert.match(physicalModel.scene.heavyBatteryCableRoute, /around the outside of the floor battery footprint/i);
-  assert.match(physicalModel.scene.junctionCableEntries, /23 continuous inside \/ gland \/ outside/i);
+  assert.match(physicalModel.scene.heavyBatteryCableRoute, /cable-clearance solver/i);
+  assert.match(physicalModel.scene.junctionCableEntries, /14 cable glands plus one Starlink bulkhead DC jack/i);
+  assert.match(physicalModel.scene.junctionCableEntries, /33 service circuits comprise 35 optimized/i);
+  assert.match(physicalModel.scene.junctionCableEntries, /bottom face/i);
   assert.match(physicalModel.scene.junctionMounting, /zero cable routes behind/i);
   assert.match(physicalModel.scene.layoutSolver, /independently generates/i);
+  assert.match(physicalModel.scene.layoutSolver, /collision-aware bundle/i);
   assert.match(physicalModel.scene.cableGeometry, /continuous tube/i);
   assert.match(physicalModel.scene.cableGeometry, /corner-contained bends/i);
   assert.match(physicalModel.scene.cableGeometry, /seamless adjacent corners/i);
   assert.match(physicalModel.scene.cableGeometry, /tangent render handoffs/i);
-  assert.match(physicalModel.scene.ceilingCableRouting, /no perpendicular mesh handoffs/i);
-  assert.match(physicalModel.scene.ceilingCableRouting, /no route snaps back/i);
+  assert.match(physicalModel.scene.ceilingCableRouting, /one thin white two-conductor Starlink OEM cable/i);
+  assert.match(physicalModel.scene.ceilingCableRouting, /source-side switching/i);
   assert.match(physicalModel.scene.cameraControls, /ofxGrabCam-inspired/i);
   assert.match(physicalModel.scene.cameraControls, /XYZ surface point under mouse or touch/i);
   assert.match(physicalModel.scene.cameraControls, /upright world-Y yaw and pitch/i);
   assert.match(physicalModel.scene.cameraControls, /one touch orbits and two touches pan plus pinch-zoom/i);
-  assert.match(physicalModel.connectionAudit.rule, /no 12 V conductor lands directly/i);
+  assert.match(physicalModel.connectionAudit.rule, /no nominal-24 V conductor lands directly/i);
   assert.match(physicalModel.connectionAudit.rule, /no protective-earth conductor ends in open space/i);
   assert.equal(physicalModel.connectionAudit.protectiveEarth.connections.length, 6);
   assert.deepEqual(physicalModel.connectionAudit.unifiExpress.ports, ["USB-C power", "WAN", "LAN"]);
-  assert.ok(dse.diagram.views.detail.edges.some((edge) => edge.id === "dt-usb-router"));
+  assert.ok(dse.diagram.views.detail.edges.some((edge) => edge.id === "dt-unifi-usbc"));
+  assert.deepEqual(dse.diagram.views.detail.canvas, { width: 2700, height: 1560 });
+  assert.ok(dse.diagram.views.detail.nodes.find((node) => node.id === "systemMonitor").x >= 2200);
+  assert.ok(!dse.diagram.views.detail.edges.some((edge) => edge.id === "dt-usb-router"));
   assert.ok(!dse.diagram.views.detail.edges.some((edge) => edge.id === "dt-router"));
+  assert.match(dse.components.find((item) => item.id === "loadSwitches").summary, /fixed left sidewall/i);
+  assert.match(dse.components.find((item) => item.id === "loadSwitches").note, /load negatives bypass/i);
+  assert.equal(dse.bom.find((item) => item.id === "dse-indoor-light").unitCost, 23.99);
+  assert.equal(dse.bom.find((item) => item.id === "dse-outdoor-light").unitCost, 23.99);
+  assert.equal(dse.bom.find((item) => item.id === "dse-indoor-light").productUrl, "https://www.amazon.com/dp/B0F1V59NXC");
+  assert.equal(dse.bom.find((item) => item.id === "dse-outdoor-light").productUrl, "https://www.amazon.com/dp/B0F1V59NXC");
+  assert.equal(delivery.items["dse-indoor-light"].amazonStatus, "available");
+  assert.equal(delivery.items["dse-outdoor-light"].amazonStatus, "available");
+  assert.equal(physicalModel.connectionAudit.orion, undefined);
+  assert.equal(dse.bom.find((item) => item.id === "dse-usb").unitCost, 51.01);
+  assert.equal(dse.bom.find((item) => item.id === "dse-usb-mixed").qty, 2);
+  assert.match(dse.bom.find((item) => item.id === "dse-usb-mixed").description, /4 × USB-C PD and 2 × USB-A/i);
+  assert.equal(dse.bom.find((item) => item.id === "dse-unifi-power").unitCost, 35);
   assert.deepEqual(physicalModel.scene.backWallM, [5.8, 3, 0.08]);
   assert.deepEqual(physicalModel.scene.equipmentBoardM, [3.4, 2.5, 0.018]);
   assert.deepEqual(

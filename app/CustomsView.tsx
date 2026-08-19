@@ -200,8 +200,8 @@ export function CustomsView({
           </article>
           <article className="customs-alert customs-alert-warn">
             <span>Telecom permit</span>
-            <strong>Five radio models</strong>
-            <p>Apply for the UniFi plus four wireless Victron models; TAF may also require type approval.</p>
+            <strong>Four radio models</strong>
+            <p>Apply for the UniFi plus three wireless Victron models; TAF may also require type approval.</p>
           </article>
         </div>
 
@@ -216,7 +216,7 @@ export function CustomsView({
               </li>
               <li>Send the agent this manifest, every invoice, flight details and consignee TIN.</li>
               <li>Ask the agent to pre-register the ASYCUDA SAD within FRCS&apos;s three-day pre-advance window.</li>
-              <li>Apply to TAF for the UniFi Express, Ekrano GX, SmartSolar, Orion-Tr Smart and SmartShunt. Ask which models already hold Fiji type approval; a new type approval can take 10 working days.</li>
+              <li>Apply to TAF for the UniFi Express, Ekrano GX, SmartSolar and SmartShunt. Ask which models already hold Fiji type approval; a new type approval can take 10 working days.</li>
             </ol>
           </article>
           <article>
@@ -227,7 +227,7 @@ export function CustomsView({
               <li>Commercial invoices, eBay/Amazon receipts and proof of payment</li>
               <li>Donation letter plus beneficiary acceptance letter</li>
               <li>Customs Entry/SAD and duty receipt if pre-cleared</li>
-              <li>TAF permit(s) listing all five wireless models</li>
+              <li>TAF permit(s) listing all four wireless models</li>
               <li>Any written FRCS concession approval and registration certificate</li>
             </ul>
             <p className="customs-arrival-note">

@@ -1,0 +1,32 @@
+{
+  "checkedOn": "2026-08-17",
+  "scope": "29 automatic endpoint-derived routes whose source and target are both draggable wall devices",
+  "iterations": {
+    "current": 50,
+    "voxelEach": 10
+  },
+  "metrics": {
+    "currentVisibilityGraph": {
+      "averageMs": 46.92,
+      "maximumForwardM": 0.2863,
+      "totalLengthM": 34.7143,
+      "totalTurns": 137,
+      "failedRoutes": 0
+    },
+    "voxelAStar40mm": {
+      "averageMs": 23.97,
+      "maximumForwardM": 0.26,
+      "totalLengthM": 35.2421,
+      "totalTurns": 218,
+      "failedRoutes": 0
+    },
+    "voxelAStar30mm": {
+      "averageMs": 61.35,
+      "maximumForwardM": 0.225,
+      "totalLengthM": 32.9131,
+      "totalTurns": 215,
+      "failedRoutes": 0
+    }
+  },
+  "decision": "Keep the rectilinear visibility-graph solver as the production router. The 30 mm voxel A* result is 1.80 m shorter and 61 mm shallower, but adds 78 visible turns; the 40 mm realtime result is faster but is longer and adds 81 turns. Runtime is frontend-feasible, but uniform-grid endpoint adapters and sequential route order reduce visual quality. Retain voxel A* as an experimental collision-routing reference; an adaptive grid that includes exact port coordinates would be the next useful hybrid test."
+}
