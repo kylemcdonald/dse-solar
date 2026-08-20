@@ -1,0 +1,236 @@
+{
+  "generatedAt": "2026-08-20T02:37:05.677Z",
+  "algorithm": "seeded two-sided simultaneous-perturbation stochastic descent evaluated by complete voxel A* rerouting",
+  "seed": 20260819,
+  "elapsedSeconds": 87.382,
+  "candidateAccepted": false,
+  "baselinePositions": {
+    "pvEntry": [
+      1.4695467478497792,
+      0.9122897250490846
+    ],
+    "smartSolar": [
+      2.4132826296037235,
+      1.0342465814716224
+    ],
+    "multiPlus": [
+      1.4492891404810446,
+      2.1083406492079866
+    ],
+    "acBoard": [
+      1.8942891404810447,
+      1.7569080807983064
+    ],
+    "junction": [
+      3.0407826296037235,
+      1.06828773374954
+    ],
+    "ekran": [
+      2.658958844076005,
+      1.58
+    ],
+    "unifi": [
+      3.12725796595044,
+      1.8720160209274535
+    ],
+    "usb": [
+      3.6848105731539844,
+      1.4305735382794753
+    ],
+    "unifiPower": [
+      3.185719807588519,
+      1.49128773374954
+    ],
+    "balancerA": [
+      2.207857290132605,
+      0.43
+    ],
+    "balancerB": [
+      2.8895361093879366,
+      0.5519146168933804
+    ],
+    "classTA": [
+      1.9427212965657537,
+      0.7301012421331045
+    ],
+    "classTB": [
+      1.8705467478497793,
+      1.0420692002781973
+    ],
+    "earthBar": [
+      1.8216188713748702,
+      1.3317576831941773
+    ]
+  },
+  "selectedPositions": {
+    "pvEntry": [
+      1.4695467478497792,
+      0.9122897250490846
+    ],
+    "smartSolar": [
+      2.4132826296037235,
+      1.0342465814716224
+    ],
+    "multiPlus": [
+      1.4492891404810446,
+      2.1083406492079866
+    ],
+    "acBoard": [
+      1.8942891404810447,
+      1.7569080807983064
+    ],
+    "junction": [
+      3.0407826296037235,
+      1.06828773374954
+    ],
+    "ekran": [
+      2.658958844076005,
+      1.58
+    ],
+    "unifi": [
+      3.12725796595044,
+      1.8720160209274535
+    ],
+    "usb": [
+      3.6848105731539844,
+      1.4305735382794753
+    ],
+    "unifiPower": [
+      3.185719807588519,
+      1.49128773374954
+    ],
+    "balancerA": [
+      2.207857290132605,
+      0.43
+    ],
+    "balancerB": [
+      2.8895361093879366,
+      0.5519146168933804
+    ],
+    "classTA": [
+      1.9427212965657537,
+      0.7301012421331045
+    ],
+    "classTB": [
+      1.8705467478497793,
+      1.0420692002781973
+    ],
+    "earthBar": [
+      1.8216188713748702,
+      1.3317576831941773
+    ]
+  },
+  "baselineMetrics": {
+    "cableClearanceIssueCount": 0,
+    "deviceFrontViolationCount": 0,
+    "maximumForwardM": 0.8029,
+    "portApproachViolationCount": 0,
+    "roundedDeviceFrontViolationCount": 0,
+    "routeCount": 38,
+    "totalLengthM": 52.7696,
+    "totalTurns": 231,
+    "wallDistanceCostM2": 5.3352
+  },
+  "selectedMetrics": {
+    "cableClearanceIssueCount": 0,
+    "deviceFrontViolationCount": 0,
+    "maximumForwardM": 0.8029,
+    "portApproachViolationCount": 0,
+    "roundedDeviceFrontViolationCount": 0,
+    "routeCount": 38,
+    "totalLengthM": 52.7696,
+    "totalTurns": 231,
+    "wallDistanceCostM2": 5.3352
+  },
+  "convergence": [
+    {
+      "iteration": 0,
+      "loss": 53.202158,
+      "cableM": 52.948
+    },
+    {
+      "iteration": 1,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 88.560398,
+      "negativeLoss": 88.492093
+    },
+    {
+      "iteration": 2,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 159.111565,
+      "negativeLoss": 87.955275
+    },
+    {
+      "iteration": 3,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 87.98183,
+      "negativeLoss": 1310000
+    },
+    {
+      "iteration": 4,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 54.125855,
+      "negativeLoss": 88.073233
+    },
+    {
+      "iteration": 5,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 158.255398,
+      "negativeLoss": 53.612743
+    },
+    {
+      "iteration": 6,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 1620000,
+      "negativeLoss": 1310000
+    },
+    {
+      "iteration": 7,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 87.73701,
+      "negativeLoss": 123.686575
+    },
+    {
+      "iteration": 8,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 1310000,
+      "negativeLoss": 1310000
+    },
+    {
+      "iteration": 9,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 88.319873,
+      "negativeLoss": 88.118965
+    },
+    {
+      "iteration": 10,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 123.082555,
+      "negativeLoss": 53.338595
+    },
+    {
+      "iteration": 11,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 1310000,
+      "negativeLoss": 87.49766
+    },
+    {
+      "iteration": 12,
+      "loss": 53.202158,
+      "cableM": 52.948,
+      "positiveLoss": 87.485075,
+      "negativeLoss": 124.097383
+    }
+  ]
+}

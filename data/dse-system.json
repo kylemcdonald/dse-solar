@@ -21,14 +21,46 @@
   },
   "summary": "Four 565 W panels form two matched two-panel series strings (2S2P) and feed a Victron SmartSolar 150/85 through two separate 4 mm² positive/negative home runs. At the assumed 15 m one-way distance, the two runs lose about 2.0% at rated power and land directly in one indoor PV entry enclosure with two string-pair inputs and one combined output pair, a two-pole disconnect and surge protection. Four 12 V GEL batteries form two independently Class-T-protected 24 V series strings that are permanently paralleled through equal-length cables. A single Blue Sea 6006 disconnect switches the complete bank ON or OFF; it cannot leave one string unintentionally idle. A non-GX Victron MultiPlus-II provides AC and generator charging, while the Ekrano GX coordinates charge current, local monitoring and VRM reporting. The SmartSolar output and every service positive use resettable, 10 kA-interrupt-rated MidNite Solar DC breakers. The only remaining fuses are the two battery Class T devices and Victron's factory-supplied 3.15 A Ekrano lead. The Class T links are retained because the selected 150 A coordination has no exact resettable equivalent: common marine breakers have much lower interrupt ratings, while MidNite's high-interrupt battery breakers jump from 125 A to 175 A. Starlink uses its single OEM 15 m white DC lead. UniFi, a six-port Scanstrut USB-C/A charging panel and two identical warm-white utility lights use protected nominal-24 V branches. Three sealed rockers on the junction-box exterior provide one master INTERNET control plus independent INSIDE and OUTSIDE light controls.",
   "keyFacts": [
-    { "label": "Solar array", "value": "2.26 kW", "detail": "2S2P · 85.1 Vmp" },
-    { "label": "PV cable", "value": "2 × 4 mm² pairs", "detail": "≈2.02% loss · direct to indoor combine" },
-    { "label": "Battery bank", "value": "9.6 kWh", "detail": "24 V · 400 Ah · two strings" },
-    { "label": "Conservative usable", "value": "4.8 kWh", "detail": "50% depth of discharge" },
-    { "label": "AC output", "value": "2.2 kW hot-rated", "detail": "3 kVA · 5.5 kW peak" },
-    { "label": "Essential autonomy", "value": "≈2.3 days", "detail": "No sun · no tool loads" },
-    { "label": "Battery switching", "value": "Whole bank only", "detail": "ON / OFF · no one-string selection" },
-    { "label": "Monitoring", "value": "Local + remote", "detail": "Ekrano GX · 7-inch · VRM" }
+    {
+      "label": "Solar array",
+      "value": "2.26 kW",
+      "detail": "2S2P · 85.1 Vmp"
+    },
+    {
+      "label": "PV cable",
+      "value": "2 × 4 mm² pairs",
+      "detail": "≈2.02% loss · direct to indoor combine"
+    },
+    {
+      "label": "Battery bank",
+      "value": "9.6 kWh",
+      "detail": "24 V · 400 Ah · two strings"
+    },
+    {
+      "label": "Conservative usable",
+      "value": "4.8 kWh",
+      "detail": "50% depth of discharge"
+    },
+    {
+      "label": "AC output",
+      "value": "2.2 kW hot-rated",
+      "detail": "3 kVA · 5.5 kW peak"
+    },
+    {
+      "label": "Essential autonomy",
+      "value": "≈2.3 days",
+      "detail": "No sun · no tool loads"
+    },
+    {
+      "label": "Battery switching",
+      "value": "Whole bank only",
+      "detail": "ON / OFF · no one-string selection"
+    },
+    {
+      "label": "Monitoring",
+      "value": "Local + remote",
+      "detail": "Ekrano GX · 7-inch · VRM"
+    }
   ],
   "powerModel": {
     "arrayWatts": 2260,
@@ -58,13 +90,69 @@
     "planningWeightLb": 10.2,
     "measurementRule": "Buy only after a 1:1 component layout. Measure hole-to-hole along the supported route, preserve broad bend radii, and keep the paired A/B paths equal. Confirm every stud before ordering, especially the purchased EverExceed battery terminals and final busbars.",
     "assemblies": [
-      { "qty": 2, "planningLengthIn": 12, "color": "black", "from": "Battery 1/3 negative", "to": "Battery 2/4 positive", "lugs": "M8–M8 assumed; confirm battery terminals", "purpose": "series links" },
-      { "qty": 2, "planningLengthIn": 12, "color": "red", "from": "String A/B positive", "to": "Class T holder", "lugs": "M8–M6 assumed; confirm battery terminals", "purpose": "battery-to-fuse" },
-      { "qty": 2, "planningLengthIn": 36, "color": "red", "from": "Class T holder", "to": "Blue Sea 6006 master-disconnect input stud", "lugs": "M6–M10", "purpose": "equal positive string paths · two lugs stacked on one rated switch stud" },
-      { "qty": 2, "planningLengthIn": 36, "color": "black", "from": "String A/B negative", "to": "SmartShunt BATTERY MINUS", "lugs": "M8–M10 assumed; confirm battery terminals", "purpose": "equal negative string paths" },
-      { "qty": 1, "planningLengthIn": 12, "color": "black", "from": "SmartShunt SYSTEM MINUS", "to": "negative busbar", "lugs": "M10–M10", "purpose": "shunt-to-bus" },
-      { "qty": 1, "planningLengthIn": 12, "color": "red", "from": "master-disconnect output", "to": "positive busbar", "lugs": "M10–M10", "purpose": "disconnect-to-bus" },
-      { "qty": 2, "planningLengthIn": 36, "color": "red / black", "from": "positive / negative busbars", "to": "MultiPlus-II", "lugs": "M10–M8", "purpose": "inverter positive and negative" }
+      {
+        "qty": 2,
+        "planningLengthIn": 12,
+        "color": "black",
+        "from": "Battery 1/3 negative",
+        "to": "Battery 2/4 positive",
+        "lugs": "M8–M8 assumed; confirm battery terminals",
+        "purpose": "series links"
+      },
+      {
+        "qty": 2,
+        "planningLengthIn": 12,
+        "color": "red",
+        "from": "String A/B positive",
+        "to": "Class T holder",
+        "lugs": "M8–M6 assumed; confirm battery terminals",
+        "purpose": "battery-to-fuse"
+      },
+      {
+        "qty": 2,
+        "planningLengthIn": 36,
+        "color": "red",
+        "from": "Class T holder",
+        "to": "Blue Sea 6006 master-disconnect input stud",
+        "lugs": "M6–M10",
+        "purpose": "equal positive string paths · two lugs stacked on one rated switch stud"
+      },
+      {
+        "qty": 2,
+        "planningLengthIn": 36,
+        "color": "black",
+        "from": "String A/B negative",
+        "to": "SmartShunt BATTERY MINUS",
+        "lugs": "M8–M10 assumed; confirm battery terminals",
+        "purpose": "equal negative string paths"
+      },
+      {
+        "qty": 1,
+        "planningLengthIn": 12,
+        "color": "black",
+        "from": "SmartShunt SYSTEM MINUS",
+        "to": "negative busbar",
+        "lugs": "M10–M10",
+        "purpose": "shunt-to-bus"
+      },
+      {
+        "qty": 1,
+        "planningLengthIn": 12,
+        "color": "red",
+        "from": "master-disconnect output",
+        "to": "positive busbar",
+        "lugs": "M10–M10",
+        "purpose": "disconnect-to-bus"
+      },
+      {
+        "qty": 2,
+        "planningLengthIn": 36,
+        "color": "red / black",
+        "from": "positive / negative busbars",
+        "to": "MultiPlus-II",
+        "lugs": "M10–M8",
+        "purpose": "inverter positive and negative"
+      }
     ]
   },
   "components": [
@@ -74,7 +162,13 @@
       "kicker": "PV array · already purchased",
       "kind": "solar",
       "summary": "Two matched two-panel series strings wired in parallel at the protected building entry (2S2P).",
-      "specs": ["2,260 W total", "85.12 Vmp · 26.56 A combined", "100.78 V Voc at 25°C", "104.71 V cold Voc at 10°C", "2 × 4 mm² positive/negative home runs"],
+      "specs": [
+        "2,260 W total",
+        "85.12 Vmp · 26.56 A combined",
+        "100.78 V Voc at 25°C",
+        "104.71 V cold Voc at 10°C",
+        "2 × 4 mm² positive/negative home runs"
+      ],
       "note": "Confirm every module nameplate is STP565S-C72/Vmh or electrically identical before wiring.",
       "sourceUrl": "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf"
     },
@@ -84,7 +178,12 @@
       "kicker": "565 W · string A",
       "kind": "solar",
       "summary": "First module in two-panel series string A.",
-      "specs": ["42.56 Vmp", "50.39 V Voc", "13.28 A Imp", "14.20 A Isc"],
+      "specs": [
+        "42.56 Vmp",
+        "50.39 V Voc",
+        "13.28 A Imp",
+        "14.20 A Isc"
+      ],
       "sourceUrl": "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf"
     },
     {
@@ -93,7 +192,10 @@
       "kicker": "565 W · string A",
       "kind": "solar",
       "summary": "Second module in string A; its string output gets a dedicated 4 mm² positive/negative home run.",
-      "specs": ["Identical orientation", "Matched module required"],
+      "specs": [
+        "Identical orientation",
+        "Matched module required"
+      ],
       "sourceUrl": "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf"
     },
     {
@@ -102,7 +204,10 @@
       "kicker": "565 W · string B",
       "kind": "solar",
       "summary": "First module in two-panel series string B.",
-      "specs": ["Identical orientation", "Matched module required"],
+      "specs": [
+        "Identical orientation",
+        "Matched module required"
+      ],
       "sourceUrl": "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf"
     },
     {
@@ -111,7 +216,10 @@
       "kicker": "565 W · string B",
       "kind": "solar",
       "summary": "Second module in string B; its string output gets a dedicated 4 mm² positive/negative home run.",
-      "specs": ["Each string: 85.12 Vmp · 13.28 A", "Protected parallel combination at building entry"],
+      "specs": [
+        "Each string: 85.12 Vmp · 13.28 A",
+        "Protected parallel combination at building entry"
+      ],
       "sourceUrl": "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf"
     },
     {
@@ -120,7 +228,15 @@
       "kicker": "Single indoor building-entry unit · PV-rated DC",
       "kind": "protection",
       "summary": "Both complete string pairs enter one indoor enclosure, where protected terminals parallel them ahead of surge protection and a common disconnect.",
-      "specs": ["2 complete string-pair inputs · four labeled conductors", "1 combined positive/negative output pair", "40 A two-pole PV disconnect", "Type 2 PV SPD coordinated with 150 V MPPT", "Protected parallel terminals", "2 × 4 mm² positive/negative home runs", "60 m single-core cable total at 15 m one-way"],
+      "specs": [
+        "2 complete string-pair inputs · four labeled conductors",
+        "1 combined positive/negative output pair",
+        "40 A two-pole PV disconnect",
+        "Type 2 PV SPD coordinated with 150 V MPPT",
+        "Protected parallel terminals",
+        "2 × 4 mm² positive/negative home runs",
+        "60 m single-core cable total at 15 m one-way"
+      ],
       "note": "With only two parallel strings, a faulted string can receive about one intact-string Isc (14.20 A), below Suntech's 25 A maximum series-fuse rating, so this base design does not add an outdoor string-fuse/combiner box. Confirm the exact module label, cable ampacity, connector ratings and applicable Fiji/AS-NZS requirements before omitting string fuses. Each string can sit near 105 VDC in cool sunlight: cover modules before connector work and never break MC4 connectors under load."
     },
     {
@@ -129,7 +245,15 @@
       "kicker": "Dedicated 24 V solar charger",
       "kind": "conversion",
       "summary": "A separate Victron charger keeps solar charging and essential DC services independent of the AC inverter/charger.",
-      "specs": ["150 V absolute maximum PV Voc · 145 V operating maximum", "85 A maximum battery current", "70 A maximum PV short-circuit current", "2,400 W nominal PV capacity at 24 V", "216 × 295 × 103 mm · 4.5 kg", "IP43 electronics · IP22 terminals", "VE.Direct to Ekrano GX"],
+      "specs": [
+        "150 V absolute maximum PV Voc · 145 V operating maximum",
+        "85 A maximum battery current",
+        "70 A maximum PV short-circuit current",
+        "2,400 W nominal PV capacity at 24 V",
+        "216 × 295 × 103 mm · 4.5 kg",
+        "IP43 electronics · IP22 terminals",
+        "VE.Direct to Ekrano GX"
+      ],
       "note": "The 2S strings model at 104.7 V cold Voc, leaving about 40 V below the 145 V operating ceiling. Fit the matching WireBox-XL Tr, mount terminals down within 3 m of the battery bus, and use a MidNite Solar MNEDC100 100 A / 150 VDC / 10 kA AIC resettable output breaker with 10 cm ventilation clearance. Set the charger itself to 85 A maximum and let Ekrano DVCC cap the combined system charge current. Its VE.Can, remote on/off and programmable-relay interfaces remain available but unused in the base design.",
       "sourceUrl": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html"
     },
@@ -139,7 +263,15 @@
       "kicker": "Victron inverter/charger · VE.Bus",
       "kind": "conversion",
       "summary": "The non-GX model provides the same inverter, generator charger and transfer-switch capability while leaving the Ekrano GX as the system's single monitoring and control device.",
-      "specs": ["PMP242305010 · 230 V model", "3,000 VA · 2,400 W at 25°C", "2,200 W at 40°C · 5,500 W peak", "70 A AC charger · 32 A transfer", "19 kg · IP22 steel enclosure", "VE.Bus to Ekrano GX", "Supplied isolated temperature sensor to battery negative"],
+      "specs": [
+        "PMP242305010 · 230 V model",
+        "3,000 VA · 2,400 W at 25°C",
+        "2,200 W at 40°C · 5,500 W peak",
+        "70 A AC charger · 32 A transfer",
+        "19 kg · IP22 steel enclosure",
+        "VE.Bus to Ekrano GX",
+        "Supplied isolated temperature sensor to battery negative"
+      ],
       "note": "Do not substitute the MultiPlus-II GX version when installing the Ekrano. IP22 and 95% non-condensing are not salt-spray ratings: mount in the dry, ventilated inner room behind the drip/salt shield, away from sea-facing openings and batteries. AC-out-2, remote on/off, programmable relay, auxiliary inputs, direct voltage-sense input and external-current-sensor input remain available but unused in this base design.",
       "sourceUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/technical-specifications-mp-ii-230v.html"
     },
@@ -149,7 +281,18 @@
       "kicker": "Single GX controller + 7-inch display",
       "kind": "control",
       "summary": "The system's only GX device combines a bright local touchscreen with coordinated DVCC control, collects inverter, solar and battery data, and sends monitoring and alarms to Victron VRM through the UniFi Express and Starlink.",
-      "specs": ["BPP900480100 · donor-funded", "7-inch · 1024 × 600 touchscreen", "187 × 124 × 29.8 mm without connectors", "8–70 VDC · supplied 3.15 A fused lead", "2 VE.Direct used · 1 spare", "VE.Bus used · VE.Can spare", "2 digital inputs used by balancer alarms", "DVCC · SVS/SCS from SmartShunt · STS from MultiPlus sensor", "Ethernet · Wi-Fi · VRM", "Front IP54 with steel bracket · rear IP21"],
+      "specs": [
+        "BPP900480100 · donor-funded",
+        "7-inch · 1024 × 600 touchscreen",
+        "187 × 124 × 29.8 mm without connectors",
+        "8–70 VDC · supplied 3.15 A fused lead",
+        "2 VE.Direct used · 1 spare",
+        "VE.Bus used · VE.Can spare",
+        "2 digital inputs used by balancer alarms",
+        "DVCC · SVS/SCS from SmartShunt · STS from MultiPlus sensor",
+        "Ethernet · Wi-Fi · VRM",
+        "Front IP54 with steel bracket · rear IP21"
+      ],
       "note": "Power directly from the protected 24 V bus on the system side of the SmartShunt—not from AC output or the low-voltage-controlled load branch—so it can report faults and recovery. Mount horizontally on the wall immediately above the junction box with the supplied steel bracket, sheltered from drips and salt air, and route all small leads around rather than across its front. Hardwire Ethernet to the UniFi LAN port. A separate Smart Battery Sense is intentionally omitted: Ekrano distributes the SmartShunt's measured battery voltage and current and the MultiPlus sensor's battery temperature to the SmartSolar through DVCC. The two native temperature inputs and two relays remain available for future sensors or an alarm buzzer.",
       "sourceUrl": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/technical-specifications.html"
     },
@@ -159,7 +302,13 @@
       "kicker": "Two protected 2S strings · permanently paralleled",
       "kind": "battery",
       "summary": "9.6 kWh nominal, operated to about 50% depth of discharge for longer GEL life.",
-      "specs": ["24 V nominal · 2S2P", "≈28.2 V absorption", "9.6 kWh nominal", "4.8 kWh conservative usable", "One string: 4.8 kWh nominal · 2.4 kWh usable"],
+      "specs": [
+        "24 V nominal · 2S2P",
+        "≈28.2 V absorption",
+        "9.6 kWh nominal",
+        "4.8 kWh conservative usable",
+        "One string: 4.8 kWh nominal · 2.4 kWh usable"
+      ],
       "note": "Fully charge and voltage-match all four units separately before assembly. Use equal-length positive and negative string leads. Both strings remain connected in normal service so both are charged and discharged together. A faulted string is removed only during a full shutdown, after meter diagnosis, by disconnecting and insulating both of that string's leads."
     },
     {
@@ -168,7 +317,12 @@
       "kicker": "12 V · 200 Ah GEL · string A",
       "kind": "battery",
       "summary": "Lower battery in the first 24 V series string.",
-      "specs": ["Matched EverExceed unit", "Preterminated 1/0 AWG tinned series link", "Insulated terminal boots", "MultiPlus temperature-sensor ring lug on negative terminal"],
+      "specs": [
+        "Matched EverExceed unit",
+        "Preterminated 1/0 AWG tinned series link",
+        "Insulated terminal boots",
+        "MultiPlus temperature-sensor ring lug on negative terminal"
+      ],
       "sourceUrl": "https://www.everexceed.com/es200-12g-gel-battery_p363.html"
     },
     {
@@ -177,7 +331,10 @@
       "kicker": "12 V · 200 Ah GEL · string A",
       "kind": "battery",
       "summary": "Upper battery in the first 24 V series string.",
-      "specs": ["150 A string fuse at positive", "Dedicated balancer + alarm"],
+      "specs": [
+        "150 A string fuse at positive",
+        "Dedicated balancer + alarm"
+      ],
       "sourceUrl": "https://www.everexceed.com/es200-12g-gel-battery_p363.html"
     },
     {
@@ -186,7 +343,11 @@
       "kicker": "12 V · 200 Ah GEL · string B",
       "kind": "battery",
       "summary": "Lower battery in the second 24 V series string.",
-      "specs": ["Matched EverExceed unit", "Preterminated 1/0 AWG tinned series link", "Insulated terminal boots"],
+      "specs": [
+        "Matched EverExceed unit",
+        "Preterminated 1/0 AWG tinned series link",
+        "Insulated terminal boots"
+      ],
       "sourceUrl": "https://www.everexceed.com/es200-12g-gel-battery_p363.html"
     },
     {
@@ -195,7 +356,10 @@
       "kicker": "12 V · 200 Ah GEL · string B",
       "kind": "battery",
       "summary": "Upper battery in the second 24 V series string.",
-      "specs": ["150 A string fuse at positive", "Dedicated balancer + alarm"],
+      "specs": [
+        "150 A string fuse at positive",
+        "Dedicated balancer + alarm"
+      ],
       "sourceUrl": "https://www.everexceed.com/es200-12g-gel-battery_p363.html"
     },
     {
@@ -204,7 +368,18 @@
       "kicker": "Inside compact box · tinned busbars",
       "kind": "protection",
       "summary": "Two covered Blue Sea 2104 600 A PowerBars distribute the whole-bank disconnect output and collect all system negatives; all negative current crosses the SmartShunt.",
-      "specs": ["Two 150 A Class T string fuses", "Blue Sea 6006 whole-bank ON / OFF disconnect", "Positive bus · 7 conductors: 3 large studs + 4 screw terminals", "Negative bus · 6 conductors: 3 large studs + 3 screw terminals", "2 × Blue Sea 2104 · four 3/8 in studs + four #8 screw terminals", "2 × Blue Sea 2708 insulating covers", "SmartShunt 500 A · supplied 1 A fused Vbatt+ lead", "1/0 AWG / 53.5 mm² Cu to MultiPlus", "Target ≤1.0 m one-way", "12 factory-crimped heavy-cable assemblies"],
+      "specs": [
+        "Two 150 A Class T string fuses",
+        "Blue Sea 6006 whole-bank ON / OFF disconnect",
+        "Positive bus · 7 conductors: 3 large studs + 4 screw terminals",
+        "Negative bus · 6 conductors: 3 large studs + 3 screw terminals",
+        "2 × Blue Sea 2104 · four 3/8 in studs + four #8 screw terminals",
+        "2 × Blue Sea 2708 insulating covers",
+        "SmartShunt 500 A · supplied 1 A fused Vbatt+ lead",
+        "1/0 AWG / 53.5 mm² Cu to MultiPlus",
+        "Target ≤1.0 m one-way",
+        "12 factory-crimped heavy-cable assemblies"
+      ],
       "note": "Put each Class T fuse as close as practicable to its string-positive terminal. Land both equal-length protected positive leads on the input stud of the single master disconnect and both equal-length negative leads on SmartShunt BATTERY MINUS. Nothing else connects on the BATTERY MINUS side. Land the SmartShunt's supplied fused Vbatt+ sense lead on the fourth small positive-bus terminal. The positive 2104 then uses three large studs and all four small terminals, leaving one large stud spare; the negative 2104 uses three of each size, leaving one of each spare. Import all heavy 1/0 AWG assemblies preterminated after a 1:1 layout."
     },
     {
@@ -213,7 +388,12 @@
       "kicker": "150 A · at Battery 2 positive",
       "kind": "protection",
       "summary": "A dedicated high-interrupt fuse protects the complete positive conductor from battery string A before the two strings join.",
-      "specs": ["150 A Class T fuse", "Blue Sea 5502 holder", "As close as practicable to Battery 2 positive", "1/0 AWG tinned-copper leads"],
+      "specs": [
+        "150 A Class T fuse",
+        "Blue Sea 5502 holder",
+        "As close as practicable to Battery 2 positive",
+        "1/0 AWG tinned-copper leads"
+      ],
       "note": "This holder is outside the junction box beside the batteries. It is a non-resettable exception because an equivalently compact 24 VDC breaker with the required battery-fault interrupt rating was not identified. Carry two spare fuses."
     },
     {
@@ -222,7 +402,12 @@
       "kicker": "150 A · at Battery 4 positive",
       "kind": "protection",
       "summary": "A dedicated high-interrupt fuse protects the complete positive conductor from battery string B before the two strings join.",
-      "specs": ["150 A Class T fuse", "Blue Sea 5502 holder", "As close as practicable to Battery 4 positive", "1/0 AWG tinned-copper leads"],
+      "specs": [
+        "150 A Class T fuse",
+        "Blue Sea 5502 holder",
+        "As close as practicable to Battery 4 positive",
+        "1/0 AWG tinned-copper leads"
+      ],
       "note": "This holder is outside the junction box beside the batteries. It is a non-resettable exception because an equivalently compact 24 VDC breaker with the required battery-fault interrupt rating was not identified. Carry two spare fuses."
     },
     {
@@ -231,7 +416,12 @@
       "kicker": "Blue Sea 2104 · covered 600 A PowerBar",
       "kind": "distribution",
       "summary": "The master-disconnect output lands here, then separate protected feeds leave for the MultiPlus, SmartSolar, services, Starlink and Ekrano sense/power circuits.",
-      "specs": ["4 × 3/8 in studs + 4 × #8 screws", "7 conductors used", "1 large stud spare", "Blue Sea 2708 insulating cover"],
+      "specs": [
+        "4 × 3/8 in studs + 4 × #8 screws",
+        "7 conductors used",
+        "1 large stud spare",
+        "Blue Sea 2708 insulating cover"
+      ],
       "note": "This is the sole whole-bank positive distribution point inside the junction box. The SmartShunt Vbatt+ sense lead uses its supplied inline fuse and one small terminal."
     },
     {
@@ -240,7 +430,13 @@
       "kicker": "Battery monitor · all negative current",
       "kind": "control",
       "summary": "Both battery-string negatives land on BATTERY MINUS; one short 1/0 AWG link from SYSTEM MINUS feeds the negative bus, so every charging and load ampere is measured.",
-      "specs": ["500 A / 50 mV shunt", "6.5–70 VDC", "VE.Direct to Ekrano GX", "Supplied fused Vbatt+ sense lead", "IP21"],
+      "specs": [
+        "500 A / 50 mV shunt",
+        "6.5–70 VDC",
+        "VE.Direct to Ekrano GX",
+        "Supplied fused Vbatt+ sense lead",
+        "IP21"
+      ],
       "note": "Nothing except the two battery-string negatives connects on the BATTERY MINUS side. All chargers, loads and chassis-related DC returns connect on the SYSTEM MINUS side through the negative bus.",
       "sourceUrl": "https://www.victronenergy.com/battery-monitors/smart-battery-shunt"
     },
@@ -250,7 +446,12 @@
       "kicker": "Blue Sea 2104 · system side of SmartShunt",
       "kind": "distribution",
       "summary": "This covered bus collects every charger and load return after current has crossed the SmartShunt.",
-      "specs": ["4 × 3/8 in studs + 4 × #8 screws", "6 conductors used", "1 stud + 1 screw spare", "Blue Sea 2708 insulating cover"],
+      "specs": [
+        "4 × 3/8 in studs + 4 × #8 screws",
+        "6 conductors used",
+        "1 stud + 1 screw spare",
+        "Blue Sea 2708 insulating cover"
+      ],
       "note": "The only connection from this bus toward the batteries is the short SYSTEM MINUS link through the SmartShunt. Never bypass the shunt with a direct battery-negative return."
     },
     {
@@ -259,7 +460,13 @@
       "kicker": "Whole bank ON / OFF · marine grade",
       "kind": "protection",
       "summary": "A compact Blue Sea 6006 switches the complete permanently paralleled bank together; there is no setting that can strand one string at a different state of charge.",
-      "specs": ["300 A continuous · 500 A for 5 min · 900 A for 30 s", "48 VDC maximum", "Single circuit ON / OFF", "Two tin-plated 3/8 in studs", "IP66 · ignition protected · UL 1107"],
+      "specs": [
+        "300 A continuous · 500 A for 5 min · 900 A for 30 s",
+        "48 VDC maximum",
+        "Single circuit ON / OFF",
+        "Two tin-plated 3/8 in studs",
+        "IP66 · ignition protected · UL 1107"
+      ],
       "note": "Mount through a fixed internal faceplate—not the hinged door—so the heavy 1/0 AWG cables never flex when the box opens. Stack the two identical Class-T-protected positive string lugs on the input stud only after confirming lug thickness, stud engagement and the manufacturer's torque. Stop AC loads and all charging before switching OFF. A faulted string is isolated during a full shutdown with a multimeter and insulated tools; the switch never selects one string.",
       "sourceUrl": "https://www.bluesea.com/products/6006"
     },
@@ -269,7 +476,12 @@
       "kicker": "One per independent 24 V string",
       "kind": "control",
       "summary": "Each two-battery string gets its own Victron balancer so the strings remain independently serviceable.",
-      "specs": ["Two units for two series pairs", "Resettable small-current breaker on each positive sense lead where the balancer manual permits; otherwise retain the specified inline fuse", "Alarm relay from each unit to one Ekrano digital input", "Monthly individual-voltage check"],
+      "specs": [
+        "Two units for two series pairs",
+        "Resettable small-current breaker on each positive sense lead where the balancer manual permits; otherwise retain the specified inline fuse",
+        "Alarm relay from each unit to one Ekrano digital input",
+        "Monthly individual-voltage check"
+      ],
       "sourceUrl": "https://www.victronenergy.com/batteries/battery-balancer"
     },
     {
@@ -278,7 +490,11 @@
       "kicker": "Backup only · existing",
       "kind": "generator",
       "summary": "Retained for cloudy spells and emergency charging; not part of normal daily operation.",
-      "specs": ["2,800 W rated", "3,200 W maximum", "230 V / 50 Hz nominal"],
+      "specs": [
+        "2,800 W rated",
+        "3,200 W maximum",
+        "230 V / 50 Hz nominal"
+      ],
       "note": "Acceptance of a non-inverter generator is not guaranteed. Test voltage, frequency, earth arrangement and charger acceptance before relying on it.",
       "sourceUrl": "https://www.husqvarna.com/au/generators/g3200p/"
     },
@@ -288,7 +504,12 @@
       "kicker": "Detachable three-core AC input cable",
       "kind": "protection",
       "summary": "One flexible three-core lead runs directly from the generator receptacle to the MultiPlus AC-in terminals; there is no fixed wall inlet box.",
-      "specs": ["Generator-end male plug selected after inspecting the actual G3200P receptacle", "MultiPlus end hardwired through strain relief", "AC input-current limit commissioned to the generator, plug and cable rating", "Estimated incremental hardware ≈$45"],
+      "specs": [
+        "Generator-end male plug selected after inspecting the actual G3200P receptacle",
+        "MultiPlus end hardwired through strain relief",
+        "AC input-current limit commissioned to the generator, plug and cable rating",
+        "Estimated incremental hardware ≈$45"
+      ],
       "note": "The G3200P model is sold with different receptacles in different markets, and the available Fiji product image does not prove a Type I outlet. Verify the actual generator before buying the plug. Never make a male-to-male lead. The generator's own breaker may provide input-cable protection only when its rating does not exceed the selected cable and plug ampacity.",
       "sourceUrl": "https://www.vinodpatel.com.fj/husqvarna-generator-g3200p-3-2kva-1-phase-petrol"
     },
@@ -298,7 +519,12 @@
       "kicker": "Mounted enclosure · 230 V / 50 Hz",
       "kind": "protection",
       "summary": "Small plywood-mounted enclosure with a two-pole 10 A / 30 mA Type A RCBO feeding one flexible tool lead; no receptacle is fixed to the building wall.",
-      "specs": ["2-pole 10 A / 30 mA Type A RCBO", "MultiPlus AC-out L / N / PE hardwired", "Cable gland + strain relief", "RCD trip + polarity test"],
+      "specs": [
+        "2-pole 10 A / 30 mA Type A RCBO",
+        "MultiPlus AC-out L / N / PE hardwired",
+        "Cable gland + strain relief",
+        "RCD trip + polarity test"
+      ],
       "note": "The RCBO and continuous protective-earth path remain required even though the outlet is movable. A qualified electrical person must verify neutral-earth behavior in inverter and generator/bypass modes."
     },
     {
@@ -307,7 +533,14 @@
       "kicker": "5 m Type I workshop lead · one tool",
       "kind": "loadAc",
       "summary": "One locally purchased Australian/Fiji Type I workshop extension lead becomes the movable tool outlet, avoiding any receptacle fixed to metal or thatched walls.",
-      "specs": ["HPM 5 m workshop extension lead", "10 A · 240 V · 3-core 1.0 mm² · AS/NZS compliant", "Molded Type I female trailing socket", "Circular saw ≈1,800 W", "Planer ≈900 W", "Drill / jigsaw ≈700 W"],
+      "specs": [
+        "HPM 5 m workshop extension lead",
+        "10 A · 240 V · 3-core 1.0 mm² · AS/NZS compliant",
+        "Molded Type I female trailing socket",
+        "Circular saw ≈1,800 W",
+        "Planer ≈900 W",
+        "Drill / jigsaw ≈700 W"
+      ],
       "note": "A qualified electrical person should remove only the source plug and terminate that source end through the 10 A RCBO and strain relief, leaving the molded female socket intact. Fully uncoil the lead before tool use and keep it dry. No power boards, daisy chains, kettle or second tool.",
       "sourceUrl": "https://bunningspacific.com.fj/collections/extension-cords-1"
     },
@@ -317,9 +550,48 @@
       "kicker": "Resettable high-interrupt DC center",
       "kind": "distribution",
       "summary": "Seven resettable MidNite Solar breakers protect the SmartSolar output and every low-current positive circuit; black load conductors return unswitched and unbroken to a separate negative bus.",
-      "specs": ["MNEDC100 · 100 A SmartSolar output", "MNEPV20 · 20 A service feeder", "MNEPV5 · 5 A Starlink", "MNEPV2 · 2 A UniFi converter", "MNEPV15 · 15 A six-port USB panel", "2 × MNEPV1 · 1 A indoor / outdoor lights", "150 VDC · 10 kA AIC · resettable", "Blue Sea 2314 return bus · 6 used landings + 1 spare"],
-      "note": "Only positive conductors pass through breakers and switches. The main-negative feeder, UniFi, USB, both lights and the tiny switch-indicator return use six of the seven landing positions on the covered Blue Sea 2314 MiniBus (two studs plus five screws), leaving one spare. Starlink returns directly to the main negative bus. Each low-current positive/negative pair shares one gland and separates only inside the box.",
+      "specs": [
+        "MNEDC100 · 100 A SmartSolar output",
+        "MNEPV20 · 20 A service feeder",
+        "MNEPV5 · 5 A Starlink",
+        "MNEPV2 · 2 A UniFi converter",
+        "MNEPV15 · 15 A six-port USB panel",
+        "2 × MNEPV1 · 1 A indoor / outdoor lights",
+        "Six-breaker service bank · 3 inputs / 6 protected outputs",
+        "150 VDC · 10 kA AIC · resettable",
+        "Blue Sea 2314 return bus · 6 used landings + 1 spare"
+      ],
+      "note": "The six-breaker service bank correctly has three incoming positive conductors and six outgoing protected conductors. The 20 A service feeder and 5 A Starlink breaker each have an independent input and output; one short common-input comb then supplies the four adjacent UniFi, USB, inside-light and outside-light breakers. This is why the top and bottom connection counts do not match one-for-one. Only positive conductors pass through breakers and switches. The main-negative feeder, UniFi, USB, both lights and the tiny switch-indicator return use six of the seven landing positions on the covered Blue Sea 2314 MiniBus, leaving one spare. Starlink returns directly to the main negative bus. Each low-current positive/negative pair shares one gland and separates only inside the box.",
       "sourceUrl": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=759&sortOrder=1"
+    },
+    {
+      "id": "mpptFuse",
+      "title": "SmartSolar 100 A DC breaker",
+      "kicker": "MidNite MNEDC100 · resettable",
+      "kind": "protection",
+      "summary": "The dedicated high-interrupt breaker protects and isolates the SmartSolar battery-positive conductor between the main positive bus and MPPT gland.",
+      "specs": [
+        "100 A DC",
+        "150 VDC maximum",
+        "10 kA interrupt rating",
+        "Resettable and manually isolating",
+        "25 mm² branch conductor"
+      ],
+      "note": "This is the large MPPT branch breaker shown separately from the six-breaker low-current service bank. Its two selectable cylindrical ports are the positive-bus input and SmartSolar output."
+    },
+    {
+      "id": "ekranoFuse",
+      "title": "Ekrano GX 3.15 A fuse",
+      "kicker": "Victron factory-specified protected lead",
+      "kind": "protection",
+      "summary": "The small inline holder protects the always-on Ekrano GX positive supply so monitoring remains available while other loads are switched off.",
+      "specs": [
+        "3.15 A fuse",
+        "Supplied or specified with Ekrano GX power lead",
+        "Always-on system-side positive connection",
+        "Individually selectable input and output ports"
+      ],
+      "note": "This remains a fuse because it is part of Victron's specified low-current equipment lead; carry labeled spares with the system."
     },
     {
       "id": "essentialLoads",
@@ -327,7 +599,11 @@
       "kicker": "All services on nominal 24 V branches",
       "kind": "loadDc",
       "summary": "Starlink Mini and UniFi share one exterior master switch while remaining on separately breakered 24 V poles; indoor and outdoor lights have separate source-side switches; general USB charging remains unswitched.",
-      "specs": ["≈2.0 kWh/day modeled", "Direct nominal-24 V distribution", "Inverter may remain off"],
+      "specs": [
+        "≈2.0 kWh/day modeled",
+        "Direct nominal-24 V distribution",
+        "Inverter may remain off"
+      ],
       "note": "Starlink hardware itself is outside the project purchase scope."
     },
     {
@@ -336,7 +612,14 @@
       "kicker": "Existing / outside purchase scope",
       "kind": "loadDc",
       "summary": "Primary continuous load, supplied at nominal 24 V through one breakered and switched branch and the single OEM 15 m white DC power cable used in the PG approach.",
-      "specs": ["25–40 W typical", "60 W maximum", "12–48 V input", "5 A resettable DC breaker at nominal 24 V", "One 15 m male-to-male OEM DC cable", "5.5 × 2.1 mm center-positive bulkhead interface"],
+      "specs": [
+        "25–40 W typical",
+        "60 W maximum",
+        "12–48 V input",
+        "5 A resettable DC breaker at nominal 24 V",
+        "One 15 m male-to-male OEM DC cable",
+        "5.5 × 2.1 mm center-positive bulkhead interface"
+      ],
       "note": "Use the complete unspliced Starlink cable from the junction-box bulkhead jack to the Mini. At 24 V its current and voltage drop are roughly half the 12 V case, which is materially better for the long run and startup margin.",
       "sourceUrl": "https://www.starlink.com/public-files/specification_sheet_mini.pdf"
     },
@@ -346,7 +629,12 @@
       "kicker": "Purchased · gateway + Wi-Fi",
       "kind": "loadDc",
       "summary": "Starlink Ethernet connects directly to the WAN port; this one purchased device provides the cloud gateway, UniFi Network controller and Wi-Fi 6 coverage.",
-      "specs": ["USB-C · 5 V / 3 A", "10 W maximum", "Wi-Fi 6 · 1 WAN + 1 LAN", "−10 to 45°C · 95% non-condensing"],
+      "specs": [
+        "USB-C · 5 V / 3 A",
+        "10 W maximum",
+        "Wi-Fi 6 · 1 WAN + 1 LAN",
+        "−10 to 45°C · 95% non-condensing"
+      ],
       "note": "Power it from the dedicated potted 8–35 V-to-5 V converter on the INTERNET switch, not from the general charging station. Preconfigure it, export a backup and print recovery instructions before travel.",
       "sourceUrl": "https://techspecs.ui.com/unifi/cloud-gateways/ux"
     },
@@ -356,7 +644,13 @@
       "kicker": "Powerwerx USBbuddy2 · potted 8–35 V to 5 V",
       "kind": "conversion",
       "summary": "A compact potted converter gives UniFi Express its own 5 V / 3 A supply so the INTERNET rocker can shut down the gateway and Starlink together without disabling general USB charging.",
-      "specs": ["8–35 VDC input", "5 V · 3 A maximum", "2 A breakered nominal-24 V input", "Potted against moisture, shock and vibration", "Short high-quality USB-A to USB-C lead"],
+      "specs": [
+        "8–35 VDC input",
+        "5 V · 3 A maximum",
+        "2 A breakered nominal-24 V input",
+        "Potted against moisture, shock and vibration",
+        "Short high-quality USB-A to USB-C lead"
+      ],
       "note": "Bench-test cold boot and repeated power cycling with the exact UniFi Express before travel; USB-A current advertisement varies between chargers even when the headline amperage is sufficient.",
       "sourceUrl": "https://powerwerx.com/usbbuddy2-powerpole-usb-device-charger"
     },
@@ -366,7 +660,15 @@
       "kicker": "3 × Scanstrut TILE · direct 24 V",
       "kind": "loadDc",
       "summary": "Three hardwired marine charging modules provide six reliable ports without cigarette-lighter contacts and remain available while the internet system is off.",
-      "specs": ["1 × SC-TILE-20 · dual USB-C", "2 × SC-TILE-10 · USB-C + USB-A", "4 × USB-C PD + 2 × USB-A total", "10–32 VDC direct input", "Up to 60 W per module at 24 V", "One 15 A branch pair through the junction gland", "Local 3 × 10 A resettable module breakers"],
+      "specs": [
+        "1 × SC-TILE-20 · dual USB-C",
+        "2 × SC-TILE-10 · USB-C + USB-A",
+        "4 × USB-C PD + 2 × USB-A total",
+        "10–32 VDC direct input",
+        "Up to 60 W per module at 24 V",
+        "One 15 A branch pair through the junction gland",
+        "Local 3 × 10 A resettable module breakers"
+      ],
       "note": "Mount all three interior-only modules in one small splash-sheltered faceplate/back box. Split the single 24 V pair locally at that panel. Scanstrut specifies conformal-coated electronics but an interior installation; keep it out of direct spray and provide strain relief.",
       "sourceUrl": "https://www.scanstrut.com/marine/power/tile"
     },
@@ -376,7 +678,14 @@
       "kicker": "Three sealed Contura rockers",
       "kind": "control",
       "summary": "A three-position panel passes through the fixed left sidewall of the junction box so routine controls stay accessible without opening the enclosure and without a moving door harness.",
-      "specs": ["INTERNET · DPST OFF–ON · separate Starlink and UniFi 24 V positives", "INSIDE · SPST OFF–ON · indoor-light positive", "OUTSIDE · SPST OFF–ON · outdoor-light positive", "Blue Sea 8287 + 2 × 8282 in 8259 frame", "Three embedded indicators · one shared small negative", "Continuous closed-cell perimeter gasket + sealed fasteners"],
+      "specs": [
+        "INTERNET · DPST OFF–ON · separate Starlink and UniFi 24 V positives",
+        "INSIDE · SPST OFF–ON · indoor-light positive",
+        "OUTSIDE · SPST OFF–ON · outdoor-light positive",
+        "Blue Sea 8287 + 2 × 8282 in 8259 frame",
+        "Three embedded indicators · one shared small negative",
+        "Continuous closed-cell perimeter gasket + sealed fasteners"
+      ],
       "note": "The double-pole internet switch keeps the separately breakered Starlink and UniFi branches electrically isolated while operating them together. Each light has one source-side positive switch and one two-core run to its fixture; there is no separate switch cable along the building. All load negatives bypass the rockers.",
       "sourceUrl": "https://www.bluesea.com/products/8287/Contura_Switch_DPST_Black_-_OFF-ON"
     },
@@ -386,7 +695,14 @@
       "kicker": "QHLightlux 12–28 V · Amazon primary",
       "kind": "loadDc",
       "summary": "The same five-inch utility fixture used outside is suspended from a short interior bracket with its warm lens aimed downward.",
-      "specs": ["3000 K warm white", "900 lm", "12–28 VDC · 0.33 A at 24 V", "IP67 die-cast aluminum housing", "1 A breakered source-side switch", "Two series silicon diodes for charge-voltage margin"],
+      "specs": [
+        "3000 K warm white",
+        "900 lm",
+        "12–28 VDC · 0.33 A at 24 V",
+        "IP67 die-cast aluminum housing",
+        "1 A breakered source-side switch",
+        "Two series silicon diodes for charge-voltage margin"
+      ],
       "note": "Amazon primary recommendation, ASIN B0F1V59NXC. The battery bank can charge to 28.2–28.8 V, slightly above the light's stated 28 V maximum, so install two 3 A silicon rectifier diodes in series with the positive branch to retain approximately 1.2–1.6 V of margin. Suspend from a short dry interior bracket with strain relief.",
       "sourceUrl": "https://www.amazon.com/dp/B0F1V59NXC"
     },
@@ -396,7 +712,15 @@
       "kicker": "QHLightlux 12/24 V · Amazon primary",
       "kind": "loadDc",
       "summary": "A compact down-angle warm-white fixture provides useful exterior area light at roughly one eighth the price of the previous dual-color Hella recommendation.",
-      "specs": ["3000 K warm white", "900 lm", "12–28 VDC · 0.33 A at 24 V", "IP67 die-cast aluminum housing", "Simple red/black two-wire input", "1 A breakered source-side switch", "Two series silicon diodes for charge-voltage margin"],
+      "specs": [
+        "3000 K warm white",
+        "900 lm",
+        "12–28 VDC · 0.33 A at 24 V",
+        "IP67 die-cast aluminum housing",
+        "Simple red/black two-wire input",
+        "1 A breakered source-side switch",
+        "Two series silicon diodes for charge-voltage margin"
+      ],
       "note": "Amazon primary recommendation, ASIN B0F1V59NXC. The battery bank can charge to 28.2–28.8 V, slightly above the light's stated 28 V maximum, so install two 3 A silicon rectifier diodes in series with the positive branch. Mount under an eave, bed the cable entry, replace supplied fasteners with 316 stainless, and inspect for corrosion because IP67 does not establish salt-spray durability.",
       "sourceUrl": "https://www.amazon.com/dp/B0F1V59NXC"
     },
@@ -406,7 +730,14 @@
       "kicker": "14.6 × 10.4 × 5.9 in target enclosure",
       "kind": "structure",
       "summary": "A compact 370 × 265 × 150 mm enclosure protects a fixed-faceplate whole-bank disconnect, SmartShunt, covered busbars, resettable DC breakers and prewired low-current connections. It is only 20 × 18 mm larger than the PG enclosure, providing a device-free bottom gland gutter and terminal-radius-aware service clearances. A sealed three-rocker control panel passes through its fixed left sidewall; the Ekrano mounts separately just above it.",
-      "specs": ["Exterior about 14.6 × 10.4 × 5.9 in", "Flat hinged door + removable backplate", "Master disconnect on fixed internal faceplate", "Three accessible fixed-sidewall rockers", "Power electronics and Ekrano remain on wall", "Fits inside either iM2875 with padding"],
+      "specs": [
+        "Exterior about 14.6 × 10.4 × 5.9 in",
+        "Flat hinged door + removable backplate",
+        "Master disconnect on fixed internal faceplate",
+        "Three accessible fixed-sidewall rockers",
+        "Power electronics and Ekrano remain on wall",
+        "Fits inside either iM2875 with padding"
+      ],
       "note": "Keep the MultiPlus, SmartSolar, Ekrano and both balancers outside this sealed box. Put the two Class T string fuses at the battery positives. All 14 cable glands plus the Starlink bulkhead jack are on the bottom; the master disconnect stays fixed because it carries three 1/0 AWG cable lugs. Each UniFi, USB and light pair enters one gland and separates only inside. Mount the 86.4 × 58.4 mm 8259 frame through the otherwise unused left sidewall, with the three switch positions stacked vertically; gasket the frame perimeter and seal its fasteners. Use factory-crimped tinned lugs, adhesive heat-shrink, noncorroding hardware and bottom cable entries; prove component depth, terminal access, route length and the 14.4 mm cable bend envelope at 1:1 scale before ordering cables or drilling the purchased enclosure.",
       "sourceUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html"
     },
@@ -416,7 +747,13 @@
       "kicker": "Site safety system",
       "kind": "earth",
       "summary": "Array frames, inverter chassis, AC-output enclosure and exposed metalwork bond to the site earth system.",
-      "specs": ["Copper/tinned conductor", "Corrosion-protected joints", "Blue Sea 2128 · 2 studs + 6 screws", "6 bonds used · 1 stud + 1 screw spare", "RCD and earth tests at commissioning"]
+      "specs": [
+        "Copper/tinned conductor",
+        "Corrosion-protected joints",
+        "Blue Sea 2128 · 2 studs + 6 screws",
+        "6 bonds used · 1 stud + 1 screw spare",
+        "RCD and earth tests at commissioning"
+      ]
     }
   ],
   "diagram": {
@@ -424,146 +761,1502 @@
     "views": {
       "overview": {
         "label": "Overview",
-        "canvas": { "width": 1740, "height": 830 },
+        "canvas": {
+          "width": 1740,
+          "height": 830
+        },
         "regions": [
-          { "id": "junctionBox", "label": "Tinted · inside / through compact junction box", "memberIds": ["batterySelector", "mainDc", "mounting"] }
+          {
+            "id": "junctionBox",
+            "label": "Tinted · inside / through compact junction box",
+            "memberIds": [
+              "batterySelector",
+              "mainDc",
+              "mounting"
+            ]
+          }
         ],
         "nodes": [
-          { "id": "array", "x": 40, "y": 70 },
-          { "id": "pvSafety", "x": 380, "y": 70 },
-          { "id": "solarController", "x": 720, "y": 70 },
-          { "id": "inverter", "x": 720, "y": 340, "featured": true },
-          { "id": "acBoard", "x": 1060, "y": 70 },
-          { "id": "toolOutlet", "x": 1400, "y": 70 },
-          { "id": "generator", "x": 40, "y": 340 },
-          { "id": "generatorInput", "x": 380, "y": 340 },
-          { "id": "systemMonitor", "x": 1060, "y": 340, "featured": true },
-          { "id": "batteryBank", "x": 40, "y": 650 },
-          { "id": "batterySelector", "x": 380, "y": 650 },
-          { "id": "mainDc", "x": 720, "y": 650 },
-          { "id": "essentialLoads", "x": 1460, "y": 650 },
-          { "id": "mounting", "x": 1460, "y": 340 },
-          { "id": "earth", "x": 1460, "y": 500 }
+          {
+            "id": "array",
+            "x": 40,
+            "y": 70
+          },
+          {
+            "id": "pvSafety",
+            "x": 380,
+            "y": 70
+          },
+          {
+            "id": "solarController",
+            "x": 720,
+            "y": 70
+          },
+          {
+            "id": "inverter",
+            "x": 720,
+            "y": 340,
+            "featured": true
+          },
+          {
+            "id": "acBoard",
+            "x": 1060,
+            "y": 70
+          },
+          {
+            "id": "toolOutlet",
+            "x": 1400,
+            "y": 70
+          },
+          {
+            "id": "generator",
+            "x": 40,
+            "y": 340
+          },
+          {
+            "id": "generatorInput",
+            "x": 380,
+            "y": 340
+          },
+          {
+            "id": "systemMonitor",
+            "x": 1060,
+            "y": 340,
+            "featured": true
+          },
+          {
+            "id": "batteryBank",
+            "x": 40,
+            "y": 650
+          },
+          {
+            "id": "batterySelector",
+            "x": 380,
+            "y": 650
+          },
+          {
+            "id": "mainDc",
+            "x": 720,
+            "y": 650
+          },
+          {
+            "id": "essentialLoads",
+            "x": 1460,
+            "y": 650
+          },
+          {
+            "id": "mounting",
+            "x": 1460,
+            "y": 340
+          },
+          {
+            "id": "earth",
+            "x": 1460,
+            "y": 500
+          }
         ],
         "edges": [
-          { "id": "ov-pv-1", "from": "array", "to": "pvSafety", "type": "solar", "label": "2S2P · 2 runs", "labelAt": { "x": 323, "y": 35 } },
-          { "id": "ov-pv-2", "from": "pvSafety", "to": "solarController", "type": "solar", "label": "1 combined pair · 40 A + SPD", "labelAt": { "x": 663, "y": 35 } },
-          { "id": "ov-solar-bus", "from": "solarController", "to": "mainDc", "type": "battery", "label": "100 A resettable breaker" },
-          { "id": "ov-ac-1", "from": "inverter", "to": "acBoard", "type": "ac", "label": "AC-out · L / N / PE", "labelAt": { "x": 1100, "y": 200 } },
-          { "id": "ov-ac-2", "from": "acBoard", "to": "toolOutlet", "type": "ac", "label": "10 A RCBO · 5 m Type I lead" },
-          { "id": "ov-gen-1", "from": "generator", "to": "generatorInput", "type": "generator", "label": "backup" },
-          { "id": "ov-gen-2", "from": "generatorInput", "to": "inverter", "type": "generator", "label": "AC input" },
-          { "id": "ov-bat-pos", "from": "batteryBank", "to": "batterySelector", "type": "battery", "label": "2 × 150 A strings", "labelAt": { "x": 323, "y": 610 } },
-          { "id": "ov-selector", "from": "batterySelector", "to": "mainDc", "type": "battery", "label": "whole bank · ON / OFF", "labelAt": { "x": 600, "y": 610 } },
-          { "id": "ov-bat-neg", "from": "batteryBank", "to": "mainDc", "type": "battery", "label": "2 negatives · SmartShunt", "waypoints": [{ "x": 190, "y": 800 }, { "x": 840, "y": 800 }], "labelAt": { "x": 490, "y": 800 } },
-          { "id": "ov-bat-2", "from": "mainDc", "to": "inverter", "type": "battery", "label": "1/0 AWG · bidirectional" },
-          { "id": "ov-starlink-24", "from": "mainDc", "to": "essentialLoads", "type": "battery", "label": "Starlink · switched 24 V / 5 A", "waypoints": [{ "x": 840, "y": 850 }, { "x": 1573, "y": 850 }], "labelAt": { "x": 1220, "y": 850 } },
-          { "id": "ov-services-24", "from": "mainDc", "to": "essentialLoads", "type": "battery", "label": "20 A protected 24 V services", "labelAt": { "x": 1210, "y": 610 } },
-          { "id": "ov-gx-vebus", "from": "inverter", "to": "systemMonitor", "type": "data", "label": "VE.Bus · MultiPlus · STS" },
-          { "id": "ov-gx-pv", "from": "solarController", "to": "systemMonitor", "type": "data", "label": "VE.Direct · MPPT · DVCC" },
-          { "id": "ov-gx-shunt", "from": "mainDc", "to": "systemMonitor", "type": "data", "label": "SmartShunt · VE.Direct · SVS/SCS", "waypoints": [{ "x": 815, "y": 590 }, { "x": 960, "y": 590 }, { "x": 960, "y": 470 }, { "x": 1040, "y": 410 }], "labelAt": { "x": 880, "y": 590 } },
-          { "id": "ov-battery-temperature", "from": "batteryBank", "to": "inverter", "type": "control", "label": "supplied battery-temperature sensor", "waypoints": [{ "x": 190, "y": 575 }, { "x": 690, "y": 575 }, { "x": 690, "y": 430 }], "labelAt": { "x": 430, "y": 575 } },
-          { "id": "ov-gx-power", "from": "mainDc", "to": "systemMonitor", "type": "battery", "label": "24 V · 3.15 A fused", "portOffset": 18, "waypoints": [{ "x": 945, "y": 620 }, { "x": 1240, "y": 620 }, { "x": 1240, "y": 500 }], "labelAt": { "x": 1240, "y": 540 } },
-          { "id": "ov-gx-network", "from": "essentialLoads", "to": "systemMonitor", "type": "data", "label": "UniFi · Starlink · VRM" },
-          { "id": "ov-mount", "from": "mounting", "to": "systemMonitor", "type": "control", "label": "IP54 face · dry rear" },
-          { "id": "ov-earth-1", "from": "earth", "to": "acBoard", "type": "earth", "label": "PE" },
-          { "id": "ov-earth-2", "from": "earth", "to": "inverter", "type": "earth", "label": "bond" },
-          { "id": "ov-earth-gx", "from": "earth", "to": "systemMonitor", "type": "earth", "label": "GX protective bond" }
+          {
+            "id": "ov-pv-1",
+            "from": "array",
+            "to": "pvSafety",
+            "type": "solar",
+            "label": "2S2P · 2 runs",
+            "labelAt": {
+              "x": 323,
+              "y": 35
+            }
+          },
+          {
+            "id": "ov-pv-2",
+            "from": "pvSafety",
+            "to": "solarController",
+            "type": "solar",
+            "label": "1 combined pair · 40 A + SPD",
+            "labelAt": {
+              "x": 663,
+              "y": 35
+            }
+          },
+          {
+            "id": "ov-solar-bus",
+            "from": "solarController",
+            "to": "mainDc",
+            "type": "battery",
+            "label": "100 A resettable breaker"
+          },
+          {
+            "id": "ov-ac-1",
+            "from": "inverter",
+            "to": "acBoard",
+            "type": "ac",
+            "label": "AC-out · L / N / PE",
+            "labelAt": {
+              "x": 1100,
+              "y": 200
+            }
+          },
+          {
+            "id": "ov-ac-2",
+            "from": "acBoard",
+            "to": "toolOutlet",
+            "type": "ac",
+            "label": "10 A RCBO · 5 m Type I lead"
+          },
+          {
+            "id": "ov-gen-1",
+            "from": "generator",
+            "to": "generatorInput",
+            "type": "generator",
+            "label": "backup"
+          },
+          {
+            "id": "ov-gen-2",
+            "from": "generatorInput",
+            "to": "inverter",
+            "type": "generator",
+            "label": "AC input"
+          },
+          {
+            "id": "ov-bat-pos",
+            "from": "batteryBank",
+            "to": "batterySelector",
+            "type": "battery",
+            "label": "2 × 150 A strings",
+            "labelAt": {
+              "x": 323,
+              "y": 610
+            }
+          },
+          {
+            "id": "ov-selector",
+            "from": "batterySelector",
+            "to": "mainDc",
+            "type": "battery",
+            "label": "whole bank · ON / OFF",
+            "labelAt": {
+              "x": 600,
+              "y": 610
+            }
+          },
+          {
+            "id": "ov-bat-neg",
+            "from": "batteryBank",
+            "to": "mainDc",
+            "type": "battery",
+            "label": "2 negatives · SmartShunt",
+            "waypoints": [
+              {
+                "x": 190,
+                "y": 800
+              },
+              {
+                "x": 840,
+                "y": 800
+              }
+            ],
+            "labelAt": {
+              "x": 490,
+              "y": 800
+            }
+          },
+          {
+            "id": "ov-bat-2",
+            "from": "mainDc",
+            "to": "inverter",
+            "type": "battery",
+            "label": "1/0 AWG · bidirectional"
+          },
+          {
+            "id": "ov-starlink-24",
+            "from": "mainDc",
+            "to": "essentialLoads",
+            "type": "battery",
+            "label": "Starlink · switched 24 V / 5 A",
+            "waypoints": [
+              {
+                "x": 840,
+                "y": 850
+              },
+              {
+                "x": 1573,
+                "y": 850
+              }
+            ],
+            "labelAt": {
+              "x": 1220,
+              "y": 850
+            }
+          },
+          {
+            "id": "ov-services-24",
+            "from": "mainDc",
+            "to": "essentialLoads",
+            "type": "battery",
+            "label": "20 A protected 24 V services",
+            "labelAt": {
+              "x": 1210,
+              "y": 610
+            }
+          },
+          {
+            "id": "ov-gx-vebus",
+            "from": "inverter",
+            "to": "systemMonitor",
+            "type": "data",
+            "label": "VE.Bus · MultiPlus · STS"
+          },
+          {
+            "id": "ov-gx-pv",
+            "from": "solarController",
+            "to": "systemMonitor",
+            "type": "data",
+            "label": "VE.Direct · MPPT · DVCC"
+          },
+          {
+            "id": "ov-gx-shunt",
+            "from": "mainDc",
+            "to": "systemMonitor",
+            "type": "data",
+            "label": "SmartShunt · VE.Direct · SVS/SCS",
+            "waypoints": [
+              {
+                "x": 815,
+                "y": 590
+              },
+              {
+                "x": 960,
+                "y": 590
+              },
+              {
+                "x": 960,
+                "y": 470
+              },
+              {
+                "x": 1040,
+                "y": 410
+              }
+            ],
+            "labelAt": {
+              "x": 880,
+              "y": 590
+            }
+          },
+          {
+            "id": "ov-battery-temperature",
+            "from": "batteryBank",
+            "to": "inverter",
+            "type": "control",
+            "label": "supplied battery-temperature sensor",
+            "waypoints": [
+              {
+                "x": 190,
+                "y": 575
+              },
+              {
+                "x": 690,
+                "y": 575
+              },
+              {
+                "x": 690,
+                "y": 430
+              }
+            ],
+            "labelAt": {
+              "x": 430,
+              "y": 575
+            }
+          },
+          {
+            "id": "ov-gx-power",
+            "from": "mainDc",
+            "to": "systemMonitor",
+            "type": "battery",
+            "label": "24 V · 3.15 A fused",
+            "portOffset": 18,
+            "waypoints": [
+              {
+                "x": 945,
+                "y": 620
+              },
+              {
+                "x": 1240,
+                "y": 620
+              },
+              {
+                "x": 1240,
+                "y": 500
+              }
+            ],
+            "labelAt": {
+              "x": 1240,
+              "y": 540
+            }
+          },
+          {
+            "id": "ov-gx-network",
+            "from": "essentialLoads",
+            "to": "systemMonitor",
+            "type": "data",
+            "label": "UniFi · Starlink · VRM"
+          },
+          {
+            "id": "ov-mount",
+            "from": "mounting",
+            "to": "systemMonitor",
+            "type": "control",
+            "label": "IP54 face · dry rear"
+          },
+          {
+            "id": "ov-earth-1",
+            "from": "earth",
+            "to": "acBoard",
+            "type": "earth",
+            "label": "PE"
+          },
+          {
+            "id": "ov-earth-2",
+            "from": "earth",
+            "to": "inverter",
+            "type": "earth",
+            "label": "bond"
+          },
+          {
+            "id": "ov-earth-gx",
+            "from": "earth",
+            "to": "systemMonitor",
+            "type": "earth",
+            "label": "GX protective bond"
+          }
         ]
       },
       "detail": {
         "label": "Detailed wiring",
-        "canvas": { "width": 2700, "height": 1560 },
+        "canvas": {
+          "width": 3456,
+          "height": 2059
+        },
         "regions": [
-          { "id": "junctionBox", "label": "Tinted · inside / through compact junction box", "memberIds": ["batterySelector", "positiveBus", "smartShunt", "negativeBus", "fuseBlock", "loadSwitches", "mounting"] }
+          {
+            "id": "junctionBox",
+            "label": "Tinted · inside / through compact junction box",
+            "memberIds": [
+              "batterySelector",
+              "positiveBus",
+              "smartShunt",
+              "negativeBus",
+              "fuseBlock",
+              "loadSwitches",
+              "mounting"
+            ]
+          }
         ],
         "nodes": [
-          { "id": "panel1", "x": 40, "y": 70 },
-          { "id": "panel2", "x": 310, "y": 70 },
-          { "id": "panel3", "x": 40, "y": 320 },
-          { "id": "panel4", "x": 310, "y": 320 },
-          { "id": "pvSafety", "x": 700, "y": 195 },
-          { "id": "solarController", "x": 1050, "y": 195 },
-          { "id": "inverter", "x": 1300, "y": 480, "featured": true },
-          { "id": "systemMonitor", "x": 2370, "y": 220, "featured": true },
-          { "id": "acBoard", "x": 1610, "y": 480 },
-          { "id": "toolOutlet", "x": 1920, "y": 480 },
-          { "id": "generator", "x": 650, "y": 480 },
-          { "id": "generatorInput", "x": 960, "y": 480 },
-          { "id": "battery1", "x": 40, "y": 780 },
-          { "id": "battery2", "x": 310, "y": 780 },
-          { "id": "battery3", "x": 40, "y": 1190 },
-          { "id": "battery4", "x": 310, "y": 1190 },
-          { "id": "balancers", "x": 650, "y": 1390 },
-          { "id": "classTFuseA", "x": 590, "y": 780 },
-          { "id": "classTFuseB", "x": 590, "y": 1190 },
-          { "id": "batterySelector", "x": 860, "y": 780 },
-          { "id": "positiveBus", "x": 1130, "y": 780 },
-          { "id": "smartShunt", "x": 860, "y": 1040 },
-          { "id": "negativeBus", "x": 1130, "y": 1040 },
-          { "id": "fuseBlock", "x": 1430, "y": 780 },
-          { "id": "loadSwitches", "x": 1990, "y": 780 },
-          { "id": "starlink", "x": 970, "y": 1320 },
-          { "id": "unifiPower", "x": 1290, "y": 1320 },
-          { "id": "router", "x": 1610, "y": 1320 },
-          { "id": "usb", "x": 2310, "y": 780 },
-          { "id": "indoorLight", "x": 1990, "y": 1190 },
-          { "id": "outdoorLight", "x": 2310, "y": 1190 },
-          { "id": "mounting", "x": 2370, "y": 430 },
-          { "id": "earth", "x": 2370, "y": 610 }
+          {
+            "id": "panel1",
+            "x": 51,
+            "y": 92
+          },
+          {
+            "id": "panel2",
+            "x": 397,
+            "y": 92
+          },
+          {
+            "id": "panel3",
+            "x": 51,
+            "y": 422
+          },
+          {
+            "id": "panel4",
+            "x": 397,
+            "y": 422
+          },
+          {
+            "id": "pvSafety",
+            "x": 896,
+            "y": 257
+          },
+          {
+            "id": "solarController",
+            "x": 1344,
+            "y": 257
+          },
+          {
+            "id": "inverter",
+            "x": 1664,
+            "y": 634,
+            "featured": true
+          },
+          {
+            "id": "systemMonitor",
+            "x": 3034,
+            "y": 290,
+            "featured": true
+          },
+          {
+            "id": "acBoard",
+            "x": 2061,
+            "y": 634
+          },
+          {
+            "id": "toolOutlet",
+            "x": 2458,
+            "y": 634
+          },
+          {
+            "id": "generator",
+            "x": 832,
+            "y": 634
+          },
+          {
+            "id": "generatorInput",
+            "x": 1229,
+            "y": 634
+          },
+          {
+            "id": "battery1",
+            "x": 51,
+            "y": 1030
+          },
+          {
+            "id": "battery2",
+            "x": 397,
+            "y": 1030
+          },
+          {
+            "id": "battery3",
+            "x": 51,
+            "y": 1571
+          },
+          {
+            "id": "battery4",
+            "x": 397,
+            "y": 1571
+          },
+          {
+            "id": "balancers",
+            "x": 832,
+            "y": 1835
+          },
+          {
+            "id": "classTFuseA",
+            "x": 755,
+            "y": 1030
+          },
+          {
+            "id": "classTFuseB",
+            "x": 755,
+            "y": 1571
+          },
+          {
+            "id": "batterySelector",
+            "x": 1101,
+            "y": 1030
+          },
+          {
+            "id": "positiveBus",
+            "x": 1446,
+            "y": 1030
+          },
+          {
+            "id": "smartShunt",
+            "x": 1101,
+            "y": 1373
+          },
+          {
+            "id": "negativeBus",
+            "x": 1446,
+            "y": 1373
+          },
+          {
+            "id": "fuseBlock",
+            "x": 1830,
+            "y": 1030
+          },
+          {
+            "id": "loadSwitches",
+            "x": 2547,
+            "y": 1030
+          },
+          {
+            "id": "starlink",
+            "x": 1242,
+            "y": 1742
+          },
+          {
+            "id": "unifiPower",
+            "x": 1651,
+            "y": 1742
+          },
+          {
+            "id": "router",
+            "x": 2061,
+            "y": 1742
+          },
+          {
+            "id": "usb",
+            "x": 2957,
+            "y": 1030
+          },
+          {
+            "id": "indoorLight",
+            "x": 2547,
+            "y": 1571
+          },
+          {
+            "id": "outdoorLight",
+            "x": 2957,
+            "y": 1571
+          },
+          {
+            "id": "mounting",
+            "x": 3034,
+            "y": 568
+          },
+          {
+            "id": "earth",
+            "x": 3034,
+            "y": 805
+          }
         ],
         "edges": [
-          { "id": "dt-pv-12", "from": "panel1", "to": "panel2", "type": "solar", "label": "String A · series", "labelAt": { "x": 288, "y": 35 } },
-          { "id": "dt-pv-34", "from": "panel3", "to": "panel4", "type": "solar", "label": "String B · series", "labelAt": { "x": 288, "y": 460 } },
-          { "id": "dt-pv-a", "from": "panel2", "to": "pvSafety", "type": "solar", "label": "A · 4 mm² pair", "labelAt": { "x": 620, "y": 130 } },
-          { "id": "dt-pv-b", "from": "panel4", "to": "pvSafety", "type": "solar", "label": "B · 4 mm² pair", "labelAt": { "x": 620, "y": 365 } },
-          { "id": "dt-pv-mppt", "from": "pvSafety", "to": "solarController", "type": "solar", "label": "1 combined pair · 40 A + SPD", "labelAt": { "x": 988, "y": 155 } },
-          { "id": "dt-mppt-positive", "from": "solarController", "to": "positiveBus", "type": "battery", "label": "+ · 100 A breaker · 25 mm²", "fromPortOffset": 30, "toPortOffset": -25, "waypoints": [{ "x": 1190, "y": 390 }, { "x": 1265, "y": 390 }, { "x": 1265, "y": 735 }], "labelAt": { "x": 1340, "y": 690 } },
-          { "id": "dt-mppt-negative", "from": "solarController", "to": "negativeBus", "type": "battery", "label": "− · 25 mm² return", "fromPortOffset": 50, "toPortOffset": -35, "waypoints": [{ "x": 1210, "y": 420 }, { "x": 1540, "y": 420 }, { "x": 1540, "y": 700 }, { "x": 1680, "y": 700 }, { "x": 1680, "y": 1160 }, { "x": 1260, "y": 1160 }], "labelAt": { "x": 1695, "y": 1090 } },
-          { "id": "dt-ac-board", "from": "inverter", "to": "acBoard", "type": "ac", "label": "AC-out · L / N / PE" },
-          { "id": "dt-ac-tools", "from": "acBoard", "to": "toolOutlet", "type": "ac", "label": "10 A RCBO · 5 m Type I lead" },
-          { "id": "dt-gen-in", "from": "generator", "to": "generatorInput", "type": "generator", "label": "field-matched plug + direct lead" },
-          { "id": "dt-gen-inv", "from": "generatorInput", "to": "inverter", "type": "generator", "label": "10 A AC input limit" },
-          { "id": "dt-b12", "from": "battery1", "to": "battery2", "type": "battery", "label": "String A · 1/0 AWG series link" },
-          { "id": "dt-b34", "from": "battery3", "to": "battery4", "type": "battery", "label": "String B · 1/0 AWG series link" },
-          { "id": "dt-a-class-t", "from": "battery2", "to": "classTFuseA", "type": "battery", "label": "A + · 1/0 AWG", "labelAt": { "x": 510, "y": 745 } },
-          { "id": "dt-a-pos", "from": "classTFuseA", "to": "batterySelector", "type": "battery", "label": "150 A protected A +" },
-          { "id": "dt-b-class-t", "from": "battery4", "to": "classTFuseB", "type": "battery", "label": "B + · 1/0 AWG", "labelAt": { "x": 510, "y": 1155 } },
-          { "id": "dt-b-pos", "from": "classTFuseB", "to": "batterySelector", "type": "battery", "label": "150 A protected B +", "waypoints": [{ "x": 703, "y": 1242 }, { "x": 830, "y": 1242 }, { "x": 830, "y": 832 }] },
-          { "id": "dt-selector-positive", "from": "batterySelector", "to": "positiveBus", "type": "battery", "label": "whole-bank + · 1/0 AWG" },
-          { "id": "dt-a-neg", "from": "battery1", "to": "smartShunt", "type": "battery", "label": "A − · BATTERY MINUS", "fromPortOffset": -20, "toPortOffset": -25, "waypoints": [{ "x": 133, "y": 700 }, { "x": 830, "y": 700 }, { "x": 830, "y": 1015 }], "labelAt": { "x": 570, "y": 700 } },
-          { "id": "dt-b-neg", "from": "battery3", "to": "smartShunt", "type": "battery", "label": "B − · BATTERY MINUS", "waypoints": [{ "x": 153, "y": 1510 }, { "x": 900, "y": 1510 }, { "x": 900, "y": 1160 }, { "x": 830, "y": 1160 }, { "x": 830, "y": 1092 }], "labelAt": { "x": 560, "y": 1510 } },
-          { "id": "dt-shunt-negative", "from": "smartShunt", "to": "negativeBus", "type": "battery", "label": "SYSTEM MINUS · 1/0 AWG" },
-          { "id": "dt-positive-inv", "from": "positiveBus", "to": "inverter", "type": "battery", "label": "+ · 1/0 AWG", "fromPortOffset": -25, "toPortOffset": -40, "waypoints": [{ "x": 1243, "y": 735 }, { "x": 1260, "y": 735 }, { "x": 1260, "y": 650 }, { "x": 1373, "y": 650 }] },
-          { "id": "dt-negative-inv", "from": "negativeBus", "to": "inverter", "type": "battery", "label": "− · 1/0 AWG", "fromPortOffset": 25, "toPortOffset": -20, "waypoints": [{ "x": 1268, "y": 1092 }, { "x": 1375, "y": 1092 }, { "x": 1375, "y": 670 }], "labelAt": { "x": 1388, "y": 1020 } },
-          { "id": "dt-bal-a", "from": "balancers", "to": "battery2", "type": "control", "label": "A midpoint balance", "fromPortOffset": -20, "toPortOffset": 40, "waypoints": [{ "x": 620, "y": 1442 }, { "x": 560, "y": 1442 }, { "x": 560, "y": 930 }, { "x": 463, "y": 930 }], "labelAt": { "x": 550, "y": 1020 } },
-          { "id": "dt-bal-b", "from": "balancers", "to": "battery4", "type": "control", "label": "B midpoint balance", "waypoints": [{ "x": 620, "y": 1442 }, { "x": 560, "y": 1442 }, { "x": 560, "y": 1340 }, { "x": 423, "y": 1340 }] },
-          { "id": "dt-bal-alarm", "from": "balancers", "to": "systemMonitor", "type": "control", "label": "2 alarm relays · GX inputs", "fromPortOffset": 20, "toPortOffset": 40, "waypoints": [{ "x": 900, "y": 1442 }, { "x": 2640, "y": 1442 }, { "x": 2640, "y": 312 }], "labelAt": { "x": 2200, "y": 1442 } },
-          { "id": "dt-services-positive", "from": "positiveBus", "to": "fuseBlock", "type": "battery", "label": "+ · 20 A services breaker" },
-          { "id": "dt-services-negative", "from": "negativeBus", "to": "fuseBlock", "type": "battery", "label": "− · return-bus feeder", "fromPortOffset": 35, "toPortOffset": 35, "waypoints": [{ "x": 1278, "y": 1102 }, { "x": 1395, "y": 1102 }, { "x": 1395, "y": 867 }] },
-          { "id": "dt-switch-feed", "from": "fuseBlock", "to": "loadSwitches", "type": "battery", "label": "3 switched 24 V + feeds · load − bypass", "labelAt": { "x": 1690, "y": 745 } },
-          { "id": "dt-star-feed", "from": "fuseBlock", "to": "loadSwitches", "type": "battery", "label": "Starlink 24 V · 5 A breaker → INTERNET A", "fromPortOffset": 40, "toPortOffset": -40, "waypoints": [{ "x": 1443, "y": 900 }, { "x": 1983, "y": 900 }] },
-          { "id": "dt-star", "from": "loadSwitches", "to": "starlink", "type": "battery", "label": "single OEM 15 m white DC cable", "fromPortOffset": -20, "waypoints": [{ "x": 2013, "y": 970 }, { "x": 1380, "y": 970 }, { "x": 1380, "y": 1160 }, { "x": 1083, "y": 1160 }], "labelAt": { "x": 1680, "y": 970 } },
-          { "id": "dt-unifi-power", "from": "loadSwitches", "to": "unifiPower", "type": "battery", "label": "INTERNET pole B · 2 A +", "fromPortOffset": 20, "waypoints": [{ "x": 2053, "y": 1010 }, { "x": 1403, "y": 1010 }], "labelAt": { "x": 1700, "y": 1010 } },
-          { "id": "dt-unifi-usbc", "from": "unifiPower", "to": "router", "type": "data", "label": "5 V / 3 A · USB-C" },
-          { "id": "dt-usb", "from": "fuseBlock", "to": "usb", "type": "battery", "label": "24 V pair · 15 A · local 3 × 10 A split", "fromPortOffset": 20, "waypoints": [{ "x": 1443, "y": 930 }, { "x": 2353, "y": 930 }], "labelAt": { "x": 2040, "y": 930 } },
-          { "id": "dt-indoor-light", "from": "loadSwitches", "to": "indoorLight", "type": "battery", "label": "INSIDE · 1 A + · diode margin · direct −", "labelAt": { "x": 1830, "y": 1060 } },
-          { "id": "dt-outdoor-light", "from": "loadSwitches", "to": "outdoorLight", "type": "battery", "label": "OUTSIDE · 1 A + · diode margin · 2-core", "fromPortOffset": 40, "waypoints": [{ "x": 2073, "y": 960 }, { "x": 2353, "y": 960 }], "labelAt": { "x": 2260, "y": 960 } },
-          { "id": "dt-data", "from": "starlink", "to": "router", "type": "data", "label": "Ethernet", "fromPortOffset": -20, "waypoints": [{ "x": 1063, "y": 1250 }, { "x": 1723, "y": 1250 }], "labelAt": { "x": 1300, "y": 1250 } },
-          { "id": "dt-gx-vebus", "from": "inverter", "to": "systemMonitor", "type": "data", "label": "VE.Bus · MultiPlus · STS", "fromPortOffset": 40, "toPortOffset": 20, "waypoints": [{ "x": 1453, "y": 430 }, { "x": 2160, "y": 430 }, { "x": 2160, "y": 292 }], "labelAt": { "x": 1800, "y": 380 } },
-          { "id": "dt-gx-pv", "from": "solarController", "to": "systemMonitor", "type": "data", "label": "VE.Direct · MPPT receives DVCC", "fromPortOffset": -20, "toPortOffset": -20, "labelAt": { "x": 1680, "y": 205 } },
-          { "id": "dt-gx-shunt", "from": "smartShunt", "to": "systemMonitor", "type": "data", "label": "VE.Direct · battery current / SOC", "fromPortOffset": -25, "toPortOffset": 30, "waypoints": [{ "x": 973, "y": 1015 }, { "x": 2260, "y": 1015 }, { "x": 2260, "y": 302 }], "labelAt": { "x": 2050, "y": 1015 } },
-          { "id": "dt-shunt-sense", "from": "positiveBus", "to": "smartShunt", "type": "control", "label": "supplied fused Vbatt+ sense", "fromPortOffset": 25, "toPortOffset": 25, "waypoints": [{ "x": 1100, "y": 857 }, { "x": 1100, "y": 1010 }, { "x": 973, "y": 1010 }] },
-          { "id": "dt-battery-temperature", "from": "battery1", "to": "inverter", "type": "control", "label": "temperature sensor · negative terminal", "fromPortOffset": -40, "toPortOffset": -40, "waypoints": [{ "x": 133, "y": 660 }, { "x": 1250, "y": 660 }, { "x": 1250, "y": 570 }, { "x": 1373, "y": 570 }], "labelAt": { "x": 820, "y": 660 } },
-          { "id": "dt-gx-power", "from": "positiveBus", "to": "systemMonitor", "type": "battery", "label": "24 V + · supplied 3.15 A fuse", "fromPortOffset": -35, "toPortOffset": -30, "waypoints": [{ "x": 1243, "y": 725 }, { "x": 2280, "y": 725 }, { "x": 2280, "y": 242 }] },
-          { "id": "dt-gx-negative", "from": "negativeBus", "to": "systemMonitor", "type": "battery", "label": "24 V − · system-side return", "fromPortOffset": -35, "toPortOffset": -10, "waypoints": [{ "x": 1243, "y": 995 }, { "x": 2300, "y": 995 }, { "x": 2300, "y": 262 }] },
-          { "id": "dt-gx-lan", "from": "router", "to": "systemMonitor", "type": "data", "label": "Ethernet · UniFi LAN", "fromPortOffset": -20, "toPortOffset": -20, "waypoints": [{ "x": 1703, "y": 1510 }, { "x": 2640, "y": 1510 }, { "x": 2640, "y": 252 }] },
-          { "id": "dt-mount", "from": "mounting", "to": "systemMonitor", "type": "control", "label": "steel bracket · sealed face" },
-          { "id": "dt-earth-inv", "from": "earth", "to": "inverter", "type": "earth", "label": "chassis", "fromPortOffset": -12, "toPortOffset": 40, "waypoints": [{ "x": 2160, "y": 650 }, { "x": 1453, "y": 650 }] },
-          { "id": "dt-earth-gx", "from": "earth", "to": "systemMonitor", "type": "earth", "label": "GX bond", "fromPortOffset": 20, "toPortOffset": 10, "waypoints": [{ "x": 2640, "y": 682 }, { "x": 2640, "y": 282 }], "labelAt": { "x": 2610, "y": 570 } },
-          { "id": "dt-earth-ac", "from": "earth", "to": "acBoard", "type": "earth", "label": "PE", "fromPortOffset": -42, "toPortOffset": 20, "waypoints": [{ "x": 2180, "y": 620 }, { "x": 1743, "y": 620 }], "labelAt": { "x": 1970, "y": 620 } },
-          { "id": "dt-earth-mppt", "from": "earth", "to": "solarController", "type": "earth", "label": "equipment bond", "fromPortOffset": -20, "toPortOffset": 40, "waypoints": [{ "x": 2640, "y": 642 }, { "x": 2640, "y": 30 }, { "x": 1203, "y": 30 }], "labelAt": { "x": 1870, "y": 30 } },
-          { "id": "dt-earth-array", "from": "earth", "to": "pvSafety", "type": "earth", "label": "array bond", "fromPortOffset": 40, "toPortOffset": -40, "waypoints": [{ "x": 2660, "y": 702 }, { "x": 2660, "y": 80 }, { "x": 773, "y": 80 }], "labelAt": { "x": 1600, "y": 80 } }
+          {
+            "id": "dt-pv-12",
+            "from": "panel1",
+            "to": "panel2",
+            "type": "solar",
+            "label": "String A · series",
+            "labelAt": {
+              "x": 369,
+              "y": 46
+            }
+          },
+          {
+            "id": "dt-pv-34",
+            "from": "panel3",
+            "to": "panel4",
+            "type": "solar",
+            "label": "String B · series",
+            "labelAt": {
+              "x": 369,
+              "y": 607
+            }
+          },
+          {
+            "id": "dt-pv-a",
+            "from": "panel2",
+            "to": "pvSafety",
+            "type": "solar",
+            "label": "A · 4 mm² pair",
+            "labelAt": {
+              "x": 794,
+              "y": 172
+            }
+          },
+          {
+            "id": "dt-pv-b",
+            "from": "panel4",
+            "to": "pvSafety",
+            "type": "solar",
+            "label": "B · 4 mm² pair",
+            "labelAt": {
+              "x": 794,
+              "y": 482
+            }
+          },
+          {
+            "id": "dt-pv-mppt",
+            "from": "pvSafety",
+            "to": "solarController",
+            "type": "solar",
+            "label": "1 combined pair · 40 A + SPD",
+            "labelAt": {
+              "x": 1265,
+              "y": 205
+            }
+          },
+          {
+            "id": "dt-mppt-positive",
+            "from": "solarController",
+            "to": "positiveBus",
+            "type": "battery",
+            "label": "+ · 100 A breaker · 25 mm²",
+            "fromPortOffset": 30,
+            "toPortOffset": -25,
+            "waypoints": [
+              {
+                "x": 1523,
+                "y": 515
+              },
+              {
+                "x": 1619,
+                "y": 515
+              },
+              {
+                "x": 1619,
+                "y": 970
+              }
+            ],
+            "labelAt": {
+              "x": 1715,
+              "y": 911
+            }
+          },
+          {
+            "id": "dt-mppt-negative",
+            "from": "solarController",
+            "to": "negativeBus",
+            "type": "battery",
+            "label": "− · 25 mm² return",
+            "fromPortOffset": 50,
+            "toPortOffset": -35,
+            "waypoints": [
+              {
+                "x": 1549,
+                "y": 554
+              },
+              {
+                "x": 1971,
+                "y": 554
+              },
+              {
+                "x": 1971,
+                "y": 924
+              },
+              {
+                "x": 2150,
+                "y": 924
+              },
+              {
+                "x": 2150,
+                "y": 1531
+              },
+              {
+                "x": 1613,
+                "y": 1531
+              }
+            ],
+            "labelAt": {
+              "x": 2170,
+              "y": 1439
+            }
+          },
+          {
+            "id": "dt-ac-board",
+            "from": "inverter",
+            "to": "acBoard",
+            "type": "ac",
+            "label": "AC-out · L / N / PE"
+          },
+          {
+            "id": "dt-ac-tools",
+            "from": "acBoard",
+            "to": "toolOutlet",
+            "type": "ac",
+            "label": "10 A RCBO · 5 m Type I lead"
+          },
+          {
+            "id": "dt-gen-in",
+            "from": "generator",
+            "to": "generatorInput",
+            "type": "generator",
+            "label": "field-matched plug + direct lead"
+          },
+          {
+            "id": "dt-gen-inv",
+            "from": "generatorInput",
+            "to": "inverter",
+            "type": "generator",
+            "label": "10 A AC input limit"
+          },
+          {
+            "id": "dt-b12",
+            "from": "battery1",
+            "to": "battery2",
+            "type": "battery",
+            "label": "String A · 1/0 AWG series link"
+          },
+          {
+            "id": "dt-b34",
+            "from": "battery3",
+            "to": "battery4",
+            "type": "battery",
+            "label": "String B · 1/0 AWG series link"
+          },
+          {
+            "id": "dt-a-class-t",
+            "from": "battery2",
+            "to": "classTFuseA",
+            "type": "battery",
+            "label": "A + · 1/0 AWG",
+            "labelAt": {
+              "x": 653,
+              "y": 983
+            }
+          },
+          {
+            "id": "dt-a-pos",
+            "from": "classTFuseA",
+            "to": "batterySelector",
+            "type": "battery",
+            "label": "150 A protected A +"
+          },
+          {
+            "id": "dt-b-class-t",
+            "from": "battery4",
+            "to": "classTFuseB",
+            "type": "battery",
+            "label": "B + · 1/0 AWG",
+            "labelAt": {
+              "x": 653,
+              "y": 1525
+            }
+          },
+          {
+            "id": "dt-b-pos",
+            "from": "classTFuseB",
+            "to": "batterySelector",
+            "type": "battery",
+            "label": "150 A protected B +",
+            "waypoints": [
+              {
+                "x": 900,
+                "y": 1639
+              },
+              {
+                "x": 1062,
+                "y": 1639
+              },
+              {
+                "x": 1062,
+                "y": 1098
+              }
+            ]
+          },
+          {
+            "id": "dt-selector-positive",
+            "from": "batterySelector",
+            "to": "positiveBus",
+            "type": "battery",
+            "label": "whole-bank + · 1/0 AWG"
+          },
+          {
+            "id": "dt-a-neg",
+            "from": "battery1",
+            "to": "smartShunt",
+            "type": "battery",
+            "label": "A − · BATTERY MINUS",
+            "fromPortOffset": -20,
+            "toPortOffset": -25,
+            "waypoints": [
+              {
+                "x": 170,
+                "y": 924
+              },
+              {
+                "x": 1062,
+                "y": 924
+              },
+              {
+                "x": 1062,
+                "y": 1340
+              }
+            ],
+            "labelAt": {
+              "x": 730,
+              "y": 924
+            }
+          },
+          {
+            "id": "dt-b-neg",
+            "from": "battery3",
+            "to": "smartShunt",
+            "type": "battery",
+            "label": "B − · BATTERY MINUS",
+            "waypoints": [
+              {
+                "x": 196,
+                "y": 1993
+              },
+              {
+                "x": 1152,
+                "y": 1993
+              },
+              {
+                "x": 1152,
+                "y": 1531
+              },
+              {
+                "x": 1062,
+                "y": 1531
+              },
+              {
+                "x": 1062,
+                "y": 1441
+              }
+            ],
+            "labelAt": {
+              "x": 717,
+              "y": 1993
+            }
+          },
+          {
+            "id": "dt-shunt-negative",
+            "from": "smartShunt",
+            "to": "negativeBus",
+            "type": "battery",
+            "label": "SYSTEM MINUS · 1/0 AWG"
+          },
+          {
+            "id": "dt-positive-inv",
+            "from": "positiveBus",
+            "to": "inverter",
+            "type": "battery",
+            "label": "+ · 1/0 AWG",
+            "fromPortOffset": -25,
+            "toPortOffset": -40,
+            "waypoints": [
+              {
+                "x": 1591,
+                "y": 970
+              },
+              {
+                "x": 1613,
+                "y": 970
+              },
+              {
+                "x": 1613,
+                "y": 858
+              },
+              {
+                "x": 1757,
+                "y": 858
+              }
+            ]
+          },
+          {
+            "id": "dt-negative-inv",
+            "from": "negativeBus",
+            "to": "inverter",
+            "type": "battery",
+            "label": "− · 1/0 AWG",
+            "fromPortOffset": 25,
+            "toPortOffset": -20,
+            "waypoints": [
+              {
+                "x": 1623,
+                "y": 1441
+              },
+              {
+                "x": 1760,
+                "y": 1441
+              },
+              {
+                "x": 1760,
+                "y": 884
+              }
+            ],
+            "labelAt": {
+              "x": 1777,
+              "y": 1346
+            }
+          },
+          {
+            "id": "dt-bal-a",
+            "from": "balancers",
+            "to": "battery2",
+            "type": "control",
+            "label": "A midpoint balance",
+            "fromPortOffset": -20,
+            "toPortOffset": 40,
+            "waypoints": [
+              {
+                "x": 794,
+                "y": 1903
+              },
+              {
+                "x": 717,
+                "y": 1903
+              },
+              {
+                "x": 717,
+                "y": 1228
+              },
+              {
+                "x": 593,
+                "y": 1228
+              }
+            ],
+            "labelAt": {
+              "x": 704,
+              "y": 1346
+            }
+          },
+          {
+            "id": "dt-bal-b",
+            "from": "balancers",
+            "to": "battery4",
+            "type": "control",
+            "label": "B midpoint balance",
+            "waypoints": [
+              {
+                "x": 794,
+                "y": 1903
+              },
+              {
+                "x": 717,
+                "y": 1903
+              },
+              {
+                "x": 717,
+                "y": 1769
+              },
+              {
+                "x": 541,
+                "y": 1769
+              }
+            ]
+          },
+          {
+            "id": "dt-bal-alarm",
+            "from": "balancers",
+            "to": "systemMonitor",
+            "type": "control",
+            "label": "2 alarm relays · GX inputs",
+            "fromPortOffset": 20,
+            "toPortOffset": 40,
+            "waypoints": [
+              {
+                "x": 1152,
+                "y": 1903
+              },
+              {
+                "x": 3379,
+                "y": 1903
+              },
+              {
+                "x": 3379,
+                "y": 412
+              }
+            ],
+            "labelAt": {
+              "x": 2816,
+              "y": 1903
+            }
+          },
+          {
+            "id": "dt-services-positive",
+            "from": "positiveBus",
+            "to": "fuseBlock",
+            "type": "battery",
+            "label": "+ · 20 A services breaker"
+          },
+          {
+            "id": "dt-services-negative",
+            "from": "negativeBus",
+            "to": "fuseBlock",
+            "type": "battery",
+            "label": "− · return-bus feeder",
+            "fromPortOffset": 35,
+            "toPortOffset": 35,
+            "waypoints": [
+              {
+                "x": 1636,
+                "y": 1455
+              },
+              {
+                "x": 1786,
+                "y": 1455
+              },
+              {
+                "x": 1786,
+                "y": 1144
+              }
+            ]
+          },
+          {
+            "id": "dt-switch-feed",
+            "from": "fuseBlock",
+            "to": "loadSwitches",
+            "type": "battery",
+            "label": "3 switched 24 V + feeds · load − bypass",
+            "labelAt": {
+              "x": 2163,
+              "y": 983
+            }
+          },
+          {
+            "id": "dt-star-feed",
+            "from": "fuseBlock",
+            "to": "loadSwitches",
+            "type": "battery",
+            "label": "Starlink 24 V · 5 A breaker → INTERNET A",
+            "fromPortOffset": 40,
+            "toPortOffset": -40,
+            "waypoints": [
+              {
+                "x": 1847,
+                "y": 1188
+              },
+              {
+                "x": 2538,
+                "y": 1188
+              }
+            ]
+          },
+          {
+            "id": "dt-star",
+            "from": "loadSwitches",
+            "to": "starlink",
+            "type": "battery",
+            "label": "single OEM 15 m white DC cable",
+            "fromPortOffset": -20,
+            "waypoints": [
+              {
+                "x": 2577,
+                "y": 1280
+              },
+              {
+                "x": 1766,
+                "y": 1280
+              },
+              {
+                "x": 1766,
+                "y": 1531
+              },
+              {
+                "x": 1386,
+                "y": 1531
+              }
+            ],
+            "labelAt": {
+              "x": 2150,
+              "y": 1280
+            }
+          },
+          {
+            "id": "dt-unifi-power",
+            "from": "loadSwitches",
+            "to": "unifiPower",
+            "type": "battery",
+            "label": "INTERNET pole B · 2 A +",
+            "fromPortOffset": 20,
+            "waypoints": [
+              {
+                "x": 2628,
+                "y": 1333
+              },
+              {
+                "x": 1796,
+                "y": 1333
+              }
+            ],
+            "labelAt": {
+              "x": 2176,
+              "y": 1333
+            }
+          },
+          {
+            "id": "dt-unifi-usbc",
+            "from": "unifiPower",
+            "to": "router",
+            "type": "data",
+            "label": "5 V / 3 A · USB-C"
+          },
+          {
+            "id": "dt-usb",
+            "from": "fuseBlock",
+            "to": "usb",
+            "type": "battery",
+            "label": "24 V pair · 15 A · local 3 × 10 A split",
+            "fromPortOffset": 20,
+            "waypoints": [
+              {
+                "x": 1847,
+                "y": 1228
+              },
+              {
+                "x": 3012,
+                "y": 1228
+              }
+            ],
+            "labelAt": {
+              "x": 2611,
+              "y": 1228
+            }
+          },
+          {
+            "id": "dt-indoor-light",
+            "from": "loadSwitches",
+            "to": "indoorLight",
+            "type": "battery",
+            "label": "INSIDE · 1 A + · diode margin · direct −",
+            "labelAt": {
+              "x": 2342,
+              "y": 1399
+            }
+          },
+          {
+            "id": "dt-outdoor-light",
+            "from": "loadSwitches",
+            "to": "outdoorLight",
+            "type": "battery",
+            "label": "OUTSIDE · 1 A + · diode margin · 2-core",
+            "fromPortOffset": 40,
+            "waypoints": [
+              {
+                "x": 2653,
+                "y": 1267
+              },
+              {
+                "x": 3012,
+                "y": 1267
+              }
+            ],
+            "labelAt": {
+              "x": 2893,
+              "y": 1267
+            }
+          },
+          {
+            "id": "dt-data",
+            "from": "starlink",
+            "to": "router",
+            "type": "data",
+            "label": "Ethernet",
+            "fromPortOffset": -20,
+            "waypoints": [
+              {
+                "x": 1361,
+                "y": 1650
+              },
+              {
+                "x": 2205,
+                "y": 1650
+              }
+            ],
+            "labelAt": {
+              "x": 1664,
+              "y": 1650
+            }
+          },
+          {
+            "id": "dt-gx-vebus",
+            "from": "inverter",
+            "to": "systemMonitor",
+            "type": "data",
+            "label": "VE.Bus · MultiPlus · STS",
+            "fromPortOffset": 40,
+            "toPortOffset": 20,
+            "waypoints": [
+              {
+                "x": 1860,
+                "y": 568
+              },
+              {
+                "x": 2765,
+                "y": 568
+              },
+              {
+                "x": 2765,
+                "y": 385
+              }
+            ],
+            "labelAt": {
+              "x": 2304,
+              "y": 502
+            }
+          },
+          {
+            "id": "dt-gx-pv",
+            "from": "solarController",
+            "to": "systemMonitor",
+            "type": "data",
+            "label": "VE.Direct · MPPT receives DVCC",
+            "fromPortOffset": -20,
+            "toPortOffset": -20,
+            "labelAt": {
+              "x": 2150,
+              "y": 271
+            }
+          },
+          {
+            "id": "dt-gx-shunt",
+            "from": "smartShunt",
+            "to": "systemMonitor",
+            "type": "data",
+            "label": "VE.Direct · battery current / SOC",
+            "fromPortOffset": -25,
+            "toPortOffset": 30,
+            "waypoints": [
+              {
+                "x": 1245,
+                "y": 1340
+              },
+              {
+                "x": 2893,
+                "y": 1340
+              },
+              {
+                "x": 2893,
+                "y": 399
+              }
+            ],
+            "labelAt": {
+              "x": 2624,
+              "y": 1340
+            }
+          },
+          {
+            "id": "dt-shunt-sense",
+            "from": "positiveBus",
+            "to": "smartShunt",
+            "type": "control",
+            "label": "supplied fused Vbatt+ sense",
+            "fromPortOffset": 25,
+            "toPortOffset": 25,
+            "waypoints": [
+              {
+                "x": 1408,
+                "y": 1131
+              },
+              {
+                "x": 1408,
+                "y": 1333
+              },
+              {
+                "x": 1245,
+                "y": 1333
+              }
+            ]
+          },
+          {
+            "id": "dt-battery-temperature",
+            "from": "battery1",
+            "to": "inverter",
+            "type": "control",
+            "label": "temperature sensor · negative terminal",
+            "fromPortOffset": -40,
+            "toPortOffset": -40,
+            "waypoints": [
+              {
+                "x": 170,
+                "y": 871
+              },
+              {
+                "x": 1600,
+                "y": 871
+              },
+              {
+                "x": 1600,
+                "y": 752
+              },
+              {
+                "x": 1757,
+                "y": 752
+              }
+            ],
+            "labelAt": {
+              "x": 1050,
+              "y": 871
+            }
+          },
+          {
+            "id": "dt-gx-power",
+            "from": "positiveBus",
+            "to": "systemMonitor",
+            "type": "battery",
+            "label": "24 V + · supplied 3.15 A fuse",
+            "fromPortOffset": -35,
+            "toPortOffset": -30,
+            "waypoints": [
+              {
+                "x": 1591,
+                "y": 957
+              },
+              {
+                "x": 2918,
+                "y": 957
+              },
+              {
+                "x": 2918,
+                "y": 319
+              }
+            ]
+          },
+          {
+            "id": "dt-gx-negative",
+            "from": "negativeBus",
+            "to": "systemMonitor",
+            "type": "battery",
+            "label": "24 V − · system-side return",
+            "fromPortOffset": -35,
+            "toPortOffset": -10,
+            "waypoints": [
+              {
+                "x": 1591,
+                "y": 1313
+              },
+              {
+                "x": 2944,
+                "y": 1313
+              },
+              {
+                "x": 2944,
+                "y": 346
+              }
+            ]
+          },
+          {
+            "id": "dt-gx-lan",
+            "from": "router",
+            "to": "systemMonitor",
+            "type": "data",
+            "label": "Ethernet · UniFi LAN",
+            "fromPortOffset": -20,
+            "toPortOffset": -20,
+            "waypoints": [
+              {
+                "x": 2180,
+                "y": 1993
+              },
+              {
+                "x": 3379,
+                "y": 1993
+              },
+              {
+                "x": 3379,
+                "y": 333
+              }
+            ]
+          },
+          {
+            "id": "dt-mount",
+            "from": "mounting",
+            "to": "systemMonitor",
+            "type": "control",
+            "label": "steel bracket · sealed face"
+          },
+          {
+            "id": "dt-earth-inv",
+            "from": "earth",
+            "to": "inverter",
+            "type": "earth",
+            "label": "chassis",
+            "fromPortOffset": -12,
+            "toPortOffset": 40,
+            "waypoints": [
+              {
+                "x": 2765,
+                "y": 858
+              },
+              {
+                "x": 1860,
+                "y": 858
+              }
+            ]
+          },
+          {
+            "id": "dt-earth-gx",
+            "from": "earth",
+            "to": "systemMonitor",
+            "type": "earth",
+            "label": "GX bond",
+            "fromPortOffset": 20,
+            "toPortOffset": 10,
+            "waypoints": [
+              {
+                "x": 3379,
+                "y": 900
+              },
+              {
+                "x": 3379,
+                "y": 372
+              }
+            ],
+            "labelAt": {
+              "x": 3341,
+              "y": 752
+            }
+          },
+          {
+            "id": "dt-earth-ac",
+            "from": "earth",
+            "to": "acBoard",
+            "type": "earth",
+            "label": "PE",
+            "fromPortOffset": -42,
+            "toPortOffset": 20,
+            "waypoints": [
+              {
+                "x": 2790,
+                "y": 818
+              },
+              {
+                "x": 2231,
+                "y": 818
+              }
+            ],
+            "labelAt": {
+              "x": 2522,
+              "y": 818
+            }
+          },
+          {
+            "id": "dt-earth-mppt",
+            "from": "earth",
+            "to": "solarController",
+            "type": "earth",
+            "label": "equipment bond",
+            "fromPortOffset": -20,
+            "toPortOffset": 40,
+            "waypoints": [
+              {
+                "x": 3379,
+                "y": 847
+              },
+              {
+                "x": 3379,
+                "y": 40
+              },
+              {
+                "x": 1540,
+                "y": 40
+              }
+            ],
+            "labelAt": {
+              "x": 2394,
+              "y": 40
+            }
+          },
+          {
+            "id": "dt-earth-array",
+            "from": "earth",
+            "to": "pvSafety",
+            "type": "earth",
+            "label": "array bond",
+            "fromPortOffset": 40,
+            "toPortOffset": -40,
+            "waypoints": [
+              {
+                "x": 3405,
+                "y": 927
+              },
+              {
+                "x": 3405,
+                "y": 106
+              },
+              {
+                "x": 989,
+                "y": 106
+              }
+            ],
+            "labelAt": {
+              "x": 2048,
+              "y": 106
+            }
+          }
         ]
       }
     }
@@ -1248,54 +2941,250 @@
     "Run the 1,800 W saw alone for 30 minutes in warm conditions with the 5 m lead fully uncoiled while monitoring inverter, lead, plug/socket, cable and terminal temperature; post the one-page operating rules and breaker map beside the equipment."
   ],
   "research": [
-    { "title": "Suntech 565 W module datasheet", "publisher": "Suntech", "url": "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf" },
-    { "title": "MultiPlus-II 230 V technical specifications", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/technical-specifications-mp-ii-230v.html" },
-    { "title": "MultiPlus-II 24/3000 physical dimensions", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/upload/documents/Datasheet-MultiPlus-II-inverter-charger-EN.pdf" },
-    { "title": "MultiPlus-II installation, fuse, cable and environmental requirements", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html" },
-    { "title": "MC4 and MC4-Evo 2 cable/contact compatibility through 6 mm²", "publisher": "Stäubli", "url": "https://www.staubli.com/content/dam/ecs/technical-documentation/assembly-instructions/RE/PV_SOL-LVDC-en.pdf" },
-    { "title": "MC4 and MC4-Evo cable assembly and connector-mating rules", "publisher": "Stäubli", "url": "https://www.staubli.com/content/dam/ecs/technical-documentation/assembly-instructions/RE/PV_MA294-en.pdf" },
-    { "title": "Why an external GX uses a non-GX MultiPlus", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/MultiPlus-II_GX/en/installation.html" },
-    { "title": "Ekrano GX technical specifications and environmental ratings", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/technical-specifications.html" },
-    { "title": "Ekrano GX mounting, direct-DC power and cabling", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/installation.html" },
-    { "title": "Ekrano GX Bluetooth is not a product-to-product connection", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/accessing-the-gx-device.html" },
-    { "title": "Connecting Victron products to Ekrano GX", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/connecting-victron-products.html" },
-    { "title": "Ekrano GX current in-stock retail listing", "publisher": "Blue Marine", "url": "https://bluemarine.com/products/victron-energy-ekrano-gx" },
-    { "title": "SmartSolar MPPT 150/85 VE.Can technical specifications", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html" },
-    { "title": "SmartSolar MPPT 150/85 VE.Can installation and PV sizing", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/installation.html" },
-    { "title": "Reverse-current sizing for parallel PV strings", "publisher": "SMA Solar Technology", "url": "https://files.sma.de/downloads/Rueckstrom-UEN083010.pdf" },
-    { "title": "SmartShunt 500 A physical dimensions", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/SmartShunt/en/technical-data.html" },
-    { "title": "SmartShunt Vbatt+ fused lead and Aux wiring", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/SmartShunt/en/installation.html" },
-    { "title": "Ekrano GX DVCC charge-current control", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/dvcc---distributed-voltage-and-current-control.html" },
-    { "title": "Remote VEConfigure through VRM", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/VRM_Portal_manual/en/remote-veconfigure.html" },
-    { "title": "VRM two-factor account protection", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/media/pg/VRM_Portal_manual/en/two-factor-verification.html" },
-    { "title": "2026 Q2 USD price list", "publisher": "Victron Energy", "url": "https://latam.victronenergy.com/wp-content/uploads/2026/04/Pricelist-Victron-2026-Q2-USD-C.pdf" },
-    { "title": "Victron distributor training and remote-support capability in Fiji", "publisher": "Victron Energy / Solar Fiji", "url": "https://www.victronenergy.com/blog/2024/10/22/solar-training-in-fiji/" },
-    { "title": "EverExceed ES200-12G manufacturer datasheet", "publisher": "EverExceed", "url": "https://pulsar.kiev.ua/uploads/pdf/ES200-12G.pdf" },
-    { "title": "Custom 1/0 AWG UL 1426 tinned-copper cable assemblies", "publisher": "BatteryCablesUSA", "url": "https://www.batterycablesusa.com/0-gauge-1-0-awg-marine-grade-battery-cable-with-ends" },
-    { "title": "Class T 110–200 A fuse-holder terminal and environmental specifications", "publisher": "Blue Sea Systems", "url": "https://www.bluesea.com/products/5007100/" },
-    { "title": "Victron Battery Balancer manual", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/upload/documents/Manual-Battery-Balancer-EN.pdf" },
-    { "title": "Victron Battery Balancer dimension drawing", "publisher": "Victron Energy", "url": "https://www.victronenergy.com/upload/documents/Battery-Balancer.PDF" },
-    { "title": "Blue Sea 6006 whole-bank disconnect ratings and dimensions", "publisher": "Blue Sea Systems", "url": "https://www.bluesea.com/products/6006" },
-    { "title": "MidNite Solar MNEPV resettable breaker ratings · 150 VDC · 10 kA AIC", "publisher": "MidNite Solar", "url": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=759&sortOrder=1" },
-    { "title": "MidNite Solar MNEDC 5–100 A breaker ratings · 150 VDC · 10 kA AIC", "publisher": "MidNite Solar", "url": "https://www.midnitesolar.com/productPhoto.php?act=p&productCat_ID=16&product_ID=76&sortOrder=1" },
-    { "title": "MidNite Solar high-current breaker ranges · 125 A / 10 kA and 175–250 A / 50 kA", "publisher": "MidNite Solar", "url": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=464&sortOrder=2" },
-    { "title": "Blue Sea 2104 four-stud plus four-screw 600 A PowerBar", "publisher": "Blue Sea Systems", "url": "https://www.bluesea.com/products/2104/PowerBar_600A_BusBar_-_Four_3_8in-16_Studs" },
-    { "title": "Blue Sea 2314 two-stud plus five-screw covered service-return MiniBus", "publisher": "Blue Sea Systems", "url": "https://www.bluesea.com/products/2314/" },
-    { "title": "Blue Sea 2128 two-stud plus six-screw 250 A bonding bus", "publisher": "Blue Sea Systems", "url": "https://www.bluesea.com/products/2128/MaxiBus_250A_BusBar_-_Two_5_16in-18_Studs_and_Six_%2310-24_Screws" },
-    { "title": "Starlink Mini specifications", "publisher": "Starlink", "url": "https://www.starlink.com/public-files/specification_sheet_mini.pdf" },
-    { "title": "Starlink Mini 15 m and 30 m DC power cables", "publisher": "Starlink", "url": "https://www.starlink.com/public-files/accessories_guide_mini.pdf" },
-    { "title": "UniFi Express technical specifications", "publisher": "Ubiquiti", "url": "https://techspecs.ui.com/unifi/cloud-gateways/ux" },
-    { "title": "Contura DPST OFF–ON switch ratings and environmental resistance", "publisher": "Blue Sea Systems", "url": "https://www.bluesea.com/products/8287/Contura_Switch_DPST_Black_-_OFF-ON" },
-    { "title": "Contura SPST OFF–ON switch ratings and environmental resistance", "publisher": "Blue Sea Systems", "url": "https://www.bluesea.com/products/8282/Contura_Switch_SPST_Black_-_OFF-ON" },
-    { "title": "Contura 8259 three-position mounting frame", "publisher": "Blue Sea Systems", "url": "https://www.bluesea.com/products/8259/Contura_Switch_Mounting_Panel_-_3_Position" },
-    { "title": "USBbuddy2 potted 8–35 V to 5 V converter", "publisher": "Powerwerx", "url": "https://powerwerx.com/usbbuddy2-powerpole-usb-device-charger" },
-    { "title": "QHLightlux 12–28 V 3000 K IP67 utility light · B0F1V59NXC", "publisher": "Amazon / QHLightlux", "url": "https://www.amazon.com/dp/B0F1V59NXC" },
-    { "title": "Scanstrut TILE USB charging family", "publisher": "Scanstrut", "url": "https://www.scanstrut.com/marine/power/tile" },
-    { "title": "SC-TILE-20 technical drawing and 10–32 V input specification", "publisher": "Scanstrut", "url": "https://www.scanstrut.com/file/inline/upload/TILE/SC-TILE-20/SC-TILE-20_amp_21_Technical_Drawing.pdf" },
-    { "title": "HPM 5 m 10 A AS/NZS workshop extension lead", "publisher": "Bunnings Pacific Fiji", "url": "https://bunningspacific.com.fj/collections/extension-cords-1" },
-    { "title": "Fiji-market Husqvarna G3200P listing", "publisher": "Vinod Patel", "url": "https://www.vinodpatel.com.fj/husqvarna-generator-g3200p-3-2kva-1-phase-petrol" },
-    { "title": "Fiji Airways checked baggage terms", "publisher": "Fiji Airways", "url": "https://www.fijiairways.com/media/246988/fiji-airways-terms-and-conditions-of-carriage.pdf" },
-    { "title": "Passenger declarations and allowances", "publisher": "Fiji Revenue & Customs Service", "url": "https://frcs.org.fj/our-services/customs/visiting-fiji/arriving-in-fiji/" },
-    { "title": "Current Fiji VAT guide", "publisher": "Fiji Revenue & Customs Service", "url": "https://frcs.org.fj/our-services/taxation-section/non-individuals/reporting-and-paying-taxes/vat-guide/" }
+    {
+      "title": "Suntech 565 W module datasheet",
+      "publisher": "Suntech",
+      "url": "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf"
+    },
+    {
+      "title": "MultiPlus-II 230 V technical specifications",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/technical-specifications-mp-ii-230v.html"
+    },
+    {
+      "title": "MultiPlus-II 24/3000 physical dimensions",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/upload/documents/Datasheet-MultiPlus-II-inverter-charger-EN.pdf"
+    },
+    {
+      "title": "MultiPlus-II installation, fuse, cable and environmental requirements",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html"
+    },
+    {
+      "title": "MC4 and MC4-Evo 2 cable/contact compatibility through 6 mm²",
+      "publisher": "Stäubli",
+      "url": "https://www.staubli.com/content/dam/ecs/technical-documentation/assembly-instructions/RE/PV_SOL-LVDC-en.pdf"
+    },
+    {
+      "title": "MC4 and MC4-Evo cable assembly and connector-mating rules",
+      "publisher": "Stäubli",
+      "url": "https://www.staubli.com/content/dam/ecs/technical-documentation/assembly-instructions/RE/PV_MA294-en.pdf"
+    },
+    {
+      "title": "Why an external GX uses a non-GX MultiPlus",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/MultiPlus-II_GX/en/installation.html"
+    },
+    {
+      "title": "Ekrano GX technical specifications and environmental ratings",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/technical-specifications.html"
+    },
+    {
+      "title": "Ekrano GX mounting, direct-DC power and cabling",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/installation.html"
+    },
+    {
+      "title": "Ekrano GX Bluetooth is not a product-to-product connection",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/accessing-the-gx-device.html"
+    },
+    {
+      "title": "Connecting Victron products to Ekrano GX",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/connecting-victron-products.html"
+    },
+    {
+      "title": "Ekrano GX current in-stock retail listing",
+      "publisher": "Blue Marine",
+      "url": "https://bluemarine.com/products/victron-energy-ekrano-gx"
+    },
+    {
+      "title": "SmartSolar MPPT 150/85 VE.Can technical specifications",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html"
+    },
+    {
+      "title": "SmartSolar MPPT 150/85 VE.Can installation and PV sizing",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/installation.html"
+    },
+    {
+      "title": "Reverse-current sizing for parallel PV strings",
+      "publisher": "SMA Solar Technology",
+      "url": "https://files.sma.de/downloads/Rueckstrom-UEN083010.pdf"
+    },
+    {
+      "title": "SmartShunt 500 A physical dimensions",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/SmartShunt/en/technical-data.html"
+    },
+    {
+      "title": "SmartShunt Vbatt+ fused lead and Aux wiring",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/SmartShunt/en/installation.html"
+    },
+    {
+      "title": "Ekrano GX DVCC charge-current control",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/dvcc---distributed-voltage-and-current-control.html"
+    },
+    {
+      "title": "Remote VEConfigure through VRM",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/VRM_Portal_manual/en/remote-veconfigure.html"
+    },
+    {
+      "title": "VRM two-factor account protection",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/VRM_Portal_manual/en/two-factor-verification.html"
+    },
+    {
+      "title": "2026 Q2 USD price list",
+      "publisher": "Victron Energy",
+      "url": "https://latam.victronenergy.com/wp-content/uploads/2026/04/Pricelist-Victron-2026-Q2-USD-C.pdf"
+    },
+    {
+      "title": "Victron distributor training and remote-support capability in Fiji",
+      "publisher": "Victron Energy / Solar Fiji",
+      "url": "https://www.victronenergy.com/blog/2024/10/22/solar-training-in-fiji/"
+    },
+    {
+      "title": "EverExceed ES200-12G manufacturer datasheet",
+      "publisher": "EverExceed",
+      "url": "https://pulsar.kiev.ua/uploads/pdf/ES200-12G.pdf"
+    },
+    {
+      "title": "Custom 1/0 AWG UL 1426 tinned-copper cable assemblies",
+      "publisher": "BatteryCablesUSA",
+      "url": "https://www.batterycablesusa.com/0-gauge-1-0-awg-marine-grade-battery-cable-with-ends"
+    },
+    {
+      "title": "Class T 110–200 A fuse-holder terminal and environmental specifications",
+      "publisher": "Blue Sea Systems",
+      "url": "https://www.bluesea.com/products/5007100/"
+    },
+    {
+      "title": "Victron Battery Balancer manual",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/upload/documents/Manual-Battery-Balancer-EN.pdf"
+    },
+    {
+      "title": "Victron Battery Balancer dimension drawing",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/upload/documents/Battery-Balancer.PDF"
+    },
+    {
+      "title": "Blue Sea 6006 whole-bank disconnect ratings and dimensions",
+      "publisher": "Blue Sea Systems",
+      "url": "https://www.bluesea.com/products/6006"
+    },
+    {
+      "title": "MidNite Solar MNEPV resettable breaker ratings · 150 VDC · 10 kA AIC",
+      "publisher": "MidNite Solar",
+      "url": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=759&sortOrder=1"
+    },
+    {
+      "title": "MidNite Solar MNEDC 5–100 A breaker ratings · 150 VDC · 10 kA AIC",
+      "publisher": "MidNite Solar",
+      "url": "https://www.midnitesolar.com/productPhoto.php?act=p&productCat_ID=16&product_ID=76&sortOrder=1"
+    },
+    {
+      "title": "MidNite Solar high-current breaker ranges · 125 A / 10 kA and 175–250 A / 50 kA",
+      "publisher": "MidNite Solar",
+      "url": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=464&sortOrder=2"
+    },
+    {
+      "title": "Blue Sea 2104 four-stud plus four-screw 600 A PowerBar",
+      "publisher": "Blue Sea Systems",
+      "url": "https://www.bluesea.com/products/2104/PowerBar_600A_BusBar_-_Four_3_8in-16_Studs"
+    },
+    {
+      "title": "Blue Sea 2314 two-stud plus five-screw covered service-return MiniBus",
+      "publisher": "Blue Sea Systems",
+      "url": "https://www.bluesea.com/products/2314/"
+    },
+    {
+      "title": "Blue Sea 2128 two-stud plus six-screw 250 A bonding bus",
+      "publisher": "Blue Sea Systems",
+      "url": "https://www.bluesea.com/products/2128/MaxiBus_250A_BusBar_-_Two_5_16in-18_Studs_and_Six_%2310-24_Screws"
+    },
+    {
+      "title": "Starlink Mini specifications",
+      "publisher": "Starlink",
+      "url": "https://www.starlink.com/public-files/specification_sheet_mini.pdf"
+    },
+    {
+      "title": "Starlink Mini 15 m and 30 m DC power cables",
+      "publisher": "Starlink",
+      "url": "https://www.starlink.com/public-files/accessories_guide_mini.pdf"
+    },
+    {
+      "title": "UniFi Express technical specifications",
+      "publisher": "Ubiquiti",
+      "url": "https://techspecs.ui.com/unifi/cloud-gateways/ux"
+    },
+    {
+      "title": "Contura DPST OFF–ON switch ratings and environmental resistance",
+      "publisher": "Blue Sea Systems",
+      "url": "https://www.bluesea.com/products/8287/Contura_Switch_DPST_Black_-_OFF-ON"
+    },
+    {
+      "title": "Contura SPST OFF–ON switch ratings and environmental resistance",
+      "publisher": "Blue Sea Systems",
+      "url": "https://www.bluesea.com/products/8282/Contura_Switch_SPST_Black_-_OFF-ON"
+    },
+    {
+      "title": "Contura 8259 three-position mounting frame",
+      "publisher": "Blue Sea Systems",
+      "url": "https://www.bluesea.com/products/8259/Contura_Switch_Mounting_Panel_-_3_Position"
+    },
+    {
+      "title": "USBbuddy2 potted 8–35 V to 5 V converter",
+      "publisher": "Powerwerx",
+      "url": "https://powerwerx.com/usbbuddy2-powerpole-usb-device-charger"
+    },
+    {
+      "title": "QHLightlux 12–28 V 3000 K IP67 utility light · B0F1V59NXC",
+      "publisher": "Amazon / QHLightlux",
+      "url": "https://www.amazon.com/dp/B0F1V59NXC"
+    },
+    {
+      "title": "Scanstrut TILE USB charging family",
+      "publisher": "Scanstrut",
+      "url": "https://www.scanstrut.com/marine/power/tile"
+    },
+    {
+      "title": "SC-TILE-20 technical drawing and 10–32 V input specification",
+      "publisher": "Scanstrut",
+      "url": "https://www.scanstrut.com/file/inline/upload/TILE/SC-TILE-20/SC-TILE-20_amp_21_Technical_Drawing.pdf"
+    },
+    {
+      "title": "HPM 5 m 10 A AS/NZS workshop extension lead",
+      "publisher": "Bunnings Pacific Fiji",
+      "url": "https://bunningspacific.com.fj/collections/extension-cords-1"
+    },
+    {
+      "title": "Fiji-market Husqvarna G3200P listing",
+      "publisher": "Vinod Patel",
+      "url": "https://www.vinodpatel.com.fj/husqvarna-generator-g3200p-3-2kva-1-phase-petrol"
+    },
+    {
+      "title": "Fiji Airways checked baggage terms",
+      "publisher": "Fiji Airways",
+      "url": "https://www.fijiairways.com/media/246988/fiji-airways-terms-and-conditions-of-carriage.pdf"
+    },
+    {
+      "title": "Passenger declarations and allowances",
+      "publisher": "Fiji Revenue & Customs Service",
+      "url": "https://frcs.org.fj/our-services/customs/visiting-fiji/arriving-in-fiji/"
+    },
+    {
+      "title": "Current Fiji VAT guide",
+      "publisher": "Fiji Revenue & Customs Service",
+      "url": "https://frcs.org.fj/our-services/taxation-section/non-individuals/reporting-and-paying-taxes/vat-guide/"
+    }
   ]
 }

@@ -185,7 +185,7 @@ test("canonical system files contain valid totals, diagram levels and physical e
   assert.match(physicalModel.scene.junctionCableEntries, /bottom face/i);
   assert.match(physicalModel.scene.junctionMounting, /zero cable routes behind/i);
   assert.match(physicalModel.scene.layoutSolver, /independently generates/i);
-  assert.match(physicalModel.scene.layoutSolver, /collision-aware bundle/i);
+  assert.match(physicalModel.scene.layoutSolver, /collision-aware.*bundle/i);
   assert.match(physicalModel.scene.cableGeometry, /continuous tube/i);
   assert.match(physicalModel.scene.cableGeometry, /corner-contained bends/i);
   assert.match(physicalModel.scene.cableGeometry, /seamless adjacent corners/i);
@@ -201,7 +201,7 @@ test("canonical system files contain valid totals, diagram levels and physical e
   assert.equal(physicalModel.connectionAudit.protectiveEarth.connections.length, 6);
   assert.deepEqual(physicalModel.connectionAudit.unifiExpress.ports, ["USB-C power", "WAN", "LAN"]);
   assert.ok(dse.diagram.views.detail.edges.some((edge) => edge.id === "dt-unifi-usbc"));
-  assert.deepEqual(dse.diagram.views.detail.canvas, { width: 2700, height: 1560 });
+  assert.deepEqual(dse.diagram.views.detail.canvas, { width: 3456, height: 2059 });
   assert.ok(dse.diagram.views.detail.nodes.find((node) => node.id === "systemMonitor").x >= 2200);
   assert.ok(!dse.diagram.views.detail.edges.some((edge) => edge.id === "dt-usb-router"));
   assert.ok(!dse.diagram.views.detail.edges.some((edge) => edge.id === "dt-router"));

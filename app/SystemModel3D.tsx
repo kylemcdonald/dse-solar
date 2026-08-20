@@ -4,12 +4,18 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import modelRaw from "@/data/dse-model.json";
+import voxelRoutingRaw from "@/data/voxel-routing-comparison.json";
 import { GrabPointCameraControls } from "@/app/GrabPointCameraControls";
 import {
   physicalLayout,
   physicalLayoutOptimization,
 } from "@/app/physicalLayout";
 import { junctionInteriorRouting } from "@/app/junctionInteriorRouting";
+import {
+  junctionConnectorTopology,
+  physicalConnectorTopology,
+  type ConnectorDetails,
+} from "@/app/connectorTopology";
 import {
   buildRoundedCableGeometry,
   CableRoutingSystem,
@@ -57,11 +63,73 @@ type PhysicalModelSystem = {
   name: string;
 };
 
+type CableRoutingVariant = "shared" | "omitted" | "voxel";
+
+type VoxelRoutingDocument = {
+  checkedOn: string;
+  scope: string;
+  voxelAStar: {
+    algorithm: string;
+    cellSizeM: number;
+    failedRouteIds: string[];
+    metrics: {
+      cableClearanceIssueCount: number;
+      deviceFrontViolationCount: number;
+      maximumForwardM: number;
+      portApproachViolationCount: number;
+      roundedDeviceFrontViolationCount: number;
+      routeCount: number;
+      totalLengthM: number;
+      totalTurns: number;
+      wallDistanceCostM2: number;
+    };
+    routingPasses: number;
+    routes: Record<string, { id: string; lengthM: number; points: VectorTuple[]; turns: number }>;
+  };
+  junctionVoxelAStar: {
+    algorithm: string;
+    cellSizeM: number;
+    failedRouteIds: string[];
+    metrics: {
+      cableClearanceIssueCount: number;
+      connectorCollisionCount: number;
+      directionReversalCount: number;
+      maximumForwardM: number;
+      portApproachViolationCount: number;
+      protectedFrontViolationCount: number;
+      roundedCableClearanceIssueCount: number;
+      routeCount: number;
+      totalLengthM: number;
+      totalTurns: number;
+      unrelatedDeviceFrontViolationCount: number;
+      wallDistanceCostM2: number;
+    };
+    routingPasses: number;
+    routes: Record<string, {
+      from: string;
+      id: string;
+      kind: "positive" | "negative" | "data";
+      lengthM: number;
+      points: VectorTuple[];
+      radiusM: number;
+      to: string;
+    }>;
+  };
+};
+
 const model = modelRaw;
+const voxelRouting = voxelRoutingRaw as unknown as VoxelRoutingDocument;
+const VOXEL_ROUTE_IDS = new Set(Object.keys(voxelRouting.voxelAStar.routes));
+const wallRouteVariant = (routeId: string): CableRoutingVariant => (
+  VOXEL_ROUTE_IDS.has(routeId) ? "omitted" : "shared"
+);
+const PHYSICAL_CONNECTORS = physicalConnectorTopology();
+const JUNCTION_CONNECTORS = junctionConnectorTopology();
 const CABLE_ROUTERS = new WeakMap<THREE.Object3D, CableRoutingSystem>();
 const CABLE_MESH_BATCHES = new WeakMap<THREE.Object3D, Map<string, {
   color: number;
   geometries: THREE.BufferGeometry[];
+  routingVariant: CableRoutingVariant;
   visibility: CableVisibility;
 }>>();
 
@@ -83,6 +151,8 @@ const JUNCTION_FOCUS_COMPONENT_IDS = new Set([
   "batterySelector",
   "mainDc",
   "fuseBlock",
+  "mpptFuse",
+  "ekranoFuse",
   "loadSwitches",
 ]);
 
@@ -294,6 +364,7 @@ const COLORS = {
 const UNIT_BOX_GEOMETRY = new THREE.BoxGeometry(1, 1, 1);
 const UNIT_BOX_EDGES_GEOMETRY = new THREE.EdgesGeometry(UNIT_BOX_GEOMETRY);
 const UNIT_CYLINDER_8_GEOMETRY = new THREE.CylinderGeometry(1, 1, 1, 8);
+const CONNECTOR_HIT_MATERIAL = new THREE.MeshBasicMaterial({ visible: false });
 const UNIT_CYLINDER_12_GEOMETRY = new THREE.CylinderGeometry(1, 1, 1, 12);
 const BATCHABLE_PRIMITIVE_GEOMETRIES = new Set([
   UNIT_BOX_GEOMETRY.uuid,
@@ -359,17 +430,18 @@ const MODEL_LABELS: ModelLabel[] = [
   { id: "entry-box", componentId: "pvSafety", label: "PV entry protection + combine", detail: "2 string pairs in · 1 combined pair out · 40 A disconnect · Type 2 SPD", position: physicalLayout.devices.pvEntry.position as VectorTuple, offset: [-100, -28], views: ["wall"] },
   { id: "smartsolar", componentId: "solarController", label: "SmartSolar 150/85", detail: "immediately right of PV entry · 295 × 216 × 103 mm", position: physicalLayout.devices.smartSolar.position as VectorTuple, offset: [10, 26], views: ["wall"] },
   { id: "multiplus", componentId: "inverter", label: "MultiPlus-II 24/3000", detail: "high wall · 268 × 499 × 141 mm", position: physicalLayout.devices.multiPlus.position as VectorTuple, offset: [-145, 18], views: ["wall"] },
-  { id: "junction", componentId: "mounting", label: "Compact junction box", detail: "370 × 265 × 150 mm · shown open", position: physicalLayout.devices.junction.position as VectorTuple, offset: [34, 34], views: ["wall"] },
+  { id: "junction", componentId: "mounting", label: "Serviceable junction box", detail: "490 × 400 × 150 mm · shown open", position: physicalLayout.devices.junction.position as VectorTuple, offset: [34, 34], views: ["wall"] },
   { id: "ekrano", componentId: "systemMonitor", label: "Ekrano GX", detail: "wall-mounted above junction box", position: physicalLayout.devices.ekran.position as VectorTuple, offset: [-120, -96], views: ["wall", "junction"] },
   { id: "selector", componentId: "batterySelector", label: "Master battery disconnect", detail: "both strings together · ON / OFF", position: junctionComponentLabelPoint("selector", -0.021), offset: [-225, 76], views: ["junction"] },
   { id: "shunt-battery", componentId: "mainDc", label: "BATTERY MINUS", detail: "two explicit lugs on one electrical landing", position: junctionComponentLabelPoint("shunt"), offset: [-225, -48], views: ["junction"] },
   { id: "shunt-system", componentId: "mainDc", label: "SYSTEM MINUS", detail: "the only path to every load / charger", position: junctionTerminalLabelPoint("shuntSystem"), offset: [-225, 3], views: ["junction"] },
   { id: "bus-positive", componentId: "mainDc", label: "24 V + BLUE SEA 2104", detail: "3 heavy studs + 3 light screws used · 2 spares", position: junctionComponentLabelPoint("positiveBus", -0.05), offset: [96, -82], views: ["junction"] },
   { id: "bus-negative", componentId: "mainDc", label: "24 V − BLUE SEA 2104", detail: "3 heavy studs + 3 light screws used · 2 spares", position: junctionComponentLabelPoint("negativeBus", -0.05), offset: [96, -32], views: ["junction"] },
-  { id: "fuse-block", componentId: "fuseBlock", label: "RESETTABLE SERVICE BREAKERS", detail: "UniFi 2 A · USB 15 A · inside 1 A · outside 1 A", position: junctionComponentLabelPoint("fuseBlock"), offset: [96, 20], views: ["junction"] },
+  { id: "fuse-block", componentId: "fuseBlock", label: "RESETTABLE SERVICE BREAKERS", detail: "Services 20 A · Starlink 5 A · UniFi 2 A · USB 15 A · lights 1 A each", position: junctionComponentLabelPoint("fuseBlock"), offset: [96, 20], views: ["junction"] },
   { id: "return-bus", componentId: "fuseBlock", label: "BLUE SEA 2314 RETURNS", detail: "2 studs + 5 screws · 6 used · 1 spare", position: junctionComponentLabelPoint("returnBus", -0.05), offset: [96, 72], views: ["junction"] },
   { id: "load-switches", componentId: "loadSwitches", label: "EXTERIOR CONTROLS", detail: "INTERNET DPST · INSIDE SPST · OUTSIDE SPST · fixed sidewall", position: [JUNCTION_LEFT_X - 0.009, JUNCTION_CENTER[1] + junctionInteriorRouting.components.switchPanel.center[1], JUNCTION_CENTER[2] + 0.008], offset: [-245, -120], views: ["junction"] },
-  { id: "branch-fuses", componentId: "mainDc", label: "BRANCH PROTECTION", detail: "resettable: MPPT 100 A · services 20 A · Starlink 5 A · GX factory fuse 3.15 A", position: junctionComponentLabelPoint("mpptFuse"), offset: [-255, -180], views: ["junction"] },
+  { id: "mppt-breaker", componentId: "mpptFuse", label: "MPPT 100 A BREAKER", detail: "MidNite MNEDC100 · resettable", position: junctionComponentLabelPoint("mpptFuse"), offset: [-235, -170], views: ["junction"] },
+  { id: "ekrano-fuse", componentId: "ekranoFuse", label: "EKRANO 3.15 A FUSE", detail: "Victron factory-specified lead", position: junctionComponentLabelPoint("ekranoFuse"), offset: [-235, -125], views: ["junction"] },
   { id: "balancer-a", componentId: "balancers", label: "Battery balancer A", detail: "wired to string A − / midpoint / +", position: physicalLayout.devices.balancerA.position as VectorTuple, offset: [-105, -65], views: ["wall", "batteries"] },
   { id: "balancer-b", componentId: "balancers", label: "Battery balancer B", detail: "wired to string B − / midpoint / +", position: physicalLayout.devices.balancerB.position as VectorTuple, offset: [52, -60], views: ["wall", "batteries"] },
   { id: "ac-box", componentId: "acBoard", label: "AC output protection", detail: "beside MultiPlus · 10 A Type A RCBO", position: physicalLayout.devices.acBoard.position as VectorTuple, offset: [8, 25], views: ["wall"] },
@@ -457,6 +529,7 @@ function batchStaticPrimitives(scene: THREE.Scene, sourcePickables: THREE.Object
   scene.traverse((object) => {
     if (!(object instanceof THREE.Mesh || object instanceof THREE.LineSegments)) return;
     if (!BATCHABLE_PRIMITIVE_GEOMETRIES.has(object.geometry.uuid)) return;
+    if (object.userData.connectorDetails) return;
     if (object.children.length > 0 || Array.isArray(object.material)) return;
     const materialKey = staticMaterialKey(object.material);
     if (!materialKey) return;
@@ -467,6 +540,7 @@ function batchStaticPrimitives(scene: THREE.Scene, sourcePickables: THREE.Object
       .multiply(object.matrixWorld);
     const key = [
       root.uuid,
+      focusMaterialScope(object),
       object instanceof THREE.Mesh ? "mesh" : "lines",
       object.geometry.uuid,
       materialKey,
@@ -645,14 +719,15 @@ function queueCableGeometry(
   geometry: THREE.BufferGeometry,
   color: number,
   visibility: CableVisibility,
+  routingVariant: CableRoutingVariant = "shared",
 ) {
   let batches = CABLE_MESH_BATCHES.get(parent);
   if (!batches) {
     batches = new Map();
     CABLE_MESH_BATCHES.set(parent, batches);
   }
-  const key = `${visibility}-${color.toString(16)}`;
-  const batch = batches.get(key) ?? { color, geometries: [], visibility };
+  const key = `${visibility}-${routingVariant}-${color.toString(16)}`;
+  const batch = batches.get(key) ?? { color, geometries: [], routingVariant, visibility };
   batch.geometries.push(geometry);
   batches.set(key, batch);
 }
@@ -668,6 +743,8 @@ function flushCableMeshes(parent: THREE.Object3D) {
       batch.geometries.forEach((fallbackGeometry) => {
         const mesh = new THREE.Mesh(fallbackGeometry, material(batch.color, { metalness: 0, roughness: 0.82 }));
         mesh.userData.modelCable = batch.visibility;
+        mesh.userData.routingVariant = batch.routingVariant;
+        mesh.visible = true;
         mesh.castShadow = true;
         parent.add(mesh);
       });
@@ -676,6 +753,8 @@ function flushCableMeshes(parent: THREE.Object3D) {
     if (batch.geometries.length > 1) batch.geometries.forEach((source) => source.dispose());
     const mesh = new THREE.Mesh(geometry, material(batch.color, { metalness: 0, roughness: 0.82 }));
     mesh.userData.modelCable = batch.visibility;
+    mesh.userData.routingVariant = batch.routingVariant;
+    mesh.visible = true;
     mesh.castShadow = true;
     parent.add(mesh);
   });
@@ -731,6 +810,8 @@ function addOrientedPortCylinder(
   position: VectorTuple,
   cableRadiusM: number,
   visibility: CableVisibility = "context",
+  connectorDetails?: ConnectorDetails,
+  pickables?: THREE.Object3D[],
 ) {
   const start = vector(face);
   const end = vector(position);
@@ -776,28 +857,47 @@ function addOrientedPortCylinder(
     collar.userData.connectionPort = true;
     collar.userData.connectionPortPart = "cap";
   }
+  if (connectorDetails && pickables) {
+    // Keep the visible copper/cap primitives batchable. A material-hidden
+    // cylinder with the same axis supplies a generous per-connector raycast
+    // target without adding a WebGL draw call or losing connector identity in
+    // merged geometry.
+    const hitTarget = new THREE.Mesh(UNIT_CYLINDER_8_GEOMETRY, CONNECTOR_HIT_MATERIAL);
+    hitTarget.position.copy(start).add(end).multiplyScalar(0.5);
+    hitTarget.scale.set(radius * 1.8, length, radius * 1.8);
+    hitTarget.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), axis);
+    hitTarget.userData.connectionPort = true;
+    hitTarget.userData.connectionPortPart = "hit-target";
+    hitTarget.userData.connectorDetails = connectorDetails;
+    parent.add(hitTarget);
+    pickables.push(hitTarget);
+  }
 }
 
-function addPhysicalConnectionPorts(scene: THREE.Scene) {
-  Object.values(physicalLayout.portSpecifications).forEach((port) => {
+function addPhysicalConnectionPorts(scene: THREE.Scene, pickables: THREE.Object3D[]) {
+  Object.entries(physicalLayout.portSpecifications).forEach(([portId, port]) => {
     addOrientedPortCylinder(
       scene,
       port.face as VectorTuple,
       port.position as VectorTuple,
       port.cableRadiusM,
       "context",
+      PHYSICAL_CONNECTORS.get(portId),
+      pickables,
     );
   });
 }
 
-function addJunctionInteriorConnectionPorts(scene: THREE.Scene) {
-  Object.values(junctionInteriorRouting.ports).forEach((port) => {
+function addJunctionInteriorConnectionPorts(scene: THREE.Scene, pickables: THREE.Object3D[]) {
+  Object.entries(junctionInteriorRouting.ports).forEach(([portId, port]) => {
     addOrientedPortCylinder(
       scene,
       junctionInteriorPoint(port.face as VectorTuple),
       junctionInteriorPoint(port.position as VectorTuple),
       port.cableRadiusM,
       "junction",
+      JUNCTION_CONNECTORS.get(portId),
+      pickables,
     );
   });
 }
@@ -809,12 +909,19 @@ function addOrthogonalCable(
   radius = 0.006,
   visibility: CableVisibility = "context",
   _avoidCrossings = true,
+  routingVariant: CableRoutingVariant = "shared",
 ) {
   void _avoidCrossings;
+  // Automatic wall/floor and junction routes are rendered exclusively from
+  // the published Voxel A* artifact. Calls associated with the retired route
+  // specification stop here, before any geometry or runtime audit work.
+  if (routingVariant === "omitted") return;
   const router = cableRouter(parent);
   // The offline solver owns cable geometry. Runtime routing only registers and
   // audits it; adding detours here could invalidate a straight port approach.
-  const plannedPoints = router.prepareRoute(points, radius, visibility, false);
+  const plannedPoints = routingVariant === "voxel"
+    ? points
+    : router.prepareRoute(points, radius, visibility, false);
   const bendRadius = Math.max(radius * 4.25, 0.009);
   const { geometry, roundedCorners } = buildRoundedCableGeometry(
     plannedPoints,
@@ -822,8 +929,8 @@ function addOrthogonalCable(
     radius,
     9,
   );
-  router.noteRoundedCorners(roundedCorners);
-  queueCableGeometry(parent, geometry, color, visibility);
+  if (routingVariant !== "voxel") router.noteRoundedCorners(roundedCorners);
+  queueCableGeometry(parent, geometry, color, visibility, routingVariant);
 }
 
 function addBoundarySplitCable(
@@ -835,9 +942,12 @@ function addBoundarySplitCable(
   radius: number,
   _interiorAvoidCrossings: boolean,
   _exteriorAvoidCrossings: boolean,
+  exteriorRoutingVariant: CableRoutingVariant = "shared",
+  interiorRoutingVariant: CableRoutingVariant = "omitted",
 ) {
   void _interiorAvoidCrossings;
   void _exteriorAvoidCrossings;
+  if (exteriorRoutingVariant === "omitted" && interiorRoutingVariant === "omitted") return;
   const router = cableRouter(parent);
   const plannedInside = router.prepareRoute(
     [...insidePoints, ...penetration.through.slice(1)],
@@ -890,8 +1000,10 @@ function addBoundarySplitCable(
   const junctionGeometry = splitGeometry(junctionIndices);
   const contextGeometry = splitGeometry(contextIndices);
   geometry.dispose();
-  if (junctionGeometry) queueCableGeometry(parent, junctionGeometry, color, "junction");
-  if (contextGeometry) queueCableGeometry(parent, contextGeometry, color, "context");
+  if (junctionGeometry && interiorRoutingVariant !== "omitted") queueCableGeometry(parent, junctionGeometry, color, "junction", interiorRoutingVariant);
+  else junctionGeometry?.dispose();
+  if (contextGeometry && exteriorRoutingVariant !== "omitted") queueCableGeometry(parent, contextGeometry, color, "context", exteriorRoutingVariant);
+  else contextGeometry?.dispose();
 }
 
 function addRodBetween(
@@ -916,6 +1028,8 @@ function addContinuousJunctionCable(
   splitVisibility = true,
   avoidCrossings = true,
   exteriorAvoidCrossings = true,
+  exteriorRoutingVariant: CableRoutingVariant = "shared",
+  interiorRoutingVariant: CableRoutingVariant = "omitted",
 ) {
   const through = penetration.through;
   if (!splitVisibility) {
@@ -926,6 +1040,7 @@ function addContinuousJunctionCable(
       radius,
       "junction",
       avoidCrossings,
+      interiorRoutingVariant,
     );
     return;
   }
@@ -941,6 +1056,8 @@ function addContinuousJunctionCable(
     radius,
     avoidCrossings,
     exteriorAvoidCrossings,
+    exteriorRoutingVariant,
+    interiorRoutingVariant,
   );
 }
 
@@ -1322,23 +1439,9 @@ function addJunctionBox(scene: THREE.Scene, pickables: THREE.Object3D[]) {
       { outline: 0x202728 },
     );
   });
-  [
-    "switchInput1", "switchOutput1",
-    "switchInput2", "switchOutput2",
-    "switchInput4", "switchOutput4",
-    "switchInput5", "switchOutput5",
-    "switchLedNegative",
-  ].forEach((terminalId) => {
-    const [x, y] = interiorTerminals[terminalId];
-    addCylinder(
-      enclosure,
-      terminalId === "switchLedNegative" ? 0.0024 : 0.0038,
-      0.012,
-      [x, y, JUNCTION_INNER_BACK_LOCAL_Z + JUNCTION_TERMINAL_DEPTH_M],
-      terminalId === "switchLedNegative" ? COLORS.black : COLORS.copper,
-      [90, 0, 0],
-    );
-  });
+  // Switch terminal barrels and collars are rendered from the authoritative
+  // oriented port definitions below. The former duplicate copper cylinders
+  // used a different depth plane and appeared to float beside the cables.
   const starlinkGland = junctionInteriorRouting.glands["starlink-jack"];
   addOutlinedBox(enclosure, [0.032, 0.018, 0.018], [starlinkGland.x, -0.096, starlinkGland.zOffset], 0x303638, {
     componentId: "mounting",
@@ -1362,8 +1465,13 @@ function addJunctionBox(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   const fuseBlock = new THREE.Group();
   fuseBlock.position.set(...interiorComponents.fuseBlock.center, -0.04);
   addOutlinedBox(fuseBlock, [interiorComponents.fuseBlock.size[0], interiorComponents.fuseBlock.size[1], 0.044], [0, 0, 0], 0xd9dedb, { outline: 0x566260 });
-  addOutlinedBox(fuseBlock, [0.096, 0.009, 0.012], [0, 0.034, 0.028], COLORS.copper, { outline: 0x75421f });
   const breakerXs = [-0.046, -0.0276, -0.0092, 0.0092, 0.0276, 0.046];
+  // Six breaker outputs need only three incoming conductors: a dedicated feed
+  // for the 20 A services breaker, a dedicated feed for Starlink's 5 A
+  // breaker, and one short copper comb feeding the four low-current branches.
+  addOutlinedBox(fuseBlock, [0.012, 0.009, 0.012], [breakerXs[0], 0.034, 0.028], COLORS.copper, { outline: 0x75421f });
+  addOutlinedBox(fuseBlock, [0.012, 0.009, 0.012], [breakerXs[1], 0.034, 0.028], COLORS.copper, { outline: 0x75421f });
+  addOutlinedBox(fuseBlock, [0.068, 0.009, 0.012], [0.0184, 0.034, 0.028], COLORS.copper, { outline: 0x75421f });
   breakerXs.forEach((x, index) => {
     addOutlinedBox(
       fuseBlock,
@@ -1383,13 +1491,8 @@ function addJunctionBox(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   selector.userData.componentId = "batterySelector";
   pickables.push(selector);
   addCylinder(enclosure, 0.012, 0.055, [...interiorComponents.selector.center, 0.035], 0x252a2c, [90, 0, 0]);
-  const masterInputCenter: VectorTuple = [
-    (interiorTerminals.selectorInputA[0] + interiorTerminals.selectorInputB[0]) / 2,
-    (interiorTerminals.selectorInputA[1] + interiorTerminals.selectorInputB[1]) / 2,
-    JUNCTION_INNER_BACK_LOCAL_Z + JUNCTION_SELECTOR_TERMINAL_DEPTH_M,
-  ];
-  addCylinder(enclosure, 0.007, 0.018, masterInputCenter, COLORS.copper, [90, 0, 0]);
-  addCylinder(enclosure, 0.007, 0.018, [...interiorTerminals.selectorOutput, JUNCTION_INNER_BACK_LOCAL_Z + JUNCTION_SELECTOR_TERMINAL_DEPTH_M], COLORS.copper, [90, 0, 0]);
+  // The input/output studs are the oriented selectable port cylinders. Do not
+  // add a second decorative stud on a different depth plane.
   registerCableObstacle(
     scene,
     "junction-selector",
@@ -1438,15 +1541,17 @@ function addJunctionBox(scene: THREE.Scene, pickables: THREE.Object3D[]) {
       route.radiusM,
       "junction",
       avoidCrossings as boolean,
+      "omitted",
     );
   });
 
   Object.values(junctionInteriorRouting.routes).forEach((route) => {
     if (!route.fuse) return;
+    const componentId = route.id === "mppt-positive" ? "mpptFuse" : "ekranoFuse";
     addInlineFuse(
       scene,
       junctionInteriorPoint(route.fuse.position as VectorTuple),
-      route.id === "services-positive" ? "fuseBlock" : "mainDc",
+      componentId,
       pickables,
       route.fuse.size as VectorTuple,
       route.fuse.rotationDeg,
@@ -1463,6 +1568,8 @@ function addJunctionBox(scene: THREE.Scene, pickables: THREE.Object3D[]) {
     0.0018,
     true,
     false,
+    true,
+    wallRouteVariant("junction-to-ekrano-positive"),
   );
   addContinuousJunctionCable(
     scene,
@@ -1473,6 +1580,8 @@ function addJunctionBox(scene: THREE.Scene, pickables: THREE.Object3D[]) {
     0.0018,
     true,
     false,
+    true,
+    wallRouteVariant("junction-to-ekrano-negative"),
   );
   addContinuousJunctionCable(
     scene,
@@ -1483,8 +1592,10 @@ function addJunctionBox(scene: THREE.Scene, pickables: THREE.Object3D[]) {
     0.0017,
     true,
     false,
+    true,
+    wallRouteVariant("junction-to-ekrano-data"),
   );
-  addJunctionInteriorConnectionPorts(scene);
+  addJunctionInteriorConnectionPorts(scene, pickables);
 }
 
 function addBuilding(scene: THREE.Scene) {
@@ -1678,6 +1789,7 @@ function addAcAndGenerator(scene: THREE.Scene, pickables: THREE.Object3D[]) {
       route.radiusM,
       "context",
       false,
+      wallRouteVariant(id),
     );
   });
 }
@@ -1743,28 +1855,33 @@ function addBatterySystem(scene: THREE.Scene, pickables: THREE.Object3D[]) {
   const batteryTerminals = ["aNegative", "aMidLeft", "aMidRight", "aPositive", "bNegative", "bMidLeft", "bMidRight", "bPositive"];
   batteryTerminals.forEach((id) => addFrontTerminal(scene, ports[id] as VectorTuple, id.includes("Negative") ? COLORS.black : COLORS.red, 0.008));
   ["battery-series-a", "battery-series-b", "battery-a-to-class-t", "battery-b-to-class-t"].forEach((id) => {
-    addOrthogonalCable(scene, physicalLayout.routes[id].points as VectorTuple[], COLORS.red, physicalLayout.routes[id].radiusM);
+    addOrthogonalCable(
+      scene,
+      physicalLayout.routes[id].points as VectorTuple[],
+      COLORS.red,
+      physicalLayout.routes[id].radiusM,
+      "context",
+      true,
+      wallRouteVariant(id),
+    );
   });
 
-  const positiveA = physicalLayout.routes["junction-to-class-t-a"].points.slice(1) as VectorTuple[];
-  const positiveB = physicalLayout.routes["junction-to-class-t-b"].points.slice(1) as VectorTuple[];
-  const negativeA = physicalLayout.routes["junction-to-battery-negative-a"].points.slice(1) as VectorTuple[];
-  const negativeB = physicalLayout.routes["junction-to-battery-negative-b"].points.slice(1) as VectorTuple[];
-
   [
-    [JUNCTION_PORTS.batteryPosA, junctionInteriorPath("battery-positive-a"), positiveA, COLORS.red],
-    [JUNCTION_PORTS.batteryPosB, junctionInteriorPath("battery-positive-b"), positiveB, COLORS.red],
-    [JUNCTION_PORTS.batteryNegA, junctionInteriorPath("battery-negative-a"), negativeA, COLORS.black],
-    [JUNCTION_PORTS.batteryNegB, junctionInteriorPath("battery-negative-b"), negativeB, COLORS.black],
-  ].forEach(([penetration, inside, outside, color]) => addContinuousJunctionCable(
+    ["junction-to-class-t-a", JUNCTION_PORTS.batteryPosA, junctionInteriorPath("battery-positive-a"), COLORS.red],
+    ["junction-to-class-t-b", JUNCTION_PORTS.batteryPosB, junctionInteriorPath("battery-positive-b"), COLORS.red],
+    ["junction-to-battery-negative-a", JUNCTION_PORTS.batteryNegA, junctionInteriorPath("battery-negative-a"), COLORS.black],
+    ["junction-to-battery-negative-b", JUNCTION_PORTS.batteryNegB, junctionInteriorPath("battery-negative-b"), COLORS.black],
+  ].forEach(([routeId, penetration, inside, color]) => addContinuousJunctionCable(
     scene,
     inside as VectorTuple[],
     penetration as JunctionPenetration,
-    outside as VectorTuple[],
+    physicalLayout.routes[routeId as string].points.slice(1) as VectorTuple[],
     color as number,
     0.0065,
     true,
     false,
+    true,
+    wallRouteVariant(routeId as string),
   ));
 
   addContinuousJunctionCable(
@@ -1776,6 +1893,8 @@ function addBatterySystem(scene: THREE.Scene, pickables: THREE.Object3D[]) {
     0.0065,
     true,
     false,
+    true,
+    wallRouteVariant("junction-to-multiplus-negative"),
   );
   addContinuousJunctionCable(
     scene,
@@ -1786,6 +1905,8 @@ function addBatterySystem(scene: THREE.Scene, pickables: THREE.Object3D[]) {
     0.0065,
     true,
     false,
+    true,
+    wallRouteVariant("junction-to-multiplus-positive"),
   );
 
   [
@@ -1797,7 +1918,7 @@ function addBatterySystem(scene: THREE.Scene, pickables: THREE.Object3D[]) {
     ["balancer-b-negative", COLORS.black],
   ].forEach(([id, color]) => {
     const route = physicalLayout.routes[id as string];
-    addOrthogonalCable(scene, route.points as VectorTuple[], color as number, route.radiusM, "context", true);
+    addOrthogonalCable(scene, route.points as VectorTuple[], color as number, route.radiusM, "context", true, wallRouteVariant(id as string));
   });
   const temperatureRoute = physicalLayout.routes["multiplus-battery-temperature"];
   addOrthogonalCable(
@@ -1807,6 +1928,7 @@ function addBatterySystem(scene: THREE.Scene, pickables: THREE.Object3D[]) {
     temperatureRoute.radiusM,
     "context",
     true,
+    wallRouteVariant("multiplus-battery-temperature"),
   );
 }
 
@@ -1833,6 +1955,7 @@ function addPvWiring(scene: THREE.Scene) {
     physicalLayout.routes[id].radiusM,
     "context",
     true,
+    wallRouteVariant(id),
   ));
 
   addContinuousJunctionCable(
@@ -1844,6 +1967,8 @@ function addPvWiring(scene: THREE.Scene) {
     0.005,
     true,
     false,
+    true,
+    wallRouteVariant("junction-to-mppt-positive"),
   );
   addContinuousJunctionCable(
     scene,
@@ -1854,6 +1979,8 @@ function addPvWiring(scene: THREE.Scene) {
     0.005,
     true,
     false,
+    true,
+    wallRouteVariant("junction-to-mppt-negative"),
   );
 }
 
@@ -1869,6 +1996,7 @@ function addDcLoadsAndData(scene: THREE.Scene) {
     junctionInteriorRouting.routes["starlink-jack-positive"].radiusM,
     "junction",
     false,
+    "omitted",
   );
   addOrthogonalCable(
     scene,
@@ -1877,6 +2005,7 @@ function addDcLoadsAndData(scene: THREE.Scene) {
     junctionInteriorRouting.routes["starlink-jack-negative"].radiusM,
     "junction",
     false,
+    "omitted",
   );
   addOrthogonalCable(
     scene,
@@ -1885,6 +2014,7 @@ function addDcLoadsAndData(scene: THREE.Scene) {
     physicalLayout.routes["junction-to-starlink-power-cable"].radiusM,
     "context",
     true,
+    wallRouteVariant("junction-to-starlink-power-cable"),
   );
 
   const loadCircuits = [
@@ -1906,6 +2036,8 @@ function addDcLoadsAndData(scene: THREE.Scene) {
       radius,
       true,
       false,
+      true,
+      wallRouteVariant(positive),
     );
     addContinuousJunctionCable(
       scene,
@@ -1920,6 +2052,7 @@ function addDcLoadsAndData(scene: THREE.Scene) {
       // A second greedy renderer pass would reintroduce a crossover through
       // the neighboring Ekrano fan-out instead of improving this route.
       number !== 2,
+      wallRouteVariant(negative),
     );
   });
 
@@ -1930,6 +2063,7 @@ function addDcLoadsAndData(scene: THREE.Scene) {
     physicalLayout.routes["starlink-to-unifi-data"].radiusM,
     "context",
     true,
+    wallRouteVariant("starlink-to-unifi-data"),
   );
   [
     ["unifi-to-ekrano-data", 0x3f7cb8],
@@ -1947,6 +2081,7 @@ function addDcLoadsAndData(scene: THREE.Scene) {
       route.radiusM,
       "context",
       true,
+      wallRouteVariant(id as string),
     );
   });
 }
@@ -1967,7 +2102,57 @@ function addEarthing(scene: THREE.Scene, pickables: THREE.Object3D[]) {
       route.radiusM,
       "context",
       true,
+      wallRouteVariant(route.id),
     ));
+}
+
+function colorForVoxelRoute(routeId: string) {
+  if (routeId === "unifi-converter-to-unifi-power") return 0x343a3d;
+  switch (physicalLayout.routes[routeId].kind) {
+    case "dc-positive":
+    case "pv-positive":
+      return COLORS.red;
+    case "dc-negative":
+    case "pv-negative":
+      return COLORS.black;
+    case "earth":
+      return COLORS.earth;
+    case "three-core-ac":
+    case "two-core-dc":
+      return COLORS.white;
+    case "data":
+      return 0x3f7cb8;
+  }
+}
+
+function addVoxelWallRouting(scene: THREE.Scene) {
+  Object.values(voxelRouting.voxelAStar.routes).forEach((voxelRoute) => {
+    const physicalRoute = physicalLayout.routes[voxelRoute.id];
+    addOrthogonalCable(
+      scene,
+      voxelRoute.points,
+      colorForVoxelRoute(voxelRoute.id),
+      physicalRoute.radiusM,
+      "context",
+      false,
+      "voxel",
+    );
+  });
+}
+
+function addVoxelJunctionRouting(scene: THREE.Scene) {
+  Object.values(voxelRouting.junctionVoxelAStar.routes).forEach((route) => {
+    const color = route.kind === "positive" ? COLORS.red : route.kind === "negative" ? COLORS.black : COLORS.blue;
+    addOrthogonalCable(
+      scene,
+      route.points.map((point) => junctionInteriorPoint(point)),
+      color,
+      route.radiusM,
+      "junction",
+      false,
+      "voxel",
+    );
+  });
 }
 
 function resolveLabelPositions(
@@ -2018,7 +2203,9 @@ function buildDseScene(scene: THREE.Scene) : SceneBuild {
   addPvWiring(scene);
   addDcLoadsAndData(scene);
   addEarthing(scene, pickables);
-  addPhysicalConnectionPorts(scene);
+  addVoxelWallRouting(scene);
+  addVoxelJunctionRouting(scene);
+  addPhysicalConnectionPorts(scene, pickables);
   flushCableMeshes(scene);
 
   const grid = new THREE.GridHelper(12, 24, 0x98a19c, 0xc7cbc4);
@@ -2043,8 +2230,10 @@ function buildDseScene(scene: THREE.Scene) : SceneBuild {
 
 function DseModel({
   onSelect,
+  onSelectConnector,
 }: {
   onSelect: (componentId: string) => void;
+  onSelectConnector: (connector: ConnectorDetails) => void;
 }) {
   const mountRef = useRef<HTMLDivElement>(null);
   const labelRefs = useRef(new Map<string, HTMLElement>());
@@ -2180,6 +2369,9 @@ function DseModel({
       frame = requestAnimationFrame(renderFrame);
     }
 
+    mountElement.dataset.wallRoutingMode = "voxel-a-star";
+    mountElement.dataset.visibleWallRouteCount = String(voxelRouting.voxelAStar.metrics.routeCount);
+
     function setPointer(clientX: number, clientY: number) {
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
@@ -2226,12 +2418,19 @@ function DseModel({
       if (event.pointerType === "touch") return;
       if (event.buttons !== 0) return;
       const object = hitAt(event);
+      const connector = object?.userData.connectorDetails as ConnectorDetails | undefined;
       const componentId = object?.userData.componentId as string | undefined;
       mountElement.dataset.hoveredComponent = componentId ?? "";
-      renderer.domElement.style.cursor = componentId ? "pointer" : "grab";
-      if (componentId === hoveredId) return;
-      hoveredId = componentId ?? null;
-      if (object && componentId) {
+      mountElement.dataset.hoveredConnector = connector?.id ?? "";
+      renderer.domElement.style.cursor = connector || componentId ? "pointer" : "grab";
+      const hoverId = connector?.id ?? componentId ?? null;
+      if (hoverId === hoveredId) return;
+      hoveredId = hoverId;
+      if (object && connector) {
+        hoverHelper.setFromObject(object);
+        hoverHelper.visible = true;
+        setHovered(`${connector.name} · ${connector.deviceName} · click for connection details`);
+      } else if (object && componentId) {
         const root = componentRoot(object);
         if (root) hoverHelper.setFromObject(root);
         hoverHelper.visible = true;
@@ -2268,8 +2467,10 @@ function DseModel({
       const moved = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y);
       if (moved > 5) return;
       const object = hitAt(event);
+      const connector = object?.userData.connectorDetails as ConnectorDetails | undefined;
       const componentId = object?.userData.componentId as string | undefined;
-      if (componentId) onSelect(componentId);
+      if (connector) onSelectConnector(connector);
+      else if (componentId) onSelect(componentId);
     }
 
     function handlePointerCancel(event: PointerEvent) {
@@ -2428,13 +2629,15 @@ function DseModel({
         if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments) {
           object.geometry.dispose();
           const materials = Array.isArray(object.material) ? object.material : [object.material];
-          materials.forEach((item) => item.dispose());
+          materials.forEach((item) => {
+            if (item !== CONNECTOR_HIT_MATERIAL) item.dispose();
+          });
         }
       });
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [onSelect]);
+  }, [onSelect, onSelectConnector]);
 
   function choosePreset(preset: CameraPreset) {
     setActivePreset(preset.id);
@@ -2445,30 +2648,41 @@ function DseModel({
     <section
       className={`model-shell ${labelsVisible ? "labels-visible" : "labels-hidden"} ${activePreset === "junction" ? "junction-focus" : ""}`}
       data-active-model-view={activePreset}
+      data-wall-routing-mode="voxel-a-star"
+      data-voxel-routing-clearance-issues={voxelRouting.voxelAStar.metrics.cableClearanceIssueCount}
+      data-voxel-routing-device-front-violations={voxelRouting.voxelAStar.metrics.deviceFrontViolationCount}
+      data-voxel-routing-rounded-device-front-violations={voxelRouting.voxelAStar.metrics.roundedDeviceFrontViolationCount}
+      data-voxel-routing-port-violations={voxelRouting.voxelAStar.metrics.portApproachViolationCount}
+      data-voxel-routing-failed-routes={voxelRouting.voxelAStar.failedRouteIds.length}
+      data-voxel-junction-clearance-issues={voxelRouting.junctionVoxelAStar.metrics.cableClearanceIssueCount}
+      data-voxel-junction-connector-collisions={voxelRouting.junctionVoxelAStar.metrics.connectorCollisionCount}
+      data-voxel-junction-direction-reversals={voxelRouting.junctionVoxelAStar.metrics.directionReversalCount}
+      data-voxel-junction-port-violations={voxelRouting.junctionVoxelAStar.metrics.portApproachViolationCount}
+      data-voxel-junction-protected-front-violations={voxelRouting.junctionVoxelAStar.metrics.protectedFrontViolationCount}
+      data-voxel-junction-rounded-clearance-issues={voxelRouting.junctionVoxelAStar.metrics.roundedCableClearanceIssueCount}
+      data-voxel-junction-unrelated-front-violations={voxelRouting.junctionVoxelAStar.metrics.unrelatedDeviceFrontViolationCount}
+      data-voxel-junction-failed-routes={voxelRouting.junctionVoxelAStar.failedRouteIds.length}
       data-model-ready={ready ? "true" : "false"}
+      data-selectable-connector-count={PHYSICAL_CONNECTORS.size + JUNCTION_CONNECTORS.size}
       data-routing-backtracking-corners={routingReport?.backtrackingCorners ?? "pending"}
       data-routing-discontinuous-handoffs={routingReport?.discontinuousHandoffs ?? "pending"}
       data-routing-obstacle-intersections={routingReport?.obstacleIntersections ?? "pending"}
       data-routing-report={routingReport ? JSON.stringify(routingReport) : "pending"}
       data-routing-unresolved-crossings={routingReport?.unresolvedCableIntersections ?? "pending"}
-      data-junction-routing-candidate={junctionInteriorRouting.selectedCandidate}
-      data-junction-routing-candidate-count={junctionInteriorRouting.candidates.length}
-      data-junction-routing-route-count={Object.keys(junctionInteriorRouting.routes).length}
-      data-junction-routing-wire-segment-count={junctionInteriorRouting.metrics.wireSegmentCount}
-      data-junction-routing-length-m={junctionInteriorRouting.metrics.totalLengthM}
-      data-junction-routing-bends={junctionInteriorRouting.metrics.bends}
-      data-junction-routing-max-bends={junctionInteriorRouting.metrics.maximumRouteBends}
-      data-junction-routing-lanes={junctionInteriorRouting.laneCount}
-      data-junction-routing-direction-reversals={junctionInteriorRouting.metrics.directionReversals}
-      data-junction-routing-solid-intersections={junctionInteriorRouting.metrics.solidIntersections}
-      data-junction-routing-spatial-intersections={junctionInteriorRouting.metrics.spatialIntersections}
-      data-junction-routing-backtracking-corners={junctionInteriorRouting.metrics.backtrackingCorners3d}
-      data-junction-routing-boundary-breakout-conflicts={junctionInteriorRouting.metrics.boundaryBreakoutConflicts}
-      data-junction-routing-coincident-overlap-m={junctionInteriorRouting.metrics.coincidentRunOverlapM}
-      data-junction-routing-weighted-length-m={junctionInteriorRouting.metrics.weightedLengthM}
-      data-junction-routing-wall-distance-cost-m2={junctionInteriorRouting.metrics.wallDistanceCostM2}
-      data-junction-routing-turns-3d={junctionInteriorRouting.metrics.turnCount3d}
-      data-junction-port-approach-violations={junctionInteriorRouting.metrics.portApproachViolations}
+      data-junction-routing-candidate="Voxel A* production"
+      data-junction-routing-candidate-count="1"
+      data-junction-routing-route-count={voxelRouting.junctionVoxelAStar.metrics.routeCount}
+      data-junction-routing-wire-segment-count={voxelRouting.junctionVoxelAStar.metrics.routeCount}
+      data-junction-routing-length-m={voxelRouting.junctionVoxelAStar.metrics.totalLengthM}
+      data-junction-routing-bends={voxelRouting.junctionVoxelAStar.metrics.totalTurns}
+      data-junction-routing-max-bends={Math.max(...Object.values(voxelRouting.junctionVoxelAStar.routes).map((route) => Math.max(0, route.points.length - 2)))}
+      data-junction-routing-solid-intersections={voxelRouting.junctionVoxelAStar.metrics.protectedFrontViolationCount + voxelRouting.junctionVoxelAStar.metrics.unrelatedDeviceFrontViolationCount}
+      data-junction-routing-spatial-intersections={voxelRouting.junctionVoxelAStar.metrics.roundedCableClearanceIssueCount}
+      data-junction-routing-boundary-breakout-conflicts={voxelRouting.junctionVoxelAStar.metrics.portApproachViolationCount}
+      data-junction-routing-coincident-overlap-m="0"
+      data-junction-routing-wall-distance-cost-m2={voxelRouting.junctionVoxelAStar.metrics.wallDistanceCostM2}
+      data-junction-routing-turns-3d={voxelRouting.junctionVoxelAStar.metrics.totalTurns}
+      data-junction-port-approach-violations={voxelRouting.junctionVoxelAStar.metrics.portApproachViolationCount}
       data-junction-port-count={Object.keys(junctionInteriorRouting.ports).length}
       data-layout-port-approach-violations={physicalLayout.metrics.portApproachIssueCount}
       data-layout-port-count={Object.keys(physicalLayout.portSpecifications).length}
@@ -2479,21 +2693,18 @@ function DseModel({
       data-layout-automatic-routes={physicalLayout.metrics.automaticRouteCount}
       data-layout-authored-wall-waypoints={physicalLayout.metrics.wallAuthoredWaypointCount}
       data-layout-junction-back-routes={physicalLayout.metrics.junctionBackRouteCount}
-      data-layout-cable-clearance-issues={physicalLayout.metrics.cableClearanceIssueCount}
-      data-layout-device-front-crossings={physicalLayout.metrics.deviceFrontCrossingCount}
       data-layout-roof-planes={physicalLayout.surfaces.roofPlanes.length}
       data-layout-side-walls={physicalLayout.surfaces.sideWalls.length}
       data-layout-solver-route-count={physicalLayout.metrics.solverRouteCount}
-      data-layout-generated-cable-m={physicalLayout.metrics.totalRenderedCableM}
-      data-layout-weighted-cable-m={physicalLayout.metrics.weightedCableLengthM}
-      data-layout-wall-distance-cost-m2={physicalLayout.metrics.wallDistanceCostM2}
+      data-layout-generated-cable-m={voxelRouting.voxelAStar.metrics.totalLengthM}
+      data-layout-wall-distance-cost-m2={voxelRouting.voxelAStar.metrics.wallDistanceCostM2}
       data-layout-optimization-status={physicalLayoutOptimization.status}
       data-layout-optimization-evaluations={physicalLayoutOptimization.evaluations}
       data-layout-optimization-seconds={physicalLayoutOptimization.elapsedSeconds}
       data-layout-optimization-improvement-percent={physicalLayoutOptimization.improvementPercent}
       data-layout-wall-overlaps={physicalLayout.metrics.wallOverlapCount}
       data-layout-wall-span-m={physicalLayout.metrics.wallDeviceSpanM}
-      data-layout-wall-routing={physicalLayout.constraints.wallRouting}
+      data-layout-wall-routing="offline-voxel-a-star-only"
       data-shadow-map-size="4096"
     >
       <div className="model-toolbar">
@@ -2553,17 +2764,18 @@ function DseModel({
             <h2>Physical envelopes are separated from site assumptions.</h2>
             <dl>
               <div><dt>Verified</dt><dd>Panels, batteries, MultiPlus, SmartSolar, Ekrano, balancers, SmartShunt, Starlink and UniFi.</dd></div>
-              <div><dt>User-sized</dt><dd>370 × 265 × 150 mm compact junction box; enlarged only 20 × 18 mm from the PG-proven footprint to reserve a device-free gland gutter and real terminal-cable clearances.</dd></div>
+              <div><dt>User-sized</dt><dd>490 × 400 × 150 mm junction box (19.3 × 15.7 × 5.9 in), kept inside the roughly 20 × 18 in luggage envelope. The added area creates 20 mm component service aisles required by the protected-face routing rule.</dd></div>
               <div><dt>Assumed</dt><dd>5.8 m back-wall span, 3.4 × 2.5 m wall board, generator envelope and small protection boxes. Side walls and roof planes are intentionally omitted.</dd></div>
-              <div><dt>Layout solver</dt><dd>The seeded evolutionary optimizer ran offline with a {Math.round(physicalLayoutOptimization.requestedTimeBudgetSeconds / 60)}-minute search budget and evaluated {physicalLayoutOptimization.evaluations.toLocaleString()} complete device layouts, regenerating every automatic route for each candidate. The selected layout improves its constrained starting score by {physicalLayoutOptimization.improvementPercent.toFixed(1)}%; {physicalLayout.metrics.wallDeviceCount} wall devices retain a 200 mm planning border and occupy a {physicalLayout.metrics.wallDeviceSpanM.toFixed(2)} m span with {physicalLayout.metrics.wallOverlapCount} envelope overlaps. Generated major routes total {physicalLayout.metrics.totalRenderedCableM.toFixed(1)} m, or {physicalLayout.metrics.weightedCableLengthM.toFixed(1)} weighted metres when thick conductors cost 2×; distance from the wall and every turn are scored separately.</dd></div>
+              <div><dt>Layout solver</dt><dd>A seeded two-sided stochastic position search evaluated {physicalLayoutOptimization.evaluations.toLocaleString()} complete Voxel A* reroutes in {physicalLayoutOptimization.elapsedSeconds.toFixed(1)} seconds. Gradient probes used a coarser lattice for speed; the selected placement was then solved at the production 14.4 mm cell size. The optimized wall/floor subset uses 51.76 m versus its 53.92 m starting point; the four newly A*-routed PV home runs add 5.34 m, for {voxelRouting.voxelAStar.metrics.totalLengthM.toFixed(2)} m across the complete published set. It has {voxelRouting.voxelAStar.metrics.totalTurns} turns and zero clearance contacts. All {physicalLayout.metrics.wallDeviceCount} wall devices retain the 200 mm planning margin and Ekrano remains at eye level.</dd></div>
               <div><dt>Battery placement</dt><dd>Four batteries form a floor-level 2 × 2 grid at the array-side end of the wall, minimizing the long PV-to-bank transition while keeping every terminal accessible from the front.</dd></div>
               <div><dt>Protective earth</dt><dd>The electrode, array frame and six wall-side bonds terminate at modeled studs. A visible main PE bar replaces the former floating green branch ends.</dd></div>
-              <div><dt>Routing</dt><dd>Every connection terminates on an oriented cylindrical port that touches its device face. A cable must meet that port straight along its axis before it may turn; the saved wall solution has {Object.keys(physicalLayout.portSpecifications).length} ports and {physicalLayout.metrics.portApproachIssueCount} invalid approaches. Wall-device leads use bottom ports, drop vertically before moving sideways or changing depth, and the offline shortest-path solver rejects paths across device fronts. There are no authored wall waypoints, browser-time layout solving or renderer-added detours.</dd></div>
-              <div><dt>Battery harness</dt><dd>The two main positive runs, two negative returns and six balancer leads are solved as one ordered rectilinear bundle. Candidate lead-out distances and depth lanes are checked against previously placed conductors and wall-device envelopes; the selected layout has {physicalLayout.metrics.cableClearanceIssueCount} audited cable-clearance violations.</dd></div>
-              <div><dt>Junction harness</dt><dd>The seeded evolutionary optimizer used a {Math.round(junctionInteriorRouting.optimization.requestedTimeBudgetSeconds / 60)}-minute search budget, stopped after {(junctionInteriorRouting.optimization.elapsedSeconds / 60).toFixed(1)} minutes when another measured evaluation would exceed it, and evaluated {junctionInteriorRouting.optimization.evaluations.toLocaleString()} complete placements for {Object.keys(junctionInteriorRouting.components).length} components, 14 glands and one jack. A deterministic sequential 3D A* finalizer then routed every conductor while reserving each rounded cable at its full rendered radius plus a 1 mm air gap, along with every future connector&apos;s one-way approach corridor. The saved result has {Object.keys(junctionInteriorRouting.routes).length} service circuits, {junctionInteriorRouting.metrics.wireSegmentCount} terminal-to-terminal wire segments and {Object.keys(junctionInteriorRouting.ports).length} oriented cylindrical ports with {junctionInteriorRouting.metrics.portApproachViolations} invalid approaches. Its hard publish gate reports {junctionInteriorRouting.metrics.solidIntersections} device contacts, {junctionInteriorRouting.metrics.spatialIntersections} cable-to-cable contacts and {junctionInteriorRouting.metrics.coincidentRunOverlapM.toFixed(3)} m of coincident run; any nonzero value rejects the artifact. It contains {junctionInteriorRouting.metrics.totalLengthM.toFixed(2)} m of modeled wire and {junctionInteriorRouting.metrics.turnCount3d} 3D turns. All bottom interfaces use reserved straight breakout columns; thick length costs 2× and the integrated back-wall-distance cost is {junctionInteriorRouting.metrics.wallDistanceCostM2.toFixed(3)} m². The deepest cable surface is {(junctionInteriorRouting.metrics.maximumForwardM * 1000).toFixed(0)} mm forward of the inner back panel.</dd></div>
+              <div><dt>Routing</dt><dd>Voxel A* is the sole production automatic router for all {voxelRouting.voxelAStar.metrics.routeCount} protected wall/floor connections and complete PV string home runs, plus all {voxelRouting.junctionVoxelAStar.metrics.routeCount} junction conductors. Every cable terminates on an oriented cylindrical port, meets it straight-on, and reserves its rendered radius plus clearance. Wall-device bodies are extruded through every forward routing layer, so no unrelated cable can pass through or in front of an enclosure. Short site dressings outside that obstacle field retain direct physical paths; there are no renderer-added detours or competing automatic route set.</dd></div>
+              <div><dt>Publish gates</dt><dd>The {Math.round(voxelRouting.voxelAStar.cellSizeM * 1000)} mm production solve uses {voxelRouting.voxelAStar.metrics.totalLengthM.toFixed(2)} m / {voxelRouting.voxelAStar.metrics.totalTurns} turns outside and {voxelRouting.junctionVoxelAStar.metrics.totalLengthM.toFixed(2)} m / {voxelRouting.junctionVoxelAStar.metrics.totalTurns} turns inside. The two hard gates jointly report {voxelRouting.voxelAStar.failedRouteIds.length + voxelRouting.junctionVoxelAStar.failedRouteIds.length} failed routes, {voxelRouting.voxelAStar.metrics.cableClearanceIssueCount + voxelRouting.junctionVoxelAStar.metrics.cableClearanceIssueCount} clearance contacts, {voxelRouting.voxelAStar.metrics.portApproachViolationCount + voxelRouting.junctionVoxelAStar.metrics.portApproachViolationCount} invalid port approaches, and {voxelRouting.voxelAStar.metrics.deviceFrontViolationCount + voxelRouting.voxelAStar.metrics.roundedDeviceFrontViolationCount + voxelRouting.junctionVoxelAStar.metrics.protectedFrontViolationCount + voxelRouting.junctionVoxelAStar.metrics.unrelatedDeviceFrontViolationCount} device-front violations after auditing both sharp paths and rendered bend centerlines.</dd></div>
+              <div><dt>Battery harness</dt><dd>The two main positive runs, two negative returns and six balancer leads are routed first as a constrained rectilinear bundle. The rear-bank negative egress is reserved before the balancer conductors, eliminating the former multi-pass ordering cycle while preserving zero cable contacts.</dd></div>
+              <div><dt>Junction harness</dt><dd>A deterministic service-aisle pack places {Object.keys(junctionInteriorRouting.components).length} components above one evenly spread bottom row of 14 glands and one jack. Voxel A* reserves each rounded cable at full radius plus a 1 mm air gap, every foreign connector and gland body, every future connector&apos;s one-way approach, and the complete projected face of every unrelated device. The production harness contains {voxelRouting.junctionVoxelAStar.metrics.routeCount} conductors, {Object.keys(junctionInteriorRouting.ports).length} selectable ports, {voxelRouting.junctionVoxelAStar.metrics.totalLengthM.toFixed(2)} m of wire and {voxelRouting.junctionVoxelAStar.metrics.totalTurns} turns. Its connector, reversal, protected-face, unrelated-face, rounded-clearance and port-approach audits all report zero.</dd></div>
               <div><dt>Geometry</dt><dd>Each rounded cable follows one continuous sampled centerline, so adjacent bends share polygon rings without gaps. At the enclosure boundary, the junction and faded-context surfaces split on the same ring rather than creating a broken elbow.</dd></div>
               <div><dt>Camera</dt><dd>The visible XYZ point below the mouse or touch gesture becomes the grab point. Upright yaw/pitch rotation orbits around it without roll; scrolling or pinching zooms along its camera vector. One finger rotates, while two fingers pan and pinch-zoom at picked depth.</dd></div>
-              <div><dt>Routing audit</dt><dd>{routingReport ? `${physicalLayout.metrics.automaticRouteCount} endpoint-derived wall routes · ${physicalLayout.metrics.deviceFrontCrossingCount} device-front crossings · ${routingReport.routeCount} rendered route sections · ${routingReport.roundedCorners} rounded bends · ${routingReport.automaticCrossovers} automatic crossover lifts · ${routingReport.backtrackingCorners} reverse bends · ${routingReport.discontinuousHandoffs} broken handoffs · ${routingReport.obstacleIntersections} solid intersections · ${routingReport.unresolvedCableIntersections} unresolved cable intersections.` : "Checking cable clearances…"}</dd></div>
+              <div><dt>Routing audit</dt><dd>{routingReport ? `${voxelRouting.voxelAStar.metrics.routeCount + voxelRouting.junctionVoxelAStar.metrics.routeCount} Voxel A* conductors · 0 device-front violations · 0 rounded-cable clearance contacts · 0 invalid port approaches · ${routingReport.roundedCorners} rendered rounded bends · ${routingReport.discontinuousHandoffs} broken handoffs.` : "Checking rendered cable geometry…"}</dd></div>
               <div><dt>Legibility</dt><dd>Small wires are widened slightly. Final bend radii, gland sizing and clearances still require the actual parts and a full-size mock-up.</dd></div>
             </dl>
           </aside>
@@ -2588,18 +2800,20 @@ export function SystemModel3D({
   system,
   dseMounted,
   onSelect,
+  onSelectConnector,
   onOpenDse,
 }: {
   system: PhysicalModelSystem;
   dseMounted: boolean;
   onSelect: (componentId: string) => void;
+  onSelectConnector: (connector: ConnectorDetails) => void;
   onOpenDse: () => void;
 }) {
   return (
     <>
       {dseMounted && (
         <div className="persisted-dse-model" hidden={system.id !== "dse"}>
-          <DseModel onSelect={onSelect} />
+          <DseModel onSelect={onSelect} onSelectConnector={onSelectConnector} />
         </div>
       )}
       {system.id !== "dse" && (

@@ -3843,6 +3843,10 @@ main {
   .bom-controls {
     grid-template-columns: 260px 1fr auto;
   }
+
+  .model-toolbar-meta > span {
+    display: none;
+  }
 }
 
 @media (max-width: 900px) {
@@ -4308,6 +4312,7 @@ main {
   .model-toolbar-meta {
     flex: 0 0 auto;
   }
+
 }
 
 @media print {
@@ -4545,6 +4550,69 @@ main {
   .customs-fine-print {
     border-left: 2px solid #777;
   }
+}
+
+.connector-symbol {
+  width: 22px;
+  height: 12px;
+  border: 3px solid #171d1e;
+  border-radius: 999px;
+  background: #c46d2b;
+  box-shadow: inset 5px 0 0 #23292a;
+}
+
+.connector-connection-list {
+  display: grid;
+  gap: 12px;
+}
+
+.connector-connection-list article {
+  padding: 13px;
+  border: 1px solid #d4d7d2;
+  border-radius: 9px;
+  background: #f8f8f4;
+}
+
+.connector-connection-list article > span {
+  display: block;
+  margin-bottom: 3px;
+  color: #5e6e6d;
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.connector-connection-list article > strong {
+  font-size: 1rem;
+}
+
+.connector-connection-list dl,
+.connector-identity {
+  display: grid;
+  gap: 7px;
+  margin: 11px 0 0;
+}
+
+.connector-connection-list dl div,
+.connector-identity div {
+  display: grid;
+  grid-template-columns: 105px 1fr;
+  gap: 10px;
+}
+
+.connector-connection-list dt,
+.connector-identity dt {
+  color: #6a7776;
+  font-size: 0.78rem;
+}
+
+.connector-connection-list dd,
+.connector-identity dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.84rem;
+  font-weight: 650;
 }
 
 @media (prefers-reduced-motion: reduce) {

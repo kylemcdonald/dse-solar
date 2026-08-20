@@ -3,6 +3,7 @@
 import {
   type ComponentType,
   type PointerEvent as ReactPointerEvent,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -12,10 +13,12 @@ import dseRaw from "@/data/dse-system.json";
 import dseDeliveryRaw from "@/data/dse-delivery.json";
 import pgRaw from "@/data/pg-system.json";
 import { CustomsView } from "./CustomsView";
-import { JunctionBoxDiagram } from "./JunctionBoxDiagram";
+import type { ConnectorDetails } from "./connectorTopology";
 
 const loadSystemModel3D = () =>
   import("./SystemModel3D").then((module) => ({ default: module.SystemModel3D }));
+const loadJunctionBoxDiagram = () =>
+  import("./JunctionBoxDiagram").then((module) => ({ default: module.JunctionBoxDiagram }));
 
 type FlowType =
   | "all"
@@ -232,6 +235,8 @@ const modelComponentBomIds: Record<string, readonly string[]> = {
   acBoard: ["dse-ac-board"],
   toolOutlet: ["dse-ac-board"],
   fuseBlock: ["dse-fuse-block", "dse-service-return-bus"],
+  mpptFuse: ["dse-fuse-block"],
+  ekranoFuse: ["dse-ekrano-gx"],
   starlink: ["dse-ex-starlink"],
   router: ["dse-router"],
   unifiPower: ["dse-unifi-power"],
@@ -1360,6 +1365,54 @@ function Inspector({
   );
 }
 
+function ConnectorInspector({
+  connector,
+  onClose,
+}: {
+  connector: ConnectorDetails;
+  onClose: () => void;
+}) {
+  return (
+    <aside className="inspector connector-inspector" aria-label="Connector details" role="dialog">
+      <button type="button" className="inspector-close" onClick={onClose} aria-label="Close connector details">×</button>
+      <div className="inspector-topline">
+        <span className="connector-symbol" aria-hidden="true" />
+        <span>{connector.scope}</span>
+      </div>
+      <h2>{connector.name}</h2>
+      <p className="inspector-kicker">Connector on {connector.deviceName}</p>
+      <p className="inspector-summary">{connector.direction}. Modeled cable diameter: {connector.cableDiameterMm.toFixed(1)} mm.</p>
+      <div className="inspector-section">
+        <div className="rail-section-label">Connection topology</div>
+        {connector.connections.length > 0 ? (
+          <div className="connector-connection-list">
+            {connector.connections.map((connection) => (
+              <article key={`${connection.routeId}:${connection.otherConnectorId ?? "termination"}`}>
+                <span>{connection.kind}</span>
+                <strong>{connection.otherDeviceName}</strong>
+                <dl>
+                  <div><dt>Other connector</dt><dd>{connection.otherConnectorName}</dd></div>
+                  <div><dt>Circuit</dt><dd>{connection.routeName}</dd></div>
+                  <div><dt>Route ID</dt><dd>{connection.routeId}</dd></div>
+                </dl>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="model-procurement-empty">This modeled connector has no cable route assigned.</p>
+        )}
+      </div>
+      <div className="inspector-section">
+        <div className="rail-section-label">Identity</div>
+        <dl className="connector-identity">
+          <div><dt>Connector ID</dt><dd>{connector.id}</dd></div>
+          <div><dt>Device</dt><dd>{connector.deviceName}</dd></div>
+        </dl>
+      </div>
+    </aside>
+  );
+}
+
 function BomView({ system }: { system: SystemData }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
@@ -1703,36 +1756,25 @@ export function SystemViewer() {
     system: SystemData;
     dseMounted: boolean;
     onSelect: (componentId: string) => void;
+    onSelectConnector: (connector: ConnectorDetails) => void;
     onOpenDse: () => void;
   }> | null>(null);
+  const [JunctionDiagram, setJunctionDiagram] = useState<ComponentType | null>(null);
   const [viewKey, setViewKey] = useState<"overview" | "detail">("overview");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedConnector, setSelectedConnector] = useState<ConnectorDetails | null>(null);
   const system = systems[systemId];
-
-  useEffect(() => {
-    shellRef.current?.setAttribute("data-viewer-ready", "true");
+  const handleModelSelect = useCallback((componentId: string) => {
+    setSelectedConnector(null);
+    setSelectedId(componentId);
+  }, []);
+  const handleConnectorSelect = useCallback((connector: ConnectorDetails) => {
+    setSelectedId(null);
+    setSelectedConnector(connector);
   }, []);
 
   useEffect(() => {
-    // Parse Three.js while the diagram is idle so the first deliberate switch
-    // to 3D does not make the user wait on the large lazy module. It remains a
-    // split chunk and therefore does not block the initial diagram render.
-    let cancelled = false;
-    const warmModel = () => void loadSystemModel3D().then(({ default: component }) => {
-      if (!cancelled) setModel3D(() => component);
-    });
-    if ("requestIdleCallback" in window) {
-      const idleId = window.requestIdleCallback(warmModel, { timeout: 1800 });
-      return () => {
-        cancelled = true;
-        window.cancelIdleCallback(idleId);
-      };
-    }
-    const timeoutId = window.setTimeout(warmModel, 350);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeoutId);
-    };
+    shellRef.current?.setAttribute("data-viewer-ready", "true");
   }, []);
 
   function changeSystem(id: "dse" | "pg") {
@@ -1741,6 +1783,7 @@ export function SystemViewer() {
     setSystemId(id);
     setViewKey("overview");
     setSelectedId(null);
+    setSelectedConnector(null);
     window.scrollTo({ top: 0 });
   }
 
@@ -1762,9 +1805,13 @@ export function SystemViewer() {
         void loadSystemModel3D().then(({ default: component }) => setModel3D(() => component));
       }
     }
+    if (nextMode === "junction" && !JunctionDiagram) {
+      void loadJunctionBoxDiagram().then(({ default: component }) => setJunctionDiagram(() => component));
+    }
     if ((nextMode === "customs" || nextMode === "junction") && systemId !== "dse") setSystemId("dse");
     setMode(nextMode);
     setSelectedId(null);
+    setSelectedConnector(null);
     window.scrollTo({ top: 0 });
   }
 
@@ -1890,34 +1937,44 @@ export function SystemViewer() {
               <Model3D
                 system={system}
                 dseMounted={dseModelMounted}
-                onSelect={setSelectedId}
+                onSelect={handleModelSelect}
+                onSelectConnector={handleConnectorSelect}
                 onOpenDse={() => changeSystem("dse")}
               />
             ) : (
               <div className="model-loading">Preparing measured 3D scene…</div>
             )}
-            {selectedId && (
+            {(selectedId || selectedConnector) && (
               <div className="inspector-layer">
                 <button
                   type="button"
                   className="inspector-backdrop"
-                  onClick={() => setSelectedId(null)}
-                  aria-label="Close component details"
+                  onClick={() => {
+                    setSelectedId(null);
+                    setSelectedConnector(null);
+                  }}
+                  aria-label="Close details"
                 />
-                <Inspector
-                  system={system}
-                  viewKey="detail"
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                  onClose={() => setSelectedId(null)}
-                  showProcurement
-                />
+                {selectedConnector ? (
+                  <ConnectorInspector connector={selectedConnector} onClose={() => setSelectedConnector(null)} />
+                ) : selectedId ? (
+                  <Inspector
+                    system={system}
+                    viewKey="detail"
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                    onClose={() => setSelectedId(null)}
+                    showProcurement
+                  />
+                ) : null}
               </div>
             )}
           </div>
         )}
 
-        {mode === "junction" && <JunctionBoxDiagram />}
+        {mode === "junction" && (
+          JunctionDiagram ? <JunctionDiagram /> : <div className="model-loading">Preparing junction wiring map…</div>
+        )}
         {mode === "system" && <SystemOverview system={system} />}
         {mode === "bom" && <BomView key={system.id} system={system} />}
         {mode === "customs" && (

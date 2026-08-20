@@ -1,18 +1,18 @@
 {
   "schemaVersion": 6,
-  "generatedAt": "2026-08-19T09:11:38.979Z",
-  "algorithm": "budget-safe steady-state evolutionary placement strategy followed by deterministic sequential 3D A* routing with finite-radius cable reservations, future-port approach reservations, hard component keep-outs, explicit oriented cylindrical ports with mandatory straight-on approaches, renderer-equivalent rounded-tube clearance auditing, and a zero-contact publish gate",
+  "generatedAt": "2026-08-20T07:20:44.496Z",
+  "algorithm": "deterministic service-aisle repack followed by protected-front sequential voxel A* baseline routing",
   "seed": 20260817,
-  "requestedTimeBudgetSeconds": 60,
-  "elapsedSeconds": 57.637,
-  "populationSize": 10,
-  "evaluations": 18,
-  "generations": 16,
-  "startedAt": "2026-08-18T19:27:35.309Z",
+  "requestedTimeBudgetSeconds": 0,
+  "elapsedSeconds": 2.90626,
+  "populationSize": 12,
+  "evaluations": 1,
+  "generations": 0,
+  "startedAt": "2026-08-19T23:43:19.887Z",
   "enclosure": {
     "innerDimensionsM": [
-      0.34,
-      0.235,
+      0.46,
+      0.37,
       0.138
     ],
     "bottomFaceGlandRowsZ": [
@@ -21,9 +21,9 @@
     ],
     "routingDepthOrigin": "metres forward from the inner back-panel surface",
     "maximumAllowedRoutingDepthM": 0.13,
-    "bottomRoutingGutterTopY": -0.08399999999999999,
+    "bottomRoutingGutterTopY": -0.1515,
     "componentToBreakoutGutterGapM": 0.006,
-    "minimumComponentGapM": 0.003,
+    "minimumComponentGapM": 0.02,
     "selectorPortalGapM": 0.011,
     "glandEdgeClearanceM": 0.007,
     "glandGapM": 0.003
@@ -43,211 +43,191 @@
       "few 3D turns",
       "few local depth bridges"
     ],
-    "note": "The evolutionary search owns component positions and gland order; a deterministic sequential 3D A* finalizer derives every route. Every component terminal uses an explicit one-way axial approach, future approach corridors are reserved before routing, the lower enclosure band is a device-free breakout gutter, and every accepted cable centerline is reserved at its full rendered radius plus a 1 mm air gap. A renderer-equivalent rounded-tube audit is a hard publish gate: any cable contact, component contact, coincident run or invalid port approach rejects the generated artifact."
+    "note": "Hard physical violations dominate. Every component has a radius-inflated keep-out envelope and an explicit terminal egress portal; cables may attach to their own terminal but may not cross any device face. The lower enclosure band is reserved exclusively for gland breakout columns, and the through-wall switch bodies are interior keep-outs. Every gland conductor changes depth at the enclosure floor, then rises through its reserved breakout column. The same rounded centerline and realistic insulated-conductor radii used by the Three.js renderer drive final acceptance, with a 1 mm cable-to-cable air gap. Cable length is weighted 2× for conductors at least 10 mm in modeled outside diameter. Integrated distance from the back wall and every 3D turn add cost."
   },
   "baseline": {
     "backtrackingCorners3d": 0,
-    "boundaryBreakoutConflicts": 0,
-    "bridgeCount": 14,
+    "boundaryBreakoutConflicts": 1,
+    "bridgeCount": 8,
     "cableGlandCount": 14,
-    "coincidentRunOverlapM": 0.046322,
+    "coincidentRunOverlapM": 0.258164,
     "componentOverlapAreaM2": 0,
     "componentOverlapCount": 0,
     "depthOverflowM": 0,
-    "directionReversals": 9,
+    "directionReversals": 24,
     "glandCount": 15,
     "glandOverflowM": 0,
     "jackCount": 1,
     "laneCount": 12,
-    "maximumForwardM": 0.1298,
-    "maximumPlanarBends": 8,
-    "planarBends": 89,
+    "maximumForwardM": 0.13,
+    "maximumPlanarBends": 6,
+    "planarBends": 146,
     "portApproachViolations": 0,
-    "routingCost": 35.27607,
+    "routingCost": 57.945032,
     "solidIntersections": 0,
-    "spatialIntersections": 56,
-    "totalLengthM": 10.176643,
-    "turnCount3d": 220,
+    "spatialIntersections": 62,
+    "totalLengthM": 18.716013,
+    "turnCount3d": 277,
     "unbridgeableConflicts": 0,
     "unsatisfiedBridgeConstraints": 0,
-    "wallDistanceCostM2": 0.956785,
-    "weightedLengthM": 12.840379,
-    "wireCrossings": 219,
-    "wireOverlapM": 0.332076,
-    "score": 5.6004632200000004e+26
+    "wallDistanceCostM2": 1.456716,
+    "weightedLengthM": 24.655711,
+    "wireCrossings": 342,
+    "wireOverlapM": 1.297664,
+    "score": 6.212581639999999e+26
   },
   "bestMetrics": {
-    "backtrackingCorners3d": 12,
+    "backtrackingCorners3d": 0,
     "boundaryBreakoutConflicts": 0,
-    "bridgeCount": 5,
+    "bridgeCount": 0,
     "cableGlandCount": 14,
     "coincidentRunOverlapM": 0,
     "componentOverlapAreaM2": 0,
     "componentOverlapCount": 0,
     "depthOverflowM": 0,
-    "directionReversals": 14,
+    "directionReversals": 0,
     "glandCount": 15,
     "glandOverflowM": 0,
     "jackCount": 1,
-    "laneCount": 12,
-    "maximumForwardM": 0.1296,
-    "maximumPlanarBends": 9,
-    "planarBends": 96,
+    "laneCount": 10,
+    "maximumForwardM": 0.13,
+    "maximumPlanarBends": 20,
+    "planarBends": 390,
     "portApproachViolations": 0,
-    "routingCost": 32.480169,
+    "routingCost": 24.357200000000002,
     "solidIntersections": 0,
     "spatialIntersections": 0,
-    "totalLengthM": 9.717381,
-    "turnCount3d": 195,
+    "totalLengthM": 16.5572,
+    "turnCount3d": 390,
     "unbridgeableConflicts": 0,
     "unsatisfiedBridgeConstraints": 0,
-    "wallDistanceCostM2": 0.858753,
-    "weightedLengthM": 12.380118,
-    "wireCrossings": 171,
-    "wireOverlapM": 0.243868,
-    "score": 1.2000000000000013e+21
+    "wallDistanceCostM2": 1.200582,
+    "weightedLengthM": 21.276100000000003,
+    "wireCrossings": 0,
+    "wireOverlapM": 0,
+    "score": 24.357200000000002
   },
-  "improvementPercent": 100,
+  "improvementPercent": 0,
   "bestGenome": {
     "componentCenters": {
-      "selector": [
-        -0.08450080552397862,
-        0.07799999999999999
-      ],
-      "shunt": [
-        -0.056007771106440514,
-        0.0071040268456375785
+      "fuseBlock": [
+        0.16135224654525518,
+        0.11290753619023602
       ],
       "positiveBus": [
-        0.052999226065197,
-        0.0817492418826117
+        0.1285027098488063,
+        -0.08487651758035646
       ],
       "negativeBus": [
-        -0.07842608578105273,
-        -0.0498
+        -0.0847553187198937,
+        -0.06152559080137872
       ],
-      "fuseBlock": [
-        0.11388583884165003,
-        -0.03426384772566121
+      "selector": [
+        -0.03594338587252424,
+        0.10905241514439692
       ],
-      "returnBus": [
-        0.10719170063066959,
-        0.026435706448469744
+      "shunt": [
+        0.168,
+        -0.012060143320821226
       ],
       "switchPanel": [
-        -0.15100000000000002,
-        0.06041964261941593
+        -0.21100000000000002,
+        0.13730187495145946
+      ],
+      "returnBus": [
+        -0.09166796664847061,
+        -0.13399999999999998
       ],
       "mpptFuse": [
-        0.029692252519390373,
-        0.015899011292860844
+        -0.14166889735171573,
+        0.08305993727198802
       ],
       "ekranoFuse": [
-        -0.14800000000000002,
-        -0.0057412739540837095
+        0.039052367331460114,
+        0.017880499437451375
       ]
     },
     "glandOrder": [
-      "ekrano-power",
-      "battery-a-negative",
-      "battery-b-negative",
-      "ekrano-data",
-      "multiplus-negative",
-      "usb-power",
+      "multiplus-positive",
       "unifi-power",
       "outside-light",
-      "mppt-positive",
-      "starlink-jack",
-      "mppt-negative",
-      "multiplus-positive",
+      "battery-a-negative",
       "battery-b-positive",
       "battery-a-positive",
-      "inside-light"
+      "multiplus-negative",
+      "inside-light",
+      "ekrano-power",
+      "mppt-negative",
+      "battery-b-negative",
+      "usb-power",
+      "mppt-positive",
+      "ekrano-data",
+      "starlink-jack"
     ],
     "routeOrder": [
-      "selector-to-positive-bus",
-      "battery-negative-b",
-      "battery-positive-a",
-      "ekrano-positive-feed",
-      "ekrano-data",
-      "mppt-positive",
-      "starlink-jack-negative",
-      "multiplus-negative",
-      "shunt-to-negative-bus",
-      "load-negative-2",
-      "multiplus-positive",
-      "battery-positive-b",
+      "load-positive-4",
+      "ekrano-positive",
       "services-positive",
+      "battery-positive-b",
+      "load-negative-2",
+      "starlink-jack-negative",
+      "selector-to-positive-bus",
+      "switch-input-5",
+      "multiplus-positive",
+      "switch-led-negative",
+      "switch-input-4",
+      "multiplus-negative",
+      "ekrano-positive-feed",
+      "load-negative-4",
+      "ekrano-negative",
+      "load-positive-5",
       "services-positive-feed",
-      "load-negative-3",
+      "battery-negative-b",
+      "starlink-fuse-feed",
+      "switch-input-2",
+      "mppt-positive",
+      "starlink-switch-input",
+      "ekrano-data",
+      "load-positive-2",
+      "mppt-negative",
       "mppt-positive-feed",
       "load-positive-3",
-      "ekrano-negative",
-      "ekrano-positive",
-      "load-positive-2",
-      "starlink-fuse-feed",
+      "load-negative-3",
       "battery-negative-a",
-      "mppt-negative",
       "shunt-voltage-sense",
-      "load-negative-4",
-      "switch-input-5",
-      "switch-input-4",
-      "load-positive-5",
-      "load-positive-4",
-      "load-negative-5",
-      "switch-led-negative",
       "services-negative",
-      "switch-input-2",
-      "starlink-switch-input",
-      "starlink-jack-positive"
+      "starlink-jack-positive",
+      "battery-positive-a",
+      "shunt-to-negative-bus",
+      "load-negative-5"
     ],
-    "rowBreak": 9
+    "rowBreak": 7
   },
   "convergence": [
     {
       "elapsedSeconds": 0,
       "evaluations": 2,
-      "score": 5.60046322e+23
-    },
-    {
-      "elapsedSeconds": 35.784,
-      "evaluations": 11,
-      "score": 5.3011352000000004e+23
-    },
-    {
-      "elapsedSeconds": 39.077,
-      "evaluations": 12,
-      "score": 5.30090127e+23
+      "score": 6.212581639999999e+26
     }
   ],
   "runtime": {
     "candidates": [
       {
-        "name": "initial-population-best",
-        "score": 5.6004632200000004e+26,
-        "totalLengthM": 10.176643,
-        "bends": 89,
-        "crossings": 219,
-        "overlapM": 0.332076,
-        "directionReversals": 9,
-        "solidIntersections": 0
-      },
-      {
-        "name": "evolutionary-optimized-finalized",
-        "score": 1.2000000000000013e+21,
-        "totalLengthM": 9.717381,
-        "bends": 96,
-        "crossings": 171,
-        "overlapM": 0.243868,
-        "directionReversals": 14,
-        "solidIntersections": 0
+        "bends": 390,
+        "crossings": 0,
+        "directionReversals": 0,
+        "name": "Expanded protected-face baseline",
+        "overlapM": 0,
+        "score": 24.357200000000002,
+        "solidIntersections": 0,
+        "totalLengthM": 16.5572
       }
     ],
     "components": {
       "selector": {
         "center": [
-          -0.08450080552397862,
-          0.07799999999999999
+          -0.125,
+          0.14
         ],
         "size": [
           0.075,
@@ -256,8 +236,8 @@
       },
       "shunt": {
         "center": [
-          -0.056007771106440514,
-          0.0071040268456375785
+          -0.1,
+          0.035
         ],
         "size": [
           0.12,
@@ -266,8 +246,8 @@
       },
       "positiveBus": {
         "center": [
-          0.052999226065197,
-          0.0817492418826117
+          0.105,
+          0.135
         ],
         "size": [
           0.178,
@@ -276,8 +256,8 @@
       },
       "negativeBus": {
         "center": [
-          -0.07842608578105273,
-          -0.0498
+          -0.105,
+          -0.085
         ],
         "size": [
           0.178,
@@ -286,8 +266,8 @@
       },
       "fuseBlock": {
         "center": [
-          0.11388583884165003,
-          -0.03426384772566121
+          0.145,
+          -0.085
         ],
         "size": [
           0.108,
@@ -296,8 +276,8 @@
       },
       "returnBus": {
         "center": [
-          0.10719170063066959,
-          0.026435706448469744
+          0.15,
+          0.05
         ],
         "size": [
           0.107,
@@ -306,8 +286,8 @@
       },
       "switchPanel": {
         "center": [
-          -0.15100000000000002,
-          0.06041964261941593
+          -0.2,
+          0.13
         ],
         "size": [
           0.036,
@@ -316,8 +296,8 @@
       },
       "mpptFuse": {
         "center": [
-          0.029692252519390373,
-          0.015899011292860844
+          0.015,
+          0.035
         ],
         "size": [
           0.034,
@@ -326,8 +306,8 @@
       },
       "ekranoFuse": {
         "center": [
-          -0.14800000000000002,
-          -0.0057412739540837095
+          -0.2,
+          0.04
         ],
         "size": [
           0.04,
@@ -339,12 +319,12 @@
       "ekrano-power": {
         "conductorPoints": {
           "ekranPos": [
-            -0.0995,
-            -0.105
+            -0.2135,
+            -0.1725
           ],
           "ekranNeg": [
-            -0.0925,
-            -0.105
+            -0.2065,
+            -0.1725
           ]
         },
         "diameterM": 0.016,
@@ -356,14 +336,14 @@
         "label": "EKRANO POWER",
         "row": 0,
         "type": "gland",
-        "x": -0.096,
-        "zOffset": -0.034
+        "x": -0.21,
+        "zOffset": 0
       },
       "battery-a-negative": {
         "conductorPoints": {
           "batteryNegA": [
-            -0.071,
-            -0.105
+            -0.1799285714285714,
+            -0.1725
           ]
         },
         "diameterM": 0.028,
@@ -374,14 +354,36 @@
         "label": "STRING A −",
         "row": 0,
         "type": "gland",
-        "x": -0.071,
-        "zOffset": -0.034
+        "x": -0.1799285714285714,
+        "zOffset": 0
+      },
+      "starlink-jack": {
+        "conductorPoints": {
+          "starlinkJackPositive": [
+            -0.15285714285714286,
+            -0.1725
+          ],
+          "starlinkJackNegative": [
+            -0.14485714285714285,
+            -0.1725
+          ]
+        },
+        "diameterM": 0.018,
+        "exteriorPortIds": [
+          "junctionStarlinkCable"
+        ],
+        "id": "starlink-jack",
+        "label": "STARLINK 24 V",
+        "row": 0,
+        "type": "jack",
+        "x": -0.14885714285714285,
+        "zOffset": 0
       },
       "battery-b-negative": {
         "conductorPoints": {
           "batteryNegB": [
-            -0.04,
-            -0.105
+            -0.11778571428571429,
+            -0.1725
           ]
         },
         "diameterM": 0.028,
@@ -392,32 +394,32 @@
         "label": "STRING B −",
         "row": 0,
         "type": "gland",
-        "x": -0.04,
-        "zOffset": -0.034
+        "x": -0.11778571428571429,
+        "zOffset": 0
       },
-      "ekrano-data": {
+      "battery-a-positive": {
         "conductorPoints": {
-          "ekranData": [
-            -0.016,
-            -0.105
+          "batteryPosA": [
+            -0.08171428571428573,
+            -0.1725
           ]
         },
-        "diameterM": 0.014,
+        "diameterM": 0.028,
         "exteriorPortIds": [
-          "junctionEkranData"
+          "junctionBatteryPositiveA"
         ],
-        "id": "ekrano-data",
-        "label": "VE.DIRECT",
+        "id": "battery-a-positive",
+        "label": "STRING A +",
         "row": 0,
         "type": "gland",
-        "x": -0.016,
-        "zOffset": -0.034
+        "x": -0.08171428571428573,
+        "zOffset": 0
       },
       "multiplus-negative": {
         "conductorPoints": {
           "multiplusNeg": [
-            0.008,
-            -0.105
+            -0.045642857142857166,
+            -0.1725
           ]
         },
         "diameterM": 0.028,
@@ -428,41 +430,72 @@
         "label": "MULTIPLUS −",
         "row": 0,
         "type": "gland",
-        "x": 0.008,
-        "zOffset": -0.034
+        "x": -0.04564285714285716,
+        "zOffset": 0
       },
-      "usb-power": {
+      "battery-b-positive": {
         "conductorPoints": {
-          "loadPos3": [
-            0.0295,
-            -0.105
-          ],
-          "loadNeg3": [
-            0.0375,
-            -0.105
+          "batteryPosB": [
+            -0.009571428571428588,
+            -0.1725
           ]
         },
-        "diameterM": 0.017,
+        "diameterM": 0.028,
         "exteriorPortIds": [
-          "junctionLoadPositive3",
-          "junctionLoadNegative3"
+          "junctionBatteryPositiveB"
         ],
-        "id": "usb-power",
-        "label": "USB 24 V PAIR",
+        "id": "battery-b-positive",
+        "label": "STRING B +",
         "row": 0,
         "type": "gland",
-        "x": 0.0335,
-        "zOffset": -0.034
+        "x": -0.00957142857142859,
+        "zOffset": 0
+      },
+      "ekrano-data": {
+        "conductorPoints": {
+          "ekranData": [
+            0.019499999999999976,
+            -0.1725
+          ]
+        },
+        "diameterM": 0.014,
+        "exteriorPortIds": [
+          "junctionEkranData"
+        ],
+        "id": "ekrano-data",
+        "label": "VE.DIRECT",
+        "row": 0,
+        "type": "gland",
+        "x": 0.019499999999999976,
+        "zOffset": 0
+      },
+      "mppt-negative": {
+        "conductorPoints": {
+          "mpptNeg": [
+            0.04507142857142855,
+            -0.1725
+          ]
+        },
+        "diameterM": 0.021,
+        "exteriorPortIds": [
+          "junctionMpptNegative"
+        ],
+        "id": "mppt-negative",
+        "label": "MPPT −",
+        "row": 0,
+        "type": "gland",
+        "x": 0.04507142857142855,
+        "zOffset": 0
       },
       "unifi-power": {
         "conductorPoints": {
           "loadPos2": [
-            0.0495,
-            -0.105
+            0.06814285714285712,
+            -0.1725
           ],
           "loadNeg2": [
-            0.0565,
-            -0.105
+            0.07514285714285712,
+            -0.1725
           ]
         },
         "diameterM": 0.016,
@@ -474,18 +507,41 @@
         "label": "UNIFI 24 V PAIR",
         "row": 0,
         "type": "gland",
-        "x": 0.053,
-        "zOffset": -0.034
+        "x": 0.07164285714285712,
+        "zOffset": 0
+      },
+      "inside-light": {
+        "conductorPoints": {
+          "loadPos4": [
+            0.09221428571428565,
+            -0.1725
+          ],
+          "loadNeg4": [
+            0.09921428571428566,
+            -0.1725
+          ]
+        },
+        "diameterM": 0.016,
+        "exteriorPortIds": [
+          "junctionLoadPositive4",
+          "junctionLoadNegative4"
+        ],
+        "id": "inside-light",
+        "label": "INSIDE LIGHT",
+        "row": 0,
+        "type": "gland",
+        "x": 0.09571428571428567,
+        "zOffset": 0
       },
       "outside-light": {
         "conductorPoints": {
           "loadPos5": [
-            0.0685,
-            -0.105
+            0.11628571428571424,
+            -0.1725
           ],
           "loadNeg5": [
-            0.0755,
-            -0.105
+            0.12328571428571425,
+            -0.1725
           ]
         },
         "diameterM": 0.016,
@@ -497,14 +553,14 @@
         "label": "OUTSIDE LIGHT",
         "row": 0,
         "type": "gland",
-        "x": 0.072,
-        "zOffset": -0.034
+        "x": 0.11978571428571425,
+        "zOffset": 0
       },
       "mppt-positive": {
         "conductorPoints": {
           "mpptPos": [
-            0.0935,
-            -0.105
+            0.14635714285714282,
+            -0.1725
           ]
         },
         "diameterM": 0.021,
@@ -515,54 +571,14 @@
         "label": "MPPT +",
         "row": 0,
         "type": "gland",
-        "x": 0.0935,
-        "zOffset": -0.034
-      },
-      "starlink-jack": {
-        "conductorPoints": {
-          "starlinkJackPositive": [
-            -0.072,
-            -0.105
-          ],
-          "starlinkJackNegative": [
-            -0.064,
-            -0.105
-          ]
-        },
-        "diameterM": 0.018,
-        "exteriorPortIds": [
-          "junctionStarlinkCable"
-        ],
-        "id": "starlink-jack",
-        "label": "STARLINK 24 V",
-        "row": 1,
-        "type": "jack",
-        "x": -0.068,
-        "zOffset": 0.034
-      },
-      "mppt-negative": {
-        "conductorPoints": {
-          "mpptNeg": [
-            -0.0455,
-            -0.105
-          ]
-        },
-        "diameterM": 0.021,
-        "exteriorPortIds": [
-          "junctionMpptNegative"
-        ],
-        "id": "mppt-negative",
-        "label": "MPPT −",
-        "row": 1,
-        "type": "gland",
-        "x": -0.0455,
-        "zOffset": 0.034
+        "x": 0.14635714285714282,
+        "zOffset": 0
       },
       "multiplus-positive": {
         "conductorPoints": {
           "multiplusPos": [
-            -0.018,
-            -0.105
+            0.17892857142857138,
+            -0.1725
           ]
         },
         "diameterM": 0.028,
@@ -571,123 +587,85 @@
         ],
         "id": "multiplus-positive",
         "label": "MULTIPLUS +",
-        "row": 1,
+        "row": 0,
         "type": "gland",
-        "x": -0.018,
-        "zOffset": 0.034
+        "x": 0.17892857142857138,
+        "zOffset": 0
       },
-      "battery-b-positive": {
+      "usb-power": {
         "conductorPoints": {
-          "batteryPosB": [
-            0.013,
-            -0.105
-          ]
-        },
-        "diameterM": 0.028,
-        "exteriorPortIds": [
-          "junctionBatteryPositiveB"
-        ],
-        "id": "battery-b-positive",
-        "label": "STRING B +",
-        "row": 1,
-        "type": "gland",
-        "x": 0.013,
-        "zOffset": 0.034
-      },
-      "battery-a-positive": {
-        "conductorPoints": {
-          "batteryPosA": [
-            0.044,
-            -0.105
-          ]
-        },
-        "diameterM": 0.028,
-        "exteriorPortIds": [
-          "junctionBatteryPositiveA"
-        ],
-        "id": "battery-a-positive",
-        "label": "STRING A +",
-        "row": 1,
-        "type": "gland",
-        "x": 0.044,
-        "zOffset": 0.034
-      },
-      "inside-light": {
-        "conductorPoints": {
-          "loadPos4": [
-            0.0655,
-            -0.105
+          "loadPos3": [
+            0.20549999999999996,
+            -0.1725
           ],
-          "loadNeg4": [
-            0.0725,
-            -0.105
+          "loadNeg3": [
+            0.21349999999999994,
+            -0.1725
           ]
         },
-        "diameterM": 0.016,
+        "diameterM": 0.017,
         "exteriorPortIds": [
-          "junctionLoadPositive4",
-          "junctionLoadNegative4"
+          "junctionLoadPositive3",
+          "junctionLoadNegative3"
         ],
-        "id": "inside-light",
-        "label": "INSIDE LIGHT",
-        "row": 1,
+        "id": "usb-power",
+        "label": "USB 24 V PAIR",
+        "row": 0,
         "type": "gland",
-        "x": 0.069,
-        "zOffset": 0.034
+        "x": 0.20949999999999994,
+        "zOffset": 0
       }
     },
     "glandRows": [
       [
         "ekrano-power",
         "battery-a-negative",
-        "battery-b-negative",
-        "ekrano-data",
-        "multiplus-negative",
-        "usb-power",
-        "unifi-power",
-        "outside-light",
-        "mppt-positive"
-      ],
-      [
         "starlink-jack",
-        "mppt-negative",
-        "multiplus-positive",
-        "battery-b-positive",
+        "battery-b-negative",
         "battery-a-positive",
-        "inside-light"
+        "multiplus-negative",
+        "battery-b-positive",
+        "ekrano-data",
+        "mppt-negative",
+        "unifi-power",
+        "inside-light",
+        "outside-light",
+        "mppt-positive",
+        "multiplus-positive",
+        "usb-power"
       ]
     ],
-    "laneCount": 12,
+    "laneCount": 10,
     "metrics": {
-      "backtrackingCorners3d": 12,
+      "backtrackingCorners3d": 0,
       "boundaryBreakoutConflicts": 0,
-      "bridgeCount": 5,
+      "bridgeCount": 0,
       "cableGlandCount": 14,
       "coincidentRunOverlapM": 0,
       "componentOverlapAreaM2": 0,
       "componentOverlapCount": 0,
       "depthOverflowM": 0,
-      "directionReversals": 14,
+      "directionReversals": 0,
       "glandCount": 15,
       "glandOverflowM": 0,
       "jackCount": 1,
-      "laneCount": 12,
-      "maximumForwardM": 0.1296,
-      "maximumPlanarBends": 9,
-      "planarBends": 96,
+      "laneCount": 10,
+      "maximumForwardM": 0.13,
+      "maximumPlanarBends": 20,
+      "planarBends": 390,
       "portApproachViolations": 0,
-      "routingCost": 32.480169,
+      "routingCost": 24.357200000000002,
       "solidIntersections": 0,
       "spatialIntersections": 0,
-      "totalLengthM": 9.717381,
-      "turnCount3d": 195,
+      "totalLengthM": 16.5572,
+      "turnCount3d": 390,
       "unbridgeableConflicts": 0,
       "unsatisfiedBridgeConstraints": 0,
-      "wallDistanceCostM2": 0.858753,
-      "weightedLengthM": 12.380118,
-      "wireCrossings": 171,
-      "wireOverlapM": 0.243868,
-      "score": 1.2000000000000013e+21
+      "wallDistanceCostM2": 1.200582,
+      "weightedLengthM": 21.276100000000003,
+      "wireCrossings": 0,
+      "wireOverlapM": 0,
+      "score": 24.357200000000002
     },
     "ports": {
       "selectorInputA": {
@@ -695,19 +673,19 @@
         "componentId": "selector",
         "direction": [
           0,
-          0,
-          1
+          -1,
+          0
         ],
         "face": [
-          -0.106501,
-          0.068,
-          0.084
+          -0.137,
+          0.10250000000000001,
+          0.042
         ],
         "lengthM": 0.0108,
         "position": [
-          -0.106501,
-          0.068,
-          0.09480000000000001
+          -0.137,
+          0.0917,
+          0.042
         ]
       },
       "selectorInputB": {
@@ -715,39 +693,39 @@
         "componentId": "selector",
         "direction": [
           0,
-          0,
-          1
+          -1,
+          0
         ],
         "face": [
-          -0.106501,
-          0.088,
-          0.084
+          -0.113,
+          0.10250000000000001,
+          0.042
         ],
         "lengthM": 0.0108,
         "position": [
-          -0.106501,
-          0.088,
-          0.09480000000000001
+          -0.113,
+          0.0917,
+          0.042
         ]
       },
       "selectorOutput": {
         "cableRadiusM": 0.0072,
         "componentId": "selector",
         "direction": [
+          1,
           0,
-          0,
-          1
+          0
         ],
         "face": [
-          -0.062501,
-          0.078,
-          0.084
+          -0.0875,
+          0.14,
+          0.042
         ],
         "lengthM": 0.0108,
         "position": [
-          -0.062501,
-          0.078,
-          0.09480000000000001
+          -0.07669999999999999,
+          0.14,
+          0.042
         ]
       },
       "shuntBatteryA": {
@@ -759,14 +737,14 @@
           1
         ],
         "face": [
-          -0.106008,
-          0.007104,
+          -0.154,
+          0.035,
           0.054
         ],
         "lengthM": 0.0108,
         "position": [
-          -0.106008,
-          0.007104,
+          -0.154,
+          0.035,
           0.0648
         ]
       },
@@ -779,14 +757,14 @@
           1
         ],
         "face": [
-          -0.088008,
-          0.007104,
+          -0.128,
+          0.035,
           0.054
         ],
         "lengthM": 0.0108,
         "position": [
-          -0.088008,
-          0.007104,
+          -0.128,
+          0.035,
           0.0648
         ]
       },
@@ -799,14 +777,14 @@
           1
         ],
         "face": [
-          -0.013008,
-          0.007104,
+          -0.05700000000000002,
+          0.035,
           0.054
         ],
         "lengthM": 0.0108,
         "position": [
-          -0.013008,
-          0.007104,
+          -0.05700000000000002,
+          0.035,
           0.0648
         ]
       },
@@ -819,14 +797,14 @@
           1
         ],
         "face": [
-          -0.056008,
-          0.007104,
+          -0.1,
+          0.035,
           0.054
         ],
         "lengthM": 0.008,
         "position": [
-          -0.056008,
-          0.007104,
+          -0.1,
+          0.035,
           0.062
         ]
       },
@@ -839,14 +817,14 @@
           1
         ],
         "face": [
-          -0.038008,
-          -0.006896,
+          -0.08200000000000002,
+          0.021000000000000005,
           0.054
         ],
         "lengthM": 0.008,
         "position": [
-          -0.038008,
-          -0.006896,
+          -0.08200000000000002,
+          0.021000000000000005,
           0.062
         ]
       },
@@ -855,19 +833,19 @@
         "componentId": "fuseBlock",
         "direction": [
           0,
-          0,
-          1
+          1,
+          0
         ],
         "face": [
-          0.067886,
-          -0.000264,
-          0.071
+          0.098,
+          -0.04150000000000001,
+          0.04
         ],
         "lengthM": 0.008,
         "position": [
-          0.067886,
-          -0.000264,
-          0.07899999999999999
+          0.098,
+          -0.03350000000000001,
+          0.04
         ]
       },
       "servicesFuseOut": {
@@ -875,19 +853,19 @@
         "componentId": "fuseBlock",
         "direction": [
           0,
-          0,
-          1
+          -1,
+          0
         ],
         "face": [
-          0.087886,
-          -0.000264,
-          0.071
+          0.098,
+          -0.1285,
+          0.04
         ],
         "lengthM": 0.008,
         "position": [
-          0.087886,
-          -0.000264,
-          0.07899999999999999
+          0.098,
+          -0.1365,
+          0.04
         ]
       },
       "fuseInput": {
@@ -895,19 +873,19 @@
         "componentId": "fuseBlock",
         "direction": [
           0,
-          0,
-          1
+          1,
+          0
         ],
         "face": [
-          0.107886,
-          -0.000264,
-          0.071
+          0.161,
+          -0.04150000000000001,
+          0.04
         ],
         "lengthM": 0.008,
         "position": [
-          0.107886,
-          -0.000264,
-          0.07899999999999999
+          0.161,
+          -0.03350000000000001,
+          0.04
         ]
       },
       "starlinkFuseIn": {
@@ -915,19 +893,19 @@
         "componentId": "fuseBlock",
         "direction": [
           0,
-          0,
-          1
+          1,
+          0
         ],
         "face": [
-          0.127886,
-          -0.000264,
-          0.071
+          0.116,
+          -0.04150000000000001,
+          0.04
         ],
         "lengthM": 0.008,
         "position": [
-          0.127886,
-          -0.000264,
-          0.07899999999999999
+          0.116,
+          -0.03350000000000001,
+          0.04
         ]
       },
       "starlinkFuseOut": {
@@ -935,19 +913,19 @@
         "componentId": "fuseBlock",
         "direction": [
           0,
-          0,
-          1
+          -1,
+          0
         ],
         "face": [
-          0.147886,
-          -0.000264,
-          0.071
+          0.116,
+          -0.1285,
+          0.04
         ],
         "lengthM": 0.008,
         "position": [
-          0.147886,
-          -0.000264,
-          0.07899999999999999
+          0.116,
+          -0.1365,
+          0.04
         ]
       },
       "switchInput1": {
@@ -959,14 +937,14 @@
           1
         ],
         "face": [
-          -0.16,
-          0.09542,
+          -0.20900000000000002,
+          0.165,
           0.1
         ],
         "lengthM": 0.008,
         "position": [
-          -0.16,
-          0.09542,
+          -0.20900000000000002,
+          0.165,
           0.10800000000000001
         ]
       },
@@ -979,14 +957,14 @@
           1
         ],
         "face": [
-          -0.132,
-          0.09542,
+          -0.18100000000000002,
+          0.165,
           0.1
         ],
         "lengthM": 0.008,
         "position": [
-          -0.132,
-          0.09542,
+          -0.18100000000000002,
+          0.165,
           0.10800000000000001
         ]
       },
@@ -999,14 +977,14 @@
           1
         ],
         "face": [
-          -0.16,
-          0.08042,
+          -0.20900000000000002,
+          0.15,
           0.1
         ],
         "lengthM": 0.008,
         "position": [
-          -0.16,
-          0.08042,
+          -0.20900000000000002,
+          0.15,
           0.10800000000000001
         ]
       },
@@ -1019,14 +997,14 @@
           1
         ],
         "face": [
-          -0.132,
-          0.08042,
+          -0.18100000000000002,
+          0.15,
           0.1
         ],
         "lengthM": 0.008,
         "position": [
-          -0.132,
-          0.08042,
+          -0.18100000000000002,
+          0.15,
           0.10800000000000001
         ]
       },
@@ -1039,14 +1017,14 @@
           1
         ],
         "face": [
-          -0.16,
-          0.05342,
+          -0.20900000000000002,
+          0.123,
           0.1
         ],
         "lengthM": 0.008,
         "position": [
-          -0.16,
-          0.05342,
+          -0.20900000000000002,
+          0.123,
           0.10800000000000001
         ]
       },
@@ -1059,14 +1037,14 @@
           1
         ],
         "face": [
-          -0.132,
-          0.05342,
+          -0.18100000000000002,
+          0.123,
           0.1
         ],
         "lengthM": 0.008,
         "position": [
-          -0.132,
-          0.05342,
+          -0.18100000000000002,
+          0.123,
           0.10800000000000001
         ]
       },
@@ -1079,14 +1057,14 @@
           1
         ],
         "face": [
-          -0.16,
-          0.03142,
+          -0.20900000000000002,
+          0.10099999999999999,
           0.1
         ],
         "lengthM": 0.008,
         "position": [
-          -0.16,
-          0.03142,
+          -0.20900000000000002,
+          0.10099999999999999,
           0.10800000000000001
         ]
       },
@@ -1099,14 +1077,14 @@
           1
         ],
         "face": [
-          -0.132,
-          0.03142,
+          -0.18100000000000002,
+          0.10099999999999999,
           0.1
         ],
         "lengthM": 0.008,
         "position": [
-          -0.132,
-          0.03142,
+          -0.18100000000000002,
+          0.10099999999999999,
           0.10800000000000001
         ]
       },
@@ -1119,14 +1097,14 @@
           1
         ],
         "face": [
-          -0.16,
-          0.01342,
+          -0.20900000000000002,
+          0.08299999999999999,
           0.1
         ],
         "lengthM": 0.008,
         "position": [
-          -0.16,
-          0.01342,
+          -0.20900000000000002,
+          0.08299999999999999,
           0.10800000000000001
         ]
       },
@@ -1139,14 +1117,14 @@
           1
         ],
         "face": [
-          -0.001001,
-          0.089749,
+          0.05099999999999999,
+          0.143,
           0.057
         ],
         "lengthM": 0.0108,
         "position": [
-          -0.001001,
-          0.089749,
+          0.05099999999999999,
+          0.143,
           0.0678
         ]
       },
@@ -1159,14 +1137,14 @@
           1
         ],
         "face": [
-          -0.132426,
-          -0.0418,
+          -0.15899999999999997,
+          -0.07700000000000001,
           0.057
         ],
         "lengthM": 0.0108,
         "position": [
-          -0.132426,
-          -0.0418,
+          -0.15899999999999997,
+          -0.07700000000000001,
           0.0678
         ]
       },
@@ -1179,14 +1157,14 @@
           1
         ],
         "face": [
-          0.034999,
-          0.089749,
+          0.087,
+          0.143,
           0.057
         ],
         "lengthM": 0.0108,
         "position": [
-          0.034999,
-          0.089749,
+          0.087,
+          0.143,
           0.0678
         ]
       },
@@ -1199,14 +1177,14 @@
           1
         ],
         "face": [
-          -0.096426,
-          -0.0418,
+          -0.123,
+          -0.07700000000000001,
           0.057
         ],
         "lengthM": 0.0108,
         "position": [
-          -0.096426,
-          -0.0418,
+          -0.123,
+          -0.07700000000000001,
           0.0678
         ]
       },
@@ -1219,14 +1197,14 @@
           1
         ],
         "face": [
-          0.070999,
-          0.089749,
+          0.12299999999999998,
+          0.143,
           0.057
         ],
         "lengthM": 0.00825,
         "position": [
-          0.070999,
-          0.089749,
+          0.12299999999999998,
+          0.143,
           0.06525
         ]
       },
@@ -1239,14 +1217,14 @@
           1
         ],
         "face": [
-          -0.060426,
-          -0.0418,
+          -0.087,
+          -0.07700000000000001,
           0.057
         ],
         "lengthM": 0.00825,
         "position": [
-          -0.060426,
-          -0.0418,
+          -0.087,
+          -0.07700000000000001,
           0.06525
         ]
       },
@@ -1259,14 +1237,14 @@
           1
         ],
         "face": [
-          -0.001001,
-          0.069749,
+          0.05099999999999999,
+          0.12299999999999998,
           0.057
         ],
         "lengthM": 0.008,
         "position": [
-          -0.001001,
-          0.069749,
+          0.05099999999999999,
+          0.12299999999999998,
           0.065
         ]
       },
@@ -1279,14 +1257,14 @@
           1
         ],
         "face": [
-          -0.132426,
-          -0.0618,
+          -0.15899999999999997,
+          -0.097,
           0.057
         ],
         "lengthM": 0.008,
         "position": [
-          -0.132426,
-          -0.0618,
+          -0.15899999999999997,
+          -0.097,
           0.065
         ]
       },
@@ -1299,14 +1277,14 @@
           1
         ],
         "face": [
-          0.034999,
-          0.069749,
+          0.087,
+          0.12299999999999998,
           0.057
         ],
         "lengthM": 0.008,
         "position": [
-          0.034999,
-          0.069749,
+          0.087,
+          0.12299999999999998,
           0.065
         ]
       },
@@ -1319,14 +1297,14 @@
           1
         ],
         "face": [
-          -0.096426,
-          -0.0618,
+          -0.123,
+          -0.097,
           0.057
         ],
         "lengthM": 0.008,
         "position": [
-          -0.096426,
-          -0.0618,
+          -0.123,
+          -0.097,
           0.065
         ]
       },
@@ -1339,14 +1317,14 @@
           1
         ],
         "face": [
-          0.070999,
-          0.069749,
+          0.12299999999999998,
+          0.12299999999999998,
           0.057
         ],
         "lengthM": 0.008,
         "position": [
-          0.070999,
-          0.069749,
+          0.12299999999999998,
+          0.12299999999999998,
           0.065
         ]
       },
@@ -1359,14 +1337,14 @@
           1
         ],
         "face": [
-          -0.060426,
-          -0.0618,
+          -0.087,
+          -0.097,
           0.057
         ],
         "lengthM": 0.008,
         "position": [
-          -0.060426,
-          -0.0618,
+          -0.087,
+          -0.097,
           0.065
         ]
       },
@@ -1379,14 +1357,14 @@
           1
         ],
         "face": [
-          0.106999,
-          0.069749,
+          0.15899999999999997,
+          0.12299999999999998,
           0.057
         ],
         "lengthM": 0.008,
         "position": [
-          0.106999,
-          0.069749,
+          0.15899999999999997,
+          0.12299999999999998,
           0.065
         ]
       },
@@ -1399,14 +1377,14 @@
           1
         ],
         "face": [
-          0.062192,
-          0.032436,
+          0.10499999999999998,
+          0.055999999999999994,
           0.056
         ],
         "lengthM": 0.008,
         "position": [
-          0.062192,
-          0.032436,
+          0.10499999999999998,
+          0.055999999999999994,
           0.064
         ]
       },
@@ -1419,14 +1397,14 @@
           1
         ],
         "face": [
-          0.075192,
-          0.021436,
+          0.118,
+          0.044999999999999984,
           0.056
         ],
         "lengthM": 0.008,
         "position": [
-          0.075192,
-          0.021436,
+          0.118,
+          0.044999999999999984,
           0.064
         ]
       },
@@ -1439,14 +1417,14 @@
           1
         ],
         "face": [
-          0.091192,
-          0.021436,
+          0.134,
+          0.044999999999999984,
           0.056
         ],
         "lengthM": 0.008,
         "position": [
-          0.091192,
-          0.021436,
+          0.134,
+          0.044999999999999984,
           0.064
         ]
       },
@@ -1459,14 +1437,14 @@
           1
         ],
         "face": [
-          0.107192,
-          0.021436,
+          0.15,
+          0.044999999999999984,
           0.056
         ],
         "lengthM": 0.008,
         "position": [
-          0.107192,
-          0.021436,
+          0.15,
+          0.044999999999999984,
           0.064
         ]
       },
@@ -1479,14 +1457,14 @@
           1
         ],
         "face": [
-          0.123192,
-          0.021436,
+          0.16599999999999998,
+          0.044999999999999984,
           0.056
         ],
         "lengthM": 0.008,
         "position": [
-          0.123192,
-          0.021436,
+          0.16599999999999998,
+          0.044999999999999984,
           0.064
         ]
       },
@@ -1499,14 +1477,14 @@
           1
         ],
         "face": [
-          0.139192,
-          0.021436,
+          0.182,
+          0.044999999999999984,
           0.056
         ],
         "lengthM": 0.008,
         "position": [
-          0.139192,
-          0.021436,
+          0.182,
+          0.044999999999999984,
           0.064
         ]
       },
@@ -1515,19 +1493,19 @@
         "componentId": "fuseBlock",
         "direction": [
           0,
-          0,
-          1
+          -1,
+          0
         ],
         "face": [
-          0.079886,
-          -0.068264,
-          0.071
+          0.134,
+          -0.1285,
+          0.04
         ],
         "lengthM": 0.008,
         "position": [
-          0.079886,
-          -0.068264,
-          0.07899999999999999
+          0.134,
+          -0.1365,
+          0.04
         ]
       },
       "fuseOutput2": {
@@ -1535,19 +1513,19 @@
         "componentId": "fuseBlock",
         "direction": [
           0,
-          0,
-          1
+          -1,
+          0
         ],
         "face": [
-          0.101886,
-          -0.068264,
-          0.071
+          0.152,
+          -0.1285,
+          0.04
         ],
         "lengthM": 0.008,
         "position": [
-          0.101886,
-          -0.068264,
-          0.07899999999999999
+          0.152,
+          -0.1365,
+          0.04
         ]
       },
       "fuseOutput3": {
@@ -1555,19 +1533,19 @@
         "componentId": "fuseBlock",
         "direction": [
           0,
-          0,
-          1
+          -1,
+          0
         ],
         "face": [
-          0.125886,
-          -0.068264,
-          0.071
+          0.17,
+          -0.1285,
+          0.04
         ],
         "lengthM": 0.008,
         "position": [
-          0.125886,
-          -0.068264,
-          0.07899999999999999
+          0.17,
+          -0.1365,
+          0.04
         ]
       },
       "fuseOutput4": {
@@ -1575,59 +1553,59 @@
         "componentId": "fuseBlock",
         "direction": [
           0,
-          0,
-          1
+          -1,
+          0
         ],
         "face": [
-          0.147886,
-          -0.068264,
-          0.071
+          0.188,
+          -0.1285,
+          0.04
         ],
         "lengthM": 0.008,
         "position": [
-          0.147886,
-          -0.068264,
-          0.07899999999999999
+          0.188,
+          -0.1365,
+          0.04
         ]
       },
       "mpptFuseIn": {
         "cableRadiusM": 0.0055,
         "componentId": "mpptFuse",
         "direction": [
+          -1,
           0,
-          0,
-          1
+          0
         ],
         "face": [
-          0.012692,
-          0.015899,
-          0.06
+          -0.0020000000000000018,
+          0.035,
+          0.035
         ],
         "lengthM": 0.00825,
         "position": [
-          0.012692,
-          0.015899,
-          0.06825
+          -0.010250000000000002,
+          0.035,
+          0.035
         ]
       },
       "mpptFuseOut": {
         "cableRadiusM": 0.0055,
         "componentId": "mpptFuse",
         "direction": [
+          1,
           0,
-          0,
-          1
+          0
         ],
         "face": [
-          0.046692,
-          0.015899,
-          0.06
+          0.032,
+          0.035,
+          0.035
         ],
         "lengthM": 0.00825,
         "position": [
-          0.046692,
-          0.015899,
-          0.06825
+          0.04025,
+          0.035,
+          0.035
         ]
       },
       "ekranoFuseIn": {
@@ -1639,14 +1617,14 @@
           1
         ],
         "face": [
-          -0.168,
-          -0.005741,
+          -0.22000000000000003,
+          0.04,
           0.06
         ],
         "lengthM": 0.008,
         "position": [
-          -0.168,
-          -0.005741,
+          -0.22000000000000003,
+          0.04,
           0.068
         ]
       },
@@ -1659,319 +1637,15 @@
           1
         ],
         "face": [
-          -0.128,
-          -0.005741,
+          -0.18000000000000002,
+          0.04,
           0.06
         ],
         "lengthM": 0.008,
         "position": [
-          -0.128,
-          -0.005741,
+          -0.18000000000000002,
+          0.04,
           0.068
-        ]
-      },
-      "ekranPos": {
-        "cableRadiusM": 0.0018,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          -0.0995,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          -0.0995,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "ekranNeg": {
-        "cableRadiusM": 0.0018,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          -0.0925,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          -0.0925,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "batteryNegA": {
-        "cableRadiusM": 0.0072,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          -0.071,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          -0.071,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "batteryNegB": {
-        "cableRadiusM": 0.0072,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          -0.04,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          -0.04,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "ekranData": {
-        "cableRadiusM": 0.0016,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          -0.016,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          -0.016,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "multiplusNeg": {
-        "cableRadiusM": 0.0072,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          0.008,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          0.008,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "loadPos3": {
-        "cableRadiusM": 0.0023,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          0.0295,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          0.0295,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "loadNeg3": {
-        "cableRadiusM": 0.0023,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          0.0375,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          0.0375,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "loadPos2": {
-        "cableRadiusM": 0.0018,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          0.0495,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          0.0495,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "loadNeg2": {
-        "cableRadiusM": 0.0018,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          0.0565,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          0.0565,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "loadPos5": {
-        "cableRadiusM": 0.0016,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          0.0685,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          0.0685,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "loadNeg5": {
-        "cableRadiusM": 0.0016,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          0.0755,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          0.0755,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "mpptPos": {
-        "cableRadiusM": 0.0055,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          0.0935,
-          -0.1175,
-          0.028999999999999998
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          0.0935,
-          -0.105,
-          0.028999999999999998
-        ]
-      },
-      "starlinkJackPositive": {
-        "cableRadiusM": 0.0018,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          -0.072,
-          -0.1175,
-          0.097
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          -0.072,
-          -0.105,
-          0.097
-        ]
-      },
-      "starlinkJackNegative": {
-        "cableRadiusM": 0.0018,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          -0.064,
-          -0.1175,
-          0.097
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          -0.064,
-          -0.105,
-          0.097
-        ]
-      },
-      "mpptNeg": {
-        "cableRadiusM": 0.0055,
-        "direction": [
-          0,
-          1,
-          0
-        ],
-        "face": [
-          -0.0455,
-          -0.1175,
-          0.097
-        ],
-        "lengthM": 0.0125,
-        "position": [
-          -0.0455,
-          -0.105,
-          0.097
         ]
       },
       "multiplusPos": {
@@ -1982,15 +1656,110 @@
           0
         ],
         "face": [
-          -0.018,
-          -0.1175,
-          0.097
+          0.17892857142857138,
+          -0.185,
+          0.063
         ],
         "lengthM": 0.0125,
         "position": [
-          -0.018,
-          -0.105,
-          0.097
+          0.17892857142857138,
+          -0.1725,
+          0.063
+        ]
+      },
+      "loadPos2": {
+        "cableRadiusM": 0.0018,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          0.06814285714285712,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          0.06814285714285712,
+          -0.1725,
+          0.063
+        ]
+      },
+      "loadNeg2": {
+        "cableRadiusM": 0.0018,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          0.07514285714285712,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          0.07514285714285712,
+          -0.1725,
+          0.063
+        ]
+      },
+      "loadPos5": {
+        "cableRadiusM": 0.0016,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          0.11628571428571424,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          0.11628571428571424,
+          -0.1725,
+          0.063
+        ]
+      },
+      "loadNeg5": {
+        "cableRadiusM": 0.0016,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          0.12328571428571425,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          0.12328571428571425,
+          -0.1725,
+          0.063
+        ]
+      },
+      "batteryNegA": {
+        "cableRadiusM": 0.0072,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          -0.1799285714285714,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          -0.1799285714285714,
+          -0.1725,
+          0.063
         ]
       },
       "batteryPosB": {
@@ -2001,15 +1770,15 @@
           0
         ],
         "face": [
-          0.013,
-          -0.1175,
-          0.097
+          -0.009571428571428588,
+          -0.185,
+          0.063
         ],
         "lengthM": 0.0125,
         "position": [
-          0.013,
-          -0.105,
-          0.097
+          -0.009571428571428588,
+          -0.1725,
+          0.063
         ]
       },
       "batteryPosA": {
@@ -2020,15 +1789,34 @@
           0
         ],
         "face": [
-          0.044,
-          -0.1175,
-          0.097
+          -0.08171428571428573,
+          -0.185,
+          0.063
         ],
         "lengthM": 0.0125,
         "position": [
-          0.044,
-          -0.105,
-          0.097
+          -0.08171428571428573,
+          -0.1725,
+          0.063
+        ]
+      },
+      "multiplusNeg": {
+        "cableRadiusM": 0.0072,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          -0.045642857142857166,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          -0.045642857142857166,
+          -0.1725,
+          0.063
         ]
       },
       "loadPos4": {
@@ -2039,15 +1827,15 @@
           0
         ],
         "face": [
-          0.0655,
-          -0.1175,
-          0.097
+          0.09221428571428565,
+          -0.185,
+          0.063
         ],
         "lengthM": 0.0125,
         "position": [
-          0.0655,
-          -0.105,
-          0.097
+          0.09221428571428565,
+          -0.1725,
+          0.063
         ]
       },
       "loadNeg4": {
@@ -2058,263 +1846,260 @@
           0
         ],
         "face": [
-          0.0725,
-          -0.1175,
-          0.097
+          0.09921428571428566,
+          -0.185,
+          0.063
         ],
         "lengthM": 0.0125,
         "position": [
-          0.0725,
-          -0.105,
-          0.097
+          0.09921428571428566,
+          -0.1725,
+          0.063
+        ]
+      },
+      "ekranPos": {
+        "cableRadiusM": 0.0018,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          -0.2135,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          -0.2135,
+          -0.1725,
+          0.063
+        ]
+      },
+      "ekranNeg": {
+        "cableRadiusM": 0.0018,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          -0.2065,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          -0.2065,
+          -0.1725,
+          0.063
+        ]
+      },
+      "mpptNeg": {
+        "cableRadiusM": 0.0055,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          0.04507142857142855,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          0.04507142857142855,
+          -0.1725,
+          0.063
+        ]
+      },
+      "batteryNegB": {
+        "cableRadiusM": 0.0072,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          -0.11778571428571429,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          -0.11778571428571429,
+          -0.1725,
+          0.063
+        ]
+      },
+      "loadPos3": {
+        "cableRadiusM": 0.0023,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          0.20549999999999996,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          0.20549999999999996,
+          -0.1725,
+          0.063
+        ]
+      },
+      "loadNeg3": {
+        "cableRadiusM": 0.0023,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          0.21349999999999994,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          0.21349999999999994,
+          -0.1725,
+          0.063
+        ]
+      },
+      "mpptPos": {
+        "cableRadiusM": 0.0055,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          0.14635714285714282,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          0.14635714285714282,
+          -0.1725,
+          0.063
+        ]
+      },
+      "ekranData": {
+        "cableRadiusM": 0.0016,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          0.019499999999999976,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          0.019499999999999976,
+          -0.1725,
+          0.063
+        ]
+      },
+      "starlinkJackPositive": {
+        "cableRadiusM": 0.0018,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          -0.15285714285714286,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          -0.15285714285714286,
+          -0.1725,
+          0.063
+        ]
+      },
+      "starlinkJackNegative": {
+        "cableRadiusM": 0.0018,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "face": [
+          -0.14485714285714285,
+          -0.185,
+          0.063
+        ],
+        "lengthM": 0.0125,
+        "position": [
+          -0.14485714285714285,
+          -0.1725,
+          0.063
         ]
       }
     },
     "routes": {
-      "battery-positive-a": {
-        "bends": 5,
-        "from": "selectorInputA",
-        "id": "battery-positive-a",
-        "kind": "positive",
-        "lane": 10,
-        "lengthM": 0.359101,
-        "points": [
-          [
-            -0.106501,
-            0.068,
-            0.0948
-          ],
-          [
-            -0.106501,
-            0.068,
-            0.1122
-          ],
-          [
-            -0.106501,
-            -0.0876,
-            0.1122
-          ],
-          [
-            -0.106501,
-            -0.0876,
-            0.1137
-          ],
-          [
-            0.044,
-            -0.0876,
-            0.1137
-          ],
-          [
-            0.044,
-            -0.0876,
-            0.097
-          ],
-          [
-            0.044,
-            -0.105,
-            0.097
-          ]
-        ],
-        "radiusM": 0.0072,
-        "to": "batteryPosA"
-      },
-      "battery-positive-b": {
-        "bends": 6,
-        "from": "selectorInputB",
-        "id": "battery-positive-b",
-        "kind": "positive",
-        "lane": 10,
-        "lengthM": 0.348101,
-        "points": [
-          [
-            -0.106501,
-            0.088,
-            0.0948
-          ],
-          [
-            -0.106501,
-            0.088,
-            0.1122
-          ],
-          [
-            -0.078426,
-            0.088,
-            0.1122
-          ],
-          [
-            -0.078426,
-            0.061099,
-            0.1122
-          ],
-          [
-            -0.078426,
-            0.061099,
-            0.1137
-          ],
-          [
-            0.013,
-            0.061099,
-            0.1137
-          ],
-          [
-            0.013,
-            0.061099,
-            0.097
-          ],
-          [
-            0.013,
-            -0.105,
-            0.097
-          ]
-        ],
-        "radiusM": 0.0072,
-        "to": "batteryPosB"
-      },
-      "battery-negative-a": {
-        "bends": 6,
-        "from": "shuntBatteryA",
-        "id": "battery-negative-a",
-        "kind": "negative",
-        "lane": 7,
-        "lengthM": 0.252896,
-        "points": [
-          [
-            -0.106008,
-            0.007104,
-            0.0648
-          ],
-          [
-            -0.106008,
-            0.007104,
-            0.0822
-          ],
-          [
-            -0.1128,
-            0.007104,
-            0.0822
-          ],
-          [
-            -0.1128,
-            -0.0876,
-            0.0822
-          ],
-          [
-            -0.1128,
-            -0.0876,
-            0.0182
-          ],
-          [
-            -0.071,
-            -0.0876,
-            0.0182
-          ],
-          [
-            -0.071,
-            -0.0876,
-            0.029
-          ],
-          [
-            -0.071,
-            -0.105,
-            0.029
-          ]
-        ],
-        "radiusM": 0.0072,
-        "to": "batteryNegA"
-      },
-      "battery-negative-b": {
-        "bends": 6,
-        "from": "shuntBatteryB",
-        "id": "battery-negative-b",
-        "kind": "negative",
-        "lane": 7,
-        "lengthM": 0.266112,
-        "points": [
-          [
-            -0.088008,
-            0.007104,
-            0.0648
-          ],
-          [
-            -0.088008,
-            0.007104,
-            0.0822
-          ],
-          [
-            -0.088008,
-            -0.0253,
-            0.0822
-          ],
-          [
-            -0.04,
-            -0.0253,
-            0.0822
-          ],
-          [
-            -0.04,
-            -0.1053,
-            0.0822
-          ],
-          [
-            -0.04,
-            -0.1053,
-            0.029
-          ],
-          [
-            -0.04,
-            -0.0876,
-            0.029
-          ],
-          [
-            -0.04,
-            -0.105,
-            0.029
-          ]
-        ],
-        "radiusM": 0.0072,
-        "to": "batteryNegB"
-      },
       "selector-to-positive-bus": {
-        "bends": 5,
+        "bends": 7,
         "from": "selectorOutput",
         "id": "selector-to-positive-bus",
         "kind": "positive",
-        "lane": 10,
-        "lengthM": 0.135049,
+        "lane": 6,
+        "lengthM": 0.2397,
         "points": [
           [
-            -0.062501,
-            0.078,
-            0.0948
+            -0.07669999999999999,
+            0.14,
+            0.042
           ],
           [
-            -0.062501,
-            0.078,
-            0.1122
+            -0.0613,
+            0.14,
+            0.042
           ],
           [
-            -0.0378,
-            0.078,
-            0.1122
+            -0.0613,
+            0.14,
+            0.0832
           ],
           [
-            -0.0378,
-            0.078,
-            0.0852
+            -0.0613,
+            0.1688,
+            0.0832
           ],
           [
-            -0.0378,
-            0.089749,
-            0.0852
+            -0.0058,
+            0.1688,
+            0.0832
           ],
           [
-            -0.001001,
-            0.089749,
-            0.0852
+            -0.0058,
+            0.1692,
+            0.0832
           ],
           [
-            -0.001001,
-            0.089749,
+            0.051,
+            0.1692,
+            0.0832
+          ],
+          [
+            0.051,
+            0.143,
+            0.0832
+          ],
+          [
+            0.05099999999999999,
+            0.143,
             0.0678
           ]
         ],
@@ -2322,541 +2107,1347 @@
         "to": "positiveStud1"
       },
       "shunt-to-negative-bus": {
-        "bends": 7,
+        "bends": 8,
         "from": "shuntSystem",
         "id": "shunt-to-negative-bus",
         "kind": "negative",
-        "lane": 9,
-        "lengthM": 0.275314,
+        "lane": 6,
+        "lengthM": 0.328,
         "points": [
           [
-            -0.013008,
-            0.007104,
+            -0.05700000000000002,
+            0.035,
             0.0648
           ],
           [
-            -0.013008,
-            0.007104,
-            0.0822
+            -0.057,
+            0.035,
+            0.0802
           ],
           [
-            -0.013008,
-            0.007104,
-            0.0782
+            -0.0313,
+            0.035,
+            0.0802
           ],
           [
-            -0.013008,
-            0.0247,
-            0.0782
+            -0.0313,
+            0.035,
+            0.0832
           ],
           [
-            -0.1178,
-            0.0247,
-            0.0782
+            -0.0313,
+            -0.0472,
+            0.0832
           ],
           [
-            -0.1178,
-            0.0247,
-            0.0982
+            -0.0634,
+            -0.0472,
+            0.0832
           ],
           [
-            -0.1178,
-            -0.0418,
-            0.0982
+            -0.0634,
+            -0.0328,
+            0.0832
           ],
           [
-            -0.132426,
-            -0.0418,
-            0.0982
+            -0.159,
+            -0.0328,
+            0.0832
           ],
           [
-            -0.132426,
-            -0.0418,
+            -0.159,
+            -0.077,
+            0.0832
+          ],
+          [
+            -0.15899999999999997,
+            -0.07700000000000001,
             0.0678
           ]
         ],
         "radiusM": 0.0072,
         "to": "negativeStud1"
       },
-      "shunt-voltage-sense": {
-        "bends": 6,
-        "from": "positiveStud7",
-        "id": "shunt-voltage-sense",
-        "kind": "positive",
-        "lane": 7,
-        "lengthM": 0.272252,
+      "battery-negative-b": {
+        "bends": 9,
+        "from": "shuntBatteryB",
+        "id": "battery-negative-b",
+        "kind": "negative",
+        "lane": 6,
+        "lengthM": 0.4091,
         "points": [
           [
-            0.106999,
-            0.069749,
-            0.065
+            -0.128,
+            0.035,
+            0.0648
           ],
           [
-            0.106999,
-            0.069749,
-            0.077
+            -0.128,
+            0.035,
+            0.0802
           ],
           [
-            0.106999,
-            0.069749,
-            0.0622
+            -0.128,
+            0.0033,
+            0.0802
           ],
           [
-            0.106999,
-            0.0587,
-            0.0622
+            -0.128,
+            0.0033,
+            0.063
           ],
           [
-            -0.038008,
-            0.0587,
-            0.0622
+            -0.128,
+            -0.0472,
+            0.063
           ],
           [
-            -0.038008,
-            -0.006896,
-            0.0622
+            -0.2074,
+            -0.0472,
+            0.063
           ],
           [
-            -0.038008,
-            -0.006896,
-            0.074
+            -0.2074,
+            -0.1192,
+            0.063
           ],
           [
-            -0.038008,
-            -0.006896,
-            0.062
+            -0.128,
+            -0.1192,
+            0.063
+          ],
+          [
+            -0.128,
+            -0.1571,
+            0.063
+          ],
+          [
+            -0.117786,
+            -0.1571,
+            0.063
+          ],
+          [
+            -0.11778571428571429,
+            -0.1725,
+            0.063
           ]
         ],
-        "radiusM": 0.0012,
-        "to": "shuntVbattPositive"
+        "radiusM": 0.0072,
+        "to": "batteryNegB"
       },
-      "mppt-positive-feed": {
-        "bends": 6,
-        "from": "positiveStud3",
-        "id": "mppt-positive-feed",
-        "kind": "positive",
-        "lane": 7,
-        "lengthM": 0.163157,
+      "multiplus-negative": {
+        "bends": 8,
+        "from": "negativeStud2",
+        "id": "multiplus-negative",
+        "kind": "negative",
+        "lane": 6,
+        "lengthM": 0.3405,
         "points": [
           [
-            0.070999,
-            0.089749,
-            0.06525
+            -0.123,
+            -0.07700000000000001,
+            0.0678
           ],
           [
-            0.070999,
-            0.089749,
-            0.07925
+            -0.123,
+            -0.077,
+            0.0832
           ],
           [
-            0.0505,
-            0.089749,
-            0.07925
+            -0.123,
+            -0.0508,
+            0.0832
           ],
           [
-            0.0505,
-            0.033,
-            0.07925
+            -0.123,
+            -0.0508,
+            0.0802
           ],
           [
-            0.012692,
-            0.033,
-            0.07925
+            -0.1066,
+            -0.0508,
+            0.0802
           ],
           [
-            0.012692,
-            0.015899,
-            0.07925
+            -0.1066,
+            -0.0508,
+            0.063
           ],
           [
-            0.012692,
-            0.015899,
-            0.08225
+            -0.0058,
+            -0.0508,
+            0.063
           ],
           [
-            0.012692,
-            0.015899,
-            0.06825
+            -0.0058,
+            -0.1192,
+            0.063
+          ],
+          [
+            -0.045643,
+            -0.1192,
+            0.063
+          ],
+          [
+            -0.045642857142857166,
+            -0.1725,
+            0.063
           ]
         ],
-        "radiusM": 0.0055,
-        "to": "mpptFuseIn"
+        "radiusM": 0.0072,
+        "to": "multiplusNeg"
+      },
+      "battery-negative-a": {
+        "bends": 10,
+        "from": "shuntBatteryA",
+        "id": "battery-negative-a",
+        "kind": "negative",
+        "lane": 6,
+        "lengthM": 0.321,
+        "points": [
+          [
+            -0.154,
+            0.035,
+            0.0648
+          ],
+          [
+            -0.154,
+            0.035,
+            0.0802
+          ],
+          [
+            -0.1687,
+            0.035,
+            0.0802
+          ],
+          [
+            -0.1687,
+            -0.0184,
+            0.0802
+          ],
+          [
+            -0.1786,
+            -0.0184,
+            0.0802
+          ],
+          [
+            -0.1786,
+            -0.0472,
+            0.0802
+          ],
+          [
+            -0.2074,
+            -0.0472,
+            0.0802
+          ],
+          [
+            -0.2074,
+            -0.1571,
+            0.0802
+          ],
+          [
+            -0.193,
+            -0.1571,
+            0.0802
+          ],
+          [
+            -0.193,
+            -0.1571,
+            0.063
+          ],
+          [
+            -0.179929,
+            -0.1571,
+            0.063
+          ],
+          [
+            -0.1799285714285714,
+            -0.1725,
+            0.063
+          ]
+        ],
+        "radiusM": 0.0072,
+        "to": "batteryNegA"
+      },
+      "battery-positive-b": {
+        "bends": 13,
+        "from": "selectorInputB",
+        "id": "battery-positive-b",
+        "kind": "positive",
+        "lane": 4,
+        "lengthM": 0.477,
+        "points": [
+          [
+            -0.113,
+            0.0917,
+            0.042
+          ],
+          [
+            -0.113,
+            0.0763,
+            0.042
+          ],
+          [
+            -0.113,
+            0.0763,
+            0.063
+          ],
+          [
+            -0.0202,
+            0.0763,
+            0.063
+          ],
+          [
+            -0.0202,
+            -0.0328,
+            0.063
+          ],
+          [
+            0.023,
+            -0.0328,
+            0.063
+          ],
+          [
+            0.023,
+            -0.1336,
+            0.063
+          ],
+          [
+            0.0086,
+            -0.1336,
+            0.063
+          ],
+          [
+            0.0086,
+            -0.1336,
+            0.0514
+          ],
+          [
+            -0.0058,
+            -0.1336,
+            0.0514
+          ],
+          [
+            -0.0058,
+            -0.148,
+            0.0514
+          ],
+          [
+            -0.0058,
+            -0.148,
+            0.063
+          ],
+          [
+            -0.0058,
+            -0.1571,
+            0.063
+          ],
+          [
+            -0.009571,
+            -0.1571,
+            0.063
+          ],
+          [
+            -0.009571428571428588,
+            -0.1725,
+            0.063
+          ]
+        ],
+        "radiusM": 0.0072,
+        "to": "batteryPosB"
+      },
+      "battery-positive-a": {
+        "bends": 12,
+        "from": "selectorInputA",
+        "id": "battery-positive-a",
+        "kind": "positive",
+        "lane": 6,
+        "lengthM": 0.6763,
+        "points": [
+          [
+            -0.137,
+            0.0917,
+            0.042
+          ],
+          [
+            -0.137,
+            0.0763,
+            0.042
+          ],
+          [
+            -0.137,
+            0.0763,
+            0.0802
+          ],
+          [
+            0.0086,
+            0.0763,
+            0.0802
+          ],
+          [
+            0.0086,
+            0.0763,
+            0.063
+          ],
+          [
+            0.0518,
+            0.0763,
+            0.063
+          ],
+          [
+            0.0518,
+            -0.1192,
+            0.063
+          ],
+          [
+            0.0518,
+            -0.1192,
+            0.0802
+          ],
+          [
+            -0.0634,
+            -0.1192,
+            0.0802
+          ],
+          [
+            -0.0634,
+            -0.1192,
+            0.063
+          ],
+          [
+            -0.0778,
+            -0.1192,
+            0.063
+          ],
+          [
+            -0.0778,
+            -0.1571,
+            0.063
+          ],
+          [
+            -0.081714,
+            -0.1571,
+            0.063
+          ],
+          [
+            -0.08171428571428573,
+            -0.1725,
+            0.063
+          ]
+        ],
+        "radiusM": 0.0072,
+        "to": "batteryPosA"
+      },
+      "multiplus-positive": {
+        "bends": 13,
+        "from": "positiveStud2",
+        "id": "multiplus-positive",
+        "kind": "positive",
+        "lane": 6,
+        "lengthM": 0.6156,
+        "points": [
+          [
+            0.087,
+            0.143,
+            0.0678
+          ],
+          [
+            0.087,
+            0.143,
+            0.0832
+          ],
+          [
+            0.087,
+            0.1692,
+            0.0832
+          ],
+          [
+            0.087,
+            0.1692,
+            0.063
+          ],
+          [
+            0.2102,
+            0.1692,
+            0.063
+          ],
+          [
+            0.2102,
+            0.0824,
+            0.063
+          ],
+          [
+            0.2218,
+            0.0824,
+            0.063
+          ],
+          [
+            0.2218,
+            -0.1336,
+            0.063
+          ],
+          [
+            0.2102,
+            -0.1336,
+            0.063
+          ],
+          [
+            0.2102,
+            -0.1336,
+            0.0802
+          ],
+          [
+            0.2102,
+            -0.1571,
+            0.0802
+          ],
+          [
+            0.1814,
+            -0.1571,
+            0.0802
+          ],
+          [
+            0.1814,
+            -0.1571,
+            0.063
+          ],
+          [
+            0.178929,
+            -0.1571,
+            0.063
+          ],
+          [
+            0.17892857142857138,
+            -0.1725,
+            0.063
+          ]
+        ],
+        "radiusM": 0.0072,
+        "to": "multiplusPos"
       },
       "mppt-positive": {
         "bends": 4,
         "from": "mpptFuseOut",
         "id": "mppt-positive",
         "kind": "positive",
-        "lane": 7,
-        "lengthM": 0.234957,
+        "lane": 4,
+        "lengthM": 0.3416,
         "points": [
           [
-            0.046692,
-            0.015899,
-            0.06825
+            0.04025,
+            0.035,
+            0.035
           ],
           [
-            0.046692,
-            0.015899,
-            0.08225
+            0.0789,
+            0.035,
+            0.035
           ],
           [
-            0.046692,
-            -0.091,
-            0.08225
+            0.0789,
+            -0.16,
+            0.035
           ],
           [
-            0.0935,
-            -0.091,
-            0.08225
+            0.146357,
+            -0.16,
+            0.035
           ],
           [
-            0.0935,
-            -0.091,
-            0.029
+            0.146357,
+            -0.16,
+            0.063
           ],
           [
-            0.0935,
-            -0.105,
-            0.029
+            0.14635714285714282,
+            -0.1725,
+            0.063
           ]
         ],
         "radiusM": 0.0055,
         "to": "mpptPos"
       },
       "mppt-negative": {
-        "bends": 2,
+        "bends": 17,
         "from": "negativeStud3",
         "id": "mppt-negative",
         "kind": "negative",
-        "lane": 9,
-        "lengthM": 0.109876,
+        "lane": 7,
+        "lengthM": 0.4306,
         "points": [
           [
-            -0.060426,
-            -0.0418,
+            -0.087,
+            -0.07700000000000001,
             0.06525
           ],
           [
-            -0.060426,
-            -0.0418,
-            0.097
+            -0.087,
+            -0.077,
+            0.07725
           ],
           [
-            -0.0455,
-            -0.0418,
-            0.097
+            -0.087,
+            -0.0525,
+            0.07725
           ],
           [
-            -0.0455,
-            -0.105,
-            0.097
+            -0.0795,
+            -0.0525,
+            0.07725
+          ],
+          [
+            -0.0795,
+            -0.0525,
+            0.1073
+          ],
+          [
+            -0.0219,
+            -0.0525,
+            0.1073
+          ],
+          [
+            -0.0219,
+            -0.0525,
+            0.0929
+          ],
+          [
+            -0.0075,
+            -0.0525,
+            0.0929
+          ],
+          [
+            -0.0075,
+            -0.0525,
+            0.07725
+          ],
+          [
+            0.0645,
+            -0.0525,
+            0.07725
+          ],
+          [
+            0.0645,
+            -0.1065,
+            0.07725
+          ],
+          [
+            0.0789,
+            -0.1065,
+            0.07725
+          ],
+          [
+            0.0789,
+            -0.1065,
+            0.0641
+          ],
+          [
+            0.0789,
+            -0.1353,
+            0.0641
+          ],
+          [
+            0.0501,
+            -0.1353,
+            0.0641
+          ],
+          [
+            0.0501,
+            -0.16,
+            0.0641
+          ],
+          [
+            0.0501,
+            -0.16,
+            0.063
+          ],
+          [
+            0.045071,
+            -0.16,
+            0.063
+          ],
+          [
+            0.04507142857142855,
+            -0.1725,
+            0.063
           ]
         ],
         "radiusM": 0.0055,
         "to": "mpptNeg"
       },
-      "multiplus-positive": {
-        "bends": 4,
-        "from": "positiveStud2",
-        "id": "multiplus-positive",
+      "mppt-positive-feed": {
+        "bends": 10,
+        "from": "positiveStud3",
+        "id": "mppt-positive-feed",
         "kind": "positive",
-        "lane": 9,
-        "lengthM": 0.276948,
+        "lane": 5,
+        "lengthM": 0.5395,
         "points": [
           [
-            0.034999,
-            0.089749,
-            0.0678
+            0.12299999999999998,
+            0.143,
+            0.06525
           ],
           [
-            0.034999,
-            0.089749,
-            0.0852
+            0.123,
+            0.143,
+            0.07725
           ],
           [
-            0.034999,
-            0.078,
-            0.0852
+            0.123,
+            0.1675,
+            0.07725
           ],
           [
-            0.034999,
-            0.078,
-            0.097
+            0.2085,
+            0.1675,
+            0.07725
           ],
           [
-            -0.018,
-            0.078,
-            0.097
+            0.2085,
+            0.0807,
+            0.07725
           ],
           [
-            -0.018,
-            -0.105,
-            0.097
+            0.1941,
+            0.0807,
+            0.07725
+          ],
+          [
+            0.1941,
+            0.0807,
+            0.0353
+          ],
+          [
+            -0.0219,
+            0.0807,
+            0.0353
+          ],
+          [
+            -0.0219,
+            0.035,
+            0.0353
+          ],
+          [
+            -0.02225,
+            0.035,
+            0.0353
+          ],
+          [
+            -0.02225,
+            0.035,
+            0.035
+          ],
+          [
+            -0.010250000000000002,
+            0.035,
+            0.035
           ]
         ],
-        "radiusM": 0.0072,
-        "to": "multiplusPos"
-      },
-      "multiplus-negative": {
-        "bends": 6,
-        "from": "negativeStud2",
-        "id": "multiplus-negative",
-        "kind": "negative",
-        "lane": 8,
-        "lengthM": 0.241226,
-        "points": [
-          [
-            -0.096426,
-            -0.0418,
-            0.0678
-          ],
-          [
-            -0.096426,
-            -0.0418,
-            0.0852
-          ],
-          [
-            -0.0878,
-            -0.0418,
-            0.0852
-          ],
-          [
-            -0.0878,
-            -0.0876,
-            0.0852
-          ],
-          [
-            -0.0878,
-            -0.0876,
-            0.0482
-          ],
-          [
-            0.008,
-            -0.0876,
-            0.0482
-          ],
-          [
-            0.008,
-            -0.0876,
-            0.029
-          ],
-          [
-            0.008,
-            -0.105,
-            0.029
-          ]
-        ],
-        "radiusM": 0.0072,
-        "to": "multiplusNeg"
+        "radiusM": 0.0055,
+        "to": "mpptFuseIn"
       },
       "services-positive-feed": {
-        "bends": 6,
+        "bends": 10,
         "from": "positiveStud4",
         "id": "services-positive-feed",
         "kind": "positive",
-        "lane": 8,
-        "lengthM": 0.1769,
+        "lane": 5,
+        "lengthM": 0.2585,
         "points": [
           [
-            -0.001001,
-            0.069749,
+            0.05099999999999999,
+            0.12299999999999998,
             0.065
           ],
           [
-            -0.001001,
-            0.069749,
-            0.077
+            0.051,
+            0.123,
+            0.073
           ],
           [
-            -0.001001,
-            0.0453,
-            0.077
+            0.051,
+            0.1052,
+            0.073
           ],
           [
-            0.0378,
-            0.0453,
-            0.077
+            0.051,
+            0.1052,
+            0.04
           ],
           [
-            0.0378,
-            0.0453,
-            0.091
+            0.051,
+            0.0924,
+            0.04
           ],
           [
-            0.067886,
-            0.0453,
-            0.091
+            0.0906,
+            0.0924,
+            0.04
           ],
           [
-            0.067886,
-            -0.000264,
-            0.091
+            0.0906,
+            0.0924,
+            0.047
           ],
           [
-            0.067886,
-            -0.000264,
-            0.079
+            0.0906,
+            0.0636,
+            0.047
+          ],
+          [
+            0.0906,
+            0.0636,
+            0.04
+          ],
+          [
+            0.0906,
+            -0.0255,
+            0.04
+          ],
+          [
+            0.098,
+            -0.0255,
+            0.04
+          ],
+          [
+            0.098,
+            -0.03350000000000001,
+            0.04
           ]
         ],
         "radiusM": 0.0028,
         "to": "servicesFuseIn"
       },
       "services-positive": {
-        "bends": 2,
+        "bends": 6,
         "from": "servicesFuseOut",
         "id": "services-positive",
         "kind": "positive",
-        "lane": 8,
-        "lengthM": 0.044,
+        "lane": 3,
+        "lengthM": 0.3024,
         "points": [
           [
-            0.087886,
-            -0.000264,
-            0.079
+            0.098,
+            -0.1365,
+            0.04
           ],
           [
-            0.087886,
-            -0.000264,
-            0.091
+            0.098,
+            -0.1445,
+            0.04
           ],
           [
-            0.107886,
-            -0.000264,
-            0.091
+            0.098,
+            -0.1445,
+            0.0326
           ],
           [
-            0.107886,
-            -0.000264,
-            0.079
+            0.2058,
+            -0.1445,
+            0.0326
+          ],
+          [
+            0.2058,
+            -0.1445,
+            0.04
+          ],
+          [
+            0.2058,
+            -0.0255,
+            0.04
+          ],
+          [
+            0.161,
+            -0.0255,
+            0.04
+          ],
+          [
+            0.161,
+            -0.03350000000000001,
+            0.04
           ]
         ],
         "radiusM": 0.0028,
         "to": "fuseInput"
       },
       "services-negative": {
-        "bends": 7,
+        "bends": 15,
         "from": "negativeStud5",
         "id": "services-negative",
         "kind": "negative",
-        "lane": 8,
-        "lengthM": 0.391854,
+        "lane": 6,
+        "lengthM": 0.5804,
         "points": [
           [
-            -0.096426,
-            -0.0618,
+            -0.123,
+            -0.097,
             0.065
           ],
           [
-            -0.096426,
-            -0.0618,
-            0.077
+            -0.123,
+            -0.097,
+            0.073
           ],
           [
-            -0.096426,
-            -0.0618,
-            0.0693
+            -0.123,
+            -0.1236,
+            0.073
           ],
           [
-            -0.096426,
-            -0.0547,
-            0.0693
+            -0.123,
+            -0.1236,
+            0.0758
           ],
           [
-            0.0328,
-            -0.0547,
-            0.0693
+            -0.0822,
+            -0.1236,
+            0.0758
           ],
           [
-            0.0328,
-            -0.0547,
-            0.0933
+            -0.0822,
+            -0.138,
+            0.0758
           ],
           [
-            0.139192,
-            -0.0547,
-            0.0933
+            0.0762,
+            -0.138,
+            0.0758
           ],
           [
-            0.139192,
-            0.021436,
-            0.0933
+            0.0762,
+            -0.1236,
+            0.0758
           ],
           [
-            0.139192,
-            0.021436,
+            0.0762,
+            -0.1236,
+            0.0902
+          ],
+          [
+            0.0762,
+            -0.0948,
+            0.0902
+          ],
+          [
+            0.0762,
+            -0.0948,
+            0.073
+          ],
+          [
+            0.0762,
+            0.0204,
+            0.073
+          ],
+          [
+            0.182,
+            0.0204,
+            0.073
+          ],
+          [
+            0.182,
+            0.0342,
+            0.073
+          ],
+          [
+            0.182,
+            0.0342,
+            0.072
+          ],
+          [
+            0.182,
+            0.045,
+            0.072
+          ],
+          [
+            0.182,
+            0.044999999999999984,
             0.064
           ]
         ],
         "radiusM": 0.0028,
         "to": "returnStud6"
       },
+      "load-positive-3": {
+        "bends": 6,
+        "from": "fuseOutput2",
+        "id": "load-positive-3",
+        "kind": "positive",
+        "lane": 4,
+        "lengthM": 0.1125,
+        "points": [
+          [
+            0.152,
+            -0.1365,
+            0.04
+          ],
+          [
+            0.152,
+            -0.1445,
+            0.04
+          ],
+          [
+            0.152,
+            -0.1445,
+            0.0465
+          ],
+          [
+            0.2053,
+            -0.1445,
+            0.0465
+          ],
+          [
+            0.2053,
+            -0.1445,
+            0.063
+          ],
+          [
+            0.2053,
+            -0.16,
+            0.063
+          ],
+          [
+            0.2055,
+            -0.16,
+            0.063
+          ],
+          [
+            0.20549999999999996,
+            -0.1725,
+            0.063
+          ]
+        ],
+        "radiusM": 0.0023,
+        "to": "loadPos3"
+      },
+      "load-negative-3": {
+        "bends": 10,
+        "from": "returnStud2",
+        "id": "load-negative-3",
+        "kind": "negative",
+        "lane": 5,
+        "lengthM": 0.363,
+        "points": [
+          [
+            0.118,
+            0.044999999999999984,
+            0.064
+          ],
+          [
+            0.118,
+            0.045,
+            0.072
+          ],
+          [
+            0.118,
+            0.0347,
+            0.072
+          ],
+          [
+            0.118,
+            0.0347,
+            0.063
+          ],
+          [
+            0.2053,
+            0.0347,
+            0.063
+          ],
+          [
+            0.2053,
+            -0.1241,
+            0.063
+          ],
+          [
+            0.2053,
+            -0.1241,
+            0.0465
+          ],
+          [
+            0.2053,
+            -0.1385,
+            0.0465
+          ],
+          [
+            0.2135,
+            -0.1385,
+            0.0465
+          ],
+          [
+            0.2135,
+            -0.1529,
+            0.0465
+          ],
+          [
+            0.2135,
+            -0.1529,
+            0.063
+          ],
+          [
+            0.21349999999999994,
+            -0.1725,
+            0.063
+          ]
+        ],
+        "radiusM": 0.0023,
+        "to": "loadNeg3"
+      },
+      "ekrano-negative": {
+        "bends": 6,
+        "from": "negativeStud4",
+        "id": "ekrano-negative",
+        "kind": "negative",
+        "lane": 5,
+        "lengthM": 0.141,
+        "points": [
+          [
+            -0.15899999999999997,
+            -0.097,
+            0.065
+          ],
+          [
+            -0.159,
+            -0.097,
+            0.073
+          ],
+          [
+            -0.159,
+            -0.1246,
+            0.073
+          ],
+          [
+            -0.1984,
+            -0.1246,
+            0.073
+          ],
+          [
+            -0.1984,
+            -0.139,
+            0.073
+          ],
+          [
+            -0.1984,
+            -0.139,
+            0.063
+          ],
+          [
+            -0.2065,
+            -0.139,
+            0.063
+          ],
+          [
+            -0.2065,
+            -0.1725,
+            0.063
+          ]
+        ],
+        "radiusM": 0.0018,
+        "to": "ekranNeg"
+      },
+      "starlink-fuse-feed": {
+        "bends": 9,
+        "from": "positiveStud6",
+        "id": "starlink-fuse-feed",
+        "kind": "positive",
+        "lane": 5,
+        "lengthM": 0.2861,
+        "points": [
+          [
+            0.12299999999999998,
+            0.12299999999999998,
+            0.065
+          ],
+          [
+            0.123,
+            0.123,
+            0.073
+          ],
+          [
+            0.123,
+            0.1062,
+            0.073
+          ],
+          [
+            0.123,
+            0.1062,
+            0.046
+          ],
+          [
+            0.123,
+            0.1058,
+            0.046
+          ],
+          [
+            0.0752,
+            0.1058,
+            0.046
+          ],
+          [
+            0.0752,
+            -0.0238,
+            0.046
+          ],
+          [
+            0.104,
+            -0.0238,
+            0.046
+          ],
+          [
+            0.104,
+            -0.0238,
+            0.04
+          ],
+          [
+            0.116,
+            -0.0238,
+            0.04
+          ],
+          [
+            0.116,
+            -0.03350000000000001,
+            0.04
+          ]
+        ],
+        "radiusM": 0.0018,
+        "to": "starlinkFuseIn"
+      },
+      "starlink-jack-negative": {
+        "bends": 10,
+        "from": "negativeStud6",
+        "id": "starlink-jack-negative",
+        "kind": "negative",
+        "lane": 5,
+        "lengthM": 0.175,
+        "points": [
+          [
+            -0.087,
+            -0.097,
+            0.065
+          ],
+          [
+            -0.087,
+            -0.097,
+            0.073
+          ],
+          [
+            -0.087,
+            -0.1138,
+            0.073
+          ],
+          [
+            -0.087,
+            -0.1138,
+            0.063
+          ],
+          [
+            -0.0976,
+            -0.1138,
+            0.063
+          ],
+          [
+            -0.0976,
+            -0.139,
+            0.063
+          ],
+          [
+            -0.0976,
+            -0.139,
+            0.0748
+          ],
+          [
+            -0.1408,
+            -0.139,
+            0.0748
+          ],
+          [
+            -0.1408,
+            -0.16,
+            0.0748
+          ],
+          [
+            -0.1408,
+            -0.16,
+            0.063
+          ],
+          [
+            -0.144857,
+            -0.16,
+            0.063
+          ],
+          [
+            -0.14485714285714285,
+            -0.1725,
+            0.063
+          ]
+        ],
+        "radiusM": 0.0018,
+        "to": "starlinkJackNegative"
+      },
       "ekrano-positive-feed": {
         "bends": 10,
         "from": "positiveStud5",
         "id": "ekrano-positive-feed",
         "kind": "positive",
-        "lane": 7,
-        "lengthM": 0.323889,
+        "lane": 5,
+        "lengthM": 0.4156,
         "points": [
           [
-            0.034999,
-            0.069749,
+            0.087,
+            0.12299999999999998,
             0.065
           ],
           [
-            0.034999,
-            0.069749,
-            0.077
+            0.087,
+            0.123,
+            0.073
           ],
           [
-            0.034999,
-            0.069749,
-            0.0678
+            0.087,
+            0.1062,
+            0.073
           ],
           [
-            0.034999,
-            0.0593,
-            0.0678
+            0.0608,
+            0.1062,
+            0.073
           ],
           [
-            -0.0382,
-            0.0593,
-            0.0678
+            0.0608,
+            0.1062,
+            0.076
           ],
           [
-            -0.0382,
-            0.0293,
-            0.0678
+            0.0608,
+            0.0914,
+            0.076
           ],
           [
-            -0.124308,
-            0.0293,
-            0.0678
+            -0.1696,
+            0.0914,
+            0.076
           ],
           [
-            -0.124308,
-            0.0043,
-            0.0678
+            -0.1696,
+            0.0626,
+            0.076
           ],
           [
-            -0.168,
-            0.0043,
-            0.0678
+            -0.2233,
+            0.0626,
+            0.076
           ],
           [
-            -0.168,
-            -0.005741,
-            0.0678
+            -0.2233,
+            0.04,
+            0.076
           ],
           [
-            -0.168,
-            -0.005741,
-            0.08
+            -0.22,
+            0.04,
+            0.076
           ],
           [
-            -0.168,
-            -0.005741,
+            -0.22000000000000003,
+            0.04,
             0.068
           ]
         ],
@@ -2868,1245 +3459,1599 @@
         "from": "ekranoFuseOut",
         "id": "ekrano-positive",
         "kind": "positive",
-        "lane": 7,
-        "lengthM": 0.190759,
+        "lane": 5,
+        "lengthM": 0.301,
         "points": [
           [
-            -0.128,
-            -0.005741,
+            -0.18000000000000002,
+            0.04,
             0.068
           ],
           [
-            -0.128,
-            -0.005741,
-            0.08
+            -0.18,
+            0.04,
+            0.076
           ],
           [
-            -0.128,
-            -0.005741,
-            0.0678
+            -0.1767,
+            0.04,
+            0.076
           ],
           [
-            -0.1082,
-            -0.005741,
-            0.0678
+            -0.1767,
+            0.04,
+            0.063
           ],
           [
-            -0.1082,
-            -0.0707,
-            0.0678
+            -0.1767,
+            -0.0238,
+            0.063
           ],
           [
-            -0.0995,
-            -0.0707,
-            0.0678
+            -0.2272,
+            -0.0238,
+            0.063
           ],
           [
-            -0.0995,
-            -0.0925,
-            0.0678
+            -0.2272,
+            -0.16,
+            0.063
           ],
           [
-            -0.0995,
-            -0.0925,
-            0.029
+            -0.2135,
+            -0.16,
+            0.063
           ],
           [
-            -0.0995,
-            -0.105,
-            0.029
+            -0.2135,
+            -0.1725,
+            0.063
           ]
         ],
         "radiusM": 0.0018,
         "to": "ekranPos"
       },
-      "ekrano-negative": {
-        "bends": 5,
-        "from": "negativeStud4",
-        "id": "ekrano-negative",
-        "kind": "negative",
-        "lane": 7,
-        "lengthM": 0.159526,
-        "points": [
-          [
-            -0.132426,
-            -0.0618,
-            0.065
-          ],
-          [
-            -0.132426,
-            -0.0618,
-            0.077
-          ],
-          [
-            -0.132426,
-            -0.1007,
-            0.077
-          ],
-          [
-            -0.0925,
-            -0.1007,
-            0.077
-          ],
-          [
-            -0.0925,
-            -0.1007,
-            0.029
-          ],
-          [
-            -0.0925,
-            -0.0925,
-            0.029
-          ],
-          [
-            -0.0925,
-            -0.105,
-            0.029
-          ]
-        ],
-        "radiusM": 0.0018,
-        "to": "ekranNeg"
-      },
-      "ekrano-data": {
-        "bends": 7,
-        "from": "shuntData",
-        "id": "ekrano-data",
-        "kind": "data",
-        "lane": 7,
-        "lengthM": 0.233112,
-        "points": [
-          [
-            -0.056008,
-            0.007104,
-            0.062
-          ],
-          [
-            -0.056008,
-            0.007104,
-            0.074
-          ],
-          [
-            -0.0284,
-            0.007104,
-            0.074
-          ],
-          [
-            -0.0284,
-            0.007104,
-            0.0776
-          ],
-          [
-            -0.0284,
-            -0.1009,
-            0.0776
-          ],
-          [
-            -0.0284,
-            -0.1009,
-            0.029
-          ],
-          [
-            -0.016,
-            -0.1009,
-            0.029
-          ],
-          [
-            -0.016,
-            -0.0925,
-            0.029
-          ],
-          [
-            -0.016,
-            -0.105,
-            0.029
-          ]
-        ],
-        "radiusM": 0.0016,
-        "to": "ekranData"
-      },
-      "starlink-fuse-feed": {
-        "bends": 3,
-        "from": "positiveStud6",
-        "id": "starlink-fuse-feed",
-        "kind": "positive",
-        "lane": 8,
-        "lengthM": 0.1649,
-        "points": [
-          [
-            0.070999,
-            0.069749,
-            0.065
-          ],
-          [
-            0.070999,
-            0.069749,
-            0.091
-          ],
-          [
-            0.127886,
-            0.069749,
-            0.091
-          ],
-          [
-            0.127886,
-            -0.000264,
-            0.091
-          ],
-          [
-            0.127886,
-            -0.000264,
-            0.079
-          ]
-        ],
-        "radiusM": 0.0018,
-        "to": "starlinkFuseIn"
-      },
-      "starlink-switch-input": {
-        "bends": 5,
-        "from": "starlinkFuseOut",
-        "id": "starlink-switch-input",
-        "kind": "positive",
-        "lane": 11,
-        "lengthM": 0.47433,
-        "points": [
-          [
-            0.147886,
-            -0.000264,
-            0.079
-          ],
-          [
-            0.147886,
-            -0.000264,
-            0.091
-          ],
-          [
-            0.147886,
-            0.1043,
-            0.091
-          ],
-          [
-            0.147886,
-            0.1043,
-            0.12
-          ],
-          [
-            -0.16,
-            0.1043,
-            0.12
-          ],
-          [
-            -0.16,
-            0.09542,
-            0.12
-          ],
-          [
-            -0.16,
-            0.09542,
-            0.108
-          ]
-        ],
-        "radiusM": 0.0018,
-        "to": "switchInput1"
-      },
-      "starlink-jack-positive": {
-        "bends": 5,
-        "from": "switchOutput1",
-        "id": "starlink-jack-positive",
-        "kind": "positive",
-        "lane": 11,
-        "lengthM": 0.29542,
-        "points": [
-          [
-            -0.132,
-            0.09542,
-            0.108
-          ],
-          [
-            -0.132,
-            0.09542,
-            0.12
-          ],
-          [
-            -0.1182,
-            0.09542,
-            0.12
-          ],
-          [
-            -0.1182,
-            -0.0925,
-            0.12
-          ],
-          [
-            -0.1182,
-            -0.0925,
-            0.097
-          ],
-          [
-            -0.072,
-            -0.0925,
-            0.097
-          ],
-          [
-            -0.072,
-            -0.105,
-            0.097
-          ]
-        ],
-        "radiusM": 0.0018,
-        "to": "starlinkJackPositive"
-      },
-      "starlink-jack-negative": {
-        "bends": 4,
-        "from": "negativeStud6",
-        "id": "starlink-jack-negative",
-        "kind": "negative",
-        "lane": 9,
-        "lengthM": 0.078774,
-        "points": [
-          [
-            -0.060426,
-            -0.0618,
-            0.065
-          ],
-          [
-            -0.060426,
-            -0.0618,
-            0.077
-          ],
-          [
-            -0.064,
-            -0.0618,
-            0.077
-          ],
-          [
-            -0.064,
-            -0.0925,
-            0.077
-          ],
-          [
-            -0.064,
-            -0.0925,
-            0.097
-          ],
-          [
-            -0.064,
-            -0.105,
-            0.097
-          ]
-        ],
-        "radiusM": 0.0018,
-        "to": "starlinkJackNegative"
-      },
-      "switch-input-2": {
-        "bends": 3,
-        "from": "fuseOutput1",
-        "id": "switch-input-2",
-        "kind": "positive",
-        "lane": 12,
-        "lengthM": 0.45717,
-        "points": [
-          [
-            0.079886,
-            -0.068264,
-            0.079
-          ],
-          [
-            0.079886,
-            -0.068264,
-            0.1278
-          ],
-          [
-            -0.16,
-            -0.068264,
-            0.1278
-          ],
-          [
-            -0.16,
-            0.08042,
-            0.1278
-          ],
-          [
-            -0.16,
-            0.08042,
-            0.108
-          ]
-        ],
-        "radiusM": 0.0018,
-        "to": "switchInput2"
-      },
-      "load-positive-2": {
-        "bends": 8,
-        "from": "switchOutput2",
-        "id": "load-positive-2",
-        "kind": "positive",
-        "lane": 11,
-        "lengthM": 0.46992,
-        "points": [
-          [
-            -0.132,
-            0.08042,
-            0.108
-          ],
-          [
-            -0.132,
-            0.08042,
-            0.12
-          ],
-          [
-            -0.124308,
-            0.08042,
-            0.12
-          ],
-          [
-            -0.124308,
-            -0.0925,
-            0.12
-          ],
-          [
-            -0.124308,
-            -0.0925,
-            0.0878
-          ],
-          [
-            -0.0732,
-            -0.0925,
-            0.0878
-          ],
-          [
-            -0.0732,
-            -0.0925,
-            0.0623
-          ],
-          [
-            0.0495,
-            -0.0925,
-            0.0623
-          ],
-          [
-            0.0495,
-            -0.0925,
-            0.029
-          ],
-          [
-            0.0495,
-            -0.105,
-            0.029
-          ]
-        ],
-        "radiusM": 0.0018,
-        "to": "loadPos2"
-      },
       "load-negative-2": {
-        "bends": 9,
+        "bends": 8,
         "from": "returnStud1",
         "id": "load-negative-2",
         "kind": "negative",
-        "lane": 7,
-        "lengthM": 0.241528,
+        "lane": 5,
+        "lengthM": 0.327,
         "points": [
           [
-            0.062192,
-            0.032436,
+            0.10499999999999998,
+            0.055999999999999994,
             0.064
           ],
           [
-            0.062192,
-            0.032436,
-            0.076
+            0.105,
+            0.056,
+            0.072
           ],
           [
-            0.062192,
-            0.032436,
-            0.0728
+            0.105,
+            0.0648,
+            0.072
           ],
           [
-            0.062192,
-            0.026436,
-            0.0728
+            0.105,
+            0.0648,
+            0.063
           ],
           [
-            0.0368,
-            0.026436,
-            0.0728
+            0.075143,
+            0.0648,
+            0.063
           ],
           [
-            0.0368,
-            -0.016,
-            0.0728
+            0.075143,
+            -0.0958,
+            0.063
           ],
           [
-            0.050392,
-            -0.016,
-            0.0728
+            0.075143,
+            -0.0958,
+            0.046
           ],
           [
-            0.050392,
-            -0.0925,
-            0.0728
+            0.075143,
+            -0.1534,
+            0.046
           ],
           [
-            0.0565,
-            -0.0925,
-            0.0728
+            0.075143,
+            -0.1534,
+            0.063
           ],
           [
-            0.0565,
-            -0.0925,
-            0.029
-          ],
-          [
-            0.0565,
-            -0.105,
-            0.029
+            0.07514285714285712,
+            -0.1725,
+            0.063
           ]
         ],
         "radiusM": 0.0018,
         "to": "loadNeg2"
       },
-      "load-positive-3": {
-        "bends": 5,
-        "from": "fuseOutput2",
-        "id": "load-positive-3",
+      "load-positive-2": {
+        "bends": 16,
+        "from": "switchOutput2",
+        "id": "load-positive-2",
         "kind": "positive",
         "lane": 8,
-        "lengthM": 0.186722,
+        "lengthM": 0.719,
         "points": [
           [
-            0.101886,
-            -0.068264,
-            0.079
+            -0.18100000000000002,
+            0.15,
+            0.10800000000000001
           ],
           [
-            0.101886,
-            -0.068264,
-            0.091
+            -0.181,
+            0.15,
+            0.116
           ],
           [
-            0.101886,
-            -0.0752,
-            0.091
+            -0.1787,
+            0.15,
+            0.116
           ],
           [
-            0.101886,
-            -0.0752,
-            0.0928
+            -0.1787,
+            0.15,
+            0.063
           ],
           [
-            0.0295,
-            -0.0752,
-            0.0928
+            -0.1696,
+            0.15,
+            0.063
           ],
           [
-            0.0295,
-            -0.0752,
-            0.029
+            -0.1696,
+            -0.0238,
+            0.063
           ],
           [
-            0.0295,
-            -0.105,
-            0.029
+            -0.1408,
+            -0.0238,
+            0.063
+          ],
+          [
+            -0.1408,
+            -0.0238,
+            0.0748
+          ],
+          [
+            -0.04,
+            -0.0238,
+            0.0748
+          ],
+          [
+            -0.04,
+            -0.0382,
+            0.0748
+          ],
+          [
+            -0.04,
+            -0.0382,
+            0.046
+          ],
+          [
+            0.068143,
+            -0.0382,
+            0.046
+          ],
+          [
+            0.068143,
+            -0.0382,
+            0.0604
+          ],
+          [
+            0.068143,
+            -0.1246,
+            0.0604
+          ],
+          [
+            0.068143,
+            -0.1246,
+            0.046
+          ],
+          [
+            0.068143,
+            -0.1534,
+            0.046
+          ],
+          [
+            0.068143,
+            -0.1534,
+            0.063
+          ],
+          [
+            0.06814285714285712,
+            -0.1725,
+            0.063
           ]
         ],
-        "radiusM": 0.0023,
-        "to": "loadPos3"
+        "radiusM": 0.0018,
+        "to": "loadPos2"
       },
-      "load-negative-3": {
-        "bends": 5,
-        "from": "returnStud2",
-        "id": "load-negative-3",
-        "kind": "negative",
-        "lane": 8,
-        "lengthM": 0.267128,
-        "points": [
-          [
-            0.075192,
-            0.021436,
-            0.064
-          ],
-          [
-            0.075192,
-            0.021436,
-            0.0928
-          ],
-          [
-            0.075192,
-            -0.024696,
-            0.0928
-          ],
-          [
-            0.0323,
-            -0.024696,
-            0.0928
-          ],
-          [
-            0.0323,
-            -0.024696,
-            0.029
-          ],
-          [
-            0.0375,
-            -0.024696,
-            0.029
-          ],
-          [
-            0.0375,
-            -0.105,
-            0.029
-          ]
-        ],
-        "radiusM": 0.0023,
-        "to": "loadNeg3"
-      },
-      "switch-input-4": {
-        "bends": 6,
-        "from": "fuseOutput3",
-        "id": "switch-input-4",
+      "starlink-jack-positive": {
+        "bends": 16,
+        "from": "switchOutput1",
+        "id": "starlink-jack-positive",
         "kind": "positive",
-        "lane": 12,
-        "lengthM": 0.47577,
+        "lane": 8,
+        "lengthM": 0.5364,
         "points": [
           [
-            0.125886,
-            -0.068264,
-            0.079
+            -0.18100000000000002,
+            0.165,
+            0.10800000000000001
           ],
           [
-            0.125886,
-            -0.068264,
-            0.1276
+            -0.181,
+            0.165,
+            0.116
           ],
           [
-            0.125886,
-            -0.0609,
-            0.1276
+            -0.1787,
+            0.165,
+            0.116
           ],
           [
-            -0.1384,
-            -0.0609,
-            0.1276
+            -0.1787,
+            0.165,
+            0.0748
           ],
           [
-            -0.1384,
-            -0.0609,
-            0.12
+            -0.1696,
+            0.165,
+            0.0748
           ],
           [
-            -0.1384,
-            0.05342,
-            0.12
+            -0.1696,
+            0.1346,
+            0.0748
           ],
           [
+            -0.1787,
+            0.1346,
+            0.0748
+          ],
+          [
+            -0.1787,
+            0.1346,
+            0.0604
+          ],
+          [
+            -0.1787,
+            0.0626,
+            0.0604
+          ],
+          [
+            -0.1787,
+            0.0626,
+            0.046
+          ],
+          [
+            -0.1696,
+            0.0626,
+            0.046
+          ],
+          [
+            -0.1696,
+            -0.0526,
+            0.046
+          ],
+          [
+            -0.1984,
+            -0.0526,
+            0.046
+          ],
+          [
+            -0.1984,
             -0.16,
-            0.05342,
-            0.12
+            0.046
           ],
           [
+            -0.1552,
             -0.16,
-            0.05342,
-            0.108
+            0.046
+          ],
+          [
+            -0.1552,
+            -0.16,
+            0.063
+          ],
+          [
+            -0.152857,
+            -0.16,
+            0.063
+          ],
+          [
+            -0.15285714285714286,
+            -0.1725,
+            0.063
+          ]
+        ],
+        "radiusM": 0.0018,
+        "to": "starlinkJackPositive"
+      },
+      "starlink-switch-input": {
+        "bends": 12,
+        "from": "starlinkFuseOut",
+        "id": "starlink-switch-input",
+        "kind": "positive",
+        "lane": 8,
+        "lengthM": 0.7855,
+        "points": [
+          [
+            0.116,
+            -0.1365,
+            0.04
+          ],
+          [
+            0.116,
+            -0.1445,
+            0.04
+          ],
+          [
+            0.116,
+            -0.1445,
+            0.046
+          ],
+          [
+            0.104,
+            -0.1445,
+            0.046
+          ],
+          [
+            0.104,
+            -0.1445,
+            0.0604
+          ],
+          [
+            0.104,
+            -0.139,
+            0.0604
+          ],
+          [
+            0.104,
+            -0.139,
+            0.116
+          ],
+          [
+            -0.209,
+            -0.139,
+            0.116
+          ],
+          [
+            -0.209,
+            0.0194,
+            0.116
+          ],
+          [
+            -0.2272,
+            0.0194,
+            0.116
+          ],
+          [
+            -0.2272,
+            0.1763,
+            0.116
+          ],
+          [
+            -0.209,
+            0.1763,
+            0.116
+          ],
+          [
+            -0.209,
+            0.165,
+            0.116
+          ],
+          [
+            -0.20900000000000002,
+            0.165,
+            0.10800000000000001
+          ]
+        ],
+        "radiusM": 0.0018,
+        "to": "switchInput1"
+      },
+      "switch-input-2": {
+        "bends": 11,
+        "from": "fuseOutput1",
+        "id": "switch-input-2",
+        "kind": "positive",
+        "lane": 9,
+        "lengthM": 0.7903,
+        "points": [
+          [
+            0.134,
+            -0.1365,
+            0.04
+          ],
+          [
+            0.134,
+            -0.1445,
+            0.04
+          ],
+          [
+            0.134,
+            -0.1445,
+            0.116
+          ],
+          [
+            -0.2213,
+            -0.1445,
+            0.116
+          ],
+          [
+            -0.2213,
+            0.005,
+            0.116
+          ],
+          [
+            -0.2213,
+            0.005,
+            0.1282
+          ],
+          [
+            -0.2213,
+            0.0194,
+            0.1282
+          ],
+          [
+            -0.2272,
+            0.0194,
+            0.1282
+          ],
+          [
+            -0.2272,
+            0.15,
+            0.1282
+          ],
+          [
+            -0.2213,
+            0.15,
+            0.1282
+          ],
+          [
+            -0.2213,
+            0.15,
+            0.116
+          ],
+          [
+            -0.209,
+            0.15,
+            0.116
+          ],
+          [
+            -0.20900000000000002,
+            0.15,
+            0.10800000000000001
+          ]
+        ],
+        "radiusM": 0.0018,
+        "to": "switchInput2"
+      },
+      "ekrano-data": {
+        "bends": 9,
+        "from": "shuntData",
+        "id": "ekrano-data",
+        "kind": "data",
+        "lane": 5,
+        "lengthM": 0.3764,
+        "points": [
+          [
+            -0.1,
+            0.035,
+            0.062
+          ],
+          [
+            -0.1,
+            0.035,
+            0.07
+          ],
+          [
+            -0.1,
+            -0.0384,
+            0.07
+          ],
+          [
+            -0.0546,
+            -0.0384,
+            0.07
+          ],
+          [
+            -0.0546,
+            -0.0384,
+            0.0458
+          ],
+          [
+            -0.0546,
+            -0.0528,
+            0.0458
+          ],
+          [
+            0.0174,
+            -0.0528,
+            0.0458
+          ],
+          [
+            0.0174,
+            -0.1536,
+            0.0458
+          ],
+          [
+            0.0174,
+            -0.1536,
+            0.063
+          ],
+          [
+            0.0195,
+            -0.1536,
+            0.063
+          ],
+          [
+            0.019499999999999976,
+            -0.1725,
+            0.063
           ]
         ],
         "radiusM": 0.0016,
-        "to": "switchInput4"
-      },
-      "load-positive-4": {
-        "bends": 5,
-        "from": "switchOutput4",
-        "id": "load-positive-4",
-        "kind": "positive",
-        "lane": 12,
-        "lengthM": 0.40612,
-        "points": [
-          [
-            -0.132,
-            0.05342,
-            0.108
-          ],
-          [
-            -0.132,
-            0.05342,
-            0.1276
-          ],
-          [
-            0.0655,
-            0.05342,
-            0.1276
-          ],
-          [
-            0.0655,
-            0.05342,
-            0.1026
-          ],
-          [
-            0.0655,
-            -0.0925,
-            0.1026
-          ],
-          [
-            0.0655,
-            -0.0925,
-            0.097
-          ],
-          [
-            0.0655,
-            -0.105,
-            0.097
-          ]
-        ],
-        "radiusM": 0.0016,
-        "to": "loadPos4"
+        "to": "ekranData"
       },
       "load-negative-4": {
-        "bends": 4,
+        "bends": 12,
         "from": "returnStud3",
         "id": "load-negative-4",
         "kind": "negative",
-        "lane": 9,
-        "lengthM": 0.189328,
+        "lane": 6,
+        "lengthM": 0.4149,
         "points": [
           [
-            0.091192,
-            0.021436,
+            0.134,
+            0.044999999999999984,
             0.064
           ],
           [
-            0.091192,
-            0.021436,
-            0.1026
+            0.134,
+            0.045,
+            0.072
           ],
           [
-            0.091192,
-            -0.0925,
-            0.1026
+            0.134,
+            0.0336,
+            0.072
           ],
           [
-            0.091192,
-            -0.0925,
-            0.097
+            0.134,
+            0.0336,
+            0.089
           ],
           [
-            0.0725,
-            -0.0925,
-            0.097
+            0.134,
+            -0.0384,
+            0.089
           ],
           [
-            0.0725,
-            -0.105,
-            0.097
+            0.0894,
+            -0.0384,
+            0.089
+          ],
+          [
+            0.0894,
+            -0.0384,
+            0.0458
+          ],
+          [
+            0.075,
+            -0.0384,
+            0.0458
+          ],
+          [
+            0.075,
+            -0.0816,
+            0.0458
+          ],
+          [
+            0.0606,
+            -0.0816,
+            0.0458
+          ],
+          [
+            0.0606,
+            -0.16,
+            0.0458
+          ],
+          [
+            0.099214,
+            -0.16,
+            0.0458
+          ],
+          [
+            0.099214,
+            -0.16,
+            0.063
+          ],
+          [
+            0.09921428571428566,
+            -0.1725,
+            0.063
           ]
         ],
         "radiusM": 0.0016,
         "to": "loadNeg4"
       },
-      "switch-input-5": {
-        "bends": 5,
-        "from": "fuseOutput4",
-        "id": "switch-input-5",
+      "load-positive-4": {
+        "bends": 16,
+        "from": "switchOutput4",
+        "id": "load-positive-4",
         "kind": "positive",
-        "lane": 12,
-        "lengthM": 0.47577,
+        "lane": 8,
+        "lengthM": 0.8003,
         "points": [
           [
-            0.147886,
-            -0.068264,
-            0.079
+            -0.18100000000000002,
+            0.123,
+            0.10800000000000001
           ],
           [
-            0.147886,
-            -0.068264,
-            0.1276
+            -0.181,
+            0.123,
+            0.116
           ],
           [
-            0.147886,
-            0.03142,
-            0.1276
+            -0.1789,
+            0.123,
+            0.116
           ],
           [
-            -0.148,
-            0.03142,
-            0.1276
+            -0.1789,
+            0.123,
+            0.0746
           ],
           [
-            -0.148,
-            0.03142,
-            0.12
+            -0.1789,
+            0.0768,
+            0.0746
           ],
           [
+            -0.1842,
+            0.0768,
+            0.0746
+          ],
+          [
+            -0.1842,
+            0.0768,
+            0.063
+          ],
+          [
+            -0.2274,
+            0.0768,
+            0.063
+          ],
+          [
+            -0.2274,
+            -0.0096,
+            0.063
+          ],
+          [
+            -0.2274,
+            -0.0096,
+            0.0746
+          ],
+          [
+            -0.2274,
+            -0.168,
+            0.0746
+          ],
+          [
+            -0.1986,
+            -0.168,
+            0.0746
+          ],
+          [
+            -0.1986,
+            -0.168,
+            0.0458
+          ],
+          [
+            0.0894,
+            -0.168,
+            0.0458
+          ],
+          [
+            0.0894,
+            -0.168,
+            0.063
+          ],
+          [
+            0.0894,
             -0.16,
-            0.03142,
-            0.12
+            0.063
           ],
           [
+            0.092214,
             -0.16,
-            0.03142,
-            0.108
+            0.063
+          ],
+          [
+            0.09221428571428565,
+            -0.1725,
+            0.063
           ]
         ],
         "radiusM": 0.0016,
-        "to": "switchInput5"
-      },
-      "load-positive-5": {
-        "bends": 7,
-        "from": "switchOutput5",
-        "id": "load-positive-5",
-        "kind": "positive",
-        "lane": 11,
-        "lengthM": 0.43992,
-        "points": [
-          [
-            -0.132,
-            0.03142,
-            0.108
-          ],
-          [
-            -0.132,
-            0.03142,
-            0.12
-          ],
-          [
-            -0.132,
-            -0.0859,
-            0.12
-          ],
-          [
-            -0.132,
-            -0.0859,
-            0.0926
-          ],
-          [
-            -0.0734,
-            -0.0859,
-            0.0926
-          ],
-          [
-            -0.0734,
-            -0.0859,
-            0.0621
-          ],
-          [
-            0.0685,
-            -0.0859,
-            0.0621
-          ],
-          [
-            0.0685,
-            -0.0859,
-            0.029
-          ],
-          [
-            0.0685,
-            -0.105,
-            0.029
-          ]
-        ],
-        "radiusM": 0.0016,
-        "to": "loadPos5"
+        "to": "loadPos4"
       },
       "load-negative-5": {
-        "bends": 7,
+        "bends": 16,
         "from": "returnStud4",
         "id": "load-negative-5",
         "kind": "negative",
-        "lane": 8,
-        "lengthM": 0.265944,
+        "lane": 6,
+        "lengthM": 0.544,
         "points": [
           [
-            0.107192,
-            0.021436,
+            0.15,
+            0.044999999999999984,
             0.064
           ],
           [
-            0.107192,
-            0.021436,
-            0.076
+            0.15,
+            0.045,
+            0.072
           ],
           [
-            0.1166,
-            0.021436,
-            0.076
+            0.15,
+            0.0336,
+            0.072
           ],
           [
-            0.1166,
-            0.021436,
-            0.0826
+            0.15,
+            0.0336,
+            0.089
           ],
           [
-            0.1166,
-            -0.1009,
-            0.0826
+            0.15,
+            -0.0384,
+            0.089
           ],
           [
-            0.0755,
-            -0.1009,
-            0.0826
+            0.15,
+            -0.0384,
+            0.0746
           ],
           [
-            0.0755,
-            -0.1009,
-            0.029
+            0.2046,
+            -0.0384,
+            0.0746
           ],
           [
-            0.0755,
-            -0.0925,
-            0.029
+            0.2046,
+            -0.1104,
+            0.0746
           ],
           [
-            0.0755,
-            -0.105,
-            0.029
+            0.2274,
+            -0.1104,
+            0.0746
+          ],
+          [
+            0.2274,
+            -0.16,
+            0.0746
+          ],
+          [
+            0.2274,
+            -0.16,
+            0.0458
+          ],
+          [
+            0.1614,
+            -0.16,
+            0.0458
+          ],
+          [
+            0.1614,
+            -0.16,
+            0.072
+          ],
+          [
+            0.1614,
+            -0.1392,
+            0.072
+          ],
+          [
+            0.1326,
+            -0.1392,
+            0.072
+          ],
+          [
+            0.1326,
+            -0.1392,
+            0.063
+          ],
+          [
+            0.123286,
+            -0.1392,
+            0.063
+          ],
+          [
+            0.12328571428571425,
+            -0.1725,
+            0.063
           ]
         ],
         "radiusM": 0.0016,
         "to": "loadNeg5"
       },
+      "load-positive-5": {
+        "bends": 16,
+        "from": "switchOutput5",
+        "id": "load-positive-5",
+        "kind": "positive",
+        "lane": 8,
+        "lengthM": 0.6838,
+        "points": [
+          [
+            -0.18100000000000002,
+            0.10099999999999999,
+            0.10800000000000001
+          ],
+          [
+            -0.181,
+            0.101,
+            0.116
+          ],
+          [
+            -0.1789,
+            0.101,
+            0.116
+          ],
+          [
+            -0.1789,
+            0.101,
+            0.089
+          ],
+          [
+            -0.1789,
+            0.0624,
+            0.089
+          ],
+          [
+            -0.1554,
+            0.0624,
+            0.089
+          ],
+          [
+            -0.1554,
+            0.0624,
+            0.063
+          ],
+          [
+            -0.0402,
+            0.0624,
+            0.063
+          ],
+          [
+            -0.0402,
+            0.0624,
+            0.0746
+          ],
+          [
+            -0.0114,
+            0.0624,
+            0.0746
+          ],
+          [
+            -0.0114,
+            -0.0384,
+            0.0746
+          ],
+          [
+            0.0606,
+            -0.0384,
+            0.0746
+          ],
+          [
+            0.0606,
+            -0.0384,
+            0.089
+          ],
+          [
+            0.0606,
+            -0.1536,
+            0.089
+          ],
+          [
+            0.0606,
+            -0.1536,
+            0.0746
+          ],
+          [
+            0.116286,
+            -0.1536,
+            0.0746
+          ],
+          [
+            0.116286,
+            -0.1536,
+            0.063
+          ],
+          [
+            0.11628571428571424,
+            -0.1725,
+            0.063
+          ]
+        ],
+        "radiusM": 0.0016,
+        "to": "loadPos5"
+      },
+      "switch-input-5": {
+        "bends": 15,
+        "from": "fuseOutput4",
+        "id": "switch-input-5",
+        "kind": "positive",
+        "lane": 9,
+        "lengthM": 0.8213,
+        "points": [
+          [
+            0.188,
+            -0.1365,
+            0.04
+          ],
+          [
+            0.188,
+            -0.1445,
+            0.04
+          ],
+          [
+            0.1758,
+            -0.1445,
+            0.04
+          ],
+          [
+            0.1758,
+            -0.1392,
+            0.04
+          ],
+          [
+            0.1758,
+            -0.1392,
+            0.0458
+          ],
+          [
+            0.1182,
+            -0.1392,
+            0.0458
+          ],
+          [
+            0.1182,
+            -0.1392,
+            0.1284
+          ],
+          [
+            -0.2211,
+            -0.1392,
+            0.1284
+          ],
+          [
+            -0.2211,
+            -0.0096,
+            0.1284
+          ],
+          [
+            -0.2274,
+            -0.0096,
+            0.1284
+          ],
+          [
+            -0.2274,
+            0.0048,
+            0.1284
+          ],
+          [
+            -0.2274,
+            0.0048,
+            0.1034
+          ],
+          [
+            -0.2274,
+            0.101,
+            0.1034
+          ],
+          [
+            -0.2211,
+            0.101,
+            0.1034
+          ],
+          [
+            -0.2211,
+            0.101,
+            0.116
+          ],
+          [
+            -0.209,
+            0.101,
+            0.116
+          ],
+          [
+            -0.20900000000000002,
+            0.10099999999999999,
+            0.10800000000000001
+          ]
+        ],
+        "radiusM": 0.0016,
+        "to": "switchInput5"
+      },
+      "switch-input-4": {
+        "bends": 20,
+        "from": "fuseOutput3",
+        "id": "switch-input-4",
+        "kind": "positive",
+        "lane": 9,
+        "lengthM": 0.9749,
+        "points": [
+          [
+            0.17,
+            -0.1365,
+            0.04
+          ],
+          [
+            0.17,
+            -0.1445,
+            0.04
+          ],
+          [
+            0.1614,
+            -0.1445,
+            0.04
+          ],
+          [
+            0.1614,
+            -0.168,
+            0.04
+          ],
+          [
+            0.1614,
+            -0.168,
+            0.116
+          ],
+          [
+            -0.2274,
+            -0.168,
+            0.116
+          ],
+          [
+            -0.2274,
+            -0.0384,
+            0.116
+          ],
+          [
+            -0.2274,
+            -0.0384,
+            0.1034
+          ],
+          [
+            -0.2211,
+            -0.0384,
+            0.1034
+          ],
+          [
+            -0.2211,
+            0.0192,
+            0.1034
+          ],
+          [
+            -0.1986,
+            0.0192,
+            0.1034
+          ],
+          [
+            -0.1986,
+            0.0192,
+            0.116
+          ],
+          [
+            -0.1698,
+            0.0192,
+            0.116
+          ],
+          [
+            -0.1698,
+            0.0768,
+            0.116
+          ],
+          [
+            -0.2211,
+            0.0768,
+            0.116
+          ],
+          [
+            -0.2211,
+            0.0912,
+            0.116
+          ],
+          [
+            -0.2211,
+            0.0912,
+            0.1284
+          ],
+          [
+            -0.2211,
+            0.1056,
+            0.1284
+          ],
+          [
+            -0.2211,
+            0.1056,
+            0.116
+          ],
+          [
+            -0.2211,
+            0.123,
+            0.116
+          ],
+          [
+            -0.209,
+            0.123,
+            0.116
+          ],
+          [
+            -0.20900000000000002,
+            0.123,
+            0.10800000000000001
+          ]
+        ],
+        "radiusM": 0.0016,
+        "to": "switchInput4"
+      },
+      "shunt-voltage-sense": {
+        "bends": 17,
+        "from": "positiveStud7",
+        "id": "shunt-voltage-sense",
+        "kind": "positive",
+        "lane": 5,
+        "lengthM": 0.6376,
+        "points": [
+          [
+            0.15899999999999997,
+            0.12299999999999998,
+            0.065
+          ],
+          [
+            0.159,
+            0.123,
+            0.073
+          ],
+          [
+            0.159,
+            0.1068,
+            0.073
+          ],
+          [
+            0.159,
+            0.1068,
+            0.07
+          ],
+          [
+            0.1322,
+            0.1068,
+            0.07
+          ],
+          [
+            0.1322,
+            0.0764,
+            0.07
+          ],
+          [
+            0.0602,
+            0.0764,
+            0.07
+          ],
+          [
+            0.0602,
+            0.0908,
+            0.07
+          ],
+          [
+            -0.1702,
+            0.0908,
+            0.07
+          ],
+          [
+            -0.1702,
+            -0.01,
+            0.07
+          ],
+          [
+            -0.1414,
+            -0.01,
+            0.07
+          ],
+          [
+            -0.1414,
+            -0.01,
+            0.073
+          ],
+          [
+            -0.1126,
+            -0.01,
+            0.073
+          ],
+          [
+            -0.1126,
+            0.0093,
+            0.073
+          ],
+          [
+            -0.1126,
+            0.0093,
+            0.0742
+          ],
+          [
+            -0.082,
+            0.0093,
+            0.0742
+          ],
+          [
+            -0.082,
+            0.0093,
+            0.07
+          ],
+          [
+            -0.082,
+            0.021,
+            0.07
+          ],
+          [
+            -0.08200000000000002,
+            0.021000000000000005,
+            0.062
+          ]
+        ],
+        "radiusM": 0.0012,
+        "to": "shuntVbattPositive"
+      },
       "switch-led-negative": {
-        "bends": 7,
+        "bends": 6,
         "from": "returnStud5",
         "id": "switch-led-negative",
         "kind": "negative",
-        "lane": 12,
-        "lengthM": 0.373608,
+        "lane": 8,
+        "lengthM": 0.4914,
         "points": [
           [
-            0.123192,
-            0.021436,
+            0.16599999999999998,
+            0.044999999999999984,
             0.064
           ],
           [
-            0.123192,
-            0.021436,
-            0.0872
+            0.166,
+            0.045,
+            0.072
           ],
           [
-            0.0962,
-            0.021436,
-            0.0872
+            0.166,
+            0.0358,
+            0.072
           ],
           [
-            0.0962,
-            0.01342,
-            0.0872
+            0.166,
+            0.0358,
+            0.116
           ],
           [
-            0.0962,
-            0.01342,
-            0.1272
+            0.0458,
+            0.0358,
+            0.116
           ],
           [
-            -0.1438,
-            0.01342,
-            0.1272
+            0.0458,
+            0.083,
+            0.116
           ],
           [
-            -0.1438,
-            0.01342,
-            0.12
+            -0.209,
+            0.083,
+            0.116
           ],
           [
-            -0.16,
-            0.01342,
-            0.12
-          ],
-          [
-            -0.16,
-            0.01342,
-            0.108
+            -0.20900000000000002,
+            0.08299999999999999,
+            0.10800000000000001
           ]
         ],
         "radiusM": 0.0012,
         "to": "switchLedNegative"
       }
     },
-    "selectedCandidate": "evolutionary-optimized-finalized",
+    "selectedCandidate": "Expanded protected-face baseline",
     "terminals": {
       "selectorInputA": [
-        -0.106501,
-        0.068
+        -0.137,
+        0.0917
       ],
       "selectorInputB": [
-        -0.106501,
-        0.088
+        -0.113,
+        0.0917
       ],
       "selectorOutput": [
-        -0.062501,
-        0.078
+        -0.07669999999999999,
+        0.14
       ],
       "shuntBatteryA": [
-        -0.106008,
-        0.007104
+        -0.154,
+        0.035
       ],
       "shuntBatteryB": [
-        -0.088008,
-        0.007104
+        -0.128,
+        0.035
       ],
       "shuntSystem": [
-        -0.013008,
-        0.007104
+        -0.05700000000000002,
+        0.035
       ],
       "shuntData": [
-        -0.056008,
-        0.007104
+        -0.1,
+        0.035
       ],
       "shuntVbattPositive": [
-        -0.038008,
-        -0.006896
+        -0.08200000000000002,
+        0.021000000000000005
       ],
       "servicesFuseIn": [
-        0.067886,
-        -0.000264
+        0.098,
+        -0.03350000000000001
       ],
       "servicesFuseOut": [
-        0.087886,
-        -0.000264
+        0.098,
+        -0.1365
       ],
       "fuseInput": [
-        0.107886,
-        -0.000264
+        0.161,
+        -0.03350000000000001
       ],
       "starlinkFuseIn": [
-        0.127886,
-        -0.000264
+        0.116,
+        -0.03350000000000001
       ],
       "starlinkFuseOut": [
-        0.147886,
-        -0.000264
+        0.116,
+        -0.1365
       ],
       "switchInput1": [
-        -0.16,
-        0.09542
+        -0.20900000000000002,
+        0.165
       ],
       "switchOutput1": [
-        -0.132,
-        0.09542
+        -0.18100000000000002,
+        0.165
       ],
       "switchInput2": [
-        -0.16,
-        0.08042
+        -0.20900000000000002,
+        0.15
       ],
       "switchOutput2": [
-        -0.132,
-        0.08042
+        -0.18100000000000002,
+        0.15
       ],
       "switchInput4": [
-        -0.16,
-        0.05342
+        -0.20900000000000002,
+        0.123
       ],
       "switchOutput4": [
-        -0.132,
-        0.05342
+        -0.18100000000000002,
+        0.123
       ],
       "switchInput5": [
-        -0.16,
-        0.03142
+        -0.20900000000000002,
+        0.10099999999999999
       ],
       "switchOutput5": [
-        -0.132,
-        0.03142
+        -0.18100000000000002,
+        0.10099999999999999
       ],
       "switchLedNegative": [
-        -0.16,
-        0.01342
+        -0.20900000000000002,
+        0.08299999999999999
       ],
       "positiveStud1": [
-        -0.001001,
-        0.089749
+        0.05099999999999999,
+        0.143
       ],
       "negativeStud1": [
-        -0.132426,
-        -0.0418
+        -0.15899999999999997,
+        -0.07700000000000001
       ],
       "positiveStud2": [
-        0.034999,
-        0.089749
+        0.087,
+        0.143
       ],
       "negativeStud2": [
-        -0.096426,
-        -0.0418
+        -0.123,
+        -0.07700000000000001
       ],
       "positiveStud3": [
-        0.070999,
-        0.089749
+        0.12299999999999998,
+        0.143
       ],
       "negativeStud3": [
-        -0.060426,
-        -0.0418
+        -0.087,
+        -0.07700000000000001
       ],
       "positiveStud4": [
-        -0.001001,
-        0.069749
+        0.05099999999999999,
+        0.12299999999999998
       ],
       "negativeStud4": [
-        -0.132426,
-        -0.0618
+        -0.15899999999999997,
+        -0.097
       ],
       "positiveStud5": [
-        0.034999,
-        0.069749
+        0.087,
+        0.12299999999999998
       ],
       "negativeStud5": [
-        -0.096426,
-        -0.0618
+        -0.123,
+        -0.097
       ],
       "positiveStud6": [
-        0.070999,
-        0.069749
+        0.12299999999999998,
+        0.12299999999999998
       ],
       "negativeStud6": [
-        -0.060426,
-        -0.0618
+        -0.087,
+        -0.097
       ],
       "positiveStud7": [
-        0.106999,
-        0.069749
+        0.15899999999999997,
+        0.12299999999999998
       ],
       "returnStud1": [
-        0.062192,
-        0.032436
+        0.10499999999999998,
+        0.055999999999999994
       ],
       "returnStud2": [
-        0.075192,
-        0.021436
+        0.118,
+        0.044999999999999984
       ],
       "returnStud3": [
-        0.091192,
-        0.021436
+        0.134,
+        0.044999999999999984
       ],
       "returnStud4": [
-        0.107192,
-        0.021436
+        0.15,
+        0.044999999999999984
       ],
       "returnStud5": [
-        0.123192,
-        0.021436
+        0.16599999999999998,
+        0.044999999999999984
       ],
       "returnStud6": [
-        0.139192,
-        0.021436
+        0.182,
+        0.044999999999999984
       ],
       "fuseOutput1": [
-        0.079886,
-        -0.068264
+        0.134,
+        -0.1365
       ],
       "fuseOutput2": [
-        0.101886,
-        -0.068264
+        0.152,
+        -0.1365
       ],
       "fuseOutput3": [
-        0.125886,
-        -0.068264
+        0.17,
+        -0.1365
       ],
       "fuseOutput4": [
-        0.147886,
-        -0.068264
+        0.188,
+        -0.1365
       ],
       "mpptFuseIn": [
-        0.012692,
-        0.015899
+        -0.010250000000000002,
+        0.035
       ],
       "mpptFuseOut": [
-        0.046692,
-        0.015899
+        0.04025,
+        0.035
       ],
       "ekranoFuseIn": [
-        -0.168,
-        -0.005741
+        -0.22000000000000003,
+        0.04
       ],
       "ekranoFuseOut": [
-        -0.128,
-        -0.005741
-      ],
-      "ekranPos": [
-        -0.0995,
-        -0.105
-      ],
-      "ekranNeg": [
-        -0.0925,
-        -0.105
-      ],
-      "batteryNegA": [
-        -0.071,
-        -0.105
-      ],
-      "batteryNegB": [
-        -0.04,
-        -0.105
-      ],
-      "ekranData": [
-        -0.016,
-        -0.105
-      ],
-      "multiplusNeg": [
-        0.008,
-        -0.105
-      ],
-      "loadPos3": [
-        0.0295,
-        -0.105
-      ],
-      "loadNeg3": [
-        0.0375,
-        -0.105
-      ],
-      "loadPos2": [
-        0.0495,
-        -0.105
-      ],
-      "loadNeg2": [
-        0.0565,
-        -0.105
-      ],
-      "loadPos5": [
-        0.0685,
-        -0.105
-      ],
-      "loadNeg5": [
-        0.0755,
-        -0.105
-      ],
-      "mpptPos": [
-        0.0935,
-        -0.105
-      ],
-      "starlinkJackPositive": [
-        -0.072,
-        -0.105
-      ],
-      "starlinkJackNegative": [
-        -0.064,
-        -0.105
-      ],
-      "mpptNeg": [
-        -0.0455,
-        -0.105
+        -0.18000000000000002,
+        0.04
       ],
       "multiplusPos": [
-        -0.018,
-        -0.105
+        0.17892857142857138,
+        -0.1725
+      ],
+      "loadPos2": [
+        0.06814285714285712,
+        -0.1725
+      ],
+      "loadNeg2": [
+        0.07514285714285712,
+        -0.1725
+      ],
+      "loadPos5": [
+        0.11628571428571424,
+        -0.1725
+      ],
+      "loadNeg5": [
+        0.12328571428571425,
+        -0.1725
+      ],
+      "batteryNegA": [
+        -0.1799285714285714,
+        -0.1725
       ],
       "batteryPosB": [
-        0.013,
-        -0.105
+        -0.009571428571428588,
+        -0.1725
       ],
       "batteryPosA": [
-        0.044,
-        -0.105
+        -0.08171428571428573,
+        -0.1725
+      ],
+      "multiplusNeg": [
+        -0.045642857142857166,
+        -0.1725
       ],
       "loadPos4": [
-        0.0655,
-        -0.105
+        0.09221428571428565,
+        -0.1725
       ],
       "loadNeg4": [
-        0.0725,
-        -0.105
+        0.09921428571428566,
+        -0.1725
+      ],
+      "ekranPos": [
+        -0.2135,
+        -0.1725
+      ],
+      "ekranNeg": [
+        -0.2065,
+        -0.1725
+      ],
+      "mpptNeg": [
+        0.04507142857142855,
+        -0.1725
+      ],
+      "batteryNegB": [
+        -0.11778571428571429,
+        -0.1725
+      ],
+      "loadPos3": [
+        0.20549999999999996,
+        -0.1725
+      ],
+      "loadNeg3": [
+        0.21349999999999994,
+        -0.1725
+      ],
+      "mpptPos": [
+        0.14635714285714282,
+        -0.1725
+      ],
+      "ekranData": [
+        0.019499999999999976,
+        -0.1725
+      ],
+      "starlinkJackPositive": [
+        -0.15285714285714286,
+        -0.1725
+      ],
+      "starlinkJackNegative": [
+        -0.14485714285714285,
+        -0.1725
       ]
     }
-  },
-  "postProcessing": {
-    "kind": "deterministic direction-preserving polyline compaction and renderer-equivalent rounded-tube audit",
-    "preservesEvolutionaryRunStatistics": true,
-    "finalizedAt": "2026-08-19T09:11:38.979Z",
-    "backtrackingCorners3d": 12,
-    "coincidentRunOverlapM": 0,
-    "conservativeSpatialIntersections": 0
   }
 }

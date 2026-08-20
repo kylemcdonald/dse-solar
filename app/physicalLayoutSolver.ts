@@ -112,8 +112,8 @@ export type PhysicalLayoutSpecification = {
     batteryRouting: "collision-aware-terminal-derived-bundle";
     junctionBackClearance: "flush-no-cables";
     removableSurfaces: { sideWalls: true; roof: true };
-    wallLayout: "evolutionary-optimized-layout";
-    wallRouting: "bottom-port-downward-breakout-visibility-graph";
+    wallLayout: "stochastic-voxel-a-star-optimized-layout";
+    wallRouting: "offline-voxel-a-star-only";
   };
 };
 
@@ -992,6 +992,10 @@ function physicalPortDirection(portId: string, deviceId?: string): LayoutVector 
   if (portId === "arrayFrameEarth") return [1, 0, 0];
   if (portId === "earthElectrode") return [0, 1, 0];
   if (deviceId === "generator") return [1, 0, 0];
+  // The small balancer ring is stacked on the same battery post as a heavy
+  // lug. Give it the other physically available departure axis so both
+  // connector barrels and straight-on approaches remain distinct.
+  if (deviceId?.startsWith("battery") && portId.endsWith("Balancer")) return [0, 0, 1];
   if (deviceId?.startsWith("battery")) return [0, 1, 0];
   return [0, -1, 0];
 }
@@ -1213,7 +1217,7 @@ function segmentIntersectsBounds(
   return far >= 0 && near <= 1;
 }
 
-function deviceFrontCrossingIssues(
+export function deviceFrontCrossingIssues(
   routes: PhysicalCableRoute[],
   devices: Record<string, PhysicalDevice>,
 ) {
@@ -1261,6 +1265,14 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     frontZ: -2.121,
   };
   const z = (depth: number) => wallCenterZ(equipmentBoard.frontZ, depth);
+  // These four points are the array-side cable dressing exits. The short
+  // panel leads terminate here; from this point all the way to the indoor PV
+  // protection enclosure, each complete string conductor is solved by the
+  // production Voxel A* router rather than by authored waypoints.
+  const pvArrayExitAPositive: LayoutVector = [0.69, 0.68, -1.62];
+  const pvArrayExitANegative: LayoutVector = [0.69, 0.58, -1.62];
+  const pvArrayExitBPositive: LayoutVector = [0.72, 0.72, -1.55];
+  const pvArrayExitBNegative: LayoutVector = [0.69, 0.52, -1.62];
 
   const defaultDeviceOverrides = optimizedPhysicalLayout.runtime?.deviceOverrides ?? {};
   const deviceOverrides = {
@@ -1273,7 +1285,7 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     smartSolar: createDevice("smartSolar", [2.15, 0.55, z(0.103)], [0.295, 0.216, 0.103], "wall"),
     multiPlus: createDevice("multiPlus", [2.08, 1.92, z(0.141)], [0.268, 0.499, 0.141], "wall"),
     acBoard: createDevice("acBoard", [2.38, 1.75, z(0.1)], [0.22, 0.18, 0.1], "wall"),
-    junction: createDevice("junction", [3.45, 1.68, z(0.15)], [0.37, 0.265, 0.15], "wall"),
+    junction: createDevice("junction", [3.45, 1.68, z(0.15)], [0.49, 0.4, 0.15], "wall"),
     ekran: createDevice("ekran", [3.45, 2.06, z(0.0298)], [0.187, 0.124, 0.0298], "wall"),
     unifi: createDevice("unifi", [3.68, 2.06, z(0.03)], [0.098, 0.098, 0.03], "wall"),
     usb: createDevice("usb", [3.82, 2.06, z(0.075)], [0.18, 0.075, 0.075], "wall"),
@@ -1292,6 +1304,11 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     starlink: createDevice("starlink", [4.45, 3.36, -2.04], [0.2985, 0.0385, 0.259], "exterior"),
     indoorLight: createDevice("indoorLight", [5.15, 2.72, -0.72], [0.127, 0.1, 0.055], "hanging"),
     outdoorFlood: createDevice("outdoorFlood", [5.55, 2.55, -2.03], [0.127, 0.1, 0.055], "exterior"),
+    pvArrayExitAPositive: createDevice("pvArrayExitAPositive", pvArrayExitAPositive, [0.012, 0.012, 0.012], "exterior"),
+    pvArrayExitANegative: createDevice("pvArrayExitANegative", pvArrayExitANegative, [0.012, 0.012, 0.012], "exterior"),
+    pvArrayExitBPositive: createDevice("pvArrayExitBPositive", pvArrayExitBPositive, [0.012, 0.012, 0.012], "exterior"),
+    pvArrayExitBNegative: createDevice("pvArrayExitBNegative", pvArrayExitBNegative, [0.012, 0.012, 0.012], "exterior"),
+    earthElectrode: createDevice("earthElectrode", [0.72, 0.1, -2.58], [0.03, 0.18, 0.03], "exterior"),
   }, deviceOverrides);
   devices.junctionControls = createJunctionControlsDevice(devices.junction);
 
@@ -1372,6 +1389,10 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     panelStringANegative: [-1.659, 0.205, -1.18],
     panelStringBPositive: [0.559, 0.925, 1.18],
     panelStringBNegative: [-1.659, 0.205, 1.18],
+    pvArrayExitAPositive,
+    pvArrayExitANegative,
+    pvArrayExitBPositive,
+    pvArrayExitBNegative,
   };
   for (let index = 0; index < 7; index += 1) {
     ports[`earthBar${index + 1}`] = busbarStud(devices.earthBar, index, 7);
@@ -1399,13 +1420,6 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
       );
     });
   });
-  const portDown = (port: LayoutVector, distanceM = 0.03): LayoutVector => [
-    port[0],
-    round(port[1] - distanceM),
-    port[2],
-  ];
-
-  const wallZ = -2.086;
   const routes: Record<string, PhysicalCableRoute> = {};
   const addRoute = (
     id: string,
@@ -1844,22 +1858,18 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     });
   };
 
-  const stringAHomePositive: LayoutVector = [0.69, 0.68, -1.62];
-  const stringAHomeNegative: LayoutVector = [0.69, 0.58, -1.62];
-  const stringBHomePositive: LayoutVector = [0.72, 0.72, -1.55];
-  const stringBHomeNegative: LayoutVector = [0.69, 0.52, -1.62];
-  addRoute("pv-string-a-positive", "pv-positive", [ports.panelStringAPositive, [0.69, 0.925, -1.18], stringAHomePositive], 0.0032, 1, { routing: "fixed-site", sourceDeviceId: "solarPanels", sourcePortId: "panelStringAPositive" });
-  addRoute("pv-string-a-negative", "pv-negative", [ports.panelStringANegative, [-1.659, 0.205, -1.55], [-1.659, 0.58, -1.55], stringAHomeNegative], 0.0032, 1, { routing: "fixed-site", sourceDeviceId: "solarPanels", sourcePortId: "panelStringANegative" });
-  addRoute("pv-string-b-positive", "pv-positive", [ports.panelStringBPositive, [0.72, 0.925, 1.18], stringBHomePositive], 0.0032, 1, { routing: "fixed-site", sourceDeviceId: "solarPanels", sourcePortId: "panelStringBPositive" });
-  addRoute("pv-string-b-negative", "pv-negative", [ports.panelStringBNegative, [-1.659, 0.205, -1.5], [-1.659, 0.52, -1.5], stringBHomeNegative], 0.0032, 1, { routing: "fixed-site", sourceDeviceId: "solarPanels", sourcePortId: "panelStringBNegative" });
+  addRoute("pv-string-a-positive", "pv-positive", [ports.panelStringAPositive, [0.69, 0.925, -1.18], pvArrayExitAPositive], 0.0032, 1, { routing: "fixed-site", sourceDeviceId: "solarPanels", sourcePortId: "panelStringAPositive" });
+  addRoute("pv-string-a-negative", "pv-negative", [ports.panelStringANegative, [-1.659, 0.205, -1.55], [-1.659, 0.58, -1.55], pvArrayExitANegative], 0.0032, 1, { routing: "fixed-site", sourceDeviceId: "solarPanels", sourcePortId: "panelStringANegative" });
+  addRoute("pv-string-b-positive", "pv-positive", [ports.panelStringBPositive, [0.72, 0.925, 1.18], pvArrayExitBPositive], 0.0032, 1, { routing: "fixed-site", sourceDeviceId: "solarPanels", sourcePortId: "panelStringBPositive" });
+  addRoute("pv-string-b-negative", "pv-negative", [ports.panelStringBNegative, [-1.659, 0.205, -1.5], [-1.659, 0.52, -1.5], pvArrayExitBNegative], 0.0032, 1, { routing: "fixed-site", sourceDeviceId: "solarPanels", sourcePortId: "panelStringBNegative" });
 
   // Each string keeps its own complete red/black 4 mm² home run. All four
   // conductors enter one indoor enclosure, where they are combined behind the
   // DC disconnect and Type 2 SPD. There is no separate array-side box.
-  addRoute("pv-home-run-a-positive", "pv-positive", [stringAHomePositive, [1.06, 0.68, -1.62], [1.06, 0.18, -1.86], [1.28, 0.18, wallZ], portDown(ports.pvEntryStringAPositive), ports.pvEntryStringAPositive], 0.0032, 1, { routing: "fixed-site", targetDeviceId: "pvEntry", targetPortId: "pvEntryStringAPositive" });
-  addRoute("pv-home-run-a-negative", "pv-negative", [stringAHomeNegative, [1.09, 0.58, -1.62], [1.09, 0.21, -1.84], [1.31, 0.21, wallZ + 0.016], portDown(ports.pvEntryStringANegative, 0.045), ports.pvEntryStringANegative], 0.0032, 1, { routing: "fixed-site", targetDeviceId: "pvEntry", targetPortId: "pvEntryStringANegative" });
-  addRoute("pv-home-run-b-positive", "pv-positive", [stringBHomePositive, [1.12, 0.72, -1.55], [1.12, 0.24, -1.82], [1.34, 0.24, wallZ + 0.032], portDown(ports.pvEntryStringBPositive, 0.06), ports.pvEntryStringBPositive], 0.0032, 1, { routing: "fixed-site", targetDeviceId: "pvEntry", targetPortId: "pvEntryStringBPositive" });
-  addRoute("pv-home-run-b-negative", "pv-negative", [stringBHomeNegative, [1.15, 0.52, -1.62], [1.15, 0.27, -1.8], [1.37, 0.27, wallZ + 0.048], portDown(ports.pvEntryStringBNegative, 0.075), ports.pvEntryStringBNegative], 0.0032, 1, { routing: "fixed-site", targetDeviceId: "pvEntry", targetPortId: "pvEntryStringBNegative" });
+  addAutomaticWallRoute("pv-home-run-a-positive", "pv-positive", "pvArrayExitAPositive", "pvEntryStringAPositive", "pvArrayExitAPositive", "pvEntry", 0.0032);
+  addAutomaticWallRoute("pv-home-run-a-negative", "pv-negative", "pvArrayExitANegative", "pvEntryStringANegative", "pvArrayExitANegative", "pvEntry", 0.0032);
+  addAutomaticWallRoute("pv-home-run-b-positive", "pv-positive", "pvArrayExitBPositive", "pvEntryStringBPositive", "pvArrayExitBPositive", "pvEntry", 0.0032);
+  addAutomaticWallRoute("pv-home-run-b-negative", "pv-negative", "pvArrayExitBNegative", "pvEntryStringBNegative", "pvArrayExitBNegative", "pvEntry", 0.0032);
 
   addAutomaticWallRoute("pv-entry-to-mppt-positive", "pv-positive", "pvEntryMpptPositive", "smartSolarPvPositive", "pvEntry", "smartSolar", 0.0032);
   addAutomaticWallRoute("pv-entry-to-mppt-negative", "pv-negative", "pvEntryMpptNegative", "smartSolarPvNegative", "pvEntry", "smartSolar", 0.0032);
@@ -1890,12 +1900,17 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     bMidLeft: batteryTerminal(devices.battery3, 0.17),
     bMidRight: batteryTerminal(devices.battery4, -0.17),
     bPositive: batteryTerminal(devices.battery4, 0.17),
-    aNegativeBalancer: batteryTerminal(devices.battery1, -0.156, 0.025),
-    aMidLeftBalancer: batteryTerminal(devices.battery1, 0.156, 0.025),
-    aPositiveBalancer: batteryTerminal(devices.battery2, 0.156, 0.025),
-    bNegativeBalancer: batteryTerminal(devices.battery3, -0.156, 0.025),
-    bMidLeftBalancer: batteryTerminal(devices.battery3, 0.156, 0.025),
-    bPositiveBalancer: batteryTerminal(devices.battery4, 0.156, 0.025),
+    // Each balancer ring shares an electrical battery post with a heavy lug,
+    // but leaves the stacked post on its inner side. Model that separate lug
+    // exit 60 mm away from the heavy-cable centerline; otherwise reserving the
+    // two real connector bodies makes either cable's one-way approach occupy
+    // the other's only legal voxel corridor.
+    aNegativeBalancer: batteryTerminal(devices.battery1, -0.11, 0.025),
+    aMidLeftBalancer: batteryTerminal(devices.battery1, 0.11, 0.025),
+    aPositiveBalancer: batteryTerminal(devices.battery2, 0.11, 0.025),
+    bNegativeBalancer: batteryTerminal(devices.battery3, -0.11, 0.025),
+    bMidLeftBalancer: batteryTerminal(devices.battery3, 0.11, 0.025),
+    bPositiveBalancer: batteryTerminal(devices.battery4, 0.11, 0.025),
     // The ring-lug temperature sensor shares Battery 1's negative post but
     // leaves on the opposite side of the stacked heavy-cable lug. A distinct
     // nearby port lets both cables obey their straight approach without
@@ -2041,7 +2056,15 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
   ));
   const routeClearanceIssues = cableClearanceIssues(clearanceAuditedRoutes, 0.0015);
   const projectedConflictIssues = projectedCableConflictIssues(automaticRoutes, 0.0015);
-  const frontCrossingIssues = deviceFrontCrossingIssues(Object.values(routes), devices);
+  // Automatic centerlines below are endpoint declarations/provisional paths;
+  // the browser replaces them with the separately published Voxel A* result.
+  // Keep this specification-level audit scoped to geometry that is actually
+  // rendered directly, otherwise a discarded provisional path can report a
+  // false device-front failure after glands or devices move.
+  const frontCrossingIssues = deviceFrontCrossingIssues(
+    Object.values(routes).filter((route) => route.routing === "fixed-site"),
+    devices,
+  );
   const automaticRouteLengthM = round(automaticRoutes.reduce((sum, route) => sum + route.lengthM, 0));
   const automaticRouteExcessLengthM = round(automaticRoutes.reduce((sum, route) => {
     const first = route.points[0];
@@ -2137,8 +2160,8 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
       batteryRouting: "collision-aware-terminal-derived-bundle",
       junctionBackClearance: "flush-no-cables",
       removableSurfaces: { sideWalls: true, roof: true },
-      wallLayout: "evolutionary-optimized-layout",
-      wallRouting: "bottom-port-downward-breakout-visibility-graph",
+      wallLayout: "stochastic-voxel-a-star-optimized-layout",
+      wallRouting: "offline-voxel-a-star-only",
     },
   };
 }

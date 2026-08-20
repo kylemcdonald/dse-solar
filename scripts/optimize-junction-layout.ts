@@ -152,13 +152,12 @@ type Candidate = {
 
 const OUTPUT_SCHEMA_VERSION = 6;
 const ALGORITHM_DESCRIPTION = "budget-safe steady-state evolutionary placement strategy followed by deterministic sequential 3D A* routing with finite-radius cable reservations, future-port approach reservations, hard component keep-outs, explicit oriented cylindrical ports with mandatory straight-on approaches, renderer-equivalent rounded-tube clearance auditing, and a zero-contact publish gate";
-// The original PG-sized 320 × 217 mm interior cannot accommodate all nine DSE
-// devices plus switch-body keep-outs and a device-free gland gutter without
-// overlap. A 340 × 235 mm interior corresponds to an approximately
-// 370 × 265 mm (14.6 × 10.4 in) exterior and remains comfortably inside the
-// user's 20 × 18 in luggage limit.
-const INNER_WIDTH_M = 0.34;
-const INNER_HEIGHT_M = 0.235;
+// The protected-face voxel comparison needs service aisles at least one
+// 14.4 mm heavy-conductor cell wide between device projections. A 460 × 370 mm
+// interior corresponds to an approximately 490 × 400 mm (19.3 × 15.7 in)
+// exterior: still inside the user's roughly 20 × 18 in luggage envelope.
+const INNER_WIDTH_M = 0.46;
+const INNER_HEIGHT_M = 0.37;
 const INNER_LEFT = -INNER_WIDTH_M / 2;
 const INNER_RIGHT = INNER_WIDTH_M / 2;
 const INNER_BOTTOM = -INNER_HEIGHT_M / 2;
@@ -169,7 +168,7 @@ const COMPONENT_EDGE_CLEARANCE_M = 0.002;
 // a compact 3 mm packing gap is sufficient between their bodies. The selector
 // is different: its 1/0 lugs escape laterally behind the rotary body, so pairs
 // involving it need a full finite-radius portal aisle.
-const COMPONENT_GAP_M = 0.003;
+const COMPONENT_GAP_M = 0.02;
 // The 14.4 mm-OD Class-T conductors need 7.2 mm radius plus the 2.5 mm
 // terminal-escape margin. Eleven millimetres is a real service aisle; the old
 // 19 mm pairwise border consumed too much of the compact enclosure.

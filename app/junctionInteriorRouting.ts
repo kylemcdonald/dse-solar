@@ -65,6 +65,7 @@ export type JunctionInteriorRouting = {
     boundaryBreakoutConflicts: number;
     bridgeCount: number;
     coincidentRunOverlapM: number;
+    connectorCollisionCount: number;
     componentOverlapCount: number;
     crossings: number;
     depthOverflowM: number;
@@ -122,6 +123,7 @@ type OptimizedDocument = {
       backtrackingCorners3d: number;
       boundaryBreakoutConflicts: number;
       coincidentRunOverlapM: number;
+      connectorCollisionCount?: number;
       componentOverlapCount: number;
       depthOverflowM: number;
       directionReversals: number;
@@ -213,6 +215,7 @@ export const junctionInteriorRouting: JunctionInteriorRouting = {
     boundaryBreakoutConflicts: rawMetrics.boundaryBreakoutConflicts,
     bridgeCount: rawMetrics.bridgeCount,
     coincidentRunOverlapM: rawMetrics.coincidentRunOverlapM,
+    connectorCollisionCount: rawMetrics.connectorCollisionCount ?? 0,
     componentOverlapCount: rawMetrics.componentOverlapCount,
     crossings: rawMetrics.wireCrossings,
     depthOverflowM: rawMetrics.depthOverflowM,

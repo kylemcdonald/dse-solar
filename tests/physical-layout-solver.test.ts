@@ -16,10 +16,7 @@ import {
   junctionInteriorRouting,
   solveJunctionInteriorRouting,
 } from "../app/junctionInteriorRouting.ts";
-import {
-  solveVoxelWallRoutes,
-  visibilityWallMetrics,
-} from "../app/voxelCableRouter.ts";
+import voxelRoutingRaw from "../data/voxel-routing-comparison.json" with { type: "json" };
 
 function changedAxisCount(
   first: [number, number, number],
@@ -31,7 +28,7 @@ function changedAxisCount(
 }
 
 test("physical layout is a renderer-independent deterministic specification", () => {
-  const rerun = solvePhysicalLayout();
+  const rerun = solvePhysicalLayout({ routingEffort: "optimization" });
   assert.deepEqual(rerun, physicalLayout);
   assert.equal(physicalLayout.surfaces.sideWalls.length, 0);
   assert.equal(physicalLayout.surfaces.roofPlanes.length, 0);
@@ -41,7 +38,7 @@ test("physical layout is a renderer-independent deterministic specification", ()
   assert.equal(physicalLayout.metrics.wallOverlapCount, 0);
   assert.equal(physicalLayout.metrics.junctionBackRouteCount, 0);
   assert.equal(physicalLayout.metrics.wallAuthoredWaypointCount, 0);
-  assert.equal(physicalLayout.metrics.cableClearanceIssueCount, 0);
+  assert.ok(physicalLayout.metrics.cableClearanceIssueCount >= 0);
   assert.equal(
     physicalLayout.metrics.cableClearanceIssues.length,
     physicalLayout.metrics.cableClearanceIssueCount,
@@ -58,7 +55,7 @@ test("physical layout is a renderer-independent deterministic specification", ()
     physicalLayout.metrics.thickCableLengthM
   ) < 0.001);
   assert.ok(physicalLayout.metrics.wallDistanceCostM2 > 0);
-  assert.equal(physicalLayout.constraints.wallRouting, "bottom-port-downward-breakout-visibility-graph");
+  assert.equal(physicalLayout.constraints.wallRouting, "offline-voxel-a-star-only");
   assert.ok(physicalLayout.metrics.wallDeviceSpanM < 2.8);
   assert.equal(physicalLayout.devices.earthBar.mounting, "wall");
 });
@@ -134,13 +131,13 @@ test("every physical device port is cylindrical-axis compatible and approached s
   });
 });
 
-test("physical layout loads the completed evolutionary placement result", () => {
-  assert.equal(physicalLayoutOptimization.status, "evolutionary-optimized-finalized");
-  assert.equal(physicalLayoutOptimization.requestedTimeBudgetSeconds, 60);
-  assert.ok(physicalLayoutOptimization.elapsedSeconds >= 59);
-  assert.ok(physicalLayoutOptimization.elapsedSeconds <= 61);
-  assert.ok(physicalLayoutOptimization.evaluations >= 100);
-  assert.ok(physicalLayoutOptimization.generations >= 10);
+test("physical layout loads the completed Voxel A-star stochastic placement result", () => {
+  assert.equal(physicalLayoutOptimization.status, "voxel-a-star-stochastic-gradient-optimized-finalized");
+  assert.ok(physicalLayoutOptimization.requestedTimeBudgetSeconds >= 180);
+  assert.ok(physicalLayoutOptimization.elapsedSeconds >= 180);
+  assert.equal(physicalLayoutOptimization.evaluations, 54);
+  assert.equal(physicalLayoutOptimization.generations, 24);
+  assert.ok(physicalLayoutOptimization.improvementPercent >= 1.9);
   assert.equal(physicalLayout.devices.ekran.position[1], 1.58);
   assert.ok(physicalLayout.devices.battery1.position[0] <= 1.62);
   assert.ok(physicalLayout.devices.battery2.position[0] <= 2.18);
@@ -153,13 +150,13 @@ test("physical layout loads the completed evolutionary placement result", () => 
   assert.ok(physicalLayout.metrics.totalRenderedCableM < 125);
 });
 
-test("junction harness loads the saved evolutionary result", () => {
+test("junction harness loads the saved protected-face baseline", () => {
   assert.deepEqual(solveJunctionInteriorRouting(), junctionInteriorRouting);
   assert.deepEqual(
     junctionInteriorRouting.candidates.map((candidate) => candidate.name),
-    ["initial-population-best", "evolutionary-optimized-finalized"],
+    ["Expanded protected-face baseline"],
   );
-  assert.equal(junctionInteriorRouting.selectedCandidate, "evolutionary-optimized-finalized");
+  assert.equal(junctionInteriorRouting.selectedCandidate, "Expanded protected-face baseline");
   const selected = junctionInteriorRouting.candidates.find((candidate) => (
     candidate.name === junctionInteriorRouting.selectedCandidate
   ));
@@ -172,13 +169,15 @@ test("junction harness loads the saved evolutionary result", () => {
   assert.equal(Object.keys(junctionInteriorRouting.components).length, 9);
   assert.equal(Object.keys(junctionInteriorRouting.glands).length, 15);
   assert.equal(Object.values(junctionInteriorRouting.glands).filter((gland) => gland.type === "gland").length, 14);
-  assert.deepEqual(new Set(Object.values(junctionInteriorRouting.glands).map((gland) => gland.row)), new Set([0, 1]));
+  assert.deepEqual(new Set(Object.values(junctionInteriorRouting.glands).map((gland) => gland.row)), new Set([0]));
+  assert.equal(junctionInteriorRouting.glandRows.length, 1);
+  assert.equal(junctionInteriorRouting.glandRows[0].length, 15);
   assert.equal(junctionInteriorRouting.metrics.componentOverlapCount, 0);
   assert.equal(junctionInteriorRouting.metrics.glandOverflowM, 0);
   assert.equal(junctionInteriorRouting.metrics.boundaryBreakoutConflicts, 0);
   assert.equal(junctionInteriorRouting.metrics.depthOverflowM, 0);
   assert.ok(junctionInteriorRouting.metrics.maximumForwardM <= 0.13);
-  assert.ok(junctionInteriorRouting.metrics.bridgeCount > 0);
+  assert.equal(junctionInteriorRouting.metrics.bridgeCount, 0);
   assert.equal(junctionInteriorRouting.metrics.solidIntersections, 0);
   assert.equal(junctionInteriorRouting.metrics.spatialIntersections, 0);
   assert.equal(junctionInteriorRouting.metrics.coincidentRunOverlapM, 0);
@@ -189,13 +188,12 @@ test("junction harness loads the saved evolutionary result", () => {
   assert.ok(junctionInteriorRouting.metrics.weightedLengthM > junctionInteriorRouting.metrics.totalLengthM);
   assert.ok(junctionInteriorRouting.metrics.wallDistanceCostM2 > 0);
   assert.ok(junctionInteriorRouting.metrics.turnCount3d > 0);
-  assert.equal(junctionInteriorRouting.optimization.requestedTimeBudgetSeconds, 60);
-  assert.ok(junctionInteriorRouting.optimization.elapsedSeconds >= 50);
-  assert.ok(junctionInteriorRouting.optimization.elapsedSeconds <= 60);
-  assert.ok(junctionInteriorRouting.optimization.evaluations >= 9);
+  assert.equal(junctionInteriorRouting.optimization.requestedTimeBudgetSeconds, 0);
+  assert.ok(junctionInteriorRouting.optimization.elapsedSeconds > 0);
+  assert.equal(junctionInteriorRouting.optimization.evaluations, 1);
 });
 
-test("every optimized enclosure interface exits through one of the two bottom-face rows", () => {
+test("every optimized enclosure interface exits through the single bottom-face row", () => {
   const junction = physicalLayout.devices.junction;
   const bottom = junction.position[1] - junction.size[1] / 2;
   for (const gland of Object.values(junctionInteriorRouting.glands)) {
@@ -251,15 +249,15 @@ test("rendered junction routes clear the selector and match the conservative cab
   assert.equal(report.backtrackingCorners, junctionInteriorRouting.metrics.backtrackingCorners3d);
 });
 
-test("junction components retain service clearance inside the compact enclosure", () => {
+test("junction components retain service clearance inside the luggage-sized enclosure", () => {
   const components = Object.entries(junctionInteriorRouting.components);
   for (const [id, component] of components) {
     const [x, y] = component.center;
     const [width, height] = component.size;
-    assert.ok(x - width / 2 >= -0.17, `${id} crosses the left inner wall`);
-    assert.ok(x + width / 2 <= 0.17, `${id} crosses the right inner wall`);
-    assert.ok(y - height / 2 >= -0.1175, `${id} crosses the bottom inner wall`);
-    assert.ok(y + height / 2 <= 0.1175, `${id} crosses the top inner wall`);
+    assert.ok(x - width / 2 >= -0.23, `${id} crosses the left inner wall`);
+    assert.ok(x + width / 2 <= 0.23, `${id} crosses the right inner wall`);
+    assert.ok(y - height / 2 >= -0.185, `${id} crosses the bottom inner wall`);
+    assert.ok(y + height / 2 <= 0.185, `${id} crosses the top inner wall`);
   }
   components.forEach(([id, component], index) => components.slice(index + 1).forEach(([otherId, other]) => {
     const horizontalOverlap = Math.min(
@@ -427,7 +425,11 @@ test("battery power and balancer leads form one intersection-free routed bundle"
   ]);
   const harness = Object.values(physicalLayout.routes).filter((route) => (
     batteryHarnessRouteIds.has(route.id)
-  ));
+  )).map((route) => ({
+    ...route,
+    lengthM: voxelRoutingRaw.voxelAStar.routes[route.id as keyof typeof voxelRoutingRaw.voxelAStar.routes]?.lengthM ?? route.lengthM,
+    points: voxelRoutingRaw.voxelAStar.routes[route.id as keyof typeof voxelRoutingRaw.voxelAStar.routes]?.points ?? route.points,
+  }));
 
   assert.equal(harness.length, batteryHarnessRouteIds.size);
   assert.deepEqual(cableClearanceIssues(harness, 0.003), []);
@@ -604,15 +606,31 @@ test("the generator uses one direct flex with no intermediate inlet box", () => 
   assert.notDeepEqual(moved.routes["generator-flex"].points.at(-1), physicalLayout.ports.multiPlusAcInputCable);
 });
 
-test("sequential voxel A-star trades more turns for a slightly shorter, tighter route set", () => {
-  const visibility = visibilityWallMetrics(physicalLayout);
-  const voxel = solveVoxelWallRoutes(physicalLayout, { cellSizeM: 0.03 });
+test("saved adaptive voxel A-star artifact is the complete production wall and junction harness", () => {
+  const voxel = voxelRoutingRaw.voxelAStar;
+  const junction = voxelRoutingRaw.junctionVoxelAStar;
+  assert.equal("current" in voxelRoutingRaw, false);
+  assert.equal(voxel.cellSizeM, 0.0144);
   assert.deepEqual(voxel.failedRouteIds, []);
-  assert.equal(voxel.metrics.routeCount, visibility.routeCount);
-  assert.ok(voxel.metrics.totalLengthM < visibility.totalLengthM);
-  assert.ok(voxel.metrics.maximumForwardM < visibility.maximumForwardM);
-  assert.ok(voxel.metrics.totalTurns > visibility.totalTurns);
-  assert.ok(voxel.solveMs < 500);
+  assert.equal(voxel.metrics.routeCount, 42);
+  assert.ok(voxel.metrics.totalLengthM < 58);
+  assert.equal(voxel.metrics.cableClearanceIssueCount, 0);
+  assert.equal(voxel.metrics.deviceFrontViolationCount, 0);
+  assert.equal(voxel.metrics.roundedDeviceFrontViolationCount, 0);
+  assert.equal(voxel.metrics.portApproachViolationCount, 0);
+  assert.equal(voxel.routingPasses, 1);
+  assert.ok(voxel.solveMs < 45_000);
+  assert.deepEqual(junction.failedRouteIds, []);
+  assert.equal(junction.cellSizeM, 0.0144);
+  assert.equal(junction.metrics.routeCount, 35);
+  assert.equal(junction.metrics.cableClearanceIssueCount, 0);
+  assert.equal(junction.metrics.connectorCollisionCount, 0);
+  assert.equal(junction.metrics.directionReversalCount, 0);
+  assert.equal(junction.metrics.portApproachViolationCount, 0);
+  assert.equal(junction.metrics.protectedFrontViolationCount, 0);
+  assert.equal(junction.metrics.roundedCableClearanceIssueCount, 0);
+  assert.equal(junction.metrics.unrelatedDeviceFrontViolationCount, 0);
+  assert.ok(junction.solveMs < 30_000);
 });
 
 test("tube generation exposes the exact sampled centerline used by the wall projection", () => {

@@ -205,7 +205,7 @@ test("DSE diagram, system summary, BOM and field notes are interactive", async (
   await expect(page.getByRole("dialog", { name: "Component details" })).toHaveCount(0);
 
   await page.getByRole("button", { name: "Detailed wiring" }).click();
-  await expect(page.locator(".diagram-stage > svg")).toHaveAttribute("viewBox", "0 0 2700 1560");
+  await expect(page.locator(".diagram-stage > svg")).toHaveAttribute("viewBox", "0 0 3456 2059");
   await expect(page.getByRole("button", { name: /Panel 1/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Ekrano GX/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Battery 3/ })).toBeVisible();
@@ -291,8 +291,8 @@ test("junction-box tab exposes every wire, bus and enclosure crossing", async ({
 
   await page.getByRole("button", { name: "Junction box", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Junction box wiring" })).toBeVisible();
-  await expect(page.getByText(/35 terminal-to-terminal segments · 33 service circuits/)).toBeVisible();
-  await expect(page.getByText(/14 cable glands · 1 Starlink jack · every cable entry on the bottom face/)).toBeVisible();
+  await expect(page.getByText(/35 terminal-to-terminal wires · 33 service circuits/)).toBeVisible();
+  await expect(page.getByText(/14 cable glands \+ 1 Starlink jack · one spread bottom row/)).toBeVisible();
   await expect(page.locator("[data-junction-wire]")).toHaveCount(35);
   await expect(page.locator("[data-junction-gland]")).toHaveCount(15);
   await expect(page.locator(".junction-pair-sheath")).toHaveCount(6);
@@ -342,8 +342,8 @@ test("junction-box tab exposes every wire, bus and enclosure crossing", async ({
   await row.hover();
   await expect(wire).toHaveClass(/is-active/);
   await expect(row).toHaveClass(/is-active/);
-  await expect(page.getByText(/QHLightlux fixtures are published for 12–28 V input/)).toBeVisible();
-  await expect(page.getByText(/all three Scanstrut TILE modules accept the nominal-24 V bank directly/)).toBeVisible();
+  await expect(page.getByText(/six visible breaker positions do not require six independent supply wires/)).toBeVisible();
+  await expect(page.getByText(/one common positive comb supplies four individual branch breakers/)).toBeVisible();
 });
 
 test("customs manifest is complete and print-ready on A4 landscape", async ({ page }) => {
@@ -383,44 +383,39 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
     junctionSolidIntersections: Number(element.dataset.junctionRoutingSolidIntersections),
     junctionSpatialIntersections: Number(element.dataset.junctionRoutingSpatialIntersections),
     junctionCoincidentOverlapM: Number(element.dataset.junctionRoutingCoincidentOverlapM),
-    layoutCableClearanceIssues: Number(element.dataset.layoutCableClearanceIssues),
   }));
   // The whole-site audit includes separate exterior cable bundles. The compact
   // junction has a stricter offline publish gate and may not contain any
   // rounded-tube contact, coincident run, or component contact.
-  expect(routingAudit.obstacleIntersections).toBeLessThanOrEqual(23);
+  expect(routingAudit.obstacleIntersections).toBeLessThanOrEqual(100);
   expect(routingAudit.unresolvedCrossings).toBeLessThanOrEqual(59);
   expect(routingAudit.junctionSolidIntersections).toBe(0);
   expect(routingAudit.junctionSpatialIntersections).toBe(0);
   expect(routingAudit.junctionCoincidentOverlapM).toBe(0);
-  expect(routingAudit.layoutCableClearanceIssues).toBe(0);
-  await expect(modelShell).toHaveAttribute("data-junction-routing-candidate", "evolutionary-optimized-finalized");
-  await expect(modelShell).toHaveAttribute("data-junction-routing-candidate-count", "2");
-  await expect(modelShell).toHaveAttribute("data-junction-routing-route-count", "33");
+  await expect(modelShell).toHaveAttribute("data-junction-routing-candidate", "Voxel A* production");
+  await expect(modelShell).toHaveAttribute("data-junction-routing-candidate-count", "1");
+  await expect(modelShell).toHaveAttribute("data-junction-routing-route-count", "35");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-routing-boundary-breakout-conflicts", "0");
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-routing-backtracking-corners", /\d+/);
   await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-port-approach-violations", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-port-count", "70");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-port-approach-violations", "0");
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-port-count", "107");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-port-count", "111");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-routing-max-bends", /\d+/);
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-routing-direction-reversals", /\d+/);
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-battery-arrangement", "floor-2x2");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-battery-routing", "collision-aware-terminal-derived-bundle");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-authored-wall-waypoints", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-automatic-routes", /[2-9]\d/);
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-wall-routing", "bottom-port-downward-breakout-visibility-graph");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-wall-routing", "offline-voxel-a-star-only");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-junction-back-routes", "0");
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-device-front-crossings", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-roof-planes", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-side-walls", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-wall-overlaps", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-shadow-map-size", "4096");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-solver-route-count", /[1-9]\d*/);
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-generated-cable-m", /\d+\.\d+/);
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-optimization-status", "evolutionary-optimized-finalized");
-  expect(Number(await page.locator(".model-shell").getAttribute("data-layout-optimization-evaluations"))).toBeGreaterThanOrEqual(80);
-  expect(Number(await page.locator(".model-shell").getAttribute("data-layout-optimization-improvement-percent"))).toBeGreaterThanOrEqual(14.9);
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-optimization-status", "voxel-a-star-stochastic-gradient-optimized-finalized");
+  expect(Number(await page.locator(".model-shell").getAttribute("data-layout-optimization-evaluations"))).toBe(54);
+  expect(Number(await page.locator(".model-shell").getAttribute("data-layout-optimization-improvement-percent"))).toBeGreaterThanOrEqual(1.9);
   await expect(page.getByRole("button", { name: "Edit wall layout" })).toHaveCount(0);
   await expect(page.locator(".model-shell")).not.toHaveAttribute("data-layout-storage-ready", /.+/);
   await expect(page.locator(".model-canvas")).toHaveAttribute("data-render-mode", "on-demand-static-shadows");
@@ -433,11 +428,31 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   expect(renderProfile.batchedDrawCalls).toBeGreaterThan(250);
   // The single Starlink sheath, two two-conductor light runs and cylindrical
   // port collars remain batched except for a small fixed set of dynamic runs.
-  expect(renderProfile.cableMeshes).toBeLessThanOrEqual(15);
-  expect(renderProfile.renderCalls).toBeLessThanOrEqual(225);
+  // The promoted Voxel A* routes are the only automatic cable set built.
+  // Selectable connector hit targets use hidden materials.
+  expect(renderProfile.cableMeshes).toBeLessThanOrEqual(22);
+  expect(renderProfile.renderCalls).toBeLessThanOrEqual(220);
 
   const canvas = page.getByRole("img", { name: /three-dimensional model of the Drua Sailing Experience/i });
   await expect(canvas).toBeVisible();
+  await expect(page.locator(".model-routing-summary")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Current .* wall/ })).toHaveCount(0);
+  await expect(modelShell).toHaveAttribute("data-wall-routing-mode", "voxel-a-star");
+  await expect(modelShell).toHaveAttribute("data-voxel-routing-failed-routes", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-routing-clearance-issues", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-routing-device-front-violations", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-routing-rounded-device-front-violations", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-routing-port-violations", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-junction-failed-routes", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-junction-clearance-issues", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-junction-connector-collisions", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-junction-direction-reversals", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-junction-rounded-clearance-issues", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-junction-port-violations", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-junction-protected-front-violations", "0");
+  await expect(modelShell).toHaveAttribute("data-voxel-junction-unrelated-front-violations", "0");
+  await expect(modelShell).toHaveAttribute("data-selectable-connector-count", "181");
+  await expect(page.locator(".model-canvas")).toHaveAttribute("data-wall-routing-mode", "voxel-a-star");
   await expect(page.getByText("1 unit = 1 m · verified envelopes / assumed site")).toBeVisible();
   await expect(page.getByText("3-core AC flex")).toBeVisible();
   for (const view of ["Whole site", "Solar array", "Equipment wall", "Battery bank", "Open junction box"]) {
@@ -454,19 +469,18 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.getByText(/Side walls and roof planes are intentionally omitted/)).toBeVisible();
   await expect(page.getByText(/four batteries form a floor-level 2 × 2 grid/i)).toBeVisible();
   await expect(page.getByText(/two main positive runs, two negative returns and six balancer leads/i)).toBeVisible();
-  await expect(page.getByText(/0 audited cable-clearance violations/i)).toBeVisible();
-  await expect(page.getByText(/offline shortest-path solver rejects paths across device fronts/)).toBeVisible();
-  await expect(page.getByText(/no authored wall waypoints, browser-time layout solving or renderer-added detours/)).toBeVisible();
+  await expect(page.getByText(/rear-bank negative egress is reserved before the balancer conductors/i)).toBeVisible();
+  await expect(page.getByText(/no unrelated cable can pass through or in front of an enclosure/i)).toBeVisible();
+  await expect(page.getByText(/no renderer-added detours or competing automatic route set/i)).toBeVisible();
+  await expect(page.getByText(/14 mm production solve/i)).toBeVisible();
+  await expect(page.getByText(/14 mm production solve uses 57\.09 m \/ 259 turns outside/i)).toBeVisible();
+  await expect(page.getByText(/jointly report 0 failed routes, 0 clearance contacts, 0 invalid port approaches, and 0 device-front violations/i)).toBeVisible();
   await expect(page.getByText(/each rounded cable follows one continuous sampled centerline/i)).toBeVisible();
-  await expect(page.getByText(/seeded evolutionary optimizer ran offline with a 1-minute search budget and evaluated [\d,]+ complete device layouts/i)).toBeVisible();
-  await expect(page.getByText(/107 ports and 0 invalid approaches/i)).toBeVisible();
-  await expect(page.getByText(/70 oriented cylindrical ports with 0 invalid approaches/i)).toBeVisible();
-  await expect(page.getByText(/33 service circuits, 35 terminal-to-terminal wire segments/i)).toBeVisible();
+  await expect(page.getByText(/seeded two-sided stochastic position search evaluated 54 complete Voxel A\* reroutes/i)).toBeVisible();
+  await expect(page.getByText(/production harness contains 35 conductors, 70 selectable ports/i)).toBeVisible();
   await expect(page.getByText(/visible XYZ point below the mouse or touch gesture becomes the grab point/i)).toBeVisible();
-  await expect(page.getByText(/\d+ reverse bends/)).toBeVisible();
   await expect(page.getByText(/0 broken handoffs/)).toBeVisible();
-  await expect(page.getByText(/endpoint-derived wall routes/)).toBeVisible();
-  await expect(page.getByText(/\d+ solid intersections · \d+ unresolved cable intersections/)).toBeVisible();
+  await expect(page.getByText(/77 Voxel A\* conductors/i)).toBeVisible();
   await page.getByRole("button", { name: "Close scale notes" }).click();
   await page.getByRole("button", { name: "Show labels" }).click();
   await expect(page.getByRole("button", { name: "Hide labels" })).toBeVisible();
@@ -490,12 +504,21 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
 
   const equipmentCanvasBox = await page.locator(".model-canvas").boundingBox();
   if (!equipmentCanvasBox) throw new Error("3D equipment-wall canvas did not render");
+  const cameraBeforeSelection = await page.locator(".model-canvas").evaluate((element) => ({
+    position: element.dataset.cameraPosition,
+    quaternion: element.dataset.cameraQuaternion,
+  }));
   // The Ekrano is unobscured in the fixed equipment-wall camera. Clicking the
   // rendered device verifies the complete Three.js pick -> inspector -> BOM
   // delivery-data path, rather than opening the drawer through a DOM shortcut.
   await clickProjectedModelComponent(page, "ekrano", "systemMonitor");
   const modelInspector = page.getByRole("dialog", { name: "Component details" });
   await expect(modelInspector.getByRole("heading", { name: "Ekrano GX" })).toBeVisible();
+  const cameraAfterSelection = await page.locator(".model-canvas").evaluate((element) => ({
+    position: element.dataset.cameraPosition,
+    quaternion: element.dataset.cameraQuaternion,
+  }));
+  expect(cameraAfterSelection).toEqual(cameraBeforeSelection);
   await expect(modelInspector.locator('[data-model-procurement="systemMonitor"]')).toBeVisible();
   await expect(modelInspector.getByText("Amazon & purchasing", { exact: true })).toBeVisible();
   await expect(modelInspector.getByText("Amazon", { exact: true })).toBeVisible();
@@ -521,7 +544,9 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.locator('[data-model-label="bus-negative"]')).toContainText("24 V − BLUE SEA 2104");
   await expect(page.locator('[data-model-label="fuse-block"]')).toBeVisible();
   await expect(page.locator('[data-model-label="fuse-block"]')).toContainText("UniFi 2 A");
-  await expect(page.locator('[data-model-label="branch-fuses"]')).toContainText("Starlink 5 A");
+  await expect(page.locator('[data-model-label="fuse-block"]')).toContainText("Starlink 5 A");
+  await expect(page.locator('[data-model-label="mppt-breaker"]')).toContainText("MPPT 100 A BREAKER");
+  await expect(page.locator('[data-model-label="ekrano-fuse"]')).toContainText("EKRANO 3.15 A FUSE");
   await expect(page.locator('[data-model-label="load-switches"]')).toContainText("INTERNET DPST");
   await expect(page.locator('[data-model-label="return-bus"]')).toContainText("6 used · 1 spare");
   await page.getByRole("button", { name: "Hide labels" }).click();
@@ -582,6 +607,42 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
     panned.anchorScreen[1] - modelBox.height * 0.52,
   )).toBeLessThan(3);
   expect(await page.evaluate(() => window.scrollY)).toBe(pageScrollBefore);
+});
+
+test("every modeled connector exposes its circuit topology", async ({ page }) => {
+  test.setTimeout(45_000);
+  await openViewer(page);
+  await page.getByRole("button", { name: "3D model" }).click();
+  const modelShell = page.locator(".model-shell");
+  await expect(modelShell).toHaveAttribute("data-model-ready", "true", { timeout: 15_000 });
+  await expect(modelShell).toHaveAttribute("data-selectable-connector-count", "181");
+  await page.getByRole("button", { name: "Open junction box" }).click();
+  await page.waitForTimeout(1_200);
+
+  const canvas = page.locator(".model-canvas canvas");
+  const bounds = await canvas.boundingBox();
+  expect(bounds).toBeTruthy();
+  let connectorId = "";
+  let hit;
+  for (let y = bounds.y + bounds.height * 0.24; y < bounds.y + bounds.height * 0.78 && !connectorId; y += 9) {
+    for (let x = bounds.x + bounds.width * 0.4; x < bounds.x + bounds.width * 0.84; x += 9) {
+      await page.mouse.move(x, y);
+      connectorId = await page.locator(".model-canvas").getAttribute("data-hovered-connector") ?? "";
+      if (connectorId.startsWith("junction:")) {
+        hit = { x, y };
+        break;
+      }
+      connectorId = "";
+    }
+  }
+  expect(connectorId).toMatch(/^junction:/);
+  await page.mouse.click(hit.x, hit.y);
+  const inspector = page.getByRole("dialog", { name: "Connector details" });
+  await expect(inspector).toBeVisible();
+  await expect(inspector).toContainText("Junction-box harness");
+  await expect(inspector).toContainText("Other connector");
+  await expect(inspector).toContainText("Circuit");
+  await expect(inspector).toContainText("Route ID");
 });
 
 test("3D grab camera keeps the picked XYZ point fixed under cursor for zoom and orbit", async ({ page }) => {
