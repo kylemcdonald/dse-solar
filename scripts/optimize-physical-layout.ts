@@ -67,19 +67,17 @@ const WALL_DEVICE_IDS = [
   "ekran",
   "unifi",
   "usb",
-  "unifiPower",
   "balancerA",
   "balancerB",
-  "classTA",
-  "classTB",
+  "batteryBreakerBox",
   "earthBar",
 ] as const;
 
 const BATTERY_ROUTE_IDS = new Set([
   "junction-to-battery-negative-a",
   "junction-to-battery-negative-b",
-  "battery-a-to-class-t",
-  "battery-b-to-class-t",
+  "battery-a-to-breaker",
+  "battery-b-to-breaker",
   "balancer-a-positive",
   "balancer-a-midpoint",
   "balancer-a-negative",
@@ -174,19 +172,16 @@ const verticalRanges: Partial<Record<(typeof WALL_DEVICE_IDS)[number], [number, 
   ekran: [EKRANO_EYE_LEVEL_M, EKRANO_EYE_LEVEL_M],
   unifi: [1.3, 1.9],
   usb: [1.2, 1.95],
-  unifiPower: [1.1, 1.85],
   balancerA: [0.43, 1.2],
   balancerB: [0.43, 1.2],
-  classTA: [0.38, 1.05],
-  classTB: [0.38, 1.05],
+  batteryBreakerBox: [0.43, 1.15],
   earthBar: [0.4, 1.4],
 };
 
 const horizontalRanges: Partial<Record<(typeof WALL_DEVICE_IDS)[number], [number, number]>> = {
   pvEntry: [1.4, 1.95],
   smartSolar: [1.45, 2.5],
-  classTA: [1.35, 2.85],
-  classTB: [1.35, 2.85],
+  batteryBreakerBox: [1.35, 2.85],
   balancerA: [1.4, 2.9],
   balancerB: [1.4, 2.9],
   ekran: [1.75, 2.95],
@@ -331,11 +326,9 @@ function heuristicGenome(): Genome {
       ekran: [2.75, EKRANO_EYE_LEVEL_M],
       unifi: [2.98, 1.68],
       usb: [2.98, 1.48],
-      unifiPower: [2.82, 1.42],
       balancerA: [2, 0.78],
       balancerB: [2.18, 0.78],
-      classTA: [1.45, 0.85],
-      classTB: [1.72, 0.85],
+      batteryBreakerBox: [1.58, 0.78],
       earthBar: [2.25, 1.08],
     },
   });
@@ -439,7 +432,7 @@ function evaluate(genome: Genome, includeSpecification = false): Evaluation {
   const wallVerticalSpanM = wallTopEdgeM - wallBottomEdgeM;
   const wallBoundingAreaM2 = (wallRightEdgeM - wallLeftEdgeM) * wallVerticalSpanM;
   const wallMeanXM = wallDevices.reduce((sum, device) => sum + device.position[0], 0) / wallDevices.length;
-  const unfusedBatteryPositiveLengthM = ["battery-a-to-class-t", "battery-b-to-class-t"]
+  const unfusedBatteryPositiveLengthM = ["battery-a-to-breaker", "battery-b-to-breaker"]
     .reduce((sum, id) => sum + (specification.routes[id]?.lengthM ?? 0), 0);
   const hardViolation =
     specification.metrics.wallOverlapCount * 1_000_000_000_000_000 +
@@ -743,7 +736,7 @@ const document = {
       "no automatic cable makes an excessive forward excursion",
       "thick cable length costs 2× thin cable length",
       "minimum integrated cable distance from the wall",
-      "minimum unfused battery-positive lead length to each Class T fuse",
+      "minimum unprotected battery-positive lead length to the dual 125 A breaker enclosure",
       "every cable turn adds cost",
       "compact wall span",
       "left-biased wall centroid and minimum absolute right edge",

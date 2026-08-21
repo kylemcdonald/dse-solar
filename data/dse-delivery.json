@@ -1,5 +1,5 @@
 {
-  "checkedOn": "2026-08-17",
+  "checkedOn": "2026-08-21",
   "destination": "Los Angeles, CA 90065",
   "items": {
     "dse-panels": {
@@ -48,13 +48,27 @@
       "time": "No LA shipment",
       "note": "This is a site-cut plywood, shield, duct and hardware lot rather than one shippable product."
     },
-    "dse-ac-board": {
+    "dse-ac-rcbo": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Fiji electrical supplier · genuine 230 V Type A RCBO",
+      "eta": "Buy in Fiji",
+      "time": "Confirm exact compliant stock before commissioning",
+      "note": "The purchased CHTAIXI B0CSV93CTN is 120 V Type AC and cannot substitute. Use a two-pole 230 V, 10 A, 30 mA Type A RCBO selected and tested by the qualified installer."
+    },
+    "dse-ac-enclosure": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Electrical supplier in Fiji",
+      "eta": "Buy in Fiji",
+      "time": "Select with the RCBO",
+      "note": "Choose the compact enclosure, DIN rail and strain relief only after confirming the RCBO dimensions and the qualified installer's termination plan."
+    },
+    "dse-tool-lead": {
       "amazonStatus": "unavailable",
       "sourceLabel": "Bunnings Pacific Fiji · HPM 5 m workshop lead",
       "sourceUrl": "https://bunningspacific.com.fj/collections/extension-cords-1",
       "eta": "Buy in Fiji",
       "time": "Local stock shown; confirm before travel",
-      "note": "Amazon U.S. does not supply a trustworthy complete Fiji Type I / AS-NZS kit. The primary local lead is the HPM 5 m, 10 A, 3-core 1.0 mm² workshop extension lead at FJD 56.86. Source a 10 A / 30 mA Type A RCBO and compact enclosure locally and have a qualified person terminate the lead."
+      "note": "The local HPM 5 m, 10 A, three-core lead was listed at FJD 56.86. Retain its molded Type I female trailing socket; a qualified electrical person removes only the source plug and hardwires the lead after the RCBO."
     },
     "dse-gen-input": {
       "amazonStatus": "unavailable",
@@ -64,38 +78,61 @@
       "time": "No LA shipment",
       "note": "Do not order an assumed Type I lead from Amazon. This G3200P model is sold with market-specific receptacles and the Fiji listing image is not conclusive. Inspect the actual outlet, then fit one matching male plug to a three-core lead whose other end is hardwired to MultiPlus AC-in. No inlet box is required."
     },
-    "dse-switch-panel": {
+    "dse-switch-internet": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact Blue Sea 8287",
+      "sourceUrl": "https://www.amazon.com/dp/B000MMC8OM",
+      "eta": "Check at checkout",
+      "time": "Amazon exact model · $18.32 when checked",
+      "note": "Exact DPST OFF–ON Contura switch. Amazon's generic page title is unhelpful, but the listing specifies double-pole/single-throw, 15 A at 24 VDC, salt-spray resistance and compatibility with Blue Sea Contura mounting panels."
+    },
+    "dse-switch-lights": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · exact Blue Sea 8282",
+      "sourceUrl": "https://www.amazon.com/dp/B000Y87W54",
+      "eta": "Check at checkout",
+      "time": "Amazon exact model · $14.99 each when checked",
+      "note": "Buy two exact SPST OFF–ON Contura switches. The listing specifies 15 A at 24 VDC, salt-spray resistance and compatibility with the existing Blue Sea Contura frame."
+    },
+    "dse-switch-frame": {
       "amazonStatus": "unavailable",
-      "sourceLabel": "Fisheries Supply · exact Blue Sea parts",
-      "sourceUrl": "https://www.fisheriessupply.com/blue-sea-systems-black-water-resistant-contura-rocker-switches/8287",
+      "sourceLabel": "Fisheries Supply · exact Blue Sea 8259",
+      "sourceUrl": "https://www.fisheriessupply.com/blue-sea-systems-contura-switch-mounting-panels/8259",
       "eta": "Ships immediately",
-      "time": "Confirm LA date at checkout",
-      "note": "Exact 8287 DPST and 8282 SPST Contura rockers were listed in stock and shipping immediately; buy one 8287, two 8282s and the 8259 three-position frame, then add labels, the separately mounted 5 A MidNite Starlink breaker, bulkhead DC jack, perimeter gasket and terminals. Amazon did not provide a trustworthy exact three-switch set.",
-      "ebay": {
-        "status": "unavailable",
-        "sourceLabel": "No verified complete exact set",
-        "eta": "Not verified",
-        "price": "—",
-        "condition": "—",
-        "shipsFrom": "U.S.-only search",
-        "note": "Individual Contura parts appear intermittently, but no complete exact 8287 + two 8282 + 8259 U.S. set was verified."
-      }
+      "time": "2 shown in stock; order promptly",
+      "note": "Exact three-position frame was $10.80 and shipping immediately when checked."
+    },
+    "dse-switch-accessories": {
+      "amazonStatus": "partial",
+      "sourceLabel": "Amazon / marine-electrical small parts",
+      "sourceUrl": "https://www.amazon.com/s?k=5.5x2.1mm+panel+mount+dc+jack+1N5408+diode",
+      "eta": "Aug 22–24",
+      "time": "Buy as separate small packs",
+      "note": "No single kit matches the jack, diode, gasket, labeling and terminal requirements. Verify the jack polarity and current rating; buy six 1N5408-class diodes so two remain as spares."
     },
     "dse-indoor-light": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · QHLightlux 3000 K utility light",
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased QHLightlux fixture",
       "sourceUrl": "https://www.amazon.com/dp/B0F1V59NXC",
-      "eta": "Aug 19",
-      "time": "2 days to LA when checked",
-      "note": "Primary recommendation. Use the same ASIN B0F1V59NXC fixture indoors, suspended from a short dry bracket with the lens aimed down. The listing showed $23.99 and 12–28 V input. Add two series 3 A silicon diodes to keep its input below 28 V during GEL absorption."
+      "eta": "Delivered Aug 19",
+      "time": "Purchased Aug 17",
+      "note": "One of three purchased ASIN B0F1V59NXC fixtures. Install indoors on a short dry bracket with the lens aimed down. Add two series 3 A silicon diodes to keep its input below 28 V during GEL absorption."
     },
     "dse-outdoor-light": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · QHLightlux 3000 K IP67 utility light",
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased QHLightlux fixture",
       "sourceUrl": "https://www.amazon.com/dp/B0F1V59NXC",
-      "eta": "Aug 19",
-      "time": "2 days to LA when checked",
-      "note": "Primary recommendation. ASIN B0F1V59NXC was in stock at $23.99; the listing specifies 12–28 V, 900 lm, 3000 K and IP67. Add two series 3 A silicon diodes for charge-voltage margin. Use it under an eave with 316 stainless replacement fasteners and sealed bedding; this low-cost fixture has no demonstrated Hella-equivalent salt-spray rating."
+      "eta": "Delivered Aug 19",
+      "time": "Purchased Aug 17",
+      "note": "One of three purchased ASIN B0F1V59NXC fixtures. Add two series 3 A silicon diodes for charge-voltage margin. Install under an eave with 316 stainless replacement fasteners and sealed bedding; this low-cost fixture has no demonstrated Hella-equivalent salt-spray rating."
+    },
+    "dse-light-spare": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased QHLightlux spare",
+      "sourceUrl": "https://www.amazon.com/dp/B0F1V59NXC",
+      "eta": "Delivered Aug 19",
+      "time": "Purchased Aug 17",
+      "note": "Third identical fixture, carried as a direct spare rather than connected as another load."
     },
     "dse-light-install": {
       "amazonStatus": "not-applicable",
@@ -105,12 +142,11 @@
       "note": "Site-measured cable and mounting consumables are intentionally local; confirm UV, moisture and corrosion suitability."
     },
     "dse-earth": {
-      "amazonStatus": "partial",
-      "sourceLabel": "Amazon · busbar component",
-      "sourceUrl": "https://www.amazon.com/dp/B000OTJ8A0",
-      "eta": "Aug 16",
-      "time": "1 day to LA",
-      "note": "The covered tinned busbar is available; electrode, bonding conductor, lugs and corrosion protection still require local selection."
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Local grounding materials and commissioning",
+      "eta": "Buy in Fiji",
+      "time": "Select on site",
+      "note": "This allowance covers the electrode, bonding conductors, lugs, corrosion protection and testing—not the busbar. The exact eight-position Blue Sea 2128 is a separate BOM row."
     },
     "dse-terms": {
       "amazonStatus": "partial",
@@ -129,76 +165,35 @@
       "note": "Stainless-hardware straps are available; the low rack/base and fitted terminal covers remain local fabrication."
     },
     "dse-multiplus": {
-      "amazonStatus": "unavailable",
-      "sourceLabel": "Off-Grid Source · exact model",
-      "sourceUrl": "https://offgridsource.com/products/victron-energy-multiplus-ii-24-3000-70-32-230v",
-      "eta": "Aug 19–28",
-      "time": "3–10 business days",
-      "note": "Order-critical. Amazon returned 120 V units, not PMP242305010. The linked U.S. supplier lists the exact 230 V non-GX model in stock; confirm the checkout date before paying.",
-      "ebay": {
-        "status": "unavailable",
-        "sourceLabel": "No exact U.S. listing",
-        "sourceUrl": "https://www.ebay.com/sch/i.html?_nkw=Victron+MultiPlus-II+24%2F3000%2F70-32+230V&LH_BIN=1&LH_PrefLoc=1",
-        "eta": "Not available",
-        "price": "—",
-        "condition": "—",
-        "shipsFrom": "U.S.-only search",
-        "note": "The U.S.-only results were 120 V or different-capacity units. Exact 24/3000/70-32 230 V listings were international, so eBay is not a safe substitute for the linked U.S. supplier."
-      }
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Fiji supplier · 20% deposit paid",
+      "eta": "Collect in Fiji",
+      "time": "80% balance due",
+      "note": "The exact 230 V non-GX PMP242305010 will be purchased in Fiji. Replace the current $939 USD planning value with the final Fiji invoice and actual deposit amount."
     },
     "dse-ekrano-gx": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · exact model",
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased exact model",
       "sourceUrl": "https://www.amazon.com/dp/B0C9N42K9Z",
-      "eta": "Aug 16",
-      "time": "1 day to LA",
-      "note": "Exact Victron Ekrano GX listing; recheck seller, condition and delivery at checkout.",
-      "ebay": {
-        "status": "available",
-        "sourceLabel": "eBay · exact BPP900480100",
-        "sourceUrl": "https://www.ebay.com/itm/116685644602",
-        "eta": "2–4 days",
-        "price": "$619.65",
-        "condition": "New",
-        "shipsFrom": "United States",
-        "note": "Exact model from a U.S. seller; displayed free 2–4 day delivery to 90065."
-      }
+      "eta": "Delivered Aug 20",
+      "time": "Purchased Aug 17",
+      "note": "Exact new Ekrano GX purchased for $563.55 before the order-level promotion and tax."
     },
     "dse-smartsolar": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · exact model",
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased exact model",
       "sourceUrl": "https://www.amazon.com/dp/B08LP7JLLT",
-      "eta": "Aug 17",
-      "time": "2 days to LA",
-      "note": "Exact 150/85-Tr VE.Can controller listing.",
-      "ebay": {
-        "status": "available",
-        "sourceLabel": "eBay · exact 150/85-Tr VE.Can",
-        "sourceUrl": "https://www.ebay.com/itm/172957792110",
-        "eta": "2–4 days",
-        "price": "$476.00",
-        "condition": "New",
-        "shipsFrom": "United States",
-        "note": "Exact controller; displayed free 2–4 day delivery to 90065 and is $32 below the BOM planning value."
-      }
+      "eta": "Expected Aug 24",
+      "time": "Purchased Aug 17",
+      "note": "Exact new 150/85-Tr VE.Can controller purchased for $476 before the order-level promotion and tax; the receipt still showed it in transit."
     },
-    "dse-mppt-wirebox": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · exact model",
-      "sourceUrl": "https://www.amazon.com/dp/B08LBX79XY",
-      "eta": "Aug 16",
-      "time": "1 day to LA",
-      "note": "Exact WireBox-XL Tr for the 150/85-Tr controller.",
-      "ebay": {
-        "status": "available",
-        "sourceLabel": "eBay · exact SCC950400210",
-        "sourceUrl": "https://www.ebay.com/itm/327310682825",
-        "eta": "2–4 days",
-        "price": "$54.49",
-        "condition": "New",
-        "shipsFrom": "United States",
-        "note": "Exact WireBox-XL Tr; displayed free 2–4 day delivery to 90065. Amazon is currently cheaper."
-      }
+    "dse-dielectric-grease": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased exact 3 oz tube",
+      "sourceUrl": "https://www.amazon.com/dp/B000AL8VD2",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 20",
+      "note": "Permatex 22058, 3 oz purchased for $10.49."
     },
     "dse-supplier-freight": {
       "amazonStatus": "not-applicable",
@@ -208,104 +203,102 @@
       "note": "This row budgets inbound freight; it is not a purchasable item."
     },
     "dse-balancers": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · exact model",
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · two purchased exact units",
       "sourceUrl": "https://www.amazon.com/dp/B01DH6B2D2",
-      "eta": "Aug 15",
-      "time": "Same-day to LA",
-      "note": "Exact Victron Battery Balancer; BOM quantity is two.",
-      "ebay": {
-        "status": "available",
-        "sourceLabel": "eBay · exact BBA000100100",
-        "sourceUrl": "https://www.ebay.com/itm/235590012699",
-        "eta": "Aug 19–22",
-        "price": "$48.45 each",
-        "condition": "New",
-        "shipsFrom": "Boca Raton, Florida",
-        "note": "Exact balancer; item page estimated Aug 19–22 to 90065. BOM quantity is two."
-      }
+      "eta": "Delivered Aug 19–20",
+      "time": "Purchased Aug 17",
+      "note": "Two exact units purchased: one new for $48.45 and one used-mint for $43.60. Inspect and bench-test the used unit before packing."
     },
     "dse-shunt": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · IP65 500 A",
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased IP65 500 A",
       "sourceUrl": "https://www.amazon.com/dp/B0BF636VBX",
-      "eta": "Aug 15",
-      "time": "Same-day to LA",
-      "note": "The 500 A IP65 SmartShunt is a suitable harsh-environment version of the BOM item.",
-      "ebay": {
-        "status": "available",
-        "sourceLabel": "eBay · exact SHU050150050",
-        "sourceUrl": "https://www.ebay.com/itm/115801019590",
-        "eta": "2–4 days",
-        "price": "$100.30",
-        "condition": "New",
-        "shipsFrom": "United States",
-        "note": "Exact standard 500 A SmartShunt; displayed free 2–4 day delivery to 90065. Amazon's IP65 version remains preferable for this climate if the price is acceptable."
-      }
+      "eta": "Delivered Aug 20",
+      "time": "Purchased Aug 17",
+      "note": "New IP65 500 A SmartShunt purchased for $98.93 before the order-level promotion and tax."
     },
-    "dse-class-t": {
-      "amazonStatus": "partial",
-      "sourceLabel": "Amazon · holder + fuses",
-      "sourceUrl": "https://www.amazon.com/s?k=Blue+Sea+Class+T+fuse+block+150A+fuse",
-      "eta": "Aug 21",
-      "time": "6 days to LA for the fuse",
-      "note": "Blue Sea holders arrive Aug 15, but 150 A Blue Sea 5114 fuses arrive Aug 21. Order two holders, two installed fuses and at least one spare.",
-      "ebay": {
-        "status": "partial",
-        "sourceLabel": "eBay · Blue Sea 5007100 holder",
-        "sourceUrl": "https://www.ebay.com/itm/167299673103",
-        "secondaryLabel": "Blue Sea 5114 150 A fuse",
-        "secondaryUrl": "https://www.ebay.com/itm/377307070044",
-        "eta": "Aug 19–24",
-        "price": "$82.99/holder + $49.99/fuse",
-        "condition": "New",
-        "shipsFrom": "Texas + Rhode Island",
-        "note": "Correct 110–200 A covered holder and exact 150 A fuse. The holder displayed 2–4 day delivery; the fuse item page estimated Aug 19–24. Two holders plus three fuses cost about $316 before tax, above the $220 BOM allowance."
-      }
+    "dse-orion-spare": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased Orion-Tr Smart",
+      "sourceUrl": "https://www.amazon.com/dp/B087CZC211",
+      "eta": "Delivered Aug 20",
+      "time": "Purchased Aug 17",
+      "note": "New 24/12-30A 360 W unit purchased for $174.87. It is a carried spare and is not connected in the production 24 V design."
     },
-    "dse-selector": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · exact model",
-      "sourceUrl": "https://www.amazon.com/dp/B00445KFZ2",
-      "eta": "Check at checkout",
-      "time": "Live delivery date varies",
-      "note": "Exact Blue Sea 6006 m-Series whole-bank ON/OFF disconnect; no one-string selector positions.",
-      "ebay": {
-        "status": "available",
-        "sourceLabel": "eBay · Blue Sea 6006 search",
-        "sourceUrl": "https://www.ebay.com/sch/i.html?_nkw=Blue+Sea+6006",
-        "eta": "Varies by U.S. seller",
-        "price": "Check listing",
-        "condition": "New",
-        "shipsFrom": "United States",
-        "note": "Use only the exact 6006 ON/OFF model; verify U.S. shipping origin and delivery date before ordering."
-      }
+    "dse-amazon-promotion": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Amazon order adjustment",
+      "eta": "Applied through Aug 21",
+      "time": "No shipment",
+      "note": "Actual unallocated promotions across the Amazon receipts through Aug 21."
+    },
+    "dse-us-sales-tax": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Amazon checkout tax",
+      "eta": "Paid through Aug 21",
+      "time": "No shipment",
+      "note": "Combined U.S. sales tax across all five ingested Amazon orders."
     },
     "dse-pv-protection": {
-      "amazonStatus": "partial",
-      "sourceLabel": "Amazon · comparable combiner",
-      "sourceUrl": "https://www.amazon.com/dp/B0F4331NJ1",
-      "eta": "Aug 16",
-      "time": "1 day to LA",
-      "note": "A two-string 40 A combiner/SPD box is available, but it is not an approved drop-in selection. Verify disconnect poles, SPD Ucpv, enclosure, terminals and all DC ratings before purchase."
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased CXCESNS 2-in/1-out combiner",
+      "sourceUrl": "https://www.amazon.com/dp/B0FSQB97T2",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 21",
+      "note": "Purchased at $65.99 before a $5.28 order promotion. Replace its supplied 32 A string fuses with listed 20 A gPV links before commissioning; the Suntech module maximum series-fuse rating is 25 A."
     },
-    "dse-fuse-block": {
+    "dse-breaker-mnedc100": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Authorized MidNite Solar distributor",
+      "sourceUrl": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=759&sortOrder=1",
+      "eta": "Confirm before ordering",
+      "time": "Specialist item",
+      "note": "Retain the exact 10 kA MidNite MNEDC100. The $11.97 CHTAIXI B0B1WDDC75 is only 6 kA and is rejected for this direct battery-bus branch because the published ES200-12G resistance permits a theoretical bank fault above 6 kA.",
+      "secondaryLabel": "Rejected CHTAIXI 100 A candidate",
+      "secondaryUrl": "https://www.amazon.com/dp/B0B1WDDC75"
+    },
+    "dse-breaker-mnepv20": {
       "amazonStatus": "partial",
-      "sourceLabel": "Amazon · MidNite breaker search",
-      "sourceUrl": "https://www.amazon.com/s?k=MidNite+Solar+MNEPV+breakers",
-      "eta": "Check each rating",
-      "time": "Exact amperages may need a solar distributor",
-      "note": "Buy exact MidNite MNEDC100 and MNEPV20/15/5/2/1 resettable DC breakers. Amazon does not reliably stock the complete rating set; use an authorized solar distributor for missing values.",
-      "ebay": {
-        "status": "partial",
-        "sourceLabel": "eBay · MidNite MNEPV search",
-        "sourceUrl": "https://www.ebay.com/sch/i.html?_nkw=MidNite+Solar+MNEPV+breaker",
-        "eta": "Varies by U.S. seller",
-        "price": "Check exact ratings",
-        "condition": "New",
-        "shipsFrom": "United States",
-        "note": "Do not substitute unbranded automotive breakers; match the exact DC voltage, interrupt rating and amperage."
-      }
+      "sourceLabel": "Amazon / authorized distributor · exact MNEPV20",
+      "sourceUrl": "https://www.amazon.com/s?k=MidNite+Solar+MNEPV20",
+      "eta": "Check exact listing",
+      "time": "Specialist item",
+      "note": "Retain the exact 10 kA MidNite MNEPV20 on the direct battery bus. The $8.99 CHTAIXI B20 is listed for low-short-circuit-current applications and lacks documented series coordination for this role.",
+      "secondaryLabel": "Rejected CHTAIXI 20 A direct-bus candidate",
+      "secondaryUrl": "https://www.amazon.com/dp/B09H4WNK3S"
+    },
+    "dse-breaker-mnepv15": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · CHTAIXI B15",
+      "sourceUrl": "https://www.amazon.com/dp/B09H4WQ1QJ",
+      "eta": "Aug 26",
+      "time": "Buy 1 · $8.99 each when checked Aug 21",
+      "note": "Polarized 12–110 VDC B-curve breaker. Use only in the documented downstream position, observe marked polarity and obtain qualified-installer approval before commissioning."
+    },
+    "dse-breaker-mnepv5": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · CHTAIXI B6",
+      "sourceUrl": "https://www.amazon.com/dp/B09H4XZLCR",
+      "eta": "Aug 26",
+      "time": "Buy 2; one is spare · $8.99 each when checked Aug 21",
+      "note": "Polarized 12–110 VDC B-curve breaker. Use only in the documented downstream position, observe marked polarity and obtain qualified-installer approval before commissioning."
+    },
+    "dse-breaker-mnepv2": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · CHTAIXI B6",
+      "sourceUrl": "https://www.amazon.com/dp/B09H4XZLCR",
+      "eta": "Aug 26",
+      "time": "Buy 1 · $8.99 each when checked Aug 21",
+      "note": "Polarized 12–110 VDC B-curve breaker. Use only in the documented downstream position, observe marked polarity and obtain qualified-installer approval before commissioning."
+    },
+    "dse-breaker-mnepv1": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · CHTAIXI B6",
+      "sourceUrl": "https://www.amazon.com/dp/B09H4XZLCR",
+      "eta": "Aug 26",
+      "time": "Buy 2 · $8.99 each when checked Aug 21",
+      "note": "Polarized 12–110 VDC B-curve breaker. Use only in the documented downstream position, observe marked polarity and obtain qualified-installer approval before commissioning."
     },
     "dse-usb": {
       "amazonStatus": "available",
@@ -323,22 +316,21 @@
       "time": "2 days to LA when checked",
       "note": "Buy two. The listing showed in stock at $50.63 each with Aug 19 delivery. Combined with one SC-TILE-20, the station total is $152.27 before tax and provides four USB-C plus two USB-A ports."
     },
-    "dse-unifi-power": {
-      "amazonStatus": "unavailable",
-      "sourceLabel": "Powerwerx · exact USBbuddy2",
-      "sourceUrl": "https://powerwerx.com/usbbuddy2-powerpole-usb-device-charger",
-      "eta": "In stock",
-      "time": "Confirm LA date at checkout",
-      "note": "The potted 8–35 V input, 5 V / 3 A converter is the preferred compact marine-friendly option. Add a short known-good USB-A-to-USB-C lead and bench-test the purchased UniFi Express.",
-      "ebay": {
-        "status": "unavailable",
-        "sourceLabel": "No verified exact U.S. listing",
-        "eta": "Not found",
-        "price": "—",
-        "condition": "—",
-        "shipsFrom": "U.S.-only search",
-        "note": "Generic converters were excluded because their potting, protection and USB current advertisement were not documented."
-      }
+    "dse-unifi-converter": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased YRDZXG B0G1W6JTX8",
+      "sourceUrl": "https://www.amazon.com/dp/B0G1W6JTX8",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 21",
+      "note": "Mount inside the junction box and bench-test repeated UniFi Express cold starts before travel."
+    },
+    "dse-unifi-usb-cable": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · Amazon Basics USB-A to USB-C",
+      "sourceUrl": "https://www.amazon.com/dp/B01GGKYKQM",
+      "eta": "Aug 22",
+      "time": "Two-day to LA when checked",
+      "note": "USB-IF-certified three-foot cable was $4.88. It now exits the junction box from the internal converter; bench-test it with the selected converter and purchased UniFi Express before travel."
     },
     "dse-router": {
       "amazonStatus": "available",
@@ -348,13 +340,13 @@
       "time": "9 days to LA",
       "note": "Already purchased. Amazon currently has the exact UniFi Express, but its delivery is slower and its listed price was high."
     },
-    "dse-dc-spares": {
-      "amazonStatus": "available",
-      "sourceLabel": "Amazon · exact Blue Sea 2104",
-      "sourceUrl": "https://www.amazon.com/dp/B000XBB758",
-      "eta": "Check at checkout",
-      "time": "Buy 2 busbars + 2 Blue Sea 2708 covers",
-      "note": "Exact 600 A four-stud/four-screw PowerBar. Each polarity has six actual conductors and retains one spare stud plus one spare screw."
+    "dse-main-busbars": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased AMOMD pair",
+      "sourceUrl": "https://www.amazon.com/dp/B0DG4WLVT7",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 20",
+      "note": "Purchased red/black pair for $89.99. Inspect the received current-path material, hardware and covers before assembly."
     },
     "dse-service-return-bus": {
       "amazonStatus": "available",
@@ -364,29 +356,53 @@
       "time": "Live delivery date varies",
       "note": "Exact covered 100 A bus with two studs and five screws. Six positions are used and one remains spare."
     },
-    "dse-earth-bus": {
+    "dse-earth-busbar": {
       "amazonStatus": "available",
-      "sourceLabel": "Amazon · Blue Sea 2128 search",
-      "sourceUrl": "https://www.amazon.com/s?k=Blue+Sea+Systems+2128+MaxiBus",
+      "sourceLabel": "Amazon · exact Blue Sea 2128",
+      "sourceUrl": "https://www.amazon.com/dp/B00821YF1E",
       "eta": "Check seller at checkout",
-      "time": "Buy with Blue Sea 2719 cover",
-      "note": "Exact 250 A MaxiBus has two studs and six screws. Six bonds are used, leaving one stud and one screw spare."
+      "time": "$46.66 when checked",
+      "note": "Exact 250 A MaxiBus has two studs plus six screws: eight positions for six modeled bonds. Do not buy B000OTJ8A0; that is a four-position 2315 MiniBus."
+    },
+    "dse-earth-bus-cover": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Fisheries Supply · exact Blue Sea 2719",
+      "sourceUrl": "https://www.fisheriessupply.com/blue-sea-systems-insulating-cover-only-for-2127-and-2128-maxibus/2719",
+      "eta": "Ships immediately",
+      "time": "3 shown in stock",
+      "note": "Exact insulating cover for the 2128 MaxiBus was $31.09 and shipping immediately."
     },
     "dse-usb-breakers": {
       "amazonStatus": "available",
-      "sourceLabel": "Amazon · Blue Sea 2132 search",
-      "sourceUrl": "https://www.amazon.com/s?k=Blue+Sea+2132+10A+push+button+circuit+breaker",
-      "eta": "Check seller at checkout",
-      "time": "Buy 3 exact 10 A units",
-      "note": "Three resettable marine push-button breakers replace the three local USB-module fuses."
+      "sourceLabel": "Amazon · CHTAIXI B10",
+      "sourceUrl": "https://www.amazon.com/dp/B09H4W5HSW",
+      "eta": "Aug 26",
+      "time": "Buy 3 · $8.99 each when checked Aug 21",
+      "note": "Polarized 12–110 VDC B-curve breaker. Use only in the documented downstream position, observe marked polarity and obtain qualified-installer approval before commissioning."
     },
-    "dse-victron-data": {
-      "amazonStatus": "partial",
-      "sourceLabel": "Amazon · exact Victron cables",
+    "dse-vedirect-cables": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased Victron VE.Direct 0.9 m",
       "sourceUrl": "https://www.amazon.com/dp/B01F9ESFZS",
-      "eta": "Aug 16",
-      "time": "1 day for the last cable",
-      "note": "The 0.9 m VE.Direct cables arrive Aug 15 and the 3 m Victron RJ45 UTP cable arrives Aug 16; add a short standard Ethernet patch lead."
+      "eta": "Aug 22",
+      "time": "Purchased Aug 20",
+      "note": "Two exact cables purchased at $17.85 and $17.75."
+    },
+    "dse-vebus-cable": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased StarTech yellow Cat6",
+      "sourceUrl": "https://www.amazon.com/dp/B003OCRW3E",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 20",
+      "note": "10 ft yellow unshielded Cat6 cable purchased for $9.99 and assigned to MultiPlus VE.Bus ↔ Ekrano VE.Bus."
+    },
+    "dse-ekrano-ethernet": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased StarTech red Cat6",
+      "sourceUrl": "https://www.amazon.com/dp/B003OCRW34",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 20",
+      "note": "10 ft red unshielded Cat6 cable purchased for $9.99 and assigned to Ekrano LAN ↔ UniFi LAN."
     },
     "dse-junction-box": {
       "amazonStatus": "substitute",
@@ -402,7 +418,7 @@
       "sourceUrl": "https://www.amazon.com/s?k=Blue+Sea+5114+150A+Class+T+fuse+MC4+spares",
       "eta": "Aug 15–21",
       "time": "Same day to 6 days",
-      "note": "No single service kit exists. The 150 A Class T fuse is the slowest identified component, arriving Aug 21."
+      "note": "No single service kit exists. Assemble the correctly listed 20 A gPV links, Ekrano spares, MC4 parts, corrosion protection and labels as separate verified items."
     },
     "dse-baggage": {
       "amazonStatus": "not-applicable",
@@ -447,6 +463,109 @@
       "eta": "Not applicable",
       "time": "No parcel delivery",
       "note": "Labor is donated and is not a purchasable item."
+    },
+    "dse-battery-string-breakers": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased exact MidNite model",
+      "sourceUrl": "https://www.amazon.com/dp/B0CFX5PW79",
+      "eta": "Aug 26–28",
+      "time": "Purchased Aug 20",
+      "note": "Two MNEPV125-80-1PNP breakers purchased at $55.98 each; $11.61 supplier shipping and $12.06 sales tax are recorded separately."
+    },
+    "dse-battery-breaker-enclosure": {
+      "amazonStatus": "available",
+      "sourceLabel": "Amazon · QILIPSU six-way enclosure",
+      "sourceUrl": "https://www.amazon.com/dp/B0CPV9NQ2M",
+      "eta": "Check at checkout",
+      "time": "$25.99 when researched",
+      "note": "Compact 172 × 200 × 110 mm IP65 / UL94-V0 enclosure. Confirm both received MidNite breakers, dead-front clearance and 1/0 AWG bend radius before purchase."
+    },
+    "dse-starlink-ethernet": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased CHGRNLF Starlink Mini cable",
+      "sourceUrl": "https://www.amazon.com/dp/B0D8J3HC7Z",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 21",
+      "note": "Purpose-built 15 ft weatherproof Mini-to-UniFi Ethernet route; preserve the Mini weather seal."
+    },
+    "dse-inline-connectors": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased Oyviny 4-pack",
+      "sourceUrl": "https://www.amazon.com/dp/B0DZWYVYP8",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 20",
+      "note": "Four IP68 three-pole connectors purchased for $16.89; use only after a qualified person verifies ratings and installation suitability."
+    },
+    "dse-mc4-tool-kit": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased MUYI kit",
+      "sourceUrl": "https://www.amazon.com/dp/B0BWRHMHY9",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 20",
+      "note": "47-piece MC4 tool kit purchased for $22.99."
+    },
+    "dse-amazon-shipping": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Amazon supplier-shipping adjustment",
+      "eta": "Paid Aug 20",
+      "time": "No separate shipment",
+      "note": "$11.61 actual shipping on the MidNite breaker order."
+    },
+    "dse-chtai-ac-rcbos-rejected": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased CHTAIXI B0CSV93CTN",
+      "sourceUrl": "https://www.amazon.com/dp/B0CSV93CTN",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 21",
+      "note": "Do not install: exact listing is 120 VAC, 1P+N and Type AC, not the required 230 V Type A device. Return if practical."
+    },
+    "dse-multimeter": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased Klein MM325",
+      "sourceUrl": "https://www.amazon.com/dp/B0B57L9FNL",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 21",
+      "note": "Portable commissioning and service tool; not a fixed system component."
+    },
+    "dse-aa-aaa-charger": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased EBL AA/AAA charger",
+      "sourceUrl": "https://www.amazon.com/dp/B0FZR3HX62",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 21",
+      "note": "Portable accessory; not a solar-bank charger."
+    },
+    "dse-10awg-duplex-wire": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased 10 AWG duplex wire",
+      "sourceUrl": "https://www.amazon.com/dp/B0DGL7QVVF",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 21",
+      "note": "Unassigned installation stock pending final measured routes; not suitable for 85–100 A circuits."
+    },
+    "dse-starlink-portable-usbc-cables": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased Genioss cables",
+      "sourceUrl": "https://www.amazon.com/dp/B0DD12LJNF",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 21",
+      "note": "Two portable-use 100 W USB-C PD power leads; not installed in DSE fixed wiring."
+    },
+    "dse-starlink-portable-battery-cable": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased SegurVelo battery lead",
+      "sourceUrl": "https://www.amazon.com/dp/B0F7LDGP2P",
+      "eta": "Aug 22",
+      "time": "Purchased Aug 21",
+      "note": "Portable-use direct-battery cable; not installed in the fixed 24 V system."
+    },
+    "dse-cat6-blue-spare": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased StarTech blue Cat6",
+      "sourceUrl": "https://www.amazon.com/dp/B000KSEJV8",
+      "eta": "Delivered / prior order",
+      "time": "Purchased Aug 20",
+      "note": "Retained as an indoor spare after the purpose-built weatherproof Starlink Mini cable became primary."
     }
   }
 }

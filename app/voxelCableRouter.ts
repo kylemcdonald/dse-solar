@@ -738,7 +738,10 @@ export function solveVoxelWallRoutes(
         other.result.points,
         request.radiusM,
         other.request.radiusM,
-        options.cableClearanceM,
+        // A* tests voxel centers while the rendered cable occupies the
+        // continuous segment between centers. A small sub-voxel guard closes
+        // the edge-crossing gap without consuming an entire neighboring lane.
+        options.cableClearanceM + options.cellSizeM * 0.12,
       ));
       const terminalOccupied = new Uint8Array(deviceOccupied.length);
       markForeignTerminalCorridors(

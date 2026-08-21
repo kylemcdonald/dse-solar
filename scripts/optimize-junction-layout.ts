@@ -2,6 +2,7 @@ import { performance } from "node:perf_hooks";
 import { readFile, rename, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { CableRoutingSystem, sampleRoundedCableCenterline } from "../app/cableRouting.ts";
+import { junctionCableRadiusM } from "../app/cableSpecifications.ts";
 
 type Point2 = [number, number];
 type Point3 = [number, number, number];
@@ -164,15 +165,8 @@ const INNER_BOTTOM = -INNER_HEIGHT_M / 2;
 const INNER_TOP = INNER_HEIGHT_M / 2;
 const INNER_BACK_Z = -0.063;
 const COMPONENT_EDGE_CLEARANCE_M = 0.002;
-// Most front-stud components can move directly onto a safe Z service plane;
-// a compact 3 mm packing gap is sufficient between their bodies. The selector
-// is different: its 1/0 lugs escape laterally behind the rotary body, so pairs
-// involving it need a full finite-radius portal aisle.
+// Most front-stud components can move directly onto a safe Z service plane.
 const COMPONENT_GAP_M = 0.02;
-// The 14.4 mm-OD Class-T conductors need 7.2 mm radius plus the 2.5 mm
-// terminal-escape margin. Eleven millimetres is a real service aisle; the old
-// 19 mm pairwise border consumed too much of the compact enclosure.
-const SELECTOR_PORTAL_GAP_M = 0.011;
 const GLAND_EDGE_CLEARANCE_M = 0.007;
 const GLAND_GAP_M = 0.003;
 const GLAND_TERMINAL_Y = INNER_BOTTOM + 0.0125;
@@ -190,10 +184,6 @@ const POSITIVE_WIRE_PLANE_Z = 0.018;
 const NEGATIVE_WIRE_PLANE_Z = 0.018;
 const WIRE_PLANE_Z = POSITIVE_WIRE_PLANE_Z;
 const ROUTING_PLANES_M = [0.014, 0.025, 0.036, 0.047, 0.058, 0.069, 0.08, 0.091, 0.102, 0.113, 0.122] as const;
-// The master-disconnect studs are on the rear of the rotary body. Keep their
-// short terminal leads close to the back panel, then transition to the service
-// plane only after the cable has cleared the switch's projected envelope.
-const SELECTOR_TERMINAL_Z = 0.012;
 const DEPTH_LEVEL_STEP_M = 0.011;
 const MAXIMUM_ALLOWED_FORWARD_M = 0.13;
 const EPSILON = 1e-7;
@@ -206,7 +196,6 @@ const round = (value: number, places = 6) => {
 };
 
 const COMPONENT_SPECS: ComponentSpec[] = [
-  { id: "selector", center: [-0.0602, 0.078], size: [0.075, 0.075] },
   { id: "shunt", center: [-0.058, 0.0053], size: [0.12, 0.046] },
   { id: "positiveBus", center: [0.079, 0.09], size: [0.178, 0.051] },
   { id: "negativeBus", center: [-0.079, -0.0555], size: [0.178, 0.051] },
@@ -215,6 +204,9 @@ const COMPONENT_SPECS: ComponentSpec[] = [
   { id: "switchPanel", center: [INNER_LEFT + 0.019, 0.0725], fixedX: INNER_LEFT + 0.019, size: [0.036, 0.086] },
   { id: "mpptFuse", center: [0.0359, -0.0217], size: [0.034, 0.063] },
   { id: "ekranoFuse", center: [-0.148, -0.0088], size: [0.04, 0.018] },
+  // YRDZXG B0G1W6JTX8: 64 × 14 mm body. It is intentionally inside the
+  // enclosure, so only the finished USB-A-to-USB-C lead crosses the boundary.
+  { id: "unifiPower", center: [-0.105, 0.12], size: [0.064, 0.014] },
 ];
 
 const componentById = Object.fromEntries(COMPONENT_SPECS.map((component) => [component.id, component]));
@@ -222,9 +214,8 @@ const componentById = Object.fromEntries(COMPONENT_SPECS.map((component) => [com
 // Body-to-body spacing must also leave room for the thickest conductor to
 // move forward from a front-face terminal without entering its neighbor's
 // radius-inflated solid. These are conductor radii plus the 1.5 mm solid-audit
-// margin; the selector retains its larger lateral bend/egress aisle.
+// margin.
 const COMPONENT_TERMINAL_CLEARANCE_M: Record<string, number> = {
-  selector: SELECTOR_PORTAL_GAP_M,
   shunt: 0.0087,
   positiveBus: 0.0087,
   negativeBus: 0.0087,
@@ -233,6 +224,7 @@ const COMPONENT_TERMINAL_CLEARANCE_M: Record<string, number> = {
   switchPanel: 0.0033,
   mpptFuse: 0.007,
   ekranoFuse: 0.0033,
+  unifiPower: 0.0033,
 };
 
 // The rocker panel is mounted through the enclosure side rather than flat on
@@ -244,13 +236,6 @@ const sharesBackplatePlane = (firstId: string, secondId: string) => (
 );
 
 const TERMINAL_SPECS: Record<string, TerminalSpec> = {
-  // Both Class-T-protected positive lugs stack on one master-disconnect input
-  // stud. The two modeled lug centers are separated by 4 mm only so both
-  // cable surfaces stay visible; electrically they are one stud. The other
-  // stud is the whole-bank output.
-  selectorInputA: { componentId: "selector", escape: "left", offset: [-0.022, -0.010] },
-  selectorInputB: { componentId: "selector", escape: "left", offset: [-0.022, 0.010] },
-  selectorOutput: { componentId: "selector", escape: "right", offset: [0.022, 0] },
   // The two string-negative lugs share the SmartShunt battery-side copper
   // landing electrically, but are rendered as two explicit attachment ports
   // on that landing so two finite-diameter cables never occupy one volume.
@@ -283,10 +268,11 @@ mainBusTerminalOffsets.forEach((offset, index) => {
   TERMINAL_SPECS[`positiveStud${index + 1}`] = { componentId: "positiveBus", offset };
   TERMINAL_SPECS[`negativeStud${index + 1}`] = { componentId: "negativeBus", offset };
 });
-// The SmartShunt's supplied fused Vbatt+ sense lead uses the fourth small
-// terminal on the positive PowerBar. The corresponding fourth large stud
-// remains spare for future service work.
-TERMINAL_SPECS.positiveStud7 = { componentId: "positiveBus", offset: [0.054, -0.012] };
+// The purchased AMOMD positive bar has four large studs and eight small screw
+// positions. Model four distinct high-current string/charger/load landings and
+// four low-current landings; the remaining four physical positions stay spare.
+TERMINAL_SPECS.positiveStud7 = { componentId: "positiveBus", offset: [0.054, 0.008] };
+TERMINAL_SPECS.positiveStud8 = { componentId: "positiveBus", offset: [0.054, -0.012] };
 const returnBusOffsets: Point2[] = [
   [-0.045, 0.006], [-0.032, -0.005], [-0.016, -0.005], [0, -0.005], [0.016, -0.005], [0.032, -0.005],
 ];
@@ -303,6 +289,10 @@ for (const component of ["mpptFuse", "ekranoFuse"]) {
   TERMINAL_SPECS[`${component}Out`] = { componentId: component, offset: [halfWidth, 0] };
 }
 
+TERMINAL_SPECS.unifiConverterPositive = { componentId: "unifiPower", offset: [-0.022, 0] };
+TERMINAL_SPECS.unifiConverterNegative = { componentId: "unifiPower", offset: [0, 0] };
+TERMINAL_SPECS.unifiConverterUsb = { componentId: "unifiPower", offset: [0.022, 0] };
+
 const GLAND_SPECS: GlandSpec[] = [
   { id: "battery-a-positive", label: "STRING A +", diameterM: 0.028, type: "gland", terminals: ["batteryPosA"], conductorOffsetsM: [0], exteriorPortIds: ["junctionBatteryPositiveA"] },
   { id: "battery-b-positive", label: "STRING B +", diameterM: 0.028, type: "gland", terminals: ["batteryPosB"], conductorOffsetsM: [0], exteriorPortIds: ["junctionBatteryPositiveB"] },
@@ -314,7 +304,7 @@ const GLAND_SPECS: GlandSpec[] = [
   { id: "multiplus-negative", label: "MULTIPLUS −", diameterM: 0.028, type: "gland", terminals: ["multiplusNeg"], conductorOffsetsM: [0], exteriorPortIds: ["junctionMultiPlusNegative"] },
   { id: "ekrano-power", label: "EKRANO POWER", diameterM: 0.016, type: "gland", terminals: ["ekranPos", "ekranNeg"], conductorOffsetsM: [-0.0035, 0.0035], exteriorPortIds: ["junctionEkranPositive", "junctionEkranNegative"] },
   { id: "ekrano-data", label: "VE.DIRECT", diameterM: 0.014, type: "gland", terminals: ["ekranData"], conductorOffsetsM: [0], exteriorPortIds: ["junctionEkranData"] },
-  { id: "unifi-power", label: "UNIFI 24 V PAIR", diameterM: 0.016, type: "gland", terminals: ["loadPos2", "loadNeg2"], conductorOffsetsM: [-0.0035, 0.0035], exteriorPortIds: ["junctionLoadPositive2", "junctionLoadNegative2"] },
+  { id: "unifi-usb", label: "UNIFI USB-C", diameterM: 0.02, type: "gland", terminals: ["unifiUsbCable"], conductorOffsetsM: [0], exteriorPortIds: ["junctionUnifiUsb"] },
   { id: "usb-power", label: "USB 24 V PAIR", diameterM: 0.017, type: "gland", terminals: ["loadPos3", "loadNeg3"], conductorOffsetsM: [-0.004, 0.004], exteriorPortIds: ["junctionLoadPositive3", "junctionLoadNegative3"] },
   { id: "inside-light", label: "INSIDE LIGHT", diameterM: 0.016, type: "gland", terminals: ["loadPos4", "loadNeg4"], conductorOffsetsM: [-0.0035, 0.0035], exteriorPortIds: ["junctionLoadPositive4", "junctionLoadNegative4"] },
   { id: "outside-light", label: "OUTSIDE LIGHT", diameterM: 0.016, type: "gland", terminals: ["loadPos5", "loadNeg5"], conductorOffsetsM: [-0.0035, 0.0035], exteriorPortIds: ["junctionLoadPositive5", "junctionLoadNegative5"] },
@@ -330,33 +320,33 @@ const EXTERIOR_BREAKOUT_RADIUS_M: Record<string, number> = {
   "battery-b-positive": 0.0072,
 };
 
-const ROUTE_DEFINITIONS: RouteDefinition[] = [
-  { id: "battery-positive-a", from: "selectorInputA", to: "batteryPosA", kind: "positive", radiusM: 0.0072 },
-  { id: "battery-positive-b", from: "selectorInputB", to: "batteryPosB", kind: "positive", radiusM: 0.0072 },
+const ROUTE_DEFINITION_INPUTS: RouteDefinition[] = [
+  { id: "battery-positive-a", from: "positiveStud1", to: "batteryPosA", kind: "positive", radiusM: 0.0072 },
+  { id: "battery-positive-b", from: "positiveStud2", to: "batteryPosB", kind: "positive", radiusM: 0.0072 },
   { id: "battery-negative-a", from: "shuntBatteryA", to: "batteryNegA", kind: "negative", radiusM: 0.0072 },
   { id: "battery-negative-b", from: "shuntBatteryB", to: "batteryNegB", kind: "negative", radiusM: 0.0072 },
-  { id: "selector-to-positive-bus", from: "selectorOutput", to: "positiveStud1", kind: "positive", radiusM: 0.0072 },
   { id: "shunt-to-negative-bus", from: "shuntSystem", to: "negativeStud1", kind: "negative", radiusM: 0.0072 },
-  { id: "shunt-voltage-sense", from: "positiveStud7", to: "shuntVbattPositive", kind: "positive", radiusM: 0.0012 },
-  { id: "mppt-positive-feed", from: "positiveStud3", to: "mpptFuseIn", kind: "positive", radiusM: 0.0055 },
+  { id: "shunt-voltage-sense", from: "positiveStud8", to: "shuntVbattPositive", kind: "positive", radiusM: 0.0012 },
+  { id: "mppt-positive-feed", from: "positiveStud4", to: "mpptFuseIn", kind: "positive", radiusM: 0.0055 },
   { id: "mppt-positive", from: "mpptFuseOut", to: "mpptPos", kind: "positive", radiusM: 0.0055 },
   { id: "mppt-negative", from: "negativeStud3", to: "mpptNeg", kind: "negative", radiusM: 0.0055 },
-  { id: "multiplus-positive", from: "positiveStud2", to: "multiplusPos", kind: "positive", radiusM: 0.0072 },
+  { id: "multiplus-positive", from: "positiveStud3", to: "multiplusPos", kind: "positive", radiusM: 0.0072 },
   { id: "multiplus-negative", from: "negativeStud2", to: "multiplusNeg", kind: "negative", radiusM: 0.0072 },
-  { id: "services-positive-feed", from: "positiveStud4", to: "servicesFuseIn", kind: "positive", radiusM: 0.0028 },
+  { id: "services-positive-feed", from: "positiveStud5", to: "servicesFuseIn", kind: "positive", radiusM: 0.0028 },
   { id: "services-positive", from: "servicesFuseOut", to: "fuseInput", kind: "positive", radiusM: 0.0028 },
   { id: "services-negative", from: "negativeStud5", to: "returnStud6", kind: "negative", radiusM: 0.0028 },
-  { id: "ekrano-positive-feed", from: "positiveStud5", to: "ekranoFuseIn", kind: "positive", radiusM: 0.0018 },
+  { id: "ekrano-positive-feed", from: "positiveStud6", to: "ekranoFuseIn", kind: "positive", radiusM: 0.0018 },
   { id: "ekrano-positive", from: "ekranoFuseOut", to: "ekranPos", kind: "positive", radiusM: 0.0018 },
   { id: "ekrano-negative", from: "negativeStud4", to: "ekranNeg", kind: "negative", radiusM: 0.0018 },
   { id: "ekrano-data", from: "shuntData", to: "ekranData", kind: "data", radiusM: 0.0016 },
-  { id: "starlink-fuse-feed", from: "positiveStud6", to: "starlinkFuseIn", kind: "positive", radiusM: 0.0018 },
+  { id: "starlink-fuse-feed", from: "positiveStud7", to: "starlinkFuseIn", kind: "positive", radiusM: 0.0018 },
   { id: "starlink-switch-input", from: "starlinkFuseOut", to: "switchInput1", kind: "positive", radiusM: 0.0018 },
   { id: "starlink-jack-positive", from: "switchOutput1", to: "starlinkJackPositive", kind: "positive", radiusM: 0.0018 },
   { id: "starlink-jack-negative", from: "negativeStud6", to: "starlinkJackNegative", kind: "negative", radiusM: 0.0018 },
   { id: "switch-input-2", from: "fuseOutput1", to: "switchInput2", kind: "positive", radiusM: 0.0018 },
-  { id: "load-positive-2", from: "switchOutput2", to: "loadPos2", kind: "positive", radiusM: 0.0018 },
-  { id: "load-negative-2", from: "returnStud1", to: "loadNeg2", kind: "negative", radiusM: 0.0018 },
+  { id: "load-positive-2", from: "switchOutput2", to: "unifiConverterPositive", kind: "positive", radiusM: 0.0018 },
+  { id: "load-negative-2", from: "returnStud1", to: "unifiConverterNegative", kind: "negative", radiusM: 0.0018 },
+  { id: "unifi-usb-output", from: "unifiConverterUsb", to: "unifiUsbCable", kind: "data", radiusM: 0.0022 },
   { id: "load-positive-3", from: "fuseOutput2", to: "loadPos3", kind: "positive", radiusM: 0.0023 },
   { id: "load-negative-3", from: "returnStud2", to: "loadNeg3", kind: "negative", radiusM: 0.0023 },
   { id: "switch-input-4", from: "fuseOutput3", to: "switchInput4", kind: "positive", radiusM: 0.0016 },
@@ -367,6 +357,11 @@ const ROUTE_DEFINITIONS: RouteDefinition[] = [
   { id: "load-negative-5", from: "returnStud4", to: "loadNeg5", kind: "negative", radiusM: 0.0016 },
   { id: "switch-led-negative", from: "returnStud5", to: "switchLedNegative", kind: "negative", radiusM: 0.0012 },
 ];
+
+const ROUTE_DEFINITIONS: RouteDefinition[] = ROUTE_DEFINITION_INPUTS.map((route) => ({
+  ...route,
+  radiusM: junctionCableRadiusM(route.id),
+}));
 
 const routeById = Object.fromEntries(ROUTE_DEFINITIONS.map((route) => [route.id, route]));
 const terminalOwner = (terminalId: string) => TERMINAL_SPECS[terminalId]?.componentId;
@@ -712,7 +707,7 @@ function terminalEscapeDirection(terminalId: string): "bottom" | "front" | "left
   if (!specification) return "top";
   // Every internal device terminal is a front-face port. The old inferred
   // left/right exits allowed a route to attach sideways or hide behind the
-  // selector and switch bodies. Glands remain upward-facing bottom ports.
+  // switch bodies. Glands remain upward-facing bottom ports.
   return "front";
 }
 
@@ -784,12 +779,6 @@ function terminalEscapePoint(
       return [round(inferredCenterX - component.size[0] / 2 - routeClearance), terminal[1]];
     }
     if (terminalId === "shuntBatteryB") {
-      return [round(inferredCenterX + component.size[0] / 2 + routeClearance), terminal[1]];
-    }
-    if (terminalId === "selectorInputA") {
-      return [round(inferredCenterX - component.size[0] / 2 - routeClearance), terminal[1]];
-    }
-    if (terminalId === "selectorInputB") {
       return [round(inferredCenterX + component.size[0] / 2 + routeClearance), terminal[1]];
     }
     // buildTerminals already applies the component center. Recover it from
@@ -967,7 +956,6 @@ function segmentCrossesRectangle(segment: Segment, center: Point2, size: Point2)
 }
 
 const COMPONENT_FRONT_Z_M: Record<string, number> = {
-  selector: 0.084,
   shunt: 0.054,
   positiveBus: 0.057,
   negativeBus: 0.057,
@@ -1400,7 +1388,6 @@ function terminalZ(terminalId: string, glands: Record<string, GlandPlacement>) {
   // Side-mounted lugs sit midway through their device body. Front-facing
   // terminals end at the tip of a cylinder whose base touches the front face.
   if (Math.abs(direction[2]) < EPSILON) {
-    if (owner === "selector") return Math.max(SELECTOR_TERMINAL_Z, componentFront * 0.55);
     return componentFront * 0.55;
   }
   return componentFront + terminalPortLength(terminalId);
@@ -2139,7 +2126,7 @@ function routeAllWithHardClearance(
     route.id === "switch-led-negative" ? -1 :
     route.id.startsWith("multiplus-") ? 0 :
     route.id.startsWith("battery-") ? 1 :
-    route.id === "selector-to-positive-bus" || route.id === "shunt-to-negative-bus" ? 2 : 3
+    route.id === "shunt-to-negative-bus" ? 2 : 3
   );
   const ordered = [...ROUTE_DEFINITIONS].sort((first, second) => (
     second.radiusM - first.radiusM || thickPriority(first) - thickPriority(second) || first.id.localeCompare(second.id)
@@ -2314,9 +2301,8 @@ function routeWires(
       const overlapM = allRelationships.reduce((sum, relationship) => sum + relationship.overlapM, 0);
       const context = routeGeometryContext(route, terminals, components);
       for (const planeZ of routePlaneCandidates(route)) {
-        // Bridge only the portal-to-portal run. A selector terminal first
-        // travels behind its rotary body to the assigned edge portal; its
-        // depth change happens outside that body, never through its face.
+        // Bridge only the portal-to-portal run. Terminal leads retain their
+        // required straight-on approaches before changing depth.
         const bridgedPath = bridgePlanarPath(path.corePoints, planeZ, route, placed);
         const bridgeCandidates = [
           {
@@ -2756,7 +2742,6 @@ function outputDocument(
       bottomRoutingGutterTopY: BOTTOM_ROUTING_GUTTER_TOP_Y,
       componentToBreakoutGutterGapM: COMPONENT_TO_BREAKOUT_GUTTER_GAP_M,
       minimumComponentGapM: COMPONENT_GAP_M,
-      selectorPortalGapM: SELECTOR_PORTAL_GAP_M,
       glandEdgeClearanceM: GLAND_EDGE_CLEARANCE_M,
       glandGapM: GLAND_GAP_M,
     },

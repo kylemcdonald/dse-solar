@@ -1,4 +1,5 @@
 import optimizedPhysicalLayoutRaw from "../data/optimized-physical-layout.json" with { type: "json" };
+import { physicalCableRadiusM } from "./cableSpecifications.ts";
 import type { PhysicalLayoutSpecification } from "./physicalLayoutSolver";
 
 type OptimizedPhysicalLayoutDocument = {
@@ -19,9 +20,31 @@ if (!optimizedPhysicalLayout.runtime?.specification) {
   throw new Error("The offline physical-layout optimizer has not produced a static specification");
 }
 
-// The browser consumes only this frozen optimizer artifact. It never invokes
-// the placement or cable-routing solver and keeps no editable layout state.
-export const physicalLayout = optimizedPhysicalLayout.runtime.specification;
+// Device positions and route centerlines remain the frozen optimizer artifact,
+// while cable radii come from the separately audited product specification.
+// This prevents a stale optimizer run from silently restoring old illustrative
+// diameters, and keeps both ends of every route on the same physical OD.
+const rawSpecification = optimizedPhysicalLayout.runtime.specification;
+const normalizedRoutes = Object.fromEntries(Object.entries(rawSpecification.routes).map(([id, route]) => [id, {
+  ...route,
+  radiusM: physicalCableRadiusM(id),
+}]));
+const radiusByPort = new Map<string, number>();
+Object.values(normalizedRoutes).forEach((route) => {
+  [route.sourcePortId, route.targetPortId].forEach((portId) => {
+    if (!portId) return;
+    radiusByPort.set(portId, Math.max(radiusByPort.get(portId) ?? 0, route.radiusM));
+  });
+});
+
+export const physicalLayout: PhysicalLayoutSpecification = {
+  ...rawSpecification,
+  routes: normalizedRoutes,
+  portSpecifications: Object.fromEntries(Object.entries(rawSpecification.portSpecifications).map(([id, port]) => [id, {
+    ...port,
+    cableRadiusM: radiusByPort.get(id) ?? port.cableRadiusM,
+  }])),
+};
 
 export const physicalLayoutOptimization = {
   elapsedSeconds: optimizedPhysicalLayout.elapsedSeconds ?? 0,

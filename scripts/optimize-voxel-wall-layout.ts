@@ -21,7 +21,7 @@ type Candidate = {
 
 const WALL_DEVICE_IDS = [
   "pvEntry", "smartSolar", "multiPlus", "acBoard", "junction", "ekran", "unifi",
-  "usb", "unifiPower", "balancerA", "balancerB", "classTA", "classTB", "earthBar",
+  "usb", "balancerA", "balancerB", "batteryBreakerBox", "earthBar",
 ] as const;
 const FIXED_POSITION_IDS = [
   "battery1", "battery2", "battery3", "battery4", "indoorLight", "outdoorFlood", "starlink",
@@ -67,11 +67,11 @@ const wallZ = Object.fromEntries(WALL_DEVICE_IDS.map((id) => [id, startingSpecif
 const verticalRanges: Partial<Record<(typeof WALL_DEVICE_IDS)[number], [number, number]>> = {
   pvEntry: [0.43, 0.95], smartSolar: [0.43, 1.15], multiPlus: [0.85, 2.35],
   acBoard: [0.75, 2.25], junction: [0.9, 2.15], ekran: [EKRANO_EYE_LEVEL_M, EKRANO_EYE_LEVEL_M],
-  unifi: [1.3, 1.9], usb: [1.2, 1.95], unifiPower: [1.1, 1.85], balancerA: [0.43, 1.2],
-  balancerB: [0.43, 1.2], classTA: [0.38, 1.05], classTB: [0.38, 1.05], earthBar: [0.4, 1.4],
+  unifi: [1.3, 1.9], usb: [1.2, 1.95], balancerA: [0.43, 1.2],
+  balancerB: [0.43, 1.2], batteryBreakerBox: [0.43, 1.15], earthBar: [0.4, 1.4],
 };
 const horizontalRanges: Partial<Record<(typeof WALL_DEVICE_IDS)[number], [number, number]>> = {
-  pvEntry: [1.4, 1.95], smartSolar: [1.45, 2.5], classTA: [1.35, 2.85], classTB: [1.35, 2.85],
+  pvEntry: [1.4, 1.95], smartSolar: [1.45, 2.5], batteryBreakerBox: [1.35, 2.85],
   balancerA: [1.4, 2.9], balancerB: [1.4, 2.9], ekran: [1.75, 2.95],
 };
 
@@ -176,7 +176,7 @@ function evaluate(positions: Record<string, Point2>, exact = false): Candidate {
   const incomplete = voxel.failedRouteIds.length + voxel.metrics.portApproachViolationCount +
     voxel.metrics.deviceFrontViolationCount + voxel.metrics.roundedDeviceFrontViolationCount + spacingIssues.length;
   const loss = incomplete > 0
-    ? 1_000_000 + incomplete * 100_000 + (42 - voxel.metrics.routeCount) * 10_000
+    ? 1_000_000 + incomplete * 100_000 + (40 - voxel.metrics.routeCount) * 10_000
     : voxel.metrics.totalLengthM +
       voxel.metrics.cableClearanceIssueCount * (exact ? 100_000 : 35) +
       voxel.metrics.wallDistanceCostM2 * 0.025 + voxel.metrics.totalTurns * 0.0005;

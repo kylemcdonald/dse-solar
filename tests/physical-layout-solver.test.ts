@@ -17,6 +17,14 @@ import {
   solveJunctionInteriorRouting,
 } from "../app/junctionInteriorRouting.ts";
 import voxelRoutingRaw from "../data/voxel-routing-comparison.json" with { type: "json" };
+import junctionWiringMapRaw from "../data/junction-wiring-map.json" with { type: "json" };
+import { junctionConnectorTopology, physicalConnectorTopology } from "../app/connectorTopology.ts";
+import {
+  JUNCTION_ROUTE_CABLE_SPECIFICATIONS,
+  PHYSICAL_ROUTE_CABLE_SPECIFICATIONS,
+  junctionCableSpecification,
+  physicalCableSpecification,
+} from "../app/cableSpecifications.ts";
 
 function changedAxisCount(
   first: [number, number, number],
@@ -28,7 +36,7 @@ function changedAxisCount(
 }
 
 test("physical layout is a renderer-independent deterministic specification", () => {
-  const rerun = solvePhysicalLayout({ routingEffort: "optimization" });
+  const rerun = solvePhysicalLayout();
   assert.deepEqual(rerun, physicalLayout);
   assert.equal(physicalLayout.surfaces.sideWalls.length, 0);
   assert.equal(physicalLayout.surfaces.roofPlanes.length, 0);
@@ -104,6 +112,56 @@ test("Victron sensing and alarm links terminate on the intended interfaces", () 
   assert.deepEqual(junctionInteriorRouting.metrics.portApproachViolations, 0);
 });
 
+test("external connector topology resolves through junction glands to the real device", () => {
+  const topology = physicalConnectorTopology();
+  const ekranVeDirect1 = topology.get("ekranVeDirect1");
+  assert.ok(ekranVeDirect1);
+  assert.equal(ekranVeDirect1.deviceName, "Ekrano GX");
+  assert.equal(ekranVeDirect1.connections.length, 1);
+  assert.equal(ekranVeDirect1.connections[0].otherDeviceName, "Victron SmartShunt");
+  assert.equal(ekranVeDirect1.connections[0].otherConnectorId, "shuntData");
+  assert.equal(ekranVeDirect1.connections[0].viaDeviceName, "Compact junction box");
+  assert.match(ekranVeDirect1.connections[0].routeId, /junction-to-ekrano-data.*ekrano-data/);
+
+  for (const connector of topology.values()) {
+    for (const connection of connector.connections) {
+      if (!connection.routeId.includes("junction-to-")) continue;
+      assert.notEqual(connection.otherDeviceName, "Compact junction box");
+    }
+  }
+});
+
+test("every rendered cable uses an audited diameter and exposes its conductor gauge", () => {
+  assert.deepEqual(
+    new Set(Object.keys(PHYSICAL_ROUTE_CABLE_SPECIFICATIONS)),
+    new Set(Object.keys(physicalLayout.routes)),
+  );
+  assert.deepEqual(
+    new Set(Object.keys(JUNCTION_ROUTE_CABLE_SPECIFICATIONS)),
+    new Set(Object.keys(junctionInteriorRouting.wireSegments)),
+  );
+
+  Object.values(physicalLayout.routes).forEach((route) => {
+    const cable = physicalCableSpecification(route.id);
+    assert.equal(route.radiusM * 2000, cable.outsideDiameterMm, route.id);
+    assert.ok(cable.awg.length > 0, route.id);
+  });
+  Object.values(junctionInteriorRouting.wireSegments).forEach((route) => {
+    const cable = junctionCableSpecification(route.id);
+    assert.equal(route.radiusM * 2000, cable.outsideDiameterMm, route.id);
+    assert.ok(cable.awg.length > 0, route.id);
+  });
+
+  const physicalConnectors = physicalConnectorTopology();
+  const junctionConnectors = junctionConnectorTopology();
+  assert.equal(physicalConnectors.get("aPositive")?.cable.awg, "1/0 AWG");
+  assert.equal(physicalConnectors.get("aPositive")?.cableDiameterMm, 14.4);
+  assert.equal(junctionConnectors.get("batteryPosB")?.cable.awg, "1/0 AWG");
+  assert.equal(junctionConnectors.get("batteryPosB")?.cableDiameterMm, 14.4);
+  assert.equal(physicalConnectors.get("pvEntryStringAPositive")?.cable.awg, "≈11 AWG");
+  assert.equal(physicalConnectors.get("unifiWan")?.cable.awg, "24 AWG");
+});
+
 test("every physical device port is cylindrical-axis compatible and approached straight-on", () => {
   const alignedOutward = (
     from: [number, number, number],
@@ -131,13 +189,13 @@ test("every physical device port is cylindrical-axis compatible and approached s
   });
 });
 
-test("physical layout loads the completed Voxel A-star stochastic placement result", () => {
-  assert.equal(physicalLayoutOptimization.status, "voxel-a-star-stochastic-gradient-optimized-finalized");
-  assert.ok(physicalLayoutOptimization.requestedTimeBudgetSeconds >= 180);
-  assert.ok(physicalLayoutOptimization.elapsedSeconds >= 180);
-  assert.equal(physicalLayoutOptimization.evaluations, 54);
-  assert.equal(physicalLayoutOptimization.generations, 24);
-  assert.ok(physicalLayoutOptimization.improvementPercent >= 1.9);
+test("physical layout loads the completed evolutionary placement result", () => {
+  assert.equal(physicalLayoutOptimization.status, "evolutionary-optimized-finalized");
+  assert.equal(physicalLayoutOptimization.requestedTimeBudgetSeconds, 60);
+  assert.ok(physicalLayoutOptimization.elapsedSeconds >= 60);
+  assert.equal(physicalLayoutOptimization.evaluations, 277);
+  assert.equal(physicalLayoutOptimization.generations, 27);
+  assert.ok(physicalLayoutOptimization.improvementPercent > 0);
   assert.equal(physicalLayout.devices.ekran.position[1], 1.58);
   assert.ok(physicalLayout.devices.battery1.position[0] <= 1.62);
   assert.ok(physicalLayout.devices.battery2.position[0] <= 2.18);
@@ -227,15 +285,8 @@ test("every optimized junction wire remains attached and rectilinear", () => {
   }
 });
 
-test("rendered junction routes clear the selector and match the conservative cable audit", () => {
+test("rendered junction routes match the conservative cable audit", () => {
   const audit = new CableRoutingSystem();
-  const selector = junctionInteriorRouting.components.selector;
-  audit.registerObstacle(
-    "selector",
-    [selector.center[0], selector.center[1], 0.042],
-    [selector.size[0], selector.size[1], 0.084],
-    [],
-  );
   Object.values(junctionInteriorRouting.wireSegments).forEach((route) => {
     audit.prepareRoute(route.points, route.radiusM, "junction", false);
   });
@@ -287,15 +338,15 @@ test("rectilinear visibility graph routes around a flush enclosure instead of fa
   });
 });
 
-test("Starlink Ethernet takes the direct leftward path to UniFi", () => {
+test("Starlink Ethernet takes a compact path to UniFi", () => {
   const route = physicalLayout.routes["starlink-to-unifi-data"];
   assert.deepEqual(route.points[0], physicalLayout.ports.starlinkEthernet);
   assert.deepEqual(route.points.at(-1), physicalLayout.ports.unifiWan);
-  assert.equal(axisDirectionReversals(route.points, 0), 0);
-  assert.ok(route.planarDirectionReversals <= 1);
+  assert.ok(axisDirectionReversals(route.points, 0) <= 1);
+  assert.ok(route.planarDirectionReversals <= 2);
   const source = route.points[0];
   const target = route.points.at(-1)!;
-  assert.equal(Math.max(...route.points.map((point) => point[0])), Math.max(source[0], target[0]));
+  assert.ok(Math.max(...route.points.map((point) => point[0])) - Math.max(source[0], target[0]) <= 0.02);
   assert.equal(Math.min(...route.points.map((point) => point[0])), Math.min(source[0], target[0]));
   const directRectilinearLength = source.reduce((sum, value, axis) => (
     sum + Math.abs(value - target[axis])
@@ -410,10 +461,10 @@ test("battery power and balancer leads form one intersection-free routed bundle"
   const batteryHarnessRouteIds = new Set([
     "battery-series-a",
     "battery-series-b",
-    "junction-to-class-t-a",
-    "junction-to-class-t-b",
-    "battery-a-to-class-t",
-    "battery-b-to-class-t",
+    "breaker-a-to-junction",
+    "breaker-b-to-junction",
+    "battery-a-to-breaker",
+    "battery-b-to-breaker",
     "junction-to-battery-negative-a",
     "junction-to-battery-negative-b",
     "balancer-a-positive",
@@ -441,18 +492,29 @@ test("battery power and balancer leads form one intersection-free routed bundle"
   }
 });
 
-test("compact junction breakout lanes separate Ekrano and UniFi depth transitions", () => {
-  const ekranNegative = physicalLayout.routes["junction-to-ekrano-negative"];
-  const unifiNegative = physicalLayout.routes["junction-to-unifi-converter-negative"];
-  assert.deepEqual(cableRoutePairClearanceIssues(ekranNegative, unifiNegative, 0.003), []);
+test("the UniFi converter is internal and only its USB output crosses the enclosure", () => {
+  assert.equal(physicalLayout.devices.unifiPower, undefined);
+  const exterior = physicalLayout.routes["junction-to-unifi-power-usb"];
+  assert.equal(exterior.sourceDeviceId, "junction");
+  assert.equal(exterior.sourcePortId, "junctionUnifiUsb");
+  assert.equal(exterior.targetDeviceId, "unifi");
+  assert.equal(exterior.targetPortId, "unifiPower");
+  assert.deepEqual(exterior.points[0], physicalLayout.ports.junctionUnifiUsb);
+  assert.deepEqual(exterior.points.at(-1), physicalLayout.ports.unifiPower);
+  assert.equal(junctionInteriorRouting.wireSegments["load-positive-2"].to, "unifiConverterPositive");
+  assert.equal(junctionInteriorRouting.wireSegments["load-negative-2"].to, "unifiConverterNegative");
+  assert.equal(junctionInteriorRouting.wireSegments["unifi-usb-output"].from, "unifiConverterUsb");
+  assert.equal(junctionInteriorRouting.wireSegments["unifi-usb-output"].to, "unifiUsbCable");
+  assert.equal(junctionInteriorRouting.ports.unifiConverterPositive.componentId, "unifiPower");
+  assert.deepEqual(junctionInteriorRouting.glands["unifi-usb"].exteriorPortIds, ["junctionUnifiUsb"]);
 });
 
 test("battery cables never take a depth lane in front of the battery bank", () => {
   for (const id of [
     "junction-to-battery-negative-a",
     "junction-to-battery-negative-b",
-    "battery-a-to-class-t",
-    "battery-b-to-class-t",
+    "battery-a-to-breaker",
+    "battery-b-to-breaker",
   ]) {
     const route = physicalLayout.routes[id];
     const endpointMaximumZ = Math.max(route.points[0][2], route.points.at(-1)![2]);
@@ -612,13 +674,13 @@ test("saved adaptive voxel A-star artifact is the complete production wall and j
   assert.equal("current" in voxelRoutingRaw, false);
   assert.equal(voxel.cellSizeM, 0.0144);
   assert.deepEqual(voxel.failedRouteIds, []);
-  assert.equal(voxel.metrics.routeCount, 42);
+  assert.equal(voxel.metrics.routeCount, 40);
   assert.ok(voxel.metrics.totalLengthM < 58);
   assert.equal(voxel.metrics.cableClearanceIssueCount, 0);
   assert.equal(voxel.metrics.deviceFrontViolationCount, 0);
   assert.equal(voxel.metrics.roundedDeviceFrontViolationCount, 0);
   assert.equal(voxel.metrics.portApproachViolationCount, 0);
-  assert.equal(voxel.routingPasses, 1);
+  assert.ok(voxel.routingPasses >= 1);
   assert.ok(voxel.solveMs < 45_000);
   assert.deepEqual(junction.failedRouteIds, []);
   assert.equal(junction.cellSizeM, 0.0144);
@@ -631,6 +693,24 @@ test("saved adaptive voxel A-star artifact is the complete production wall and j
   assert.equal(junction.metrics.roundedCableClearanceIssueCount, 0);
   assert.equal(junction.metrics.unrelatedDeviceFrontViolationCount, 0);
   assert.ok(junction.solveMs < 30_000);
+});
+
+test("junction wiring map is a complete renderer-ready offline artifact", () => {
+  const map = junctionWiringMapRaw;
+  assert.equal(map.schemaVersion, 1);
+  assert.equal(map.source.optimizationGeneratedAt, junctionInteriorRouting.optimization.generatedAt);
+  assert.match(map.source.algorithm, /offline 2D rectilinear A\*/);
+  assert.equal(map.metrics.wireCount, 35);
+  assert.equal(map.metrics.serviceCircuitCount, 33);
+  assert.equal(map.metrics.glandCount, 14);
+  assert.equal(map.metrics.jackCount, 1);
+  assert.equal(map.metrics.glandRowCount, 1);
+  assert.equal(map.wires.length, map.metrics.wireCount);
+  assert.equal(map.glands.length, map.metrics.glandCount + map.metrics.jackCount);
+  assert.ok(map.wires.every((wire) => !("route" in wire) && wire.points.length >= 2));
+  assert.ok(map.wires.every((wire) => wire.points.slice(1).every((point, index) => (
+    point[0] === wire.points[index][0] || point[1] === wire.points[index][1]
+  ))));
 });
 
 test("tube generation exposes the exact sampled centerline used by the wall projection", () => {

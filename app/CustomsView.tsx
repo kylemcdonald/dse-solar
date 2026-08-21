@@ -16,6 +16,7 @@ type CustomsBomItem = {
 };
 
 type ItemMeta = {
+  defaultCondition?: string;
   model: string;
   origin: string;
   serialRequired: boolean;
@@ -128,9 +129,11 @@ export function CustomsView({
         item.id,
         {
           qty: String(item.qty),
-          unitCost: (item.totalUsd / item.qty).toFixed(2),
+          unitCost: Number.isInteger(item.totalUsd / item.qty * 100)
+            ? (item.totalUsd / item.qty).toFixed(2)
+            : (item.totalUsd / item.qty).toFixed(3),
           origin: customs.itemMeta[item.id].origin,
-          condition: "New",
+          condition: customs.itemMeta[item.id].defaultCondition ?? "New",
           receipt: "",
           serials: "",
           caseNo: "",
@@ -139,10 +142,12 @@ export function CustomsView({
     ),
   );
 
-  const goodsTotal = manifestItems.reduce((sum, item) => {
+  const grossGoodsTotal = manifestItems.reduce((sum, item) => {
     const edit = edits[item.id];
     return sum + valueOf(edit.qty) * valueOf(edit.unitCost);
   }, 0);
+  const orderLevelDiscount = bom.find((item) => item.id === "dse-amazon-promotion")?.totalUsd ?? 0;
+  const goodsTotal = grossGoodsTotal + orderLevelDiscount;
   const freightAndInsurance =
     valueOf(fields.supplierFreight) +
     valueOf(fields.internationalFreight) +
@@ -200,8 +205,8 @@ export function CustomsView({
           </article>
           <article className="customs-alert customs-alert-warn">
             <span>Telecom permit</span>
-            <strong>Four radio models</strong>
-            <p>Apply for the UniFi plus three wireless Victron models; TAF may also require type approval.</p>
+            <strong>Five radio models</strong>
+            <p>Apply for the UniFi plus four wireless Victron models, including the carried Orion spare; TAF may also require type approval.</p>
           </article>
         </div>
 
@@ -216,7 +221,7 @@ export function CustomsView({
               </li>
               <li>Send the agent this manifest, every invoice, flight details and consignee TIN.</li>
               <li>Ask the agent to pre-register the ASYCUDA SAD within FRCS&apos;s three-day pre-advance window.</li>
-              <li>Apply to TAF for the UniFi Express, Ekrano GX, SmartSolar and SmartShunt. Ask which models already hold Fiji type approval; a new type approval can take 10 working days.</li>
+              <li>Apply to TAF for the UniFi Express, Ekrano GX, SmartSolar, SmartShunt and carried Orion spare. Ask which models already hold Fiji type approval; a new type approval can take 10 working days.</li>
             </ol>
           </article>
           <article>
@@ -391,9 +396,21 @@ export function CustomsView({
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={6}>Declared goods subtotal</td>
-                <td>{usd(goodsTotal)}</td>
+                <td colSpan={6}>Declared goods line items</td>
+                <td>{usd(grossGoodsTotal)}</td>
                 <td colSpan={3}>Actual transaction values required</td>
+              </tr>
+              {orderLevelDiscount !== 0 && (
+                <tr>
+                  <td colSpan={6}>Order-level commercial discount</td>
+                  <td>{usd(orderLevelDiscount)}</td>
+                  <td colSpan={3}>Retain the matching receipt</td>
+                </tr>
+              )}
+              <tr>
+                <td colSpan={6}>Net declared goods subtotal</td>
+                <td>{usd(goodsTotal)}</td>
+                <td colSpan={3}>Before freight and insurance</td>
               </tr>
             </tfoot>
           </table>

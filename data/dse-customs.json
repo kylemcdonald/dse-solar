@@ -1,5 +1,5 @@
 {
-  "checkedOn": "2026-08-17",
+  "checkedOn": "2026-08-21",
   "manifestTitle": "Drua Sailing Experience solar-system equipment",
   "declaredPurpose": "Permanent donated equipment for a remote Fiji school teaching Polynesian voyaging; not for resale.",
   "defaultConsignee": "Drua Sailing Experience — confirm legal Fiji consignee",
@@ -29,44 +29,75 @@
       "serialRequired": true,
       "tafPermitRequired": true
     },
-    "dse-mppt-wirebox": {
-      "model": "SCC950400210",
+    "dse-dielectric-grease": {
+      "model": "Permatex 22058 · 3 oz tube",
       "origin": "Confirm from product label",
       "serialRequired": false
     },
     "dse-balancers": {
       "model": "BBA000100100",
       "origin": "Confirm from product label",
-      "serialRequired": true
+      "serialRequired": true,
+      "defaultCondition": "1 new; 1 used - mint"
     },
     "dse-shunt": {
-      "model": "SHU050150050",
+      "model": "SmartShunt IP65 500 A - confirm exact part number from label",
       "origin": "Confirm from product label",
       "serialRequired": true,
       "tafPermitRequired": true
     },
-    "dse-class-t": {
-      "model": "2 × Blue Sea 5007100 holders; 3 × 5114 150 A fuses",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-selector": {
-      "model": "Blue Sea 6006 m-Series ON/OFF battery switch",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
-    },
     "dse-pv-protection": {
-      "model": "Mixed 150 VDC-rated protection set — itemize after purchase",
-      "origin": "Multiple — attach supplier invoices",
+      "model": "CXCESNS DC600V 40 A 2-string / 1-output PV combiner · ASIN B0FSQB97T2",
+      "origin": "Confirm from product label",
       "serialRequired": false
     },
-    "dse-fuse-block": {
-      "model": "MidNite MNEDC100 + MNEPV20/15/5/2/1 DC breaker set",
+    "dse-breaker-mnedc100": {
+      "model": "MidNite Solar MNEDC100 100 A DC breaker",
       "origin": "United States — confirm from packaging",
       "serialRequired": false
     },
-    "dse-switch-panel": {
-      "model": "Blue Sea 8287 + 2 × 8282 + 8259; Starlink DC jack",
+    "dse-breaker-mnepv20": {
+      "model": "MidNite Solar MNEPV20 20 A DC breaker",
+      "origin": "United States — confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-breaker-mnepv15": {
+      "model": "CHTAIXI 12–110 VDC B15 single-pole breaker · ASIN B09H4WQ1QJ",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-breaker-mnepv5": {
+      "model": "2 × CHTAIXI 12–110 VDC B6 single-pole breakers · ASIN B09H4XZLCR",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-breaker-mnepv2": {
+      "model": "CHTAIXI 12–110 VDC B6 single-pole breaker · ASIN B09H4XZLCR",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-breaker-mnepv1": {
+      "model": "2 × CHTAIXI 12–110 VDC B6 single-pole breakers · ASIN B09H4XZLCR",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-switch-internet": {
+      "model": "Blue Sea 8287 DPST OFF-ON rocker",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-switch-lights": {
+      "model": "Blue Sea 8282 SPST OFF-ON rocker",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-switch-frame": {
+      "model": "Blue Sea 8259 three-position Contura frame",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-switch-accessories": {
+      "model": "Starlink DC jack, 1N5408 diodes and switch-panel installation parts",
       "origin": "Confirm from packaging",
       "serialRequired": false
     },
@@ -80,6 +111,17 @@
       "origin": "Confirm from product label",
       "serialRequired": false
     },
+    "dse-light-spare": {
+      "model": "QHLightlux 12–28 V utility light, 3000 K · Amazon B0F1V59NXC",
+      "origin": "Confirm from product label",
+      "serialRequired": false
+    },
+    "dse-orion-spare": {
+      "model": "Orion-Tr Smart 24/12-30 A 360 W - confirm exact part number from label",
+      "origin": "Confirm from product label",
+      "serialRequired": true,
+      "tafPermitRequired": true
+    },
     "dse-usb": {
       "model": "Scanstrut SC-TILE-20 dual USB-C module",
       "origin": "Confirm from product labels",
@@ -90,8 +132,13 @@
       "origin": "Confirm from product labels",
       "serialRequired": false
     },
-    "dse-unifi-power": {
-      "model": "Powerwerx USBbuddy2 + USB-A-to-USB-C lead",
+    "dse-unifi-converter": {
+      "model": "YRDZXG B0G1W6JTX8 12/24 V-to-5 V USB converter",
+      "origin": "Confirm from product label",
+      "serialRequired": false
+    },
+    "dse-unifi-usb-cable": {
+      "model": "Amazon Basics USB-A to USB-C cable, 3 ft",
       "origin": "Confirm from product labels",
       "serialRequired": false
     },
@@ -101,9 +148,9 @@
       "serialRequired": true,
       "tafPermitRequired": true
     },
-    "dse-dc-spares": {
-      "model": "2 × Blue Sea 2104 PowerBar 600 A + 2 × 2708 covers",
-      "origin": "United States — confirm from packaging",
+    "dse-main-busbars": {
+      "model": "AMOMD 600 A red/black covered busbar pair · ASIN B0DG4WLVT7",
+      "origin": "Confirm from packaging",
       "serialRequired": false
     },
     "dse-service-return-bus": {
@@ -111,18 +158,33 @@
       "origin": "United States — confirm from packaging",
       "serialRequired": false
     },
-    "dse-earth-bus": {
-      "model": "Blue Sea 2128 MaxiBus 250 A + 2719 cover",
+    "dse-earth-busbar": {
+      "model": "Blue Sea 2128 MaxiBus 250 A",
+      "origin": "United States — confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-earth-bus-cover": {
+      "model": "Blue Sea 2719 MaxiBus insulating cover",
       "origin": "United States — confirm from packaging",
       "serialRequired": false
     },
     "dse-usb-breakers": {
-      "model": "3 × Blue Sea 2132 10 A push-reset circuit breakers",
-      "origin": "United States — confirm from packaging",
+      "model": "3 × CHTAIXI 12–110 VDC B10 single-pole breakers · ASIN B09H4W5HSW",
+      "origin": "Confirm from packaging",
       "serialRequired": false
     },
-    "dse-victron-data": {
-      "model": "2 × VE.Direct 0.9 m; 1 × VE.Bus RJ45 3 m; 1 × Ethernet",
+    "dse-vedirect-cables": {
+      "model": "Victron ASS030530209 VE.Direct cable 0.9 m",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-vebus-cable": {
+      "model": "StarTech N6PATCH10YL 10 ft yellow Cat6 patch cable",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-ekrano-ethernet": {
+      "model": "StarTech N6PATCH10RD 10 ft red Cat6 patch cable",
       "origin": "Confirm from packaging",
       "serialRequired": false
     },
@@ -134,6 +196,67 @@
     "dse-service-spares": {
       "model": "Mixed electrical service spares — attach detailed sub-list",
       "origin": "Multiple — attach supplier invoices",
+      "serialRequired": false
+    },
+    "dse-battery-string-breakers": {
+      "model": "2 × MidNite Solar MNEPV125-80-1PNP 125 A / 80 VDC breakers",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-battery-breaker-enclosure": {
+      "model": "QILIPSU QL-VBB-6W IP65 six-way enclosure",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-starlink-ethernet": {
+      "model": "CHGRNLF Starlink Mini weatherproof Ethernet cable, 15 ft · ASIN B0D8J3HC7Z",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-inline-connectors": {
+      "model": "Oyviny IP68 three-pole inline connectors · 4-pack",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-mc4-tool-kit": {
+      "model": "MUYI 47-piece MC4 assembly tool kit",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-chtai-ac-rcbos-rejected": {
+      "model": "2 × CHTAIXI TXB7sLE-63 / sLE-1PN C10 RCBO · ASIN B0CSV93CTN · not for installation",
+      "origin": "Confirm from packaging",
+      "serialRequired": false,
+      "defaultCondition": "New — purchased but rejected for DSE installation"
+    },
+    "dse-multimeter": {
+      "model": "Klein Tools MM325 digital multimeter · ASIN B0B57L9FNL",
+      "origin": "Confirm from product label",
+      "serialRequired": false
+    },
+    "dse-aa-aaa-charger": {
+      "model": "EBL universal AA/AAA USB-C charger · ASIN B0FZR3HX62",
+      "origin": "Confirm from product label",
+      "serialRequired": false
+    },
+    "dse-10awg-duplex-wire": {
+      "model": "10 AWG red/black duplex copper wire, 10 ft · ASIN B0DGL7QVVF",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-starlink-portable-usbc-cables": {
+      "model": "2 × Genioss Starlink Mini USB-C PD power cable, 6.6 ft · ASIN B0DD12LJNF",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-starlink-portable-battery-cable": {
+      "model": "SegurVelo Starlink Mini direct-battery cable, 16.4 ft · ASIN B0F7LDGP2P",
+      "origin": "Confirm from packaging",
+      "serialRequired": false
+    },
+    "dse-cat6-blue-spare": {
+      "model": "StarTech N6PATCH10BL 10 ft blue Cat6 patch cable",
+      "origin": "Confirm from packaging",
       "serialRequired": false
     }
   },

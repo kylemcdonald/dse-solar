@@ -14,6 +14,7 @@ import dseDeliveryRaw from "@/data/dse-delivery.json";
 import pgRaw from "@/data/pg-system.json";
 import { CustomsView } from "./CustomsView";
 import type { ConnectorDetails } from "./connectorTopology";
+import { diameterBasisLabel } from "./cableSpecifications";
 
 const loadSystemModel3D = () =>
   import("./SystemModel3D").then((module) => ({ default: module.SystemModel3D }));
@@ -106,9 +107,11 @@ type BomItem = {
   productUrl?: string;
   specUrl?: string;
   includedInTotal?: boolean;
+  paidFraction?: number;
 };
 
 type AmazonStatus =
+  | "purchased"
   | "available"
   | "substitute"
   | "partial"
@@ -190,7 +193,14 @@ const systems: Record<"dse" | "pg", SystemData> = {
 
 const dseDelivery = dseDeliveryRaw as DeliverySnapshot;
 
+function paidAmount(item: BomItem) {
+  if (item.procurement === "Purchased") return item.totalUsd;
+  const fraction = Math.max(0, Math.min(1, item.paidFraction ?? 0));
+  return item.totalUsd * fraction;
+}
+
 const amazonStatusLabels: Record<AmazonStatus, string> = {
+  purchased: "Purchased",
   available: "Amazon",
   substitute: "Amazon substitute",
   partial: "Amazon components",
@@ -208,45 +218,98 @@ const ebayStatusLabels: Record<EbayStatus, string> = {
 // BOM rows. Keep this bridge explicit so selecting modeled hardware always
 // resolves to the intended purchase, including assemblies made from several
 // BOM items such as the main DC distribution.
-const modelComponentBomIds: Record<string, readonly string[]> = {
+const dseComponentBomIds: Record<string, readonly string[]> = {
   array: ["dse-panels"],
   panel1: ["dse-panels"],
   panel2: ["dse-panels"],
   panel3: ["dse-panels"],
   panel4: ["dse-panels"],
   pvSafety: ["dse-pv-protection"],
-  solarController: ["dse-smartsolar"],
+  solarController: ["dse-smartsolar", "dse-dielectric-grease"],
   inverter: ["dse-multiplus"],
-  systemMonitor: ["dse-ekrano-gx"],
+  systemMonitor: ["dse-ekrano-gx", "dse-vedirect-cables", "dse-vebus-cable", "dse-ekrano-ethernet"],
   batteryBank: ["dse-batteries"],
   battery1: ["dse-batteries"],
   battery2: ["dse-batteries"],
   battery3: ["dse-batteries"],
   battery4: ["dse-batteries"],
-  mainDc: ["dse-shunt", "dse-class-t", "dse-dc-spares"],
-  classTFuseA: ["dse-class-t"],
-  classTFuseB: ["dse-class-t"],
-  positiveBus: ["dse-dc-spares"],
+  mainDc: ["dse-shunt", "dse-main-busbars"],
+  batteryProtection: ["dse-battery-breaker-enclosure"],
+  batteryBreakerA: ["dse-battery-string-breakers"],
+  batteryBreakerB: ["dse-battery-string-breakers"],
+  positiveBus: ["dse-main-busbars"],
   smartShunt: ["dse-shunt"],
-  negativeBus: ["dse-dc-spares"],
-  batterySelector: ["dse-selector"],
+  negativeBus: ["dse-main-busbars"],
+  returnBus: ["dse-service-return-bus"],
   balancers: ["dse-balancers"],
   generatorInput: ["dse-gen-input"],
-  acBoard: ["dse-ac-board"],
-  toolOutlet: ["dse-ac-board"],
-  fuseBlock: ["dse-fuse-block", "dse-service-return-bus"],
-  mpptFuse: ["dse-fuse-block"],
+  acBoard: ["dse-ac-rcbo", "dse-ac-enclosure"],
+  toolOutlet: ["dse-tool-lead"],
+  fuseBlock: ["dse-breaker-mnepv20", "dse-breaker-mnepv15", "dse-breaker-mnepv5", "dse-breaker-mnepv2", "dse-breaker-mnepv1", "dse-service-return-bus"],
+  mpptFuse: ["dse-breaker-mnedc100"],
   ekranoFuse: ["dse-ekrano-gx"],
   starlink: ["dse-ex-starlink"],
   router: ["dse-router"],
-  unifiPower: ["dse-unifi-power"],
+  unifiPower: ["dse-unifi-converter", "dse-unifi-usb-cable"],
   usb: ["dse-usb", "dse-usb-mixed", "dse-usb-breakers"],
-  loadSwitches: ["dse-switch-panel"],
+  loadSwitches: ["dse-switch-internet", "dse-switch-lights", "dse-switch-frame", "dse-switch-accessories"],
   indoorLight: ["dse-indoor-light"],
   outdoorLight: ["dse-outdoor-light"],
   mounting: ["dse-junction-box"],
-  earth: ["dse-earth", "dse-earth-bus"],
+  earth: ["dse-earth"],
+  earthBus: ["dse-earth-busbar"],
 };
+
+const pgComponentBomIds: Record<string, readonly string[]> = {
+  pgArray: ["pg-1"],
+  pgPanel1: ["pg-1"],
+  pgPanel2: ["pg-1"],
+  pgPvBreaker: ["pg-20"],
+  pgScc: ["pg-8"],
+  pgChargeBreaker: ["pg-20"],
+  pgBatteryBank: ["pg-28"],
+  pgBattery1: ["pg-28"],
+  pgBattery2: ["pg-28"],
+  pgMainBreaker: ["pg-21"],
+  pgShunt: ["pg-14"],
+  pgDcBus: ["pg-19", "pg-22"],
+  pgStarBreaker: ["pg-26", "pg-27"],
+  pgStepup: ["pg-23"],
+  pgStarlink: ["pg-6"],
+  pgAccessoryFuse: ["pg-13"],
+  pgSocketSplit: ["pg-12"],
+  pgUsbDevices: ["pg-9", "pg-10", "pg-11"],
+  pgRouterBranch: ["pg-11", "pg-12"],
+  pgAltInverter: ["pg-7"],
+};
+
+const componentBomIdsBySystem: Record<SystemData["id"], Record<string, readonly string[]>> = {
+  dse: dseComponentBomIds,
+  pg: pgComponentBomIds,
+};
+
+// Existing site assets do not necessarily have a purchased BOM row. Keep the
+// classification explicit rather than inferring it from display copy such as
+// "existing" or from broad statuses such as "Outside scope" (which can also
+// mean excluded but not yet acquired).
+const existingComponentIdsBySystem: Record<SystemData["id"], readonly string[]> = {
+  dse: ["generator", "starlink"],
+  pg: [],
+};
+
+function purchasedComponentIdsFor(system: SystemData) {
+  const bomById = new Map(system.bom.map((item) => [item.id, item]));
+  return new Set([
+    ...existingComponentIdsBySystem[system.id],
+    ...Object.entries(componentBomIdsBySystem[system.id]).flatMap(([componentId, bomIds]) => (
+      bomIds.length > 0 && bomIds.every((bomId) => bomById.get(bomId)?.procurement === "Purchased")
+        ? [componentId]
+        : []
+    )),
+  ]);
+}
+
+const dsePurchasedComponentIds = [...purchasedComponentIdsFor(systems.dse)];
 
 function isAmazonUrl(url: string | undefined): url is string {
   if (!url) return false;
@@ -442,9 +505,7 @@ function BudgetCard({ system }: { system: SystemData }) {
   const total = included.reduce((sum, item) => sum + item.totalUsd, 0);
   const donorFunded = system.budget.donorFundedIncrementUsd ?? 0;
   const baseTotal = total - donorFunded;
-  const purchased = included
-    .filter((item) => item.procurement === "Purchased")
-    .reduce((sum, item) => sum + item.totalUsd, 0);
+  const purchased = included.reduce((sum, item) => sum + paidAmount(item), 0);
   const remaining = total - purchased;
   const baseRemaining = Math.max(0, remaining - donorFunded);
   const targetIsRemaining = system.budget.targetBasis === "remaining";
@@ -489,7 +550,7 @@ function BudgetCard({ system }: { system: SystemData }) {
       </div>
       <dl className={`budget-breakdown ${donorFunded > 0 ? "with-donor" : ""}`}>
         <div>
-          <dt>Purchased</dt>
+          <dt>Paid / purchased</dt>
           <dd>{money(purchased)}</dd>
         </div>
         <div>
@@ -717,13 +778,19 @@ function DiagramCanvas({
   system,
   viewKey,
   selectedId,
+  fadePurchased,
+  purchasedComponentIds,
   onSelect,
+  onFadePurchasedChange,
   onViewChange,
 }: {
   system: SystemData;
   viewKey: "overview" | "detail";
   selectedId: string | null;
+  fadePurchased: boolean;
+  purchasedComponentIds: ReadonlySet<string>;
   onSelect: (id: string) => void;
+  onFadePurchasedChange: (fade: boolean) => void;
   onViewChange: (key: "overview" | "detail") => void;
 }) {
   const view = system.diagram.views[viewKey];
@@ -986,6 +1053,15 @@ function DiagramCanvas({
           ))}
         </div>
         <div className="diagram-toolbar-actions">
+          <button
+            type="button"
+            className={`purchased-fade-toggle ${fadePurchased ? "active" : ""}`}
+            aria-pressed={fadePurchased}
+            onClick={() => onFadePurchasedChange(!fadePurchased)}
+          >
+            <span aria-hidden="true" />
+            Fade acquired
+          </button>
           <div className="view-toggle" aria-label="Diagram detail level">
             {(Object.keys(system.diagram.views) as Array<"overview" | "detail">).map((key) => (
               <button
@@ -1085,10 +1161,13 @@ function DiagramCanvas({
               {orderedEdgeLayouts.map(
                 ({ edge, geo, selectedEdge, flowMuted, muted, labelWidth, labelPosition }) => {
                   const hovered = hoveredEdgeId === edge.id;
+                  const purchased = fadePurchased &&
+                    purchasedComponentIds.has(edge.from) &&
+                    purchasedComponentIds.has(edge.to);
                 return (
                   <g
                     key={edge.id}
-                    className={`diagram-edge edge-${edge.type} ${muted ? "muted" : ""} ${selectedEdge ? "selected" : ""} ${hovered ? "is-hovered" : ""}`}
+                    className={`diagram-edge edge-${edge.type} ${muted ? "muted" : ""} ${selectedEdge ? "selected" : ""} ${hovered ? "is-hovered" : ""} ${purchased ? "purchased-faded" : ""}`}
                     data-edge-id={edge.id}
                     data-edge-from={edge.from}
                     data-edge-to={edge.to}
@@ -1136,6 +1215,7 @@ function DiagramCanvas({
                 if (!component) return null;
                 const containingRegion = nodeRegions.get(node.id);
                 const selected = selectedId === node.id;
+                const purchased = fadePurchased && purchasedComponentIds.has(node.id);
                 const muted = Boolean(selectedId) && !connected.has(node.id);
                 const flowConnected =
                   flow === "all" ||
@@ -1151,9 +1231,10 @@ function DiagramCanvas({
                     y={node.y}
                     width={NODE_W}
                     height={NODE_H}
-                    className={`${muted || !flowConnected ? "node-muted" : ""}`}
+                    className={`${muted || !flowConnected ? "node-muted" : ""} ${purchased ? "node-purchased-faded" : ""}`}
                     data-diagram-node="true"
                     data-node-id={node.id}
+                    data-procurement-faded={purchased ? "true" : "false"}
                     data-contained-in={containingRegion?.id}
                   >
                     <button
@@ -1227,7 +1308,7 @@ function Inspector({
   if (!component) return null;
 
   const procurementItems = showProcurement && system.id === "dse"
-    ? (modelComponentBomIds[component.id] ?? []).flatMap((bomId) => {
+    ? (dseComponentBomIds[component.id] ?? []).flatMap((bomId) => {
         const bom = system.bom.find((item) => item.id === bomId);
         if (!bom) return [];
         const delivery = dseDelivery.items[bomId];
@@ -1381,7 +1462,17 @@ function ConnectorInspector({
       </div>
       <h2>{connector.name}</h2>
       <p className="inspector-kicker">Connector on {connector.deviceName}</p>
-      <p className="inspector-summary">{connector.direction}. Modeled cable diameter: {connector.cableDiameterMm.toFixed(1)} mm.</p>
+      <p className="inspector-summary">{connector.direction}.</p>
+      <div className="inspector-section">
+        <div className="rail-section-label">Cable specification</div>
+        <dl className="connector-identity cable-specification-list">
+          <div><dt>Cable</dt><dd>{connector.cable.label}</dd></div>
+          <div><dt>Conductor size</dt><dd>{connector.cable.conductorSize}</dd></div>
+          <div><dt>AWG</dt><dd>{connector.cable.awg}</dd></div>
+          <div><dt>Outside diameter</dt><dd>{connector.cableDiameterMm.toFixed(1)} mm</dd></div>
+          <div><dt>Diameter basis</dt><dd>{diameterBasisLabel(connector.cable.diameterBasis)}</dd></div>
+        </dl>
+      </div>
       <div className="inspector-section">
         <div className="rail-section-label">Connection topology</div>
         {connector.connections.length > 0 ? (
@@ -1390,6 +1481,9 @@ function ConnectorInspector({
               <article key={`${connection.routeId}:${connection.otherConnectorId ?? "termination"}`}>
                 <span>{connection.kind}</span>
                 <strong>{connection.otherDeviceName}</strong>
+                {connection.viaDeviceName && (
+                  <p className="connector-via">via {connection.viaDeviceName}</p>
+                )}
                 <dl>
                   <div><dt>Other connector</dt><dd>{connection.otherConnectorName}</dd></div>
                   <div><dt>Circuit</dt><dd>{connection.routeName}</dd></div>
@@ -1415,18 +1509,33 @@ function ConnectorInspector({
 
 function BomView({ system }: { system: SystemData }) {
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("All");
+  const [selectedFilters, setSelectedFilters] = useState<{
+    location?: string;
+    procurement?: string;
+  }>({});
   const [displayCurrency, setDisplayCurrency] = useState<"USD" | "FJD">("USD");
   const deliverySnapshot = system.id === "dse" ? dseDelivery : null;
-  const filters = useMemo(() => {
+  const filterOptions = useMemo<Array<{
+    dimension: "location" | "procurement";
+    label: string;
+    value: string;
+  }>>(() => {
     const locations = Array.from(new Set(system.bom.map((item) => item.location)));
-    return ["All", "Purchased", ...locations.filter((item) => item !== "Excluded"), "Excluded"];
+    return [
+      { dimension: "procurement", label: "Purchased", value: "Purchased" },
+      { dimension: "procurement", label: "Deposit paid", value: "Deposit paid" },
+      { dimension: "procurement", label: "Buy", value: "Buy" },
+      ...locations.filter((item) => item !== "Excluded").map((location) => ({
+        dimension: "location" as const,
+        label: location,
+        value: location,
+      })),
+      { dimension: "location", label: "Excluded", value: "Excluded" },
+    ];
   }, [system.bom]);
   const included = system.bom.filter((item) => item.includedInTotal !== false);
   const total = included.reduce((sum, item) => sum + item.totalUsd, 0);
-  const purchased = included
-    .filter((item) => item.procurement === "Purchased")
-    .reduce((sum, item) => sum + item.totalUsd, 0);
+  const purchased = included.reduce((sum, item) => sum + paidAmount(item), 0);
   const importTotal = included
     .filter((item) => item.location === "Import")
     .reduce((sum, item) => sum + item.totalUsd, 0);
@@ -1444,12 +1553,21 @@ function BomView({ system }: { system: SystemData }) {
     }`.toLowerCase();
     const queryMatch = needle.includes(query.trim().toLowerCase());
     const filterMatch =
-      filter === "All" ||
-      (filter === "Purchased" && item.procurement === "Purchased") ||
-      (filter === "Excluded" && item.location === "Excluded") ||
-      item.location === filter;
+      (!selectedFilters.procurement || item.procurement === selectedFilters.procurement) &&
+      (!selectedFilters.location || item.location === selectedFilters.location);
     return queryMatch && filterMatch;
   });
+
+  const noFiltersSelected = !selectedFilters.procurement && !selectedFilters.location;
+
+  function toggleFilter(dimension: "location" | "procurement", value: string) {
+    setSelectedFilters((current) => {
+      const next = { ...current };
+      if (next[dimension] === value) delete next[dimension];
+      else next[dimension] = value;
+      return next;
+    });
+  }
 
   function display(valueUsd: number) {
     return displayCurrency === "USD"
@@ -1471,7 +1589,7 @@ function BomView({ system }: { system: SystemData }) {
           </small>
         </article>
         <article>
-          <span>Already purchased</span>
+          <span>Paid / purchased</span>
           <strong>{display(purchased)}</strong>
           <small>{total ? Math.round((purchased / total) * 100) : 0}% of known cost</small>
         </article>
@@ -1500,14 +1618,23 @@ function BomView({ system }: { system: SystemData }) {
           />
         </label>
         <div className="bom-filter-list" aria-label="Filter bill of materials">
-          {filters.map((item) => (
+          <button
+            type="button"
+            className={noFiltersSelected ? "active" : ""}
+            aria-pressed={noFiltersSelected}
+            onClick={() => setSelectedFilters({})}
+          >
+            All
+          </button>
+          {filterOptions.map((option) => (
             <button
               type="button"
-              key={item}
-              className={filter === item ? "active" : ""}
-              onClick={() => setFilter(item)}
+              key={`${option.dimension}:${option.value}`}
+              className={selectedFilters[option.dimension] === option.value ? "active" : ""}
+              aria-pressed={selectedFilters[option.dimension] === option.value}
+              onClick={() => toggleFilter(option.dimension, option.value)}
             >
-              {item}
+              {option.label}
             </button>
           ))}
         </div>
@@ -1570,6 +1697,11 @@ function BomView({ system }: { system: SystemData }) {
                     >
                       {item.procurement}
                     </span>
+                    {item.paidFraction !== undefined && (
+                      <small className="procurement-progress">
+                        {Math.round(item.paidFraction * 100)}% paid · {Math.round((1 - item.paidFraction) * 100)}% due
+                      </small>
+                    )}
                   </td>
                   <td>
                     {delivery ? (
@@ -1755,15 +1887,20 @@ export function SystemViewer() {
   const [Model3D, setModel3D] = useState<ComponentType<{
     system: SystemData;
     dseMounted: boolean;
+    fadePurchased: boolean;
+    purchasedComponentIds: readonly string[];
+    onFadePurchasedChange: (fade: boolean) => void;
     onSelect: (componentId: string) => void;
     onSelectConnector: (connector: ConnectorDetails) => void;
     onOpenDse: () => void;
   }> | null>(null);
   const [JunctionDiagram, setJunctionDiagram] = useState<ComponentType | null>(null);
   const [viewKey, setViewKey] = useState<"overview" | "detail">("overview");
+  const [fadePurchased, setFadePurchased] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedConnector, setSelectedConnector] = useState<ConnectorDetails | null>(null);
   const system = systems[systemId];
+  const purchasedComponentIds = useMemo(() => purchasedComponentIdsFor(system), [system]);
   const handleModelSelect = useCallback((componentId: string) => {
     setSelectedConnector(null);
     setSelectedId(componentId);
@@ -1907,7 +2044,10 @@ export function SystemViewer() {
                 system={system}
                 viewKey={viewKey}
                 selectedId={selectedId}
+                fadePurchased={fadePurchased}
+                purchasedComponentIds={purchasedComponentIds}
                 onSelect={setSelectedId}
+                onFadePurchasedChange={setFadePurchased}
                 onViewChange={changeView}
               />
             </div>
@@ -1937,6 +2077,9 @@ export function SystemViewer() {
               <Model3D
                 system={system}
                 dseMounted={dseModelMounted}
+                fadePurchased={fadePurchased}
+                purchasedComponentIds={dsePurchasedComponentIds}
+                onFadePurchasedChange={setFadePurchased}
                 onSelect={handleModelSelect}
                 onSelectConnector={handleConnectorSelect}
                 onOpenDse={() => changeSystem("dse")}

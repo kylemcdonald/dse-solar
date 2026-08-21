@@ -1,4 +1,5 @@
 import optimizedLayoutRaw from "../data/junction-optimized-layout.json" with { type: "json" };
+import { junctionCableRadiusM } from "./cableSpecifications.ts";
 
 export type JunctionPoint2 = [number, number];
 export type JunctionPoint3 = [number, number, number];
@@ -184,6 +185,7 @@ const mergeFusedRoute = (
 const rawRoutes = optimizedLayout.runtime.routes;
 const wireSegments = Object.fromEntries(Object.entries(rawRoutes).map(([id, route]) => [id, {
   ...route,
+  radiusM: junctionCableRadiusM(id),
   points: route.points.map((point) => [...point] as JunctionPoint3),
 }]));
 const routes = Object.fromEntries(Object.entries(wireSegments).map(([id, route]) => [id, {
@@ -202,6 +204,16 @@ fusedPairs.forEach(([feedId, outputId, componentId]) => {
 });
 
 const rawMetrics = optimizedLayout.runtime.metrics;
+const radiusByPort = new Map<string, number>();
+Object.values(wireSegments).forEach((route) => {
+  [route.from, route.to].forEach((portId) => {
+    radiusByPort.set(portId, Math.max(radiusByPort.get(portId) ?? 0, route.radiusM));
+  });
+});
+const ports = Object.fromEntries(Object.entries(optimizedLayout.runtime.ports).map(([id, port]) => [id, {
+  ...port,
+  cableRadiusM: radiusByPort.get(id) ?? port.cableRadiusM,
+}]));
 
 export const junctionInteriorRouting: JunctionInteriorRouting = {
   candidates: optimizedLayout.runtime.candidates,
@@ -246,7 +258,7 @@ export const junctionInteriorRouting: JunctionInteriorRouting = {
     requestedTimeBudgetSeconds: optimizedLayout.requestedTimeBudgetSeconds,
     seed: optimizedLayout.seed,
   },
-  ports: optimizedLayout.runtime.ports,
+  ports,
   routes,
   selectedCandidate: optimizedLayout.runtime.selectedCandidate,
   terminals: optimizedLayout.runtime.terminals,

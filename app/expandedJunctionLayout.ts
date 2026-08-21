@@ -10,7 +10,6 @@ export const EXPANDED_JUNCTION_OUTER_SIZE_M = [0.49, 0.4, 0.15] as const;
 
 const COMPONENT_CENTERS: Record<string, JunctionPoint2> = {
   switchPanel: [-0.2, 0.13],
-  selector: [-0.125, 0.14],
   positiveBus: [0.105, 0.135],
   ekranoFuse: [-0.2, 0.04],
   shunt: [-0.1, 0.035],
@@ -18,6 +17,7 @@ const COMPONENT_CENTERS: Record<string, JunctionPoint2> = {
   returnBus: [0.15, 0.05],
   negativeBus: [-0.105, -0.085],
   fuseBlock: [0.145, -0.085],
+  unifiPower: [-0.105, 0.12],
 };
 
 const INNER_BOTTOM_M = -EXPANDED_JUNCTION_INNER_SIZE_M[1] / 2;
@@ -37,7 +37,7 @@ const SINGLE_ROW_GLAND_ORDER = [
   "battery-b-positive",
   "ekrano-data",
   "mppt-negative",
-  "unifi-power",
+  "unifi-usb",
   "inside-light",
   "outside-light",
   "mppt-positive",
@@ -113,31 +113,6 @@ export function buildExpandedJunctionRouting(
     )) as JunctionPoint3;
     return [id, { ...port, face: move(port.face), position: move(port.position) }];
   }));
-  const selector = components.selector;
-  const selectorPort = (
-    id: "selectorInputA" | "selectorInputB" | "selectorOutput",
-    side: "bottom" | "left" | "right",
-    crossAxisPosition: number,
-  ) => {
-    const sourcePort = ports[id];
-    const direction: JunctionPoint3 = side === "left" ? [-1, 0, 0]
-      : side === "right" ? [1, 0, 0] : [0, -1, 0];
-    const face: JunctionPoint3 = [
-      side === "bottom" ? crossAxisPosition : selector.center[0] + direction[0] * selector.size[0] / 2,
-      side === "bottom" ? selector.center[1] - selector.size[1] / 2 : crossAxisPosition,
-      0.042,
-    ];
-    const position: JunctionPoint3 = [
-      face[0] + direction[0] * sourcePort.lengthM,
-      face[1] + direction[1] * sourcePort.lengthM,
-      face[2],
-    ];
-    ports[id] = { ...sourcePort, direction, face, position };
-    terminals[id] = [position[0], position[1]];
-  };
-  selectorPort("selectorInputA", "bottom", selector.center[0] - 0.012);
-  selectorPort("selectorInputB", "bottom", selector.center[0] + 0.012);
-  selectorPort("selectorOutput", "right", selector.center[1]);
   const edgePort = (
     id: string,
     componentId: "fuseBlock" | "mpptFuse",
@@ -165,7 +140,7 @@ export function buildExpandedJunctionRouting(
   edgePort("servicesFuseIn", "fuseBlock", "top", 0.098);
   edgePort("starlinkFuseIn", "fuseBlock", "top", 0.116);
   // One common feed supplies the four adjacent low-current branch breakers;
-  // the 20 A services and 5 A Starlink breakers keep independent inputs.
+  // the 20 A services and 6 A Starlink breakers keep independent inputs.
   edgePort("fuseInput", "fuseBlock", "top", 0.161);
   ["servicesFuseOut", "starlinkFuseOut", "fuseOutput1", "fuseOutput2", "fuseOutput3", "fuseOutput4"].forEach((id, index) => (
     edgePort(id, "fuseBlock", "bottom", [0.098, 0.116, 0.134, 0.152, 0.17, 0.188][index])

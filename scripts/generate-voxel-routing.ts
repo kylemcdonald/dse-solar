@@ -12,7 +12,7 @@ const junctionVoxelAStar = solveVoxelJunctionRoutes();
 
 if (
   voxelAStar.failedRouteIds.length > 0 ||
-  voxelAStar.metrics.routeCount !== 42 ||
+  voxelAStar.metrics.routeCount !== 40 ||
   voxelAStar.metrics.cableClearanceIssueCount > 0 ||
   voxelAStar.metrics.deviceFrontViolationCount > 0 ||
   voxelAStar.metrics.roundedDeviceFrontViolationCount > 0 ||
@@ -47,7 +47,7 @@ if (
 }
 
 const document = {
-  checkedOn: "2026-08-20",
+  checkedOn: "2026-08-21",
   scope: "The promoted production routing: every protected endpoint-derived wall/floor route, all four PV string home runs, and the complete junction-box harness. Short array dressings and other fixed site cables retain their direct physical paths.",
   voxelAStar,
   junctionVoxelAStar,

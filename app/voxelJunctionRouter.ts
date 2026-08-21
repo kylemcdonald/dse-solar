@@ -95,12 +95,9 @@ function oppositeDirection(direction: number) {
   return direction >= 6 ? 6 : direction % 2 === 0 ? direction + 1 : direction - 1;
 }
 
-const PROTECTED_FRONT_COMPONENTS = new Set(["selector", "fuseBlock", "mpptFuse"]);
+const PROTECTED_FRONT_COMPONENTS = new Set(["fuseBlock", "mpptFuse"]);
 
 const PROTECTED_ESCAPE_SIDE: Record<string, "bottom" | "left" | "right" | "top"> = {
-  selectorInputA: "left",
-  selectorInputB: "left",
-  selectorOutput: "right",
   servicesFuseIn: "top",
   servicesFuseOut: "top",
   fuseInput: "top",
@@ -731,7 +728,7 @@ export function solveVoxelJunctionRoutes(
       }
     });
     const coupledGroups = [
-      ["battery-positive-a", "battery-positive-b", "selector-to-positive-bus"],
+      ["battery-positive-a", "battery-positive-b"],
       ["starlink-switch-input", "switch-input-2", "switch-input-4", "switch-input-5"],
     ];
     coupledGroups.forEach((group) => {

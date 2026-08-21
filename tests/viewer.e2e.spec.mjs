@@ -5,6 +5,51 @@ async function openViewer(page) {
   await expect(page.locator('[data-viewer-ready="true"]')).toBeVisible({ timeout: 15_000 });
 }
 
+test("diagram and 3D views share a 20% acquired-component fade", async ({ page }) => {
+  test.setTimeout(60_000);
+  await openViewer(page);
+
+  const diagramToggle = page.getByRole("button", { name: "Fade acquired" });
+  const purchasedArray = page.locator('[data-node-id="array"]');
+  const existingGenerator = page.locator('[data-node-id="generator"]');
+  const unpaidInverter = page.locator('[data-node-id="inverter"]');
+  await expect(diagramToggle).toHaveAttribute("aria-pressed", "false");
+  await expect(purchasedArray).toHaveCSS("opacity", "1");
+
+  await diagramToggle.click();
+  await expect(diagramToggle).toHaveAttribute("aria-pressed", "true");
+  await expect(purchasedArray).toHaveAttribute("data-procurement-faded", "true");
+  await expect(purchasedArray).toHaveCSS("opacity", "0.2");
+  await expect(existingGenerator).toHaveAttribute("data-procurement-faded", "true");
+  await expect(existingGenerator).toHaveCSS("opacity", "0.2");
+  await expect(unpaidInverter).toHaveAttribute("data-procurement-faded", "false");
+  await expect(unpaidInverter).toHaveCSS("opacity", "1");
+
+  await page.getByRole("button", { name: "3D model" }).click();
+  const model = page.locator('[data-model-ready="true"]');
+  await expect(model).toBeVisible({ timeout: 15_000 });
+  await expect(model).toHaveAttribute("data-fade-purchased", "true");
+  await expect(page.locator(".model-canvas")).toHaveAttribute("data-fade-purchased", "true");
+  await expect(page.locator(".model-canvas")).not.toHaveAttribute("data-faded-purchased-component-count", "0");
+  const acquiredFadeMetrics = await page.locator(".model-canvas").evaluate((element) => ({
+    cableMeshes: Number(element.dataset.acquiredCableMeshCount),
+    cableMaxOpacity: Number(element.dataset.acquiredCableMaxOpacity),
+    componentMaxOpacity: Number(element.dataset.acquiredComponentMaxOpacity),
+    connectorMaxOpacity: Number(element.dataset.acquiredConnectorMaxOpacity),
+  }));
+  expect(acquiredFadeMetrics.cableMeshes).toBeGreaterThan(0);
+  expect(acquiredFadeMetrics.cableMaxOpacity).toBeLessThanOrEqual(0.2);
+  expect(acquiredFadeMetrics.componentMaxOpacity).toBeLessThanOrEqual(0.2);
+  expect(acquiredFadeMetrics.connectorMaxOpacity).toBeGreaterThan(0);
+  expect(acquiredFadeMetrics.connectorMaxOpacity).toBeLessThanOrEqual(0.2);
+
+  const modelToggle = page.getByRole("button", { name: "Fade acquired" });
+  await expect(modelToggle).toHaveAttribute("aria-pressed", "true");
+  await modelToggle.click();
+  await expect(model).toHaveAttribute("data-fade-purchased", "false");
+  await expect(page.locator(".model-canvas")).toHaveAttribute("data-fade-purchased", "false");
+});
+
 async function diagramLabelOverlaps(page) {
   return page.evaluate(() => {
     const labels = [...document.querySelectorAll("[data-edge-id] .edge-label")].map((element) => ({
@@ -181,14 +226,14 @@ test("DSE diagram, system summary, BOM and field notes are interactive", async (
   await expect(page).toHaveTitle(/DSE & PG Solar Systems/);
   await expect(page.getByRole("button", { name: /MultiPlus-II 24\/3000/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /SmartSolar MPPT 150\/85-Tr/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Ekrano GX/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Master battery disconnect/ })).toBeVisible();
+  await expect(page.locator('[data-node-id="systemMonitor"] button')).toBeVisible();
+  await expect(page.getByRole("button", { name: /Dual battery-string breaker enclosure/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /AC output protection/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Trailing tool lead/ })).toBeVisible();
   await expect(page.locator('[data-region-key="junctionBox"]')).toContainText(
     "inside / through compact junction box",
   );
-  await expect(page.locator('[data-contained-in="junctionBox"]')).toHaveCount(3);
+  await expect(page.locator('[data-contained-in="junctionBox"]')).toHaveCount(2);
   await expect(page.locator('[data-node-id="inverter"]')).not.toHaveAttribute(
     "data-contained-in",
     "junctionBox",
@@ -207,17 +252,23 @@ test("DSE diagram, system summary, BOM and field notes are interactive", async (
   await page.getByRole("button", { name: "Detailed wiring" }).click();
   await expect(page.locator(".diagram-stage > svg")).toHaveAttribute("viewBox", "0 0 3456 2059");
   await expect(page.getByRole("button", { name: /Panel 1/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Ekrano GX/ })).toBeVisible();
+  await expect(page.locator('[data-node-id="systemMonitor"] button')).toBeVisible();
   await expect(page.getByRole("button", { name: /Battery 3/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /2 × battery balancers/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /SmartShunt 500 A/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /String A 125 A breaker/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /String B 125 A breaker/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /SmartShunt IP65 500 A/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /SmartSolar 100 A DC breaker/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Ekrano GX 3.15 A fuse/ })).toBeVisible();
   await expect(page.locator('[data-node-id="mainDc"]')).toHaveCount(0);
   await expect(page.locator('[data-edge-id="dt-pv-a"] .edge-label')).toContainText("A · 4 mm² pair");
   await expect(page.locator('[data-edge-id="dt-pv-b"] .edge-label')).toContainText("B · 4 mm² pair");
   await expect(page.locator('[data-edge-id="dt-ac-tools"] .edge-label')).toContainText(
     "5 m Type I lead",
   );
-  await expect(page.locator('[data-contained-in="junctionBox"]')).toHaveCount(7);
+  await expect(page.locator('[data-contained-in="junctionBox"]')).toHaveCount(10);
+  await expect(page.locator('[data-edge-id="dt-mppt-positive-controller"] .edge-label')).toContainText("25 mm²");
+  await expect(page.locator('[data-edge-id="dt-mppt-positive"] .edge-label')).not.toContainText("breaker");
   expect(await diagramLabelOverlaps(page)).toEqual([]);
   expect(await diagramEdgeNodeOverlaps(page)).toEqual([]);
   await page.getByRole("button", { name: /Panel 1/ }).click();
@@ -227,53 +278,97 @@ test("DSE diagram, system summary, BOM and field notes are interactive", async (
   await expect(page.getByRole("heading", { name: "Drua Sailing Experience" })).toBeVisible();
   await expect(page.getByText("System at a glance")).toBeVisible();
   await expect(page.getByText("Scope boundary")).toBeVisible();
-  await expect(page.getByText("Whole bank only")).toBeVisible();
-  await expect(page.getByText(/\+\$60 remaining/)).toBeVisible();
+  await expect(page.getByText("Dual string breakers")).toBeVisible();
+  await expect(page.getByText(/\$2,354 below target/)).toBeVisible();
 
   await page.getByRole("button", { name: /Bill of materials/ }).click();
-  await expect(page.getByText("$9,068").first()).toBeVisible();
+  await expect(page.getByText("$8,994").first()).toBeVisible();
   await expect(page.getByText(/\$607 donor-funded/).first()).toBeVisible();
   await expect(page.getByRole("columnheader", { name: "LA delivery" })).toBeVisible();
+  await page.getByRole("button", { name: "Buy", exact: true }).click();
+  const buyRows = page.locator(".bom-table tbody tr");
+  await expect(buyRows.first()).toBeVisible();
+  const buyCount = await buyRows.count();
+  await expect(buyRows.locator(".procurement-buy")).toHaveCount(buyCount);
+  await expect(page.getByRole("button", { name: "Buy", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Import", exact: true }).click();
+  const buyImportRows = page.locator(".bom-table tbody tr");
+  const buyImportCount = await buyImportRows.count();
+  expect(buyImportCount).toBeGreaterThan(0);
+  expect(buyImportCount).toBeLessThan(buyCount);
+  await expect(buyImportRows.locator(".procurement-buy")).toHaveCount(buyImportCount);
+  await expect(buyImportRows.locator(".location-import")).toHaveCount(buyImportCount);
+  await expect(page.getByRole("button", { name: "Buy", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "Import", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText(/rows shown/)).toContainText(`${buyImportCount} of`);
+  await page.getByRole("button", { name: "All", exact: true }).click();
+  await expect(page.getByRole("button", { name: "All", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Deposit paid", exact: true }).click();
+  await page.getByRole("button", { name: "Fiji", exact: true }).click();
+  const depositRows = page.locator(".bom-table tbody tr");
+  await expect(depositRows).toHaveCount(1);
+  await expect(depositRows).toContainText("Victron MultiPlus-II 24/3000/70-32");
+  await expect(depositRows.locator(".procurement-deposit-paid")).toHaveText("Deposit paid");
+  await expect(depositRows.locator(".procurement-progress")).toHaveText("20% paid · 80% due");
+  await page.getByRole("button", { name: "All", exact: true }).click();
   await page.getByLabel("Search bill of materials").fill("Ekrano");
   const ekranoRow = page.getByRole("row").filter({ hasText: "Victron Ekrano GX BPP900480100" });
   await expect(ekranoRow).toBeVisible();
-  await expect(ekranoRow.getByText("Aug 16", { exact: true })).toBeVisible();
-  await expect(ekranoRow.getByRole("link", { name: /Amazon · exact model/ })).toBeVisible();
-  await expect(ekranoRow.getByRole("link", { name: /eBay · exact BPP900480100/ })).toBeVisible();
-  await expect(ekranoRow.getByText("$619.65 · New · United States", { exact: true })).toBeVisible();
+  await expect(ekranoRow.getByText("Delivered Aug 20", { exact: true })).toBeVisible();
+  await expect(ekranoRow.getByRole("link", { name: /Amazon · purchased exact model/ })).toBeVisible();
+  await expect(ekranoRow.getByText("Purchased", { exact: true }).first()).toBeVisible();
+  await page.getByLabel("Search bill of materials").fill("VE.Direct cable");
+  const veDirectRow = page.getByRole("row").filter({ hasText: "Victron VE.Direct cable, 0.9 m" });
+  await expect(veDirectRow).toBeVisible();
+  await expect(veDirectRow).toContainText("2");
+  await expect(veDirectRow.getByRole("link", { name: /Amazon · purchased Victron VE.Direct/ })).toBeVisible();
+  await expect(veDirectRow.getByText("Aug 22", { exact: true })).toBeVisible();
+  await page.getByLabel("Search bill of materials").fill("yellow Cat6");
+  const veBusRow = page.getByRole("row").filter({ hasText: "StarTech 10 ft yellow Cat6" });
+  await expect(veBusRow).toBeVisible();
+  await expect(veBusRow.getByRole("link", { name: /Amazon · purchased StarTech yellow Cat6/ })).toBeVisible();
+  await page.getByLabel("Search bill of materials").fill("red Cat6");
+  const ethernetRow = page.getByRole("row").filter({ hasText: "StarTech 10 ft red Cat6" });
+  await expect(ethernetRow).toBeVisible();
+  await expect(ethernetRow.getByRole("link", { name: /Amazon · purchased StarTech red Cat6/ })).toBeVisible();
   await page.getByLabel("Search bill of materials").fill("PMP242305010");
   await expect(page.getByText(/Victron MultiPlus-II 24\/3000\/70-32/)).toBeVisible();
-  await expect(page.getByText("Not on Amazon", { exact: true })).toBeVisible();
-  await expect(page.getByText("Aug 19–28", { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Off-Grid Source · exact model/ })).toBeVisible();
-  await expect(page.getByText("No eBay match", { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: /No exact U.S. listing/ })).toBeVisible();
+  await expect(page.getByText("N/A", { exact: true })).toBeVisible();
+  await expect(page.getByText("Collect in Fiji", { exact: true })).toBeVisible();
+  await expect(page.getByText("Fiji supplier · 20% deposit paid", { exact: true })).toBeVisible();
+  await expect(page.getByText("Deposit paid", { exact: true }).first()).toBeVisible();
   await page.getByLabel("Search bill of materials").fill("junction box");
   await expect(page.getByText(/Compact IP-rated junction box/)).toBeVisible();
   await page.getByLabel("Search bill of materials").fill("preterminated");
   await expect(page.getByText(/Custom preterminated 1\/0 AWG/)).toBeVisible();
+  await page.getByLabel("Search bill of materials").fill("dielectric grease");
+  const greaseRow = page.getByRole("row").filter({ hasText: "Permatex 22058 dielectric grease" });
+  await expect(greaseRow).toBeVisible();
+  await expect(greaseRow.getByRole("link", { name: /Amazon · purchased exact 3 oz tube/ })).toBeVisible();
+  await expect(greaseRow.getByText("Aug 22", { exact: true })).toBeVisible();
   await page.getByLabel("Search bill of materials").fill("indoor utility light");
   const indoorLightRow = page.getByRole("row").filter({ hasText: "QHLightlux 12–28 V 3000 K indoor" });
-  await expect(indoorLightRow.getByRole("link", { name: /Amazon · QHLightlux/ })).toBeVisible();
-  await expect(indoorLightRow.getByText("Aug 19", { exact: true })).toBeVisible();
+  await expect(indoorLightRow.getByRole("link", { name: /Amazon · purchased QHLightlux/ })).toBeVisible();
+  await expect(indoorLightRow.getByText("Delivered Aug 19", { exact: true })).toBeVisible();
   await page.getByLabel("Search bill of materials").fill("outdoor utility light");
   const outdoorLightRow = page.getByRole("row").filter({ hasText: "QHLightlux 12–28 V 3000 K outdoor" });
-  await expect(outdoorLightRow.getByRole("link", { name: /Amazon · QHLightlux/ })).toBeVisible();
-  await expect(outdoorLightRow.getByText("Aug 19", { exact: true })).toBeVisible();
+  await expect(outdoorLightRow.getByRole("link", { name: /Amazon · purchased QHLightlux/ })).toBeVisible();
+  await expect(outdoorLightRow.getByText("Delivered Aug 19", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Customs" }).click();
   await expect(page.getByRole("heading", { name: "Customs & packing manifest" })).toBeVisible();
   await expect(page.getByText("Licensed agent before arrival", { exact: true })).toBeVisible();
   await expect(page.getByText(/goods over FJ\$1,000 will be detained/i)).toBeVisible();
-  await expect(page.getByText("Four radio models", { exact: true })).toBeVisible();
+  await expect(page.getByText("Five radio models", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: /School status is not automatic relief/ })).toBeVisible();
   await expect(page.getByRole("columnheader", { name: "Description / model" })).toBeVisible();
   await expect(page.getByLabel("Consignee TIN")).toBeVisible();
-  await expect(page.getByLabel(/Victron MultiPlus-II 24\/3000.*unit value/)).toHaveValue("939.00");
-  await expect(page.getByText("$4,282.48", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("PMP242305010", { exact: true })).toBeVisible();
+  await expect(page.getByLabel(/Victron MultiPlus-II 24\/3000.*unit value/)).toHaveCount(0);
+  await expect(page.getByText("$2,987.06", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("PMP242305010", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Ubiquiti UniFi Express UX-US", { exact: true })).toBeVisible();
-  await expect(page.getByText("TAF radio permit", { exact: true })).toHaveCount(4);
+  await expect(page.getByText("TAF radio permit", { exact: true })).toHaveCount(5);
+  await expect(page.getByLabel(/Victron Battery Balancer condition/)).toHaveValue("1 new; 1 used - mint");
   await page.getByLabel("Consignee TIN").fill("TIN TO CONFIRM");
   await expect(page.getByLabel("Consignee TIN")).toHaveValue("TIN TO CONFIRM");
 
@@ -295,10 +390,14 @@ test("junction-box tab exposes every wire, bus and enclosure crossing", async ({
   await expect(page.getByText(/14 cable glands \+ 1 Starlink jack · one spread bottom row/)).toBeVisible();
   await expect(page.locator("[data-junction-wire]")).toHaveCount(35);
   await expect(page.locator("[data-junction-gland]")).toHaveCount(15);
-  await expect(page.locator(".junction-pair-sheath")).toHaveCount(6);
+  await expect(page.locator(".junction-pair-sheath")).toHaveCount(5);
   await expect(page.locator("[data-junction-wire-row]")).toHaveCount(35);
   await expect(page.getByText(/24 V POSITIVE BUS/)).toBeVisible();
   await expect(page.getByText(/BLUE SEA 2314 SERVICE RETURN BUS/)).toBeVisible();
+  await expect(page.locator(".junction-schematic")).toHaveAttribute("data-junction-a-star", "precomputed");
+  await expect(page.locator(".junction-schematic")).toHaveAttribute("data-junction-map-source", "offline-artifact");
+  await expect(page.locator(".junction-schematic")).toHaveAttribute("data-junction-runtime-routing", "false");
+  await expect(page.getByText(/browser only renders the saved result and never solves routing during page load/i)).toBeVisible();
 
   const schematicAudit = await page.locator(".junction-schematic").evaluate((svg) => {
     const components = [...svg.querySelectorAll("[data-junction-component] rect")].map((element) => ({
@@ -343,7 +442,7 @@ test("junction-box tab exposes every wire, bus and enclosure crossing", async ({
   await expect(wire).toHaveClass(/is-active/);
   await expect(row).toHaveClass(/is-active/);
   await expect(page.getByText(/six visible breaker positions do not require six independent supply wires/)).toBeVisible();
-  await expect(page.getByText(/one common positive comb supplies four individual branch breakers/)).toBeVisible();
+  await expect(page.getByText(/one common positive comb supplies four CHTAIXI branch breakers/i)).toBeVisible();
 });
 
 test("customs manifest is complete and print-ready on A4 landscape", async ({ page }) => {
@@ -399,7 +498,7 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-port-approach-violations", "0");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-port-count", "70");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-port-approach-violations", "0");
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-port-count", "111");
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-port-count", "107");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-junction-routing-max-bends", /\d+/);
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-battery-arrangement", "floor-2x2");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-battery-routing", "collision-aware-terminal-derived-bundle");
@@ -413,9 +512,9 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.locator(".model-shell")).toHaveAttribute("data-shadow-map-size", "4096");
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-solver-route-count", /[1-9]\d*/);
   await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-generated-cable-m", /\d+\.\d+/);
-  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-optimization-status", "voxel-a-star-stochastic-gradient-optimized-finalized");
-  expect(Number(await page.locator(".model-shell").getAttribute("data-layout-optimization-evaluations"))).toBe(54);
-  expect(Number(await page.locator(".model-shell").getAttribute("data-layout-optimization-improvement-percent"))).toBeGreaterThanOrEqual(1.9);
+  await expect(page.locator(".model-shell")).toHaveAttribute("data-layout-optimization-status", "evolutionary-optimized-finalized");
+  expect(Number(await page.locator(".model-shell").getAttribute("data-layout-optimization-evaluations"))).toBe(277);
+  expect(Number(await page.locator(".model-shell").getAttribute("data-layout-optimization-improvement-percent"))).toBeGreaterThan(0);
   await expect(page.getByRole("button", { name: "Edit wall layout" })).toHaveCount(0);
   await expect(page.locator(".model-shell")).not.toHaveAttribute("data-layout-storage-ready", /.+/);
   await expect(page.locator(".model-canvas")).toHaveAttribute("data-render-mode", "on-demand-static-shadows");
@@ -451,7 +550,7 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(modelShell).toHaveAttribute("data-voxel-junction-port-violations", "0");
   await expect(modelShell).toHaveAttribute("data-voxel-junction-protected-front-violations", "0");
   await expect(modelShell).toHaveAttribute("data-voxel-junction-unrelated-front-violations", "0");
-  await expect(modelShell).toHaveAttribute("data-selectable-connector-count", "181");
+  await expect(modelShell).toHaveAttribute("data-selectable-connector-count", "177");
   await expect(page.locator(".model-canvas")).toHaveAttribute("data-wall-routing-mode", "voxel-a-star");
   await expect(page.getByText("1 unit = 1 m · verified envelopes / assumed site")).toBeVisible();
   await expect(page.getByText("3-core AC flex")).toBeVisible();
@@ -473,14 +572,14 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await expect(page.getByText(/no unrelated cable can pass through or in front of an enclosure/i)).toBeVisible();
   await expect(page.getByText(/no renderer-added detours or competing automatic route set/i)).toBeVisible();
   await expect(page.getByText(/14 mm production solve/i)).toBeVisible();
-  await expect(page.getByText(/14 mm production solve uses 57\.09 m \/ 259 turns outside/i)).toBeVisible();
+  await expect(page.getByText(/14 mm production solve uses 53\.90 m \/ 231 turns outside/i)).toBeVisible();
   await expect(page.getByText(/jointly report 0 failed routes, 0 clearance contacts, 0 invalid port approaches, and 0 device-front violations/i)).toBeVisible();
   await expect(page.getByText(/each rounded cable follows one continuous sampled centerline/i)).toBeVisible();
-  await expect(page.getByText(/seeded two-sided stochastic position search evaluated 54 complete Voxel A\* reroutes/i)).toBeVisible();
+  await expect(page.getByText(/seeded evolutionary position search evaluated 277 complete terminal-derived reroutes/i)).toBeVisible();
   await expect(page.getByText(/production harness contains 35 conductors, 70 selectable ports/i)).toBeVisible();
   await expect(page.getByText(/visible XYZ point below the mouse or touch gesture becomes the grab point/i)).toBeVisible();
   await expect(page.getByText(/0 broken handoffs/)).toBeVisible();
-  await expect(page.getByText(/77 Voxel A\* conductors/i)).toBeVisible();
+  await expect(page.getByText(/75 Voxel A\* conductors/i)).toBeVisible();
   await page.getByRole("button", { name: "Close scale notes" }).click();
   await page.getByRole("button", { name: "Show labels" }).click();
   await expect(page.getByRole("button", { name: "Hide labels" })).toBeVisible();
@@ -521,7 +620,7 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   expect(cameraAfterSelection).toEqual(cameraBeforeSelection);
   await expect(modelInspector.locator('[data-model-procurement="systemMonitor"]')).toBeVisible();
   await expect(modelInspector.getByText("Amazon & purchasing", { exact: true })).toBeVisible();
-  await expect(modelInspector.getByText("Amazon", { exact: true })).toBeVisible();
+  await expect(modelInspector.getByText("Purchased", { exact: true }).first()).toBeVisible();
   await expect(
     modelInspector.getByRole("link", {
       name: /Open Amazon listing for Victron Ekrano GX BPP900480100/,
@@ -533,22 +632,41 @@ test("DSE 3D model is scale-aware, navigable and connected to component details"
   await page.waitForTimeout(1_100);
   await expect(page.locator('[data-model-label="battery1"]')).toBeVisible();
   await expect(page.locator('[data-model-label="battery4"]')).toBeVisible();
+  await expect(page.locator('[data-model-label="battery-breaker-a"]')).toContainText("String A breaker");
+  await expect(page.locator('[data-model-label="battery-breaker-b"]')).toContainText("String B breaker");
+  await clickProjectedModelComponent(page, "battery-breaker-a", "batteryBreakerA");
+  await expect(modelInspector.getByRole("heading", { name: "String A 125 A breaker" })).toBeVisible();
+  await expect(modelInspector.locator('[data-model-procurement="batteryBreakerA"]')).toBeVisible();
+  await expect(modelInspector.getByRole("link", { name: /Open Amazon listing for MidNite Solar MNEPV125/ })).toHaveAttribute(
+    "href",
+    "https://www.amazon.com/dp/B0CFX5PW79",
+  );
+  await modelInspector.getByRole("button", { name: "Close component details" }).click();
 
   await page.getByRole("button", { name: "Open junction box" }).click();
   await page.waitForTimeout(1_100);
   await expect(page.locator('[data-model-label="ekrano"]')).toBeVisible();
-  await expect(page.locator('[data-model-label="selector"]')).toBeVisible();
+  await expect(page.locator('[data-model-label="selector"]')).toHaveCount(0);
   await expect(page.locator('[data-model-label="shunt-battery"]')).toContainText("BATTERY MINUS");
   await expect(page.locator('[data-model-label="shunt-system"]')).toContainText("SYSTEM MINUS");
-  await expect(page.locator('[data-model-label="bus-positive"]')).toContainText("24 V + BLUE SEA 2104");
-  await expect(page.locator('[data-model-label="bus-negative"]')).toContainText("24 V − BLUE SEA 2104");
+  await expect(page.locator('[data-model-label="bus-positive"]')).toContainText("24 V + COVERED BUS");
+  await expect(page.locator('[data-model-label="bus-negative"]')).toContainText("24 V − COVERED BUS");
   await expect(page.locator('[data-model-label="fuse-block"]')).toBeVisible();
-  await expect(page.locator('[data-model-label="fuse-block"]')).toContainText("UniFi 2 A");
-  await expect(page.locator('[data-model-label="fuse-block"]')).toContainText("Starlink 5 A");
+  await expect(page.locator('[data-model-label="fuse-block"]')).toContainText("UniFi/lights 6 A");
+  await expect(page.locator('[data-model-label="fuse-block"]')).toContainText("Starlink/UniFi");
   await expect(page.locator('[data-model-label="mppt-breaker"]')).toContainText("MPPT 100 A BREAKER");
   await expect(page.locator('[data-model-label="ekrano-fuse"]')).toContainText("EKRANO 3.15 A FUSE");
   await expect(page.locator('[data-model-label="load-switches"]')).toContainText("INTERNET DPST");
   await expect(page.locator('[data-model-label="return-bus"]')).toContainText("6 used · 1 spare");
+  await clickProjectedModelComponent(page, "bus-negative", "negativeBus");
+  await expect(modelInspector.getByRole("heading", { name: "Main negative bus" })).toBeVisible();
+  await expect(modelInspector.locator('[data-model-procurement="negativeBus"] .model-procurement-item')).toHaveCount(1);
+  await expect(modelInspector.getByRole("link", { name: /Open Amazon listing for AMOMD 600 A covered red\/black main busbar pair/ })).toHaveAttribute(
+    "href",
+    "https://www.amazon.com/dp/B0DG4WLVT7",
+  );
+  await expect(modelInspector).not.toContainText("Class T fuse");
+  await modelInspector.getByRole("button", { name: "Close component details" }).click();
   await page.getByRole("button", { name: "Hide labels" }).click();
   await expect(page.locator(".model-label.view-visible")).toHaveCount(0);
 
@@ -615,7 +733,7 @@ test("every modeled connector exposes its circuit topology", async ({ page }) =>
   await page.getByRole("button", { name: "3D model" }).click();
   const modelShell = page.locator(".model-shell");
   await expect(modelShell).toHaveAttribute("data-model-ready", "true", { timeout: 15_000 });
-  await expect(modelShell).toHaveAttribute("data-selectable-connector-count", "181");
+  await expect(modelShell).toHaveAttribute("data-selectable-connector-count", "177");
   await page.getByRole("button", { name: "Open junction box" }).click();
   await page.waitForTimeout(1_200);
 
@@ -640,6 +758,11 @@ test("every modeled connector exposes its circuit topology", async ({ page }) =>
   const inspector = page.getByRole("dialog", { name: "Connector details" });
   await expect(inspector).toBeVisible();
   await expect(inspector).toContainText("Junction-box harness");
+  await expect(inspector).toContainText("Cable specification");
+  await expect(inspector).toContainText("Conductor size");
+  await expect(inspector).toContainText("AWG");
+  await expect(inspector).toContainText("Outside diameter");
+  await expect(inspector).toContainText("Diameter basis");
   await expect(inspector).toContainText("Other connector");
   await expect(inspector).toContainText("Circuit");
   await expect(inspector).toContainText("Route ID");

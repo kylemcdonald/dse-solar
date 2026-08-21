@@ -419,6 +419,44 @@ main {
   font-weight: 700;
 }
 
+.purchased-fade-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: #647270;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.purchased-fade-toggle > span {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #778482;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 2px #fff;
+}
+
+.purchased-fade-toggle:hover,
+.purchased-fade-toggle.active {
+  border-color: #86a8a3;
+  color: var(--ink-strong);
+  background: #eef6f3;
+}
+
+.purchased-fade-toggle.active > span {
+  border-color: var(--teal);
+  background: rgb(23 109 105 / 0.2);
+}
+
 .model-stage {
   position: relative;
   height: calc(100% - 48px);
@@ -483,6 +521,10 @@ main {
 
 .model-label[data-on-screen="true"] {
   opacity: 1;
+}
+
+.purchased-fade-active .model-label.purchased-component-label[data-on-screen="true"] {
+  opacity: 0.2;
 }
 
 .model-label.view-hidden,
@@ -1212,6 +1254,14 @@ main {
   opacity: 0.2;
 }
 
+.diagram-edge.purchased-faded,
+.diagram-edge.purchased-faded:hover,
+.diagram-edge.purchased-faded.is-hovered,
+.diagram-edge.purchased-faded.muted:hover,
+.diagram-edge.purchased-faded.muted.is-hovered {
+  opacity: 0.2;
+}
+
 .edge-line {
   stroke-width: 3.1;
   stroke-linecap: round;
@@ -1337,6 +1387,12 @@ main {
 
 .node-muted {
   opacity: 0.5;
+  transition: opacity 180ms ease;
+}
+
+.node-purchased-faded,
+.node-purchased-faded.node-muted {
+  opacity: 0.2;
   transition: opacity 180ms ease;
 }
 
@@ -2361,6 +2417,20 @@ main {
   background: #f9ecd7;
 }
 
+.procurement-deposit-paid {
+  color: #4d527f;
+  background: #e9e9f6;
+}
+
+.procurement-progress {
+  display: block;
+  margin-top: 5px;
+  color: #676f6d;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .procurement-allowance {
   color: #6a5781;
   background: #eee8f3;
@@ -2414,6 +2484,11 @@ main {
 .delivery-available {
   color: #28624d;
   background: #dff0e7;
+}
+
+.delivery-purchased {
+  color: #fff;
+  background: #28785f;
 }
 
 .delivery-substitute {
@@ -4585,6 +4660,12 @@ main {
 
 .connector-connection-list article > strong {
   font-size: 1rem;
+}
+
+.connector-via {
+  margin: 3px 0 0;
+  color: #5e6e6d;
+  font-size: 0.92rem;
 }
 
 .connector-connection-list dl,

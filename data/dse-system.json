@@ -3,9 +3,9 @@
   "id": "dse",
   "shortName": "DSE · Fiji",
   "name": "Drua Sailing Experience",
-  "subtitle": "Serviceable 24 V solar workshop with a permanently paralleled two-string bank",
+  "subtitle": "Serviceable 24 V solar workshop with two independently breakered battery strings",
   "location": "Remote Fiji",
-  "revision": "Design R14 · 17 Aug 2026",
+  "revision": "Design R15 · 21 Aug 2026",
   "status": "Recommended design",
   "currency": {
     "base": "USD",
@@ -17,9 +17,9 @@
     "targetBasis": "remaining",
     "donorFundedIncrementUsd": 607.11,
     "contingencyIncluded": false,
-    "note": "Panels, batteries and the UniFi Express are included in the project total even though they have already been purchased. The estimated $607.11 Ekrano GX increment, net of the $80 list-price saving from using a non-GX rather than GX 24 V MultiPlus and including the estimated border-tax effect, is donor-funded. Both lights are now the same affordable 3000 K Amazon utility fixture; use 316 stainless replacement fasteners and seal the exterior unit under an eave because the budget product is not a Hella-grade salt-spray fixture. The Orion converter has been removed: UniFi, USB charging and lights all accept a nominal 24 V input. Victron power-electronics costs are current planning prices pending a same-part-number Solar Fiji quote. Freight beyond Nadi, panel mounting, Starlink hardware and labor are excluded."
+    "note": "Panels, batteries, the UniFi Express, three QHLightlux fixtures, the Amazon Victron order and all additional Amazon electrical/accessory orders through 21 Aug 2026 are included in the project total as purchased. A 20% deposit has also been paid toward the MultiPlus-II, which will be supplied in Fiji; its $939 row remains a USD planning value until the Fiji invoice total and deposit amount are entered. The estimated $607.11 Ekrano GX increment remains donor-funded pending the final border-cost reconciliation. Two QHLightlux fixtures are installed and the third is a carried spare. The purchased Orion 24/12-30A and portable Starlink power leads are carried accessories rather than installed loads. Seven Amazon receipts are reconciled through separate promotion, supplier-shipping and U.S.-sales-tax adjustment rows. Freight beyond Nadi, panel mounting, Starlink hardware and labor are excluded."
   },
-  "summary": "Four 565 W panels form two matched two-panel series strings (2S2P) and feed a Victron SmartSolar 150/85 through two separate 4 mm² positive/negative home runs. At the assumed 15 m one-way distance, the two runs lose about 2.0% at rated power and land directly in one indoor PV entry enclosure with two string-pair inputs and one combined output pair, a two-pole disconnect and surge protection. Four 12 V GEL batteries form two independently Class-T-protected 24 V series strings that are permanently paralleled through equal-length cables. A single Blue Sea 6006 disconnect switches the complete bank ON or OFF; it cannot leave one string unintentionally idle. A non-GX Victron MultiPlus-II provides AC and generator charging, while the Ekrano GX coordinates charge current, local monitoring and VRM reporting. The SmartSolar output and every service positive use resettable, 10 kA-interrupt-rated MidNite Solar DC breakers. The only remaining fuses are the two battery Class T devices and Victron's factory-supplied 3.15 A Ekrano lead. The Class T links are retained because the selected 150 A coordination has no exact resettable equivalent: common marine breakers have much lower interrupt ratings, while MidNite's high-interrupt battery breakers jump from 125 A to 175 A. Starlink uses its single OEM 15 m white DC lead. UniFi, a six-port Scanstrut USB-C/A charging panel and two identical warm-white utility lights use protected nominal-24 V branches. Three sealed rockers on the junction-box exterior provide one master INTERNET control plus independent INSIDE and OUTSIDE light controls.",
+  "summary": "Four 565 W panels form two matched two-panel series strings (2S2P) and feed a Victron SmartSolar 150/85 through two separate 4 mm² positive/negative home runs. The purchased indoor 2-in/1-out PV entry box combines the strings through a two-pole disconnect and surge protection; its supplied 32 A string fuses must be replaced with correctly listed 20 A gPV links before commissioning because the Suntech module maximum series-fuse rating is 25 A. Four 12 V GEL batteries form two 24 V series strings. Each positive leaves its string through a purchased non-polarized MidNite Solar MNEPV125-80-1PNP 125 A / 80 VDC breaker in a compact finger-safe enclosure, then lands independently on the covered main positive bus. The two breakers provide string isolation and whole-bank shutdown, so no battery selector or additional master switch is fitted. Both breakers remain ON during normal service. A non-GX Victron MultiPlus-II provides AC and generator charging, while the Ekrano GX coordinates charge current, local monitoring and VRM reporting. The battery-bus-fed SmartSolar and service-feeder circuits retain high-interrupt MidNite DC breakers; lower-current downstream services use polarized CHTAIXI B-curve breakers after the MidNite feeder. Starlink uses its single OEM 15 m white DC lead. UniFi, a six-port Scanstrut USB-C/A charging panel and two identical warm-white utility lights use protected nominal-24 V branches.",
   "keyFacts": [
     {
       "label": "Solar array",
@@ -53,8 +53,8 @@
     },
     {
       "label": "Battery switching",
-      "value": "Whole bank only",
-      "detail": "ON / OFF · no one-string selection"
+      "value": "Dual string breakers",
+      "detail": "2 × 125 A · normally both ON"
     },
     {
       "label": "Monitoring",
@@ -86,9 +86,9 @@
   "batteryCablePlan": {
     "conductor": "1/0 AWG (53.5 mm²) UL 1426 flexible tinned-copper marine battery cable",
     "procurement": "Import factory-crimped, adhesive-heat-shrunk assemblies; no heavy-cable crimper is required on site.",
-    "planningTotalLengthFt": 24,
-    "planningWeightLb": 10.2,
-    "measurementRule": "Buy only after a 1:1 component layout. Measure hole-to-hole along the supported route, preserve broad bend radii, and keep the paired A/B paths equal. Confirm every stud before ordering, especially the purchased EverExceed battery terminals and final busbars.",
+    "planningTotalLengthFt": 23,
+    "planningWeightLb": 9.8,
+    "measurementRule": "Buy only after a 1:1 layout using the two received MidNite breakers and their enclosure. Measure along the supported route, preserve broad bend radii, keep the paired A/B paths equal, and confirm every battery, breaker, busbar and MultiPlus termination before ordering. The breaker is specified for 14 AWG through 1/0 AWG conductors; match the factory-prepared breaker end to the terminal geometry and instructions on the received product.",
     "assemblies": [
       {
         "qty": 2,
@@ -104,18 +104,18 @@
         "planningLengthIn": 12,
         "color": "red",
         "from": "String A/B positive",
-        "to": "Class T holder",
-        "lugs": "M8–M6 assumed; confirm battery terminals",
-        "purpose": "battery-to-fuse"
+        "to": "MidNite 125 A breaker A/B input",
+        "lugs": "M8 ring at battery; factory-prepared breaker end to match received terminal",
+        "purpose": "short unprotected battery-to-breaker leads"
       },
       {
         "qty": 2,
         "planningLengthIn": 36,
         "color": "red",
-        "from": "Class T holder",
-        "to": "Blue Sea 6006 master-disconnect input stud",
-        "lugs": "M6–M10",
-        "purpose": "equal positive string paths · two lugs stacked on one rated switch stud"
+        "from": "MidNite 125 A breaker A/B output",
+        "to": "separate M10 main-positive-bus studs",
+        "lugs": "factory-prepared breaker end–M10",
+        "purpose": "equal independently protected positive string paths"
       },
       {
         "qty": 2,
@@ -134,15 +134,6 @@
         "to": "negative busbar",
         "lugs": "M10–M10",
         "purpose": "shunt-to-bus"
-      },
-      {
-        "qty": 1,
-        "planningLengthIn": 12,
-        "color": "red",
-        "from": "master-disconnect output",
-        "to": "positive busbar",
-        "lugs": "M10–M10",
-        "purpose": "disconnect-to-bus"
       },
       {
         "qty": 2,
@@ -233,11 +224,13 @@
         "1 combined positive/negative output pair",
         "40 A two-pole PV disconnect",
         "Type 2 PV SPD coordinated with 150 V MPPT",
+        "2 × 20 A 10×38 mm gPV string links · replace supplied 32 A links",
         "Protected parallel terminals",
         "2 × 4 mm² positive/negative home runs",
         "60 m single-core cable total at 15 m one-way"
       ],
-      "note": "With only two parallel strings, a faulted string can receive about one intact-string Isc (14.20 A), below Suntech's 25 A maximum series-fuse rating, so this base design does not add an outdoor string-fuse/combiner box. Confirm the exact module label, cable ampacity, connector ratings and applicable Fiji/AS-NZS requirements before omitting string fuses. Each string can sit near 105 VDC in cool sunlight: cover modules before connector work and never break MC4 connectors under load."
+      "note": "The purchased CXCESNS B0FSQB97T2 is a true 2-input/1-output indoor combiner, but its supplied 32 A string links exceed Suntech's published 25 A maximum series-fuse rating. Replace them with correctly listed 20 A 10×38 mm gPV links and carry two matching spares before energizing the array. Confirm the exact module labels, cable ampacity, connector ratings and applicable Fiji/AS-NZS requirements. Each string can sit near 105 VDC in cool sunlight: cover modules before connector work and never break MC4 connectors under load.",
+      "sourceUrl": "https://www.amazon.com/dp/B0FSQB97T2"
     },
     {
       "id": "solarController",
@@ -254,7 +247,7 @@
         "IP43 electronics · IP22 terminals",
         "VE.Direct to Ekrano GX"
       ],
-      "note": "The 2S strings model at 104.7 V cold Voc, leaving about 40 V below the 145 V operating ceiling. Fit the matching WireBox-XL Tr, mount terminals down within 3 m of the battery bus, and use a MidNite Solar MNEDC100 100 A / 150 VDC / 10 kA AIC resettable output breaker with 10 cm ventilation clearance. Set the charger itself to 85 A maximum and let Ekrano DVCC cap the combined system charge current. Its VE.Can, remote on/off and programmable-relay interfaces remain available but unused in the base design.",
+      "note": "The 2S strings model at 104.7 V cold Voc, leaving about 40 V below the 145 V operating ceiling. Mount the controller terminals-down in the dry indoor alcove within 3 m of the battery bus and use a MidNite Solar MNEDC100 100 A / 150 VDC / 10 kA AIC resettable output breaker with 10 cm ventilation clearance. After each clean terminal is correctly crimped and torqued, apply only a thin exterior moisture-barrier film of dielectric grease around the completed connection; never place grease between the current-carrying clamping faces or use it as a substitute for touch-safe, dry mounting. Set the charger itself to 85 A maximum and let Ekrano DVCC cap the combined system charge current. Its VE.Can, remote on/off and programmable-relay interfaces remain available but unused in the base design.",
       "sourceUrl": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html"
     },
     {
@@ -299,7 +292,7 @@
     {
       "id": "batteryBank",
       "title": "24 V · 400 Ah GEL bank",
-      "kicker": "Two protected 2S strings · permanently paralleled",
+      "kicker": "Two independently breakered 2S strings · normally paralleled",
       "kind": "battery",
       "summary": "9.6 kWh nominal, operated to about 50% depth of discharge for longer GEL life.",
       "specs": [
@@ -309,7 +302,7 @@
         "4.8 kWh conservative usable",
         "One string: 4.8 kWh nominal · 2.4 kWh usable"
       ],
-      "note": "Fully charge and voltage-match all four units separately before assembly. Use equal-length positive and negative string leads. Both strings remain connected in normal service so both are charged and discharged together. A faulted string is removed only during a full shutdown, after meter diagnosis, by disconnecting and insulating both of that string's leads."
+      "note": "Fully charge and voltage-match all four units separately before assembly. Use equal-length positive and negative string leads, and keep both 125 A breakers ON during normal service so both strings charge and discharge together. For a suspected fault, stop AC loads and charging, switch both string breakers OFF, diagnose with a meter, disconnect and insulate the failed string, then restore only the verified good string if emergency service is required."
     },
     {
       "id": "battery1",
@@ -332,7 +325,7 @@
       "kind": "battery",
       "summary": "Upper battery in the first 24 V series string.",
       "specs": [
-        "150 A string fuse at positive",
+        "125 A resettable string breaker at positive",
         "Dedicated balancer + alarm"
       ],
       "sourceUrl": "https://www.everexceed.com/es200-12g-gel-battery_p363.html"
@@ -357,7 +350,7 @@
       "kind": "battery",
       "summary": "Upper battery in the second 24 V series string.",
       "specs": [
-        "150 A string fuse at positive",
+        "125 A resettable string breaker at positive",
         "Dedicated balancer + alarm"
       ],
       "sourceUrl": "https://www.everexceed.com/es200-12g-gel-battery_p363.html"
@@ -367,66 +360,82 @@
       "title": "Main DC distribution",
       "kicker": "Inside compact box · tinned busbars",
       "kind": "protection",
-      "summary": "Two covered Blue Sea 2104 600 A PowerBars distribute the whole-bank disconnect output and collect all system negatives; all negative current crosses the SmartShunt.",
+      "summary": "One covered AMOMD red/black 600 A busbar pair combines the two independently breakered string positives and collects all system negatives; all negative current crosses the SmartShunt.",
       "specs": [
-        "Two 150 A Class T string fuses",
-        "Blue Sea 6006 whole-bank ON / OFF disconnect",
-        "Positive bus · 7 conductors: 3 large studs + 4 screw terminals",
-        "Negative bus · 6 conductors: 3 large studs + 3 screw terminals",
-        "2 × Blue Sea 2104 · four 3/8 in studs + four #8 screw terminals",
-        "2 × Blue Sea 2708 insulating covers",
-        "SmartShunt 500 A · supplied 1 A fused Vbatt+ lead",
+        "2 × purchased MidNite MNEPV125-80-1PNP 125 A string breakers",
+        "One compact finger-safe two-breaker enclosure",
+        "Positive bus · 8 conductors across 12 separate positions",
+        "Negative bus · 6 conductors across 12 separate positions",
+        "AMOMD pair · each bar has four M10 studs + eight M4 screws",
+        "SmartShunt IP65 500 A · supplied 1 A fused Vbatt+ lead",
         "1/0 AWG / 53.5 mm² Cu to MultiPlus",
         "Target ≤1.0 m one-way",
-        "12 factory-crimped heavy-cable assemblies"
+        "11 factory-prepared heavy-cable assemblies"
       ],
-      "note": "Put each Class T fuse as close as practicable to its string-positive terminal. Land both equal-length protected positive leads on the input stud of the single master disconnect and both equal-length negative leads on SmartShunt BATTERY MINUS. Nothing else connects on the BATTERY MINUS side. Land the SmartShunt's supplied fused Vbatt+ sense lead on the fourth small positive-bus terminal. The positive 2104 then uses three large studs and all four small terminals, leaving one large stud spare; the negative 2104 uses three of each size, leaving one of each spare. Import all heavy 1/0 AWG assemblies preterminated after a 1:1 layout."
+      "note": "Mount the two battery-string breakers in their own finger-safe enclosure close to the batteries. Each breaker output gets its own main-positive-bus landing; do not combine the strings on a breaker terminal and do not use the enclosure's small accessory busbars for battery current. Both equal-length string negatives land on SmartShunt BATTERY MINUS. Nothing else connects on the BATTERY MINUS side. The positive bar uses eight of twelve positions and the negative bar uses six of twelve, so no circuit lugs need to share a terminal."
     },
     {
-      "id": "classTFuseA",
-      "title": "String A Class T protection",
-      "kicker": "150 A · at Battery 2 positive",
+      "id": "batteryProtection",
+      "title": "Dual battery-string breaker enclosure",
+      "kicker": "2 × MidNite 125 A · finger-safe",
       "kind": "protection",
-      "summary": "A dedicated high-interrupt fuse protects the complete positive conductor from battery string A before the two strings join.",
+      "summary": "Two separately purchased resettable breakers protect and isolate the two 24 V battery strings before their positive conductors join at the main bus.",
       "specs": [
-        "150 A Class T fuse",
-        "Blue Sea 5502 holder",
-        "As close as practicable to Battery 2 positive",
-        "1/0 AWG tinned-copper leads"
+        "2 × MNEPV125-80-1PNP",
+        "125 A · 80 VDC · non-polarized",
+        "UL 489A listed · 14 AWG–1/0 AWG",
+        "35 in-lb / 4 N·m terminal torque",
+        "Both handles ON in normal operation",
+        "Compact IP65 finger-safe outer enclosure"
       ],
-      "note": "This holder is outside the junction box beside the batteries. It is a non-resettable exception because an equivalently compact 24 VDC breaker with the required battery-fault interrupt rating was not identified. Carry two spare fuses."
+      "note": "These two breakers replace both Class T fuse assemblies and the Blue Sea battery switch. Switch both OFF before servicing the main DC box; isolate a single string only after all loads and charging are stopped. Verify received terminal geometry, conductor preparation, enclosure fit and bend radius with a 1:1 mock-up.",
+      "sourceUrl": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=729"
     },
     {
-      "id": "classTFuseB",
-      "title": "String B Class T protection",
-      "kicker": "150 A · at Battery 4 positive",
+      "id": "batteryBreakerA",
+      "title": "String A 125 A breaker",
+      "kicker": "MidNite MNEPV125-80-1PNP",
       "kind": "protection",
-      "summary": "A dedicated high-interrupt fuse protects the complete positive conductor from battery string B before the two strings join.",
+      "summary": "Resettable 80 VDC protection and isolation for battery string A before it reaches the main positive bus.",
       "specs": [
-        "150 A Class T fuse",
-        "Blue Sea 5502 holder",
-        "As close as practicable to Battery 4 positive",
-        "1/0 AWG tinned-copper leads"
+        "125 A · non-polarized",
+        "14 AWG–1/0 AWG",
+        "Normally ON",
+        "Shared finger-safe enclosure"
       ],
-      "note": "This holder is outside the junction box beside the batteries. It is a non-resettable exception because an equivalently compact 24 VDC breaker with the required battery-fault interrupt rating was not identified. Carry two spare fuses."
+      "sourceUrl": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=729"
+    },
+    {
+      "id": "batteryBreakerB",
+      "title": "String B 125 A breaker",
+      "kicker": "MidNite MNEPV125-80-1PNP",
+      "kind": "protection",
+      "summary": "Resettable 80 VDC protection and isolation for battery string B before it reaches the main positive bus.",
+      "specs": [
+        "125 A · non-polarized",
+        "14 AWG–1/0 AWG",
+        "Normally ON",
+        "Shared finger-safe enclosure"
+      ],
+      "sourceUrl": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=729"
     },
     {
       "id": "positiveBus",
       "title": "Main positive bus",
-      "kicker": "Blue Sea 2104 · covered 600 A PowerBar",
+      "kicker": "AMOMD covered red 600 A busbar",
       "kind": "distribution",
-      "summary": "The master-disconnect output lands here, then separate protected feeds leave for the MultiPlus, SmartSolar, services, Starlink and Ekrano sense/power circuits.",
+      "summary": "Each 125 A battery-string breaker lands on a separate high-current position; protected feeds then leave for the MultiPlus, SmartSolar, services, Starlink and Ekrano/sense circuits.",
       "specs": [
-        "4 × 3/8 in studs + 4 × #8 screws",
-        "7 conductors used",
-        "1 large stud spare",
-        "Blue Sea 2708 insulating cover"
+        "4 × M10 (3/8 in) studs + 8 × M4 screws",
+        "8 conductors used",
+        "4 positions spare",
+        "Red insulating cover included"
       ],
-      "note": "This is the sole whole-bank positive distribution point inside the junction box. The SmartShunt Vbatt+ sense lead uses its supplied inline fuse and one small terminal."
+      "note": "High-current landings are breaker A, breaker B, MultiPlus and SmartSolar. Small positions serve the service feeder, Starlink, Ekrano and SmartShunt Vbatt+ sense lead. No lug doubling is required."
     },
     {
       "id": "smartShunt",
-      "title": "Victron SmartShunt 500 A",
+      "title": "Victron SmartShunt IP65 500 A",
       "kicker": "Battery monitor · all negative current",
       "kind": "control",
       "summary": "Both battery-string negatives land on BATTERY MINUS; one short 1/0 AWG link from SYSTEM MINUS feeds the negative bus, so every charging and load ampere is measured.",
@@ -435,40 +444,38 @@
         "6.5–70 VDC",
         "VE.Direct to Ekrano GX",
         "Supplied fused Vbatt+ sense lead",
-        "IP21"
+        "Purchased IP65 electronics enclosure"
       ],
-      "note": "Nothing except the two battery-string negatives connects on the BATTERY MINUS side. All chargers, loads and chassis-related DC returns connect on the SYSTEM MINUS side through the negative bus.",
+      "note": "Nothing except the two battery-string negatives connects on the BATTERY MINUS side. All chargers, loads and chassis-related DC returns connect on the SYSTEM MINUS side through the negative bus. The purchased Amazon unit is the IP65 version; confirm its exact part number and serial from the product label before completing the customs manifest.",
       "sourceUrl": "https://www.victronenergy.com/battery-monitors/smart-battery-shunt"
     },
     {
       "id": "negativeBus",
       "title": "Main negative bus",
-      "kicker": "Blue Sea 2104 · system side of SmartShunt",
+      "kicker": "AMOMD covered black 600 A busbar",
       "kind": "distribution",
       "summary": "This covered bus collects every charger and load return after current has crossed the SmartShunt.",
       "specs": [
-        "4 × 3/8 in studs + 4 × #8 screws",
+        "4 × M10 (3/8 in) studs + 8 × M4 screws",
         "6 conductors used",
-        "1 stud + 1 screw spare",
-        "Blue Sea 2708 insulating cover"
+        "6 positions spare",
+        "Black insulating cover included"
       ],
       "note": "The only connection from this bus toward the batteries is the short SYSTEM MINUS link through the SmartShunt. Never bypass the shunt with a direct battery-negative return."
     },
     {
-      "id": "batterySelector",
-      "title": "Master battery disconnect",
-      "kicker": "Whole bank ON / OFF · marine grade",
-      "kind": "protection",
-      "summary": "A compact Blue Sea 6006 switches the complete permanently paralleled bank together; there is no setting that can strand one string at a different state of charge.",
+      "id": "returnBus",
+      "title": "Low-current service return bus",
+      "kicker": "Blue Sea 2314 · covered 100 A MiniBus",
+      "kind": "distribution",
+      "summary": "This junction-box bus collects the five low-current load returns and one main-negative feeder; Starlink returns directly to the main negative bus.",
       "specs": [
-        "300 A continuous · 500 A for 5 min · 900 A for 30 s",
-        "48 VDC maximum",
-        "Single circuit ON / OFF",
-        "Two tin-plated 3/8 in studs",
-        "IP66 · ignition protected · UL 1107"
+        "2 studs + 5 screw terminals",
+        "6 connections used",
+        "1 position spare",
+        "Insulating cover included"
       ],
-      "note": "Mount through a fixed internal faceplate—not the hinged door—so the heavy 1/0 AWG cables never flex when the box opens. Stack the two identical Class-T-protected positive string lugs on the input stud only after confirming lug thickness, stud engagement and the manufacturer's torque. Stop AC loads and all charging before switching OFF. A faulted string is isolated during a full shutdown with a multimeter and insulated tools; the switch never selects one string.",
-      "sourceUrl": "https://www.bluesea.com/products/6006"
+      "note": "One ring terminal lands on each position. Do not double small screw terminals merely to create room; this bar already has the required capacity."
     },
     {
       "id": "balancers",
@@ -547,22 +554,22 @@
     {
       "id": "fuseBlock",
       "title": "24 V breaker distribution",
-      "kicker": "Resettable high-interrupt DC center",
+      "kicker": "High-interrupt feeder · resettable branch bank",
       "kind": "distribution",
-      "summary": "Seven resettable MidNite Solar breakers protect the SmartSolar output and every low-current positive circuit; black load conductors return unswitched and unbroken to a separate negative bus.",
+      "summary": "A MidNite 100 A SmartSolar breaker and MidNite 20 A high-interrupt service feeder protect the two battery-bus-fed circuits; five lower-cost CHTAIXI breakers protect the downstream positive branches. Black load conductors return unswitched and unbroken to the negative bus.",
       "specs": [
-        "MNEDC100 · 100 A SmartSolar output",
-        "MNEPV20 · 20 A service feeder",
-        "MNEPV5 · 5 A Starlink",
-        "MNEPV2 · 2 A UniFi converter",
-        "MNEPV15 · 15 A six-port USB panel",
-        "2 × MNEPV1 · 1 A indoor / outdoor lights",
+        "MidNite MNEDC100 · 100 A SmartSolar output · 10 kA",
+        "MidNite MNEPV20 · 20 A service feeder · 10 kA",
+        "CHTAIXI B6 · 6 A Starlink",
+        "CHTAIXI B6 · 6 A UniFi converter",
+        "CHTAIXI B15 · 15 A six-port USB panel",
+        "2 × CHTAIXI B6 · 6 A indoor / outdoor lights",
         "Six-breaker service bank · 3 inputs / 6 protected outputs",
-        "150 VDC · 10 kA AIC · resettable",
+        "CHTAIXI branches are polarized · observe marked line/load direction",
         "Blue Sea 2314 return bus · 6 used landings + 1 spare"
       ],
-      "note": "The six-breaker service bank correctly has three incoming positive conductors and six outgoing protected conductors. The 20 A service feeder and 5 A Starlink breaker each have an independent input and output; one short common-input comb then supplies the four adjacent UniFi, USB, inside-light and outside-light breakers. This is why the top and bottom connection counts do not match one-for-one. Only positive conductors pass through breakers and switches. The main-negative feeder, UniFi, USB, both lights and the tiny switch-indicator return use six of the seven landing positions on the covered Blue Sea 2314 MiniBus, leaving one spare. Starlink returns directly to the main negative bus. Each low-current positive/negative pair shares one gland and separates only inside the box.",
-      "sourceUrl": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=759&sortOrder=1"
+      "note": "The six-breaker service bank has three incoming positive conductors and six outgoing protected conductors. The retained MidNite 20 A service feeder and 6 A Starlink breaker each have an independent input and output; one short common-input comb supplies the adjacent UniFi, USB, inside-light and outside-light CHTAIXI breakers. Only positives pass through breakers and switches. The CHTAIXI devices are allowed only downstream of the 10 kA MidNite feeder, must be wired in their marked DC polarity, and require installer verification of series coordination and Fiji acceptance.",
+      "sourceUrl": "https://www.amazon.com/stores/page/0C1264F8-9BBA-45D7-BDFB-B1A21EF78729"
     },
     {
       "id": "mpptFuse",
@@ -616,7 +623,7 @@
         "25–40 W typical",
         "60 W maximum",
         "12–48 V input",
-        "5 A resettable DC breaker at nominal 24 V",
+        "6 A CHTAIXI B-curve DC breaker at nominal 24 V",
         "One 15 m male-to-male OEM DC cable",
         "5.5 × 2.1 mm center-positive bulkhead interface"
       ],
@@ -635,24 +642,25 @@
         "Wi-Fi 6 · 1 WAN + 1 LAN",
         "−10 to 45°C · 95% non-condensing"
       ],
-      "note": "Power it from the dedicated potted 8–35 V-to-5 V converter on the INTERNET switch, not from the general charging station. Preconfigure it, export a backup and print recovery instructions before travel.",
+      "note": "Power it from the dedicated junction-box 12–32 V-to-5 V converter on the INTERNET switch, not from the general charging station. Preconfigure it, export a backup and print recovery instructions before travel.",
       "sourceUrl": "https://techspecs.ui.com/unifi/cloud-gateways/ux"
     },
     {
       "id": "unifiPower",
       "title": "Dedicated UniFi power converter",
-      "kicker": "Powerwerx USBbuddy2 · potted 8–35 V to 5 V",
+      "kicker": "YRDZXG B0G1W6JTX8 · inside junction box",
       "kind": "conversion",
-      "summary": "A compact potted converter gives UniFi Express its own 5 V / 3 A supply so the INTERNET rocker can shut down the gateway and Starlink together without disabling general USB charging.",
+      "summary": "A compact protected converter inside the junction box gives UniFi Express its own 5 V supply, so the INTERNET rocker can shut down the gateway and Starlink together without disabling general USB charging.",
       "specs": [
-        "8–35 VDC input",
-        "5 V · 3 A maximum",
-        "2 A breakered nominal-24 V input",
-        "Potted against moisture, shock and vibration",
+        "12–32 VDC input",
+        "5 V · 5 A / 25 W claimed maximum",
+        "6 A CHTAIXI B-curve breakered nominal-24 V input",
+        "Reverse-polarity, overvoltage, overcurrent, short-circuit and thermal protection",
+        "64 × 14 × 14 mm listed envelope",
         "Short high-quality USB-A to USB-C lead"
       ],
-      "note": "Bench-test cold boot and repeated power cycling with the exact UniFi Express before travel; USB-A current advertisement varies between chargers even when the headline amperage is sufficient.",
-      "sourceUrl": "https://powerwerx.com/usbbuddy2-powerpole-usb-device-charger"
+      "note": "Mount it inside the junction box and pass only the USB-A-to-USB-C output lead through the dedicated bottom gland. Bench-test cold boot and repeated power cycling with the exact UniFi Express before travel; the listing claims ample current, but USB-A current advertisement varies between chargers.",
+      "sourceUrl": "https://www.amazon.com/dp/B0G1W6JTX8"
     },
     {
       "id": "usb",
@@ -667,7 +675,7 @@
         "10–32 VDC direct input",
         "Up to 60 W per module at 24 V",
         "One 15 A branch pair through the junction gland",
-        "Local 3 × 10 A resettable module breakers"
+        "Local 3 × CHTAIXI B10 resettable DC breakers"
       ],
       "note": "Mount all three interior-only modules in one small splash-sheltered faceplate/back box. Split the single 24 V pair locally at that panel. Scanstrut specifies conformal-coated electronics but an interior installation; keep it out of direct spray and provide strain relief.",
       "sourceUrl": "https://www.scanstrut.com/marine/power/tile"
@@ -700,7 +708,7 @@
         "900 lm",
         "12–28 VDC · 0.33 A at 24 V",
         "IP67 die-cast aluminum housing",
-        "1 A breakered source-side switch",
+        "6 A CHTAIXI B-curve breaker · source-side switch",
         "Two series silicon diodes for charge-voltage margin"
       ],
       "note": "Amazon primary recommendation, ASIN B0F1V59NXC. The battery bank can charge to 28.2–28.8 V, slightly above the light's stated 28 V maximum, so install two 3 A silicon rectifier diodes in series with the positive branch to retain approximately 1.2–1.6 V of margin. Suspend from a short dry interior bracket with strain relief.",
@@ -718,7 +726,7 @@
         "12–28 VDC · 0.33 A at 24 V",
         "IP67 die-cast aluminum housing",
         "Simple red/black two-wire input",
-        "1 A breakered source-side switch",
+        "6 A CHTAIXI B-curve breaker · source-side switch",
         "Two series silicon diodes for charge-voltage margin"
       ],
       "note": "Amazon primary recommendation, ASIN B0F1V59NXC. The battery bank can charge to 28.2–28.8 V, slightly above the light's stated 28 V maximum, so install two 3 A silicon rectifier diodes in series with the positive branch. Mount under an eave, bed the cable entry, replace supplied fasteners with 316 stainless, and inspect for corrosion because IP67 does not establish salt-spray durability.",
@@ -729,16 +737,16 @@
       "title": "Compact junction box + wall board",
       "kicker": "14.6 × 10.4 × 5.9 in target enclosure",
       "kind": "structure",
-      "summary": "A compact 370 × 265 × 150 mm enclosure protects a fixed-faceplate whole-bank disconnect, SmartShunt, covered busbars, resettable DC breakers and prewired low-current connections. It is only 20 × 18 mm larger than the PG enclosure, providing a device-free bottom gland gutter and terminal-radius-aware service clearances. A sealed three-rocker control panel passes through its fixed left sidewall; the Ekrano mounts separately just above it.",
+      "summary": "A compact 370 × 265 × 150 mm enclosure protects the SmartShunt, covered busbars, resettable service breakers and prewired low-current connections. The two 125 A battery-string breakers sit separately in their own finger-safe enclosure near the batteries. The main box is only 20 × 18 mm larger than the PG enclosure, providing a device-free bottom gland gutter and terminal-radius-aware service clearances. A sealed three-rocker control panel passes through its fixed left sidewall; the Ekrano mounts separately just above it.",
       "specs": [
         "Exterior about 14.6 × 10.4 × 5.9 in",
         "Flat hinged door + removable backplate",
-        "Master disconnect on fixed internal faceplate",
+        "No battery switch or battery-string protection inside",
         "Three accessible fixed-sidewall rockers",
         "Power electronics and Ekrano remain on wall",
         "Fits inside either iM2875 with padding"
       ],
-      "note": "Keep the MultiPlus, SmartSolar, Ekrano and both balancers outside this sealed box. Put the two Class T string fuses at the battery positives. All 14 cable glands plus the Starlink bulkhead jack are on the bottom; the master disconnect stays fixed because it carries three 1/0 AWG cable lugs. Each UniFi, USB and light pair enters one gland and separates only inside. Mount the 86.4 × 58.4 mm 8259 frame through the otherwise unused left sidewall, with the three switch positions stacked vertically; gasket the frame perimeter and seal its fasteners. Use factory-crimped tinned lugs, adhesive heat-shrink, noncorroding hardware and bottom cable entries; prove component depth, terminal access, route length and the 14.4 mm cable bend envelope at 1:1 scale before ordering cables or drilling the purchased enclosure.",
+      "note": "Keep the MultiPlus, SmartSolar, Ekrano, both balancers and the separate finger-safe battery-breaker enclosure outside this sealed box. All 14 cable glands plus the Starlink bulkhead jack are on the bottom. Each UniFi, USB and light pair enters one gland and separates only inside. Mount the 86.4 × 58.4 mm 8259 frame through the otherwise unused left sidewall, with the three switch positions stacked vertically; gasket the frame perimeter and seal its fasteners. Use factory-prepared tinned cable ends, adhesive heat-shrink, noncorroding hardware and bottom cable entries; prove component depth, terminal access, route length and the 14.4 mm cable bend envelope at 1:1 scale before ordering cables or drilling the purchased enclosure.",
       "sourceUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html"
     },
     {
@@ -750,10 +758,22 @@
       "specs": [
         "Copper/tinned conductor",
         "Corrosion-protected joints",
-        "Blue Sea 2128 · 2 studs + 6 screws",
-        "6 bonds used · 1 stud + 1 screw spare",
         "RCD and earth tests at commissioning"
       ]
+    },
+    {
+      "id": "earthBus",
+      "title": "Main protective-earth busbar",
+      "kicker": "Blue Sea 2128 · 250 A MaxiBus",
+      "kind": "earth",
+      "summary": "The wall-mounted earth bus provides a dedicated landing for each of the six modeled protective-earth and bonding conductors.",
+      "specs": [
+        "2 × 5/16 in studs + 6 × #10 screws",
+        "6 bonds used",
+        "2 positions spare",
+        "48 VDC / 250 A tinned-copper bus"
+      ],
+      "note": "Use one terminal per bond. The former B000OTJ8A0 four-position MiniBus was undersized and is not part of the design."
     }
   ],
   "diagram": {
@@ -770,7 +790,6 @@
             "id": "junctionBox",
             "label": "Tinted · inside / through compact junction box",
             "memberIds": [
-              "batterySelector",
               "mainDc",
               "mounting"
             ]
@@ -830,11 +849,6 @@
             "y": 650
           },
           {
-            "id": "batterySelector",
-            "x": 380,
-            "y": 650
-          },
-          {
             "id": "mainDc",
             "x": 720,
             "y": 650
@@ -853,6 +867,11 @@
             "id": "earth",
             "x": 1460,
             "y": 500
+          },
+          {
+            "id": "batteryProtection",
+            "x": 380,
+            "y": 650
           }
         ],
         "edges": [
@@ -920,20 +939,20 @@
           {
             "id": "ov-bat-pos",
             "from": "batteryBank",
-            "to": "batterySelector",
+            "to": "batteryProtection",
             "type": "battery",
-            "label": "2 × 150 A strings",
+            "label": "2 independent + leads",
             "labelAt": {
               "x": 323,
               "y": 610
             }
           },
           {
-            "id": "ov-selector",
-            "from": "batterySelector",
+            "id": "ov-breakers-positive",
+            "from": "batteryProtection",
             "to": "mainDc",
             "type": "battery",
-            "label": "whole bank · ON / OFF",
+            "label": "2 × 125 A · normally ON",
             "labelAt": {
               "x": 600,
               "y": 610
@@ -972,7 +991,7 @@
             "from": "mainDc",
             "to": "essentialLoads",
             "type": "battery",
-            "label": "Starlink · switched 24 V / 5 A",
+            "label": "Starlink · switched 24 V / 6 A",
             "waypoints": [
               {
                 "x": 840,
@@ -1141,12 +1160,15 @@
             "id": "junctionBox",
             "label": "Tinted · inside / through compact junction box",
             "memberIds": [
-              "batterySelector",
               "positiveBus",
+              "mpptFuse",
               "smartShunt",
               "negativeBus",
+              "returnBus",
               "fuseBlock",
+              "ekranoFuse",
               "loadSwitches",
+              "unifiPower",
               "mounting"
             ]
           }
@@ -1240,24 +1262,24 @@
             "y": 1835
           },
           {
-            "id": "classTFuseA",
+            "id": "batteryBreakerA",
             "x": 755,
             "y": 1030
           },
           {
-            "id": "classTFuseB",
+            "id": "batteryBreakerB",
             "x": 755,
             "y": 1571
-          },
-          {
-            "id": "batterySelector",
-            "x": 1101,
-            "y": 1030
           },
           {
             "id": "positiveBus",
             "x": 1446,
             "y": 1030
+          },
+          {
+            "id": "mpptFuse",
+            "x": 1446,
+            "y": 420
           },
           {
             "id": "smartShunt",
@@ -1275,9 +1297,19 @@
             "y": 1030
           },
           {
+            "id": "returnBus",
+            "x": 1830,
+            "y": 1373
+          },
+          {
             "id": "loadSwitches",
             "x": 2547,
             "y": 1030
+          },
+          {
+            "id": "ekranoFuse",
+            "x": 2640,
+            "y": 510
           },
           {
             "id": "starlink",
@@ -1286,8 +1318,8 @@
           },
           {
             "id": "unifiPower",
-            "x": 1651,
-            "y": 1742
+            "x": 2200,
+            "y": 1490
           },
           {
             "id": "router",
@@ -1315,9 +1347,14 @@
             "y": 568
           },
           {
-            "id": "earth",
+            "id": "earthBus",
             "x": 3034,
             "y": 805
+          },
+          {
+            "id": "earth",
+            "x": 3034,
+            "y": 1710
           }
         ],
         "edges": [
@@ -1377,31 +1414,18 @@
             }
           },
           {
-            "id": "dt-mppt-positive",
+            "id": "dt-mppt-positive-controller",
             "from": "solarController",
+            "to": "mpptFuse",
+            "type": "battery",
+            "label": "+ · 25 mm²"
+          },
+          {
+            "id": "dt-mppt-positive",
+            "from": "mpptFuse",
             "to": "positiveBus",
             "type": "battery",
-            "label": "+ · 100 A breaker · 25 mm²",
-            "fromPortOffset": 30,
-            "toPortOffset": -25,
-            "waypoints": [
-              {
-                "x": 1523,
-                "y": 515
-              },
-              {
-                "x": 1619,
-                "y": 515
-              },
-              {
-                "x": 1619,
-                "y": 970
-              }
-            ],
-            "labelAt": {
-              "x": 1715,
-              "y": 911
-            }
+            "label": "protected + · 25 mm²"
           },
           {
             "id": "dt-mppt-negative",
@@ -1413,7 +1437,11 @@
             "toPortOffset": -35,
             "waypoints": [
               {
-                "x": 1549,
+                "x": 1300,
+                "y": 309
+              },
+              {
+                "x": 1300,
                 "y": 554
               },
               {
@@ -1485,11 +1513,11 @@
             "label": "String B · 1/0 AWG series link"
           },
           {
-            "id": "dt-a-class-t",
+            "id": "dt-a-breaker",
             "from": "battery2",
-            "to": "classTFuseA",
+            "to": "batteryBreakerA",
             "type": "battery",
-            "label": "A + · 1/0 AWG",
+            "label": "A + · short 1/0 AWG",
             "labelAt": {
               "x": 653,
               "y": 983
@@ -1497,17 +1525,17 @@
           },
           {
             "id": "dt-a-pos",
-            "from": "classTFuseA",
-            "to": "batterySelector",
+            "from": "batteryBreakerA",
+            "to": "positiveBus",
             "type": "battery",
-            "label": "150 A protected A +"
+            "label": "125 A protected A + · 1/0 AWG"
           },
           {
-            "id": "dt-b-class-t",
+            "id": "dt-b-breaker",
             "from": "battery4",
-            "to": "classTFuseB",
+            "to": "batteryBreakerB",
             "type": "battery",
-            "label": "B + · 1/0 AWG",
+            "label": "B + · short 1/0 AWG",
             "labelAt": {
               "x": 653,
               "y": 1525
@@ -1515,31 +1543,24 @@
           },
           {
             "id": "dt-b-pos",
-            "from": "classTFuseB",
-            "to": "batterySelector",
+            "from": "batteryBreakerB",
+            "to": "positiveBus",
             "type": "battery",
-            "label": "150 A protected B +",
+            "label": "125 A protected B + · 1/0 AWG",
             "waypoints": [
               {
-                "x": 900,
+                "x": 930,
                 "y": 1639
               },
               {
-                "x": 1062,
+                "x": 1370,
                 "y": 1639
               },
               {
-                "x": 1062,
+                "x": 1370,
                 "y": 1098
               }
             ]
-          },
-          {
-            "id": "dt-selector-positive",
-            "from": "batterySelector",
-            "to": "positiveBus",
-            "type": "battery",
-            "label": "whole-bank + · 1/0 AWG"
           },
           {
             "id": "dt-a-neg",
@@ -1755,25 +1776,9 @@
           {
             "id": "dt-services-negative",
             "from": "negativeBus",
-            "to": "fuseBlock",
+            "to": "returnBus",
             "type": "battery",
-            "label": "− · return-bus feeder",
-            "fromPortOffset": 35,
-            "toPortOffset": 35,
-            "waypoints": [
-              {
-                "x": 1636,
-                "y": 1455
-              },
-              {
-                "x": 1786,
-                "y": 1455
-              },
-              {
-                "x": 1786,
-                "y": 1144
-              }
-            ]
+            "label": "− · return-bus feeder"
           },
           {
             "id": "dt-switch-feed",
@@ -1791,7 +1796,7 @@
             "from": "fuseBlock",
             "to": "loadSwitches",
             "type": "battery",
-            "label": "Starlink 24 V · 5 A breaker → INTERNET A",
+            "label": "Starlink 24 V · 6 A breaker → INTERNET A",
             "fromPortOffset": 40,
             "toPortOffset": -40,
             "waypoints": [
@@ -1840,21 +1845,21 @@
             "from": "loadSwitches",
             "to": "unifiPower",
             "type": "battery",
-            "label": "INTERNET pole B · 2 A +",
+            "label": "INTERNET pole B · 2 A + · internal",
             "fromPortOffset": 20,
             "waypoints": [
               {
                 "x": 2628,
-                "y": 1333
+                "y": 1450
               },
               {
-                "x": 1796,
-                "y": 1333
+                "x": 2320,
+                "y": 1450
               }
             ],
             "labelAt": {
-              "x": 2176,
-              "y": 1333
+              "x": 2470,
+              "y": 1450
             }
           },
           {
@@ -1862,7 +1867,7 @@
             "from": "unifiPower",
             "to": "router",
             "type": "data",
-            "label": "5 V / 3 A · USB-C"
+            "label": "5 V / 3 A required · 5 A supply · USB-A → USB-C through gland"
           },
           {
             "id": "dt-usb",
@@ -1952,14 +1957,14 @@
             "waypoints": [
               {
                 "x": 1860,
-                "y": 568
+                "y": 450
               },
               {
-                "x": 2765,
-                "y": 568
+                "x": 2570,
+                "y": 450
               },
               {
-                "x": 2765,
+                "x": 2570,
                 "y": 385
               }
             ],
@@ -2063,27 +2068,32 @@
             }
           },
           {
-            "id": "dt-gx-power",
+            "id": "dt-gx-power-feed",
             "from": "positiveBus",
-            "to": "systemMonitor",
+            "to": "ekranoFuse",
             "type": "battery",
-            "label": "24 V + · supplied 3.15 A fuse",
-            "fromPortOffset": -35,
-            "toPortOffset": -30,
+            "label": "24 V + supply",
             "waypoints": [
               {
-                "x": 1591,
-                "y": 957
+                "x": 1559,
+                "y": 950
               },
               {
-                "x": 2918,
-                "y": 957
+                "x": 2720,
+                "y": 950
               },
               {
-                "x": 2918,
-                "y": 319
+                "x": 2720,
+                "y": 680
               }
             ]
+          },
+          {
+            "id": "dt-gx-power",
+            "from": "ekranoFuse",
+            "to": "systemMonitor",
+            "type": "battery",
+            "label": "fused 24 V +"
           },
           {
             "id": "dt-gx-negative",
@@ -2139,8 +2149,31 @@
             "label": "steel bracket · sealed face"
           },
           {
-            "id": "dt-earth-inv",
+            "id": "dt-earth-electrode",
             "from": "earth",
+            "to": "earthBus",
+            "type": "earth",
+            "label": "site electrode conductor",
+            "fromPortOffset": 40,
+            "toPortOffset": 40,
+            "waypoints": [
+              {
+                "x": 3379,
+                "y": 1778
+              },
+              {
+                "x": 3379,
+                "y": 925
+              }
+            ],
+            "labelAt": {
+              "x": 3398,
+              "y": 1360
+            }
+          },
+          {
+            "id": "dt-earth-inv",
+            "from": "earthBus",
             "to": "inverter",
             "type": "earth",
             "label": "chassis",
@@ -2159,7 +2192,7 @@
           },
           {
             "id": "dt-earth-gx",
-            "from": "earth",
+            "from": "earthBus",
             "to": "systemMonitor",
             "type": "earth",
             "label": "GX bond",
@@ -2182,7 +2215,7 @@
           },
           {
             "id": "dt-earth-ac",
-            "from": "earth",
+            "from": "earthBus",
             "to": "acBoard",
             "type": "earth",
             "label": "PE",
@@ -2205,7 +2238,7 @@
           },
           {
             "id": "dt-earth-mppt",
-            "from": "earth",
+            "from": "earthBus",
             "to": "solarController",
             "type": "earth",
             "label": "equipment bond",
@@ -2232,7 +2265,7 @@
           },
           {
             "id": "dt-earth-array",
-            "from": "earth",
+            "from": "earthBus",
             "to": "pvSafety",
             "type": "earth",
             "label": "array bond",
@@ -2289,7 +2322,7 @@
       "location": "Fiji",
       "procurement": "Purchased",
       "priority": "Must",
-      "description": "Purchased locally. Four matched units form two separately fused 24 V series strings; confirm exact labels and production batch.",
+      "description": "Purchased locally. Four matched units form two independently breakered 24 V series strings; confirm exact labels and production batch.",
       "productUrl": "https://www.everexceed.com/es200-12g-gel-battery_p363.html"
     },
     {
@@ -2311,14 +2344,14 @@
       "category": "Wiring",
       "item": "Custom preterminated 1/0 AWG tinned-marine battery cable set",
       "qty": 1,
-      "unit": "12-cable set",
-      "unitCost": 260,
+      "unit": "11-cable set",
+      "unitCost": 250,
       "currency": "USD",
-      "totalUsd": 260,
+      "totalUsd": 250,
       "location": "Import",
       "procurement": "Allowance",
       "priority": "Must",
-      "description": "Factory-crimped UL 1426 flexible tinned-copper 1/0 AWG (53.5 mm²) assemblies with tinned lugs and adhesive heat-shrink; this meets Victron's 50 mm² requirement for a 24/3000 connection up to 5 m and avoids buying a heavy-cable crimper. Planning set: 2 × 12 in M8–M8 series links; 2 × 12 in assumed M8–M6 battery-to-Class-T; 2 × 36 in M6–M10 Class-T-to-master-disconnect; 2 × 36 in assumed M8–M10 battery-negative-to-SmartShunt; 1 × 12 in M10–M10 shunt-to-bus; 1 × 12 in M10–M10 disconnect-to-bus; 2 × 36 in M10–M8 buses-to-MultiPlus. The two equal positive string leads stack on the Blue Sea 6006 input stud; the two equal negative leads stack on SmartShunt BATTERY MINUS. The current configurator prices these twelve assemblies at about $251.52 plus $3.97 U.S. shipping, rounded here to $260 before any applicable sales tax. Finalize every hole-to-hole length and confirm all studs after a 1:1 mock-up.",
+      "description": "Factory-prepared UL 1426 flexible tinned-copper 1/0 AWG (53.5 mm²) assemblies with adhesive heat-shrink. Planning set: 2 × M8–M8 series links; 2 × battery-to-MidNite-breaker leads; 2 × MidNite-breaker-to-separate-M10-positive-bus leads; 2 × battery-negative-to-SmartShunt leads; 1 × shunt-to-negative-bus link; and 2 × buses-to-MultiPlus leads. Breaker ends must match the received MNEPV125-80-1PNP terminal instructions; do not assume a ring lug. Eleven assemblies total, about 23 ft planned. Finalize every route and termination from a 1:1 mock-up before ordering.",
       "productUrl": "https://www.batterycablesusa.com/0-gauge-1-0-awg-marine-grade-battery-cable-with-ends",
       "specUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html"
     },
@@ -2338,20 +2371,64 @@
       "productUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html"
     },
     {
-      "id": "dse-ac-board",
+      "id": "dse-chtai-ac-rcbos-rejected",
       "category": "AC safety",
-      "item": "Compact AC protection box + HPM 5 m Type I trailing tool lead",
+      "item": "CHTAIXI 10 A / 30 mA 120 V Type AC RCBOs · not for DSE installation",
+      "qty": 2,
+      "unit": "ea",
+      "unitCost": 16.38,
+      "currency": "USD",
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Do not install",
+      "description": "Purchased from Amazon on 21 Aug 2026, order 111-9142760-2257055; ETA Aug 22. Exact ASIN B0CSV93CTN is marked 120 VAC, 1P+N, 30 mA and earth-leakage Type AC. It is not suitable for the DSE 230 V / 50 Hz system and does not meet the design's Type A residual-current requirement. Keep out of the installation and return if practical; both units still appear on the cost and customs records while owned.",
+      "productUrl": "https://www.amazon.com/dp/B0CSV93CTN",
+      "specUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html",
+      "totalUsd": 32.76
+    },
+    {
+      "id": "dse-ac-rcbo",
+      "category": "AC safety",
+      "item": "230 V two-pole 10 A / 30 mA Type A RCBO",
       "qty": 1,
-      "unit": "lot",
-      "unitCost": 250,
+      "unit": "ea",
+      "unitCost": 145,
       "currency": "FJD",
-      "totalUsd": 113.64,
+      "totalUsd": 145,
+      "location": "Fiji",
+      "procurement": "Buy",
+      "priority": "Must",
+      "description": "Required downstream protection for MultiPlus AC-out. Buy a genuine 230 V, two-pole, 10 A, 30 mA Type A RCBO from a Fiji electrical supplier; the two purchased CHTAIXI B0CSV93CTN units are 120 V Type AC devices and must not be installed. A qualified electrical person must verify neutral switching, fault protection, trip performance and Fiji/AS-NZS compliance.",
+      "specUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html"
+    },
+    {
+      "id": "dse-ac-enclosure",
+      "category": "AC safety",
+      "item": "Compact AC protection enclosure + strain relief",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 48.14,
+      "currency": "FJD",
+      "totalUsd": 21.88,
       "location": "Fiji",
       "procurement": "Allowance",
       "priority": "Must",
-      "description": "Plywood-mounted compact enclosure with a two-pole 10 A / 30 mA Type A RCBO, as required downstream of MultiPlus AC-out, plus one HPM 5 m 10 A AS/NZS workshop extension lead. A qualified electrical person removes only the lead's source plug and hardwires L / N / PE through strain relief after the RCBO, retaining its molded Fiji/Australia Type I female trailing socket. Keep this 230 V protection enclosure separate from the compact DC junction box.",
-      "productUrl": "https://bunningspacific.com.fj/collections/extension-cords-1",
-      "specUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html"
+      "description": "Small plywood-mounted enclosure for the AC-out RCBO, with DIN rail, cable glands or strain relief and touch-safe terminations. Keep this 230 V enclosure separate from the compact DC junction box."
+    },
+    {
+      "id": "dse-tool-lead",
+      "category": "AC safety",
+      "item": "HPM 5 m 10 A Type I trailing tool lead",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 56.86,
+      "currency": "FJD",
+      "totalUsd": 25.85,
+      "location": "Fiji",
+      "procurement": "Allowance",
+      "priority": "Must",
+      "description": "AS/NZS three-core workshop extension lead with a molded Fiji/Australia Type I female trailing socket. A qualified electrical person removes only the source plug and hardwires L / N / PE through strain relief after the RCBO.",
+      "productUrl": "https://bunningspacific.com.fj/collections/extension-cords-1"
     },
     {
       "id": "dse-gen-input",
@@ -2370,19 +2447,66 @@
       "specUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html"
     },
     {
-      "id": "dse-switch-panel",
+      "id": "dse-switch-internet",
       "category": "DC controls",
-      "item": "Exterior 3-rocker internet + lighting control panel",
+      "item": "Blue Sea 8287 DPST INTERNET rocker",
       "qty": 1,
-      "unit": "set",
-      "unitCost": 85,
+      "unit": "ea",
+      "unitCost": 18.32,
       "currency": "USD",
-      "totalUsd": 85,
+      "totalUsd": 18.32,
       "location": "Import",
       "procurement": "Buy",
       "priority": "Must",
-      "description": "Blue Sea 8287 DPST OFF–ON rocker for the separately breakered 24 V Starlink and UniFi positives; 2 × 8282 SPST OFF–ON rockers for the indoor- and outdoor-light positives; 8259 three-position frame; 5.5 × 2.1 mm center-positive bulkhead jack, 4 × 1N5408-class 3 A silicon diodes plus spares for the two light voltage-margin packs, engraved labels, closed-cell perimeter gasket, sealed fasteners and insulated terminals. Mount through the fixed enclosure sidewall. Each light uses one two-core cable from the junction box; load negatives bypass every switch.",
-      "productUrl": "https://www.bluesea.com/products/8287/Contura_Switch_DPST_Black_-_OFF-ON"
+      "description": "Salt-spray-resistant DPST OFF–ON rocker. Its two poles switch the separately breakered 24 V Starlink and UniFi positives together; load negatives bypass the switch.",
+      "productUrl": "https://www.amazon.com/dp/B000MMC8OM",
+      "specUrl": "https://www.bluesea.com/products/8287/Contura_Switch_DPST_Black_-_OFF-ON"
+    },
+    {
+      "id": "dse-switch-lights",
+      "category": "DC controls",
+      "item": "Blue Sea 8282 SPST light rockers",
+      "qty": 2,
+      "unit": "ea",
+      "unitCost": 14.99,
+      "currency": "USD",
+      "totalUsd": 29.98,
+      "location": "Import",
+      "procurement": "Buy",
+      "priority": "Must",
+      "description": "One salt-spray-resistant SPST OFF–ON rocker each for the indoor and outdoor light positives. Each light uses one two-core cable from the junction box; load negatives bypass the switches.",
+      "productUrl": "https://www.amazon.com/dp/B000Y87W54",
+      "specUrl": "https://www.bluesea.com/products/8282/Contura_Switch_SPST_Black_-_OFF-ON"
+    },
+    {
+      "id": "dse-switch-frame",
+      "category": "DC controls",
+      "item": "Blue Sea 8259 three-position Contura frame",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 10.8,
+      "currency": "USD",
+      "totalUsd": 10.8,
+      "location": "Import",
+      "procurement": "Buy",
+      "priority": "Must",
+      "description": "Three-position mounting frame for the INTERNET, INSIDE and OUTSIDE rockers through the fixed enclosure sidewall.",
+      "productUrl": "https://www.fisheriessupply.com/blue-sea-systems-contura-switch-mounting-panels/8259",
+      "specUrl": "https://www.bluesea.com/products/8259/Contura_Switch_Mounting_Panel_-_3_Position"
+    },
+    {
+      "id": "dse-switch-accessories",
+      "category": "DC controls",
+      "item": "Switch-panel jack, light diodes + sealing hardware",
+      "qty": 1,
+      "unit": "small-parts lot",
+      "unitCost": 15.74,
+      "currency": "USD",
+      "totalUsd": 15.74,
+      "location": "Import",
+      "procurement": "Allowance",
+      "priority": "Must",
+      "description": "One 5.5 × 2.1 mm center-positive Starlink bulkhead jack; 6 × 1N5408-class 3 A silicon diodes (four installed plus two spares) for the light voltage-margin packs; engraved labels; closed-cell perimeter gasket; sealed fasteners; and insulated terminals. These are low-value installation consumables rather than one catalog product."
     },
     {
       "id": "dse-indoor-light",
@@ -2394,9 +2518,9 @@
       "currency": "USD",
       "totalUsd": 23.99,
       "location": "Import",
-      "procurement": "Buy",
+      "procurement": "Purchased",
       "priority": "Must",
-      "description": "Amazon ASIN B0F1V59NXC: compact 12–28 V, 900 lm, 3000 K warm-white, IP67 utility light. Suspend it inside from a short dry bracket with its lens facing down. Feed its positive from the 1 A resettable breaker through the INSIDE rocker and two series silicon diodes, then run one two-core cable to the fixture; negative returns directly to the 24 V return bus.",
+      "description": "Purchased from Amazon on 17 Aug 2026 and delivered 19 Aug. ASIN B0F1V59NXC: compact 12–28 V, 900 lm, 3000 K warm-white, IP67 utility light. Suspend it inside from a short dry bracket with its lens facing down. Feed its positive from the 6 A CHTAIXI B-curve breaker through the INSIDE rocker and two series silicon diodes, then run one 2-core 1.5 mm² cable to the fixture; negative returns directly to the 24 V return bus.",
       "productUrl": "https://www.amazon.com/dp/B0F1V59NXC"
     },
     {
@@ -2409,9 +2533,24 @@
       "currency": "USD",
       "totalUsd": 23.99,
       "location": "Import",
-      "procurement": "Buy",
+      "procurement": "Purchased",
       "priority": "Must",
-      "description": "Amazon ASIN B0F1V59NXC: compact 12–28 V, 900 lm, 3000 K warm-white, IP67 down-angle exterior light with die-cast aluminum housing and a simple red/black input. Feed its positive from one 1 A resettable breaker through the OUTSIDE rocker and two series silicon diodes, then run one two-core cable to the fixture. Mount under an eave, use 316 stainless fasteners and sealed bedding, and inspect periodically for salt corrosion.",
+      "description": "Purchased from Amazon on 17 Aug 2026 and delivered 19 Aug. ASIN B0F1V59NXC: compact 12–28 V, 900 lm, 3000 K warm-white, IP67 down-angle exterior light with die-cast aluminum housing and a simple red/black input. Feed its positive from the 6 A CHTAIXI B-curve breaker through the OUTSIDE rocker and two series silicon diodes, then run one 2-core 1.5 mm² cable to the fixture. Mount under an eave, use 316 stainless fasteners and sealed bedding, and inspect periodically for salt corrosion.",
+      "productUrl": "https://www.amazon.com/dp/B0F1V59NXC"
+    },
+    {
+      "id": "dse-light-spare",
+      "category": "Spares",
+      "item": "Spare QHLightlux 12–28 V 3000 K utility light",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 23.99,
+      "currency": "USD",
+      "totalUsd": 23.99,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Should",
+      "description": "Third identical Amazon ASIN B0F1V59NXC fixture purchased on 17 Aug 2026 and delivered 19 Aug. Carry it as a direct spare for either the indoor or outdoor light; it is not an additional installed load or branch circuit.",
       "productUrl": "https://www.amazon.com/dp/B0F1V59NXC"
     },
     {
@@ -2480,10 +2619,11 @@
       "unitCost": 939,
       "currency": "USD",
       "totalUsd": 939,
-      "location": "Import",
-      "procurement": "Buy",
+      "location": "Fiji",
+      "procurement": "Deposit paid",
       "priority": "Must",
-      "description": "Exact PMP242305010: 3 kVA inverter/charger with 2.4 kW output at 25°C, 2.2 kW at 40°C, 5.5 kW peak and 70 A charger. The non-GX model is intentional because the Ekrano is the system's one GX controller; do not substitute a 48 V, GX or 120 V model. Includes the battery-temperature sensor. Price is Victron's 2026 Q2 USD list price; request this exact part from Solar Fiji before importing. IP22/non-condensing still requires the protected indoor salt-air installation shown in the design.",
+      "description": "A 20% deposit has been paid to purchase the exact PMP242305010 in Fiji; 80% remains due. The displayed $939 is the prior USD planning value, so the budget provisionally counts $187.80 as paid until the actual Fiji invoice total and deposit amount replace it. This is the 3 kVA inverter/charger with 2.4 kW output at 25°C, 2.2 kW at 40°C, 5.5 kW peak and 70 A charger. The non-GX model is intentional because the Ekrano is the system's one GX controller; do not substitute a 48 V, GX or 120 V model. Includes the battery-temperature sensor. IP22/non-condensing still requires the protected indoor salt-air installation shown in the design.",
+      "paidFraction": 0.2,
       "productUrl": "https://www.victronenergy.com/inverters-chargers/multiplus-ii",
       "specUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/technical-specifications-mp-ii-230v.html"
     },
@@ -2493,14 +2633,14 @@
       "item": "Victron Ekrano GX BPP900480100",
       "qty": 1,
       "unit": "ea",
-      "unitCost": 619.65,
+      "unitCost": 563.55,
       "currency": "USD",
-      "totalUsd": 619.65,
+      "totalUsd": 563.55,
       "location": "Import",
-      "procurement": "Buy",
+      "procurement": "Purchased",
       "priority": "Must",
-      "description": "Donor-funded all-in-one GX controller and 7-inch local touchscreen. Current Blue Marine listing shows 19 in stock with free US shipping. It provides VE.Bus, three isolated VE.Direct ports, hardwired Ethernet/VRM, DVCC coordination and local control. Mount horizontally with the included rear steel bracket for an IP54 front; protect its IP21 rear in the dry alcove. Confirm delivery before the 29 Aug departure.",
-      "productUrl": "https://bluemarine.com/products/victron-energy-ekrano-gx",
+      "description": "Purchased new from Amazon on 17 Aug 2026 for $563.55 before the order-level promotion and tax; delivered 20 Aug. Donor-funded all-in-one GX controller and 7-inch local touchscreen with VE.Bus, three isolated VE.Direct ports, hardwired Ethernet/VRM, DVCC coordination and local control. Mount horizontally with the included rear steel bracket for an IP54 front and protect its IP21 rear in the dry alcove.",
+      "productUrl": "https://www.amazon.com/dp/B0C9N42K9Z",
       "specUrl": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/technical-specifications.html"
     },
     {
@@ -2509,30 +2649,31 @@
       "item": "Victron SmartSolar MPPT 150/85-Tr VE.Can",
       "qty": 1,
       "unit": "ea",
-      "unitCost": 508,
+      "unitCost": 476,
       "currency": "USD",
-      "totalUsd": 508,
+      "totalUsd": 476,
       "location": "Import",
-      "procurement": "Buy",
+      "procurement": "Purchased",
       "priority": "Must",
-      "description": "SCC115085411 dedicated 85 A solar charger. Each 2S string is 104.7 V modeled cold Voc against the controller's 150 V absolute / 145 V operating limits; the combined 28.4 A array Isc is below its 70 A maximum, and 2.26 kW is within its 2.4 kW nominal 24 V PV rating. Use a 100 A protected battery branch. Price is Victron's 2026 Q2 USD list price; request the same part number in the Solar Fiji quote.",
-      "productUrl": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-mppt-ve-can",
+      "description": "Exact SCC115085411 purchased new from Amazon on 17 Aug 2026 for $476 before the order-level promotion and tax; expected in Los Angeles on 24 Aug. Each 2S string is 104.7 V modeled cold Voc against the controller's 150 V absolute / 145 V operating limits; the combined 28.4 A array Isc is below its 70 A maximum, and 2.26 kW is within its 2.4 kW nominal 24 V PV rating. Use a 100 A protected battery branch.",
+      "productUrl": "https://www.amazon.com/dp/B08LP7JLLT",
       "specUrl": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html"
     },
     {
-      "id": "dse-mppt-wirebox",
-      "category": "Mounting",
-      "item": "Victron MPPT WireBox-XL Tr",
+      "id": "dse-dielectric-grease",
+      "category": "Electrical protection",
+      "item": "Permatex 22058 dielectric grease · 3 oz",
       "qty": 1,
-      "unit": "ea",
-      "unitCost": 40,
+      "unit": "tube",
+      "unitCost": 10.49,
       "currency": "USD",
-      "totalUsd": 40,
+      "totalUsd": 10.49,
       "location": "Import",
-      "procurement": "Buy",
+      "procurement": "Purchased",
       "priority": "Must",
-      "description": "Manufacturer terminal cover SCC950400210 sized for the 150/85-Tr. It reduces accidental contact, insects and direct salt/dust deposition at the IP22 connection area; it does not make the controller weatherproof.",
-      "productUrl": "https://www.victronenergy.com/accessories/mppt-wirebox"
+      "description": "Purchased from Amazon on 20 Aug 2026; Permatex 22058, 3 oz, ASIN B000AL8VD2. Use a thin film only on compatible, already-tightened exposed connections; never put grease between a lug and its current-carrying contact surface.",
+      "productUrl": "https://www.amazon.com/dp/B000AL8VD2",
+      "specUrl": "https://www.permatex.com/products/lubricants/specialty-lubricants/permatex-dielectric-tune-up-grease-3-oz/"
     },
     {
       "id": "dse-supplier-freight",
@@ -2554,92 +2695,218 @@
       "item": "Victron Battery Balancer",
       "qty": 2,
       "unit": "ea",
-      "unitCost": 48.45,
+      "unitCost": 46.025,
       "currency": "USD",
-      "totalUsd": 96.9,
+      "totalUsd": 92.05,
       "location": "Import",
-      "procurement": "Buy",
+      "procurement": "Purchased",
       "priority": "Must",
-      "description": "One balancer per independent two-battery 24 V string, with each alarm relay wired to a separate Ekrano digital input.",
-      "productUrl": "https://bluemarine.com/products/battery-balancer",
+      "description": "Two units purchased from Amazon on 17 Aug 2026 and delivered 19–20 Aug: one new at $48.45 and one used–mint at $43.60, totaling $92.05 before the order-level promotion and tax. Bench-test both, inspect the used unit closely and install one balancer per independent two-battery 24 V string, with each alarm relay wired to a separate Ekrano digital input.",
+      "productUrl": "https://www.amazon.com/dp/B01DH6B2D2",
       "specUrl": "https://www.victronenergy.com/batteries/battery-balancer"
     },
     {
       "id": "dse-shunt",
       "category": "Monitoring",
-      "item": "Victron SmartShunt 500 A",
+      "item": "Victron SmartShunt IP65 500 A",
       "qty": 1,
       "unit": "ea",
-      "unitCost": 100.3,
+      "unitCost": 98.93,
       "currency": "USD",
-      "totalUsd": 100.3,
+      "totalUsd": 98.93,
       "location": "Import",
-      "procurement": "Buy",
+      "procurement": "Purchased",
       "priority": "Must",
-      "description": "Whole-bank state of charge, current and voltage for Ekrano/VRM and DVCC Shared Voltage/Current Sense. Install the supplied 1 A fused Vbatt+ lead on the protected positive bus. Leave the Aux input reserved: one Aux channel cannot independently monitor both 24 V strings, so the two balancer alarm relays provide string-specific warning instead.",
-      "productUrl": "https://www.urbansupplyinc.com/products/victron-smartshunt-500a-50mv-battery-monitor",
+      "description": "IP65 version purchased new from Amazon on 17 Aug 2026 for $98.93 before the order-level promotion and tax; delivered 20 Aug. Provides whole-bank state of charge, current and voltage for Ekrano/VRM and DVCC Shared Voltage/Current Sense. Install the supplied fused Vbatt+ lead on the protected positive bus. Leave the Aux input reserved: one Aux channel cannot independently monitor both 24 V strings, so the two balancer alarm relays provide string-specific warning instead.",
+      "productUrl": "https://www.amazon.com/dp/B0BF636VBX",
       "specUrl": "https://www.victronenergy.com/meters-and-sensors/smartshunt"
     },
     {
-      "id": "dse-class-t",
-      "category": "DC safety",
-      "item": "Two-string 150 A Class T fuse package",
-      "qty": 1,
-      "unit": "kit",
-      "unitCost": 220,
-      "currency": "USD",
-      "totalUsd": 220,
-      "location": "Import",
-      "procurement": "Allowance",
-      "priority": "Must",
-      "description": "Two high-interrupt-rated covered holders mounted close to the two string positives, two installed Blue Sea 5114 150 A fuses and at least one spare. Class T is retained deliberately: its 20,000 A interrupt rating is appropriate for a battery short, while common resettable marine breakers have much lower interrupt ratings. MidNite's high-interrupt battery-breaker range offers 125 A and 175 A rather than an exact 150 A replacement; 125 A risks compromising MultiPlus surge headroom and 175 A changes the selected cable/protection coordination. These are the only user-service fuse links other than Victron-mandated small inline fuses.",
-      "productUrl": "https://www.bluesea.com/products/category/14/25/Fuse_Blocks/Class_T_Fuse_Blocks"
-    },
-    {
-      "id": "dse-selector",
-      "category": "DC safety",
-      "item": "Blue Sea 6006 m-Series whole-bank disconnect",
+      "id": "dse-orion-spare",
+      "category": "Spares",
+      "item": "Victron Orion-Tr Smart 24/12-30A 360 W DC-DC charger",
       "qty": 1,
       "unit": "ea",
-      "unitCost": 26.75,
+      "unitCost": 174.87,
       "currency": "USD",
-      "totalUsd": 26.75,
+      "totalUsd": 174.87,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Should",
+      "description": "Purchased new from Amazon on 17 Aug 2026 and delivered 20 Aug. Carry as an uninstalled spare: the finalized UniFi, USB and lighting branches accept nominal 24 V directly, so the base design does not route through this 24-to-12 V converter or incur its idle/conversion loss. Confirm the exact isolated/non-isolated product code and serial from its label for customs, and retain it for a future genuine 12 V load or field contingency.",
+      "productUrl": "https://www.amazon.com/dp/B087CZC211",
+      "specUrl": "https://www.victronenergy.com/dc-dc-converters/orion-tr-smart"
+    },
+    {
+      "id": "dse-amazon-promotion",
+      "category": "Purchase adjustments",
+      "item": "Amazon order promotions",
+      "qty": 1,
+      "unit": "order",
+      "unitCost": -85.82,
+      "currency": "USD",
+      "totalUsd": -85.82,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Reference",
+      "description": "Actual order-level promotions and coupon savings across the seven reconciled Amazon orders through 21 Aug 2026. Kept as one negative adjustment because the receipts do not allocate every discount cleanly to individual items."
+    },
+    {
+      "id": "dse-us-sales-tax",
+      "category": "Purchase adjustments",
+      "item": "U.S. sales tax on seven Amazon orders",
+      "qty": 1,
+      "unit": "lot",
+      "unitCost": 191.07,
+      "currency": "USD",
+      "totalUsd": 191.07,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Reference",
+      "description": "Actual U.S. sales tax across the seven reconciled Amazon orders through 21 Aug 2026, including $8.36 on order 111-9142760-2257055 and $8.31 on order 111-6868471-0482610."
+    },
+    {
+      "id": "dse-battery-string-breakers",
+      "category": "DC safety",
+      "item": "MidNite Solar MNEPV125-80-1PNP 125 A battery-string breakers",
+      "qty": 2,
+      "unit": "ea",
+      "unitCost": 55.98,
+      "currency": "USD",
+      "totalUsd": 111.96,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Must",
+      "description": "Purchased from Amazon on 20 Aug 2026, order 111-2775226-7205039; ETA Aug 26–28. Two non-polarized 125 A / 80 VDC MidNite MNEPV125-80-1PNP breakers replace both Class T fuse assemblies and the battery selector. MidNite specifies UL 489A listing, 14 AWG–1/0 AWG conductor range and 35 in-lb / 4 N·m torque. Both remain ON in normal service; both switch OFF for whole-bank isolation.",
+      "productUrl": "https://www.amazon.com/dp/B0CFX5PW79",
+      "specUrl": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=729"
+    },
+    {
+      "id": "dse-battery-breaker-enclosure",
+      "category": "DC safety",
+      "item": "Compact finger-safe two-breaker enclosure",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 25.99,
+      "currency": "USD",
+      "totalUsd": 25.99,
       "location": "Import",
       "procurement": "Buy",
       "priority": "Must",
-      "description": "Compact IP66 marine ON / OFF switch for the complete permanently paralleled bank, 300 A continuous and 48 VDC maximum. Two equal Class-T-protected string-positive lugs share its input stud; its output feeds the main positive bus. It cannot accidentally leave one string idle. Amazon ASIN B00445KFZ2.",
-      "productUrl": "https://www.amazon.com/dp/B00445KFZ2",
-      "specUrl": "https://www.bluesea.com/products/6006"
+      "description": "QILIPSU QL-VBB-6W six-way IP65 / UL94-V0 enclosure, 172 × 200 × 110 mm, used as a compact dead-front housing for both MidNite breakers. Remove or leave unused its small included busbars: each 1/0 AWG breaker output must run independently to a separate main-positive-bus stud. Confirm rail fit, terminal access and 1/0 AWG bend radius with the received breakers before drilling glands.",
+      "productUrl": "https://www.amazon.com/dp/B0CPV9NQ2M",
+      "specUrl": "https://qilipsu.com/product-265.html"
     },
     {
       "id": "dse-pv-protection",
       "category": "PV safety",
-      "item": "Indoor two-string PV entry protection, combine + Type 2 SPD",
+      "item": "CXCESNS 2-string / 1-output PV combiner, disconnect + SPD",
       "qty": 1,
-      "unit": "set",
-      "unitCost": 160,
+      "unit": "ea",
+      "unitCost": 65.99,
       "currency": "USD",
-      "totalUsd": 160,
+      "totalUsd": 65.99,
       "location": "Import",
-      "procurement": "Allowance",
+      "procurement": "Purchased",
       "priority": "Must",
-      "description": "One building-entry enclosure with four labeled string-conductor inputs, protected parallel terminals, a 40 A two-pole PV disconnect and Type 2 PV SPD coordinated with the 150 V MPPT. No separate outdoor array fuse/combiner is included: with two strings, reverse current from the one intact string is about 14.20 A, below the module's 25 A maximum series-fuse rating. Final component selection, cable/connector ampacity, ambient derating and local-code review require installer verification."
+      "description": "Purchased from Amazon on 21 Aug 2026, order 111-5362611-6708229; ETA Aug 22. ASIN B0FSQB97T2 is a true 2-in/1-out IP65 combiner with a 40 A / 600 VDC breaker and Type 2-style PV surge protector. Safety hold: its supplied 32 A string fuses exceed the Suntech module's 25 A maximum series-fuse rating. Do not commission it with those links; fit two correctly listed 20 A 10×38 mm gPV links and carry two matching spares, or have a qualified installer approve a listed equivalent.",
+      "productUrl": "https://www.amazon.com/dp/B0FSQB97T2",
+      "specUrl": "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP565S_C72_Nmh%2B.pdf"
     },
     {
-      "id": "dse-fuse-block",
+      "id": "dse-breaker-mnedc100",
       "category": "DC distribution",
-      "item": "MidNite resettable DC breaker set",
+      "item": "MidNite Solar MNEDC100 100 A DC breaker",
       "qty": 1,
-      "unit": "8-breaker set",
-      "unitCost": 260,
+      "unit": "ea",
+      "unitCost": 64,
       "currency": "USD",
-      "totalUsd": 260,
+      "totalUsd": 64,
       "location": "Import",
       "procurement": "Specialist buy",
       "priority": "Must",
-      "description": "Resettable, non-polarized, listed 150 VDC breakers with 10,000 A interrupt rating: MNEDC100 for SmartSolar output; MNEPV20 service feeder; MNEPV5 Starlink; MNEPV2 UniFi; MNEPV15 USB station; 2 × MNEPV1 lights; plus one spare MNEPV5. The 13 mm branch breakers mount on DIN rail in the junction box. Amazon does not reliably stock every exact amperage, so the primary link is the manufacturer listing; do not substitute unbranded automotive breakers.",
+      "description": "Retain the resettable, non-polarized MidNite MNEDC100: 150 VDC and 10 kA interrupt rating for the battery-bus-fed SmartSolar branch. The CHTAIXI B0B1WDDC75 candidate is only 6 kA and its listing calls the range suitable for low-short-circuit-current circuits; two parallel ES200-12G strings can theoretically exceed 6 kA from the published 2.8 mΩ battery resistance, so it is not an appropriate substitution without a documented prospective-fault-current study.",
+      "productUrl": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=759&sortOrder=1"
+    },
+    {
+      "id": "dse-breaker-mnepv20",
+      "category": "DC distribution",
+      "item": "MidNite Solar MNEPV20 20 A service-feeder breaker",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 28,
+      "currency": "USD",
+      "totalUsd": 28,
+      "location": "Import",
+      "procurement": "Specialist buy",
+      "priority": "Must",
+      "description": "Retain the non-polarized MidNite MNEPV20, rated 150 VDC / 10 kA, as the direct battery-bus service feeder. It gives the lower-cost downstream CHTAIXI branch bank a verified high-interrupt upstream device. Do not substitute CHTAIXI B09H4WNK3S here without a documented fault-current and series-coordination assessment.",
       "productUrl": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=759&sortOrder=1",
       "specUrl": "https://midnitesolar.com/documents.php?act=products&model=MNEPV1+thru+MNEPV63&productCatName=Breakers&productCat_ID=16&product_ID=183"
+    },
+    {
+      "id": "dse-breaker-mnepv15",
+      "category": "DC distribution",
+      "item": "CHTAIXI B15 15 A DC USB-station breaker",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 8.99,
+      "currency": "USD",
+      "totalUsd": 8.99,
+      "location": "Import",
+      "procurement": "Buy",
+      "priority": "Must",
+      "description": "Polarized single-pole B-curve breaker for the USB charging-station branch, used only downstream of the retained 20 A / 10 kA MidNite service feeder. Amazon claims 12–110 VDC operation and IEC 60947-2. Observe marked polarity and have the qualified installer verify the received rating, conductor size, series coordination and Fiji acceptance before commissioning.",
+      "productUrl": "https://www.amazon.com/dp/B09H4WQ1QJ",
+      "specUrl": "https://www.amazon.com/stores/page/0C1264F8-9BBA-45D7-BDFB-B1A21EF78729"
+    },
+    {
+      "id": "dse-breaker-mnepv5",
+      "category": "DC distribution",
+      "item": "CHTAIXI B6 6 A DC Starlink breakers",
+      "qty": 2,
+      "unit": "ea",
+      "unitCost": 8.99,
+      "currency": "USD",
+      "totalUsd": 17.98,
+      "location": "Import",
+      "procurement": "Buy",
+      "priority": "Must",
+      "description": "One polarized 6 A B-curve breaker for the Starlink branch plus one exact field spare. CHTAIXI does not sell a 5 A unit in this range; 6 A remains below the planned conductor ampacity and is used only downstream of the retained 20 A / 10 kA MidNite feeder. Observe marked polarity and obtain installer approval.",
+      "productUrl": "https://www.amazon.com/dp/B09H4XZLCR",
+      "specUrl": "https://www.amazon.com/stores/page/0C1264F8-9BBA-45D7-BDFB-B1A21EF78729"
+    },
+    {
+      "id": "dse-breaker-mnepv2",
+      "category": "DC distribution",
+      "item": "CHTAIXI B6 6 A DC UniFi-converter breaker",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 8.99,
+      "currency": "USD",
+      "totalUsd": 8.99,
+      "location": "Import",
+      "procurement": "Buy",
+      "priority": "Must",
+      "description": "Polarized 6 A B-curve breaker for the short UniFi converter branch, downstream of the retained 20 A / 10 kA MidNite feeder. CHTAIXI does not offer a 2 A model in this range; use conductors rated for at least 6 A, observe polarity and bench-test converter fault protection before commissioning.",
+      "productUrl": "https://www.amazon.com/dp/B09H4XZLCR",
+      "specUrl": "https://www.amazon.com/stores/page/0C1264F8-9BBA-45D7-BDFB-B1A21EF78729"
+    },
+    {
+      "id": "dse-breaker-mnepv1",
+      "category": "DC distribution",
+      "item": "CHTAIXI B6 6 A DC light breakers",
+      "qty": 2,
+      "unit": "ea",
+      "unitCost": 8.99,
+      "currency": "USD",
+      "totalUsd": 17.98,
+      "location": "Import",
+      "procurement": "Buy",
+      "priority": "Must",
+      "description": "One polarized 6 A B-curve breaker per 1.5 mm² light branch, downstream of the retained 20 A / 10 kA MidNite feeder. CHTAIXI does not offer a 1 A model in this range; 6 A protects the specified 1.5 mm² conductors but is not intended as internal fixture protection. Observe marked polarity and obtain installer approval.",
+      "productUrl": "https://www.amazon.com/dp/B09H4XZLCR",
+      "specUrl": "https://www.amazon.com/stores/page/0C1264F8-9BBA-45D7-BDFB-B1A21EF78729"
     },
     {
       "id": "dse-usb",
@@ -2674,19 +2941,34 @@
       "specUrl": "https://www.scanstrut.com/marine/power/tile/sc-tile-10"
     },
     {
-      "id": "dse-unifi-power",
+      "id": "dse-unifi-converter",
       "category": "Network",
-      "item": "Powerwerx USBbuddy2 dedicated UniFi converter + short USB cable",
+      "item": "YRDZXG 12/24 V-to-5 V 5 A USB converter",
       "qty": 1,
-      "unit": "set",
-      "unitCost": 35,
+      "unit": "ea",
+      "unitCost": 8.99,
       "currency": "USD",
-      "totalUsd": 35,
+      "totalUsd": 8.99,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Must",
+      "description": "Purchased from Amazon on 21 Aug 2026, order 111-9142760-2257055; ETA Aug 22. ASIN B0G1W6JTX8 is a compact 12–32 VDC to fixed-5 V USB-A converter claiming up to 5 A / 25 W and multiple electrical/thermal protections. Mount inside the junction box on the protected INTERNET pole-B branch and bench-test repeated UniFi Express cold starts before travel.",
+      "productUrl": "https://www.amazon.com/dp/B0G1W6JTX8"
+    },
+    {
+      "id": "dse-unifi-usb-cable",
+      "category": "Network",
+      "item": "Amazon Basics USB-A to USB-C cable, 3 ft",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 4.88,
+      "currency": "USD",
+      "totalUsd": 4.88,
       "location": "Import",
       "procurement": "Buy",
       "priority": "Must",
-      "description": "Potted 8–35 VDC to 5 V / 3 A converter on the 2 A resettable-breaker nominal-24 V INTERNET pole-B branch, plus a short high-quality USB-A-to-USB-C lead. Bench-test cold boot and repeated switching with the exact purchased UniFi Express before travel.",
-      "productUrl": "https://powerwerx.com/usbbuddy2-powerpole-usb-device-charger"
+      "description": "USB-IF-certified lead from the converter inside the junction box to the UniFi Express USB-C power input. Pass the USB-C end through the dedicated bottom gland before final gland assembly; three feet provides enough service slack without mounting the converter on the wall.",
+      "productUrl": "https://www.amazon.com/dp/B01GGKYKQM"
     },
     {
       "id": "dse-router",
@@ -2704,20 +2986,19 @@
       "productUrl": "https://techspecs.ui.com/unifi/cloud-gateways/ux"
     },
     {
-      "id": "dse-dc-spares",
+      "id": "dse-main-busbars",
       "category": "DC distribution",
-      "item": "2 × Blue Sea 2104 600 A main busbars + covers",
+      "item": "AMOMD 600 A covered red/black main busbar pair",
       "qty": 1,
-      "unit": "kit",
-      "unitCost": 274.28,
+      "unit": "pair",
+      "unitCost": 89.99,
       "currency": "USD",
-      "totalUsd": 274.28,
+      "totalUsd": 89.99,
       "location": "Import",
-      "procurement": "Buy",
+      "procurement": "Purchased",
       "priority": "Must",
-      "description": "Two Blue Sea 2104 PowerBars plus two 2708 covers. Each 600 A / 48 VDC bar has four 3/8 in studs and four #8 screw terminals. The positive bar has seven conductors: three heavy circuits on individual studs and four light circuits—including the SmartShunt's supplied fused Vbatt+ lead—on all four screws, leaving one large stud spare. The negative bar has six conductors: three heavy and three light, leaving one stud and one screw spare. Amazon ASIN B000XBB758 for the busbar; covers are Blue Sea 2708.",
-      "productUrl": "https://www.amazon.com/dp/B000XBB758",
-      "specUrl": "https://www.bluesea.com/products/2104/PowerBar_600A_BusBar_-_Four_3_8in-16_Studs"
+      "description": "Purchased from Amazon on 20 Aug 2026, ASIN B0DG4WLVT7: one red and one black covered 600 A / 48 VDC busbar, each with four M10 studs and eight M4 screws. The positive bar now uses eight positions and the negative bar six; no lug doubling is required. Inspect the received nickel-plated copper bars, covers and hardware before use.",
+      "productUrl": "https://www.amazon.com/dp/B0DG4WLVT7"
     },
     {
       "id": "dse-service-return-bus",
@@ -2736,52 +3017,159 @@
       "specUrl": "https://www.bluesea.com/products/2314/"
     },
     {
-      "id": "dse-earth-bus",
+      "id": "dse-earth-busbar",
       "category": "Safety",
-      "item": "Blue Sea 2128 250 A earth/bonding bus + 2719 cover",
+      "item": "Blue Sea 2128 250 A earth/bonding bus",
       "qty": 1,
-      "unit": "set",
-      "unitCost": 65,
+      "unit": "ea",
+      "unitCost": 46.66,
       "currency": "USD",
-      "totalUsd": 65,
+      "totalUsd": 46.66,
       "location": "Import",
       "procurement": "Buy",
       "priority": "Must",
-      "description": "Six actual bonds: earth electrode, PV entry/array frame, SmartSolar chassis, MultiPlus chassis, AC protection PE and Ekrano chassis. The 2128 has two 5/16 in studs for the large electrode lead plus six #10 screws for equipment bonds, leaving one stud and one screw spare. Add the 2719 insulating cover. Amazon search is used because the direct US listing is seller-dependent.",
-      "productUrl": "https://www.amazon.com/s?k=Blue+Sea+Systems+2128+MaxiBus",
+      "description": "Six actual bonds: earth electrode, PV entry/array frame, SmartSolar chassis, MultiPlus chassis, AC protection PE and Ekrano chassis. The exact 2128 has two 5/16 in studs plus six #10 screws—eight positions total and two spare. Amazon B000OTJ8A0 is the four-position Blue Sea 2315 and is rejected as undersized.",
+      "productUrl": "https://www.amazon.com/dp/B00821YF1E",
       "specUrl": "https://www.bluesea.com/products/2128/MaxiBus_250A_BusBar_-_Two_5_16in-18_Studs_and_Six_%2310-24_Screws"
+    },
+    {
+      "id": "dse-earth-bus-cover",
+      "category": "Safety",
+      "item": "Blue Sea 2719 MaxiBus insulating cover",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 31.09,
+      "currency": "USD",
+      "totalUsd": 31.09,
+      "location": "Import",
+      "procurement": "Buy",
+      "priority": "Must",
+      "description": "Touch-safe cover made specifically for the Blue Sea 2127/2128 MaxiBus. It is a separate catalog item and was in stock and shipping immediately when checked.",
+      "productUrl": "https://www.fisheriessupply.com/blue-sea-systems-insulating-cover-only-for-2127-and-2128-maxibus/2719"
     },
     {
       "id": "dse-usb-breakers",
       "category": "DC distribution",
-      "item": "3 × Blue Sea 2132 resettable 10 A USB-module breakers",
-      "qty": 1,
-      "unit": "set",
-      "unitCost": 57,
+      "item": "CHTAIXI B10 10 A DC USB-module breakers",
+      "qty": 3,
+      "unit": "ea",
+      "unitCost": 8.99,
       "currency": "USD",
-      "totalUsd": 57,
+      "totalUsd": 26.97,
       "location": "Import",
       "procurement": "Buy",
       "priority": "Must",
-      "description": "Three compact marine push-to-reset breakers replace the three local 10 A USB module fuses inside the charging-station back box. They are downstream of the junction's 15 A feeder breaker, so a failed module can be reset or isolated without opening the main junction box.",
-      "productUrl": "https://www.amazon.com/s?k=Blue+Sea+2132+10A+push+button+circuit+breaker",
-      "specUrl": "https://www.bluesea.com/products/2132/Push_Button_Reset_Only_Screw_Terminal_Circuit_Breaker_-_10_Amps"
+      "description": "Three polarized 10 A B-curve DIN breakers provide one resettable branch per Scanstrut charging module inside the charging-station enclosure. They are downstream of both the junction's retained 20 A / 10 kA MidNite feeder and the 15 A CHTAIXI station breaker. Observe marked polarity and confirm enclosure fit, conductor ampacity and installer acceptance.",
+      "productUrl": "https://www.amazon.com/dp/B09H4W5HSW",
+      "specUrl": "https://www.amazon.com/stores/page/0C1264F8-9BBA-45D7-BDFB-B1A21EF78729"
     },
     {
-      "id": "dse-victron-data",
+      "id": "dse-vedirect-cables",
       "category": "Monitoring",
-      "item": "Ekrano GX communication cable set",
-      "qty": 1,
-      "unit": "set",
-      "unitCost": 55,
+      "item": "Victron VE.Direct cable, 0.9 m / 2.95 ft",
+      "qty": 2,
+      "unit": "ea",
+      "unitCost": 17.8,
       "currency": "USD",
-      "totalUsd": 55,
+      "totalUsd": 35.6,
       "location": "Import",
-      "procurement": "Buy",
+      "procurement": "Purchased",
       "priority": "Must",
-      "description": "Two 0.9 m VE.Direct cables (SmartSolar and SmartShunt), one 3 m Victron RJ45 UTP cable (MultiPlus VE.Bus), and one short unshielded Ethernet patch lead (UniFi LAN). The Ekrano retains one spare native VE.Direct port; no VE.Direct-to-USB adapter is needed.",
-      "productUrl": "https://latam.victronenergy.com/wp-content/uploads/2026/04/Pricelist-Victron-2026-Q2-USD-C.pdf",
+      "description": "Two exact Victron ASS030530209 0.9 m VE.Direct cables purchased from Amazon on 20 Aug 2026 at $17.85 and $17.75. One connects SmartSolar to Ekrano and one connects SmartShunt to Ekrano.",
+      "productUrl": "https://www.amazon.com/dp/B01F9ESFZS",
       "specUrl": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/connecting-victron-products.html"
+    },
+    {
+      "id": "dse-vebus-cable",
+      "category": "Monitoring",
+      "item": "StarTech 10 ft yellow Cat6 VE.Bus patch lead",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 9.99,
+      "currency": "USD",
+      "totalUsd": 9.99,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Must",
+      "description": "Purchased from Amazon on 20 Aug 2026, ASIN B003OCRW3E. Standard straight-through unshielded Cat6 lead from MultiPlus-II VE.Bus to Ekrano VE.Bus; the yellow jacket identifies the Victron control link. Bench-test before travel.",
+      "productUrl": "https://www.amazon.com/dp/B003OCRW3E",
+      "specUrl": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/connecting-victron-products.html"
+    },
+    {
+      "id": "dse-ekrano-ethernet",
+      "category": "Monitoring",
+      "item": "StarTech 10 ft red Cat6 Ekrano LAN patch lead",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 9.99,
+      "currency": "USD",
+      "totalUsd": 9.99,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Must",
+      "description": "Purchased from Amazon on 20 Aug 2026, ASIN B003OCRW34. Unshielded Cat6 lead from Ekrano Ethernet to UniFi LAN; red identifies the monitoring LAN link.",
+      "productUrl": "https://www.amazon.com/dp/B003OCRW34",
+      "specUrl": "https://www.victronenergy.com/media/pg/Ekrano_GX/en/installation.html"
+    },
+    {
+      "id": "dse-cat6-blue-spare",
+      "category": "Network accessories",
+      "item": "StarTech 10 ft blue Cat6 patch cable · spare",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 8.99,
+      "currency": "USD",
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Spare",
+      "description": "Purchased from Amazon on 20 Aug 2026, ASIN B000KSEJV8. Superseded in the roof-to-UniFi route by the purpose-built weatherproof CHGRNLF Starlink Mini cable; retain this ordinary straight-through Cat6 lead as an indoor network spare.",
+      "productUrl": "https://www.amazon.com/dp/B000KSEJV8",
+      "totalUsd": 8.99
+    },
+    {
+      "id": "dse-starlink-ethernet",
+      "category": "Network",
+      "item": "CHGRNLF 15 ft weatherproof Starlink Mini Ethernet cable",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 25.98,
+      "currency": "USD",
+      "totalUsd": 25.98,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Must",
+      "description": "Purchased from Amazon on 21 Aug 2026, order 111-6868471-0482610; ETA Aug 22. Purpose-built 15 ft weatherproof Starlink Mini Ethernet cable from the roof unit to the UniFi Express WAN connection. Bench-test the complete path and preserve the weather seal at the Mini.",
+      "productUrl": "https://www.amazon.com/dp/B0D8J3HC7Z"
+    },
+    {
+      "id": "dse-inline-connectors",
+      "category": "AC safety",
+      "item": "Oyviny IP68 three-pole inline junction connectors",
+      "qty": 1,
+      "unit": "4-pack",
+      "unitCost": 16.89,
+      "currency": "USD",
+      "totalUsd": 16.89,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Should",
+      "description": "Four three-pole IP68 inline connectors purchased from Amazon on 20 Aug 2026, ASIN B0DZWYVYP8. Use only where the conductor size, voltage/current rating, strain relief and Fiji/AS-NZS installation requirements are verified by a qualified electrical person; these do not replace the AC-out RCBO or its enclosure.",
+      "productUrl": "https://www.amazon.com/dp/B0DZWYVYP8"
+    },
+    {
+      "id": "dse-mc4-tool-kit",
+      "category": "Tools",
+      "item": "MUYI 47-piece MC4 assembly tool kit",
+      "qty": 1,
+      "unit": "kit",
+      "unitCost": 22.99,
+      "currency": "USD",
+      "totalUsd": 22.99,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Must",
+      "description": "Purchased from Amazon on 20 Aug 2026, ASIN B0BWRHMHY9. Includes the small-contact crimper and MC4 assembly tools for field PV work; test-crimp and pull-test representative 4 mm² cable before departure.",
+      "productUrl": "https://www.amazon.com/dp/B0BWRHMHY9"
     },
     {
       "id": "dse-junction-box",
@@ -2795,7 +3183,82 @@
       "location": "Import",
       "procurement": "Allowance",
       "priority": "Must",
-      "description": "Target exterior envelope about 370 × 265 × 150 mm, only 20 × 18 mm larger than the PG enclosure, with a flat hinged door and removable backplate. The added area is required for a device-free bottom gland gutter, through-wall switch-body keep-outs and terminal-radius-aware spacing. The Ekrano mounts separately on the wall above the box; the whole-bank disconnect mounts on a fixed internal faceplate; the backplate carries SmartShunt, covered buses and resettable DC breakers. All 14 cable glands and the Starlink bulkhead jack are on the bottom. Make a full-size depth-and-bend-radius mock-up before ordering or drilling."
+      "description": "Target exterior envelope about 370 × 265 × 150 mm, only 20 × 18 mm larger than the PG enclosure, with a flat hinged door and removable backplate. The added area is required for a device-free bottom gland gutter, through-wall switch-body keep-outs and terminal-radius-aware spacing. The Ekrano mounts separately on the wall above the box; the backplate carries SmartShunt, covered buses and resettable DC breakers. All 14 cable glands and the Starlink bulkhead jack are on the bottom. Make a full-size depth-and-bend-radius mock-up before ordering or drilling."
+    },
+    {
+      "id": "dse-multimeter",
+      "category": "Tools & accessories",
+      "item": "Klein Tools MM325 digital multimeter",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 29.98,
+      "currency": "USD",
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Service tool",
+      "description": "Purchased from Amazon on 21 Aug 2026, order 111-9142760-2257055; ETA Aug 22. Manual-ranging meter for battery/string diagnosis, polarity, continuity, resistance and AC/DC voltage checks. It is a carried commissioning/service accessory and is intentionally not shown in the fixed wiring diagrams or 3D installation.",
+      "productUrl": "https://www.amazon.com/dp/B0B57L9FNL",
+      "totalUsd": 29.98
+    },
+    {
+      "id": "dse-aa-aaa-charger",
+      "category": "Tools & accessories",
+      "item": "EBL universal AA/AAA rechargeable-battery charger",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 13.99,
+      "currency": "USD",
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Portable accessory",
+      "description": "Purchased from Amazon on 21 Aug 2026, order 111-9142760-2257055; ETA Aug 22. USB-C-powered independent-slot charger for 1.2 V Ni-MH/Ni-Cd and compatible 1.5 V rechargeable AA/AAA cells. This is portable school equipment, not a charger for the solar battery bank, and is not shown in the fixed system diagrams.",
+      "productUrl": "https://www.amazon.com/dp/B0FZR3HX62",
+      "totalUsd": 13.99
+    },
+    {
+      "id": "dse-10awg-duplex-wire",
+      "category": "Wiring",
+      "item": "10 AWG red/black duplex copper wire · 10 ft",
+      "qty": 1,
+      "unit": "roll",
+      "unitCost": 19.99,
+      "currency": "USD",
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Install stock",
+      "description": "Purchased from Amazon on 21 Aug 2026, order 111-6868471-0482610; ETA Aug 22. Ten-foot red/black pair of stranded oxygen-free copper conductors. Use only on a circuit whose measured route, ampacity, insulation rating, temperature rating and terminal fit are compatible; it is not large enough for the 85–100 A SmartSolar branch or the 1/0 AWG battery circuits.",
+      "productUrl": "https://www.amazon.com/dp/B0DGL7QVVF",
+      "totalUsd": 19.99
+    },
+    {
+      "id": "dse-starlink-portable-usbc-cables",
+      "category": "Network accessories",
+      "item": "Starlink Mini USB-C PD power cables · 6.6 ft",
+      "qty": 2,
+      "unit": "ea",
+      "unitCost": 9.99,
+      "currency": "USD",
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Portable accessory",
+      "description": "Two Genioss USB-C-to-Starlink-Mini DC cables purchased from Amazon on 21 Aug 2026, order 111-6868471-0482610; ETA Aug 22. Intended only for portable use with a verified 100 W USB-C PD source; they are not part of the fixed DSE power route and therefore do not appear in the wiring diagram or 3D model.",
+      "productUrl": "https://www.amazon.com/dp/B0DD12LJNF",
+      "totalUsd": 19.98
+    },
+    {
+      "id": "dse-starlink-portable-battery-cable",
+      "category": "Network accessories",
+      "item": "Starlink Mini direct-battery portable power cable · 16.4 ft",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 21.97,
+      "currency": "USD",
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Portable accessory",
+      "description": "SegurVelo 18 AWG O-ring-to-Starlink-Mini lead with inline ATC/ATO holder purchased from Amazon on 21 Aug 2026, order 111-6868471-0482610; ETA Aug 22. This is for separately supervised portable operation, not the fixed DSE system. Confirm polarity, fit the correct fuse, protect the battery terminals and never attach it to one 12 V monobloc while that monobloc remains series-connected in the 24 V bank.",
+      "productUrl": "https://www.amazon.com/dp/B0F7LDGP2P",
+      "totalUsd": 21.97
     },
     {
       "id": "dse-service-spares",
@@ -2809,7 +3272,21 @@
       "location": "Import",
       "procurement": "Allowance",
       "priority": "Must",
-      "description": "One spare 150 A Class T link, two spare 3.15 A Ekrano lead fuses, any Victron-required balancer sense fuses, MC4 pair, corrosion inhibitor, replacement filter media and printed breaker/wiring labels. No blade-fuse assortment is required."
+      "description": "Two spare 3.15 A Ekrano lead fuses, any Victron-required balancer sense fuses, two installed plus two spare correctly listed 20 A 10×38 mm gPV links for the purchased combiner, spare MC4 pair, corrosion inhibitor, replacement filter media and printed breaker/wiring labels. The main battery protection is resettable and needs no field fuse links."
+    },
+    {
+      "id": "dse-amazon-shipping",
+      "category": "Purchase adjustments",
+      "item": "Amazon supplier shipping on MidNite breakers",
+      "qty": 1,
+      "unit": "order",
+      "unitCost": 11.61,
+      "currency": "USD",
+      "totalUsd": 11.61,
+      "location": "Import",
+      "procurement": "Purchased",
+      "priority": "Reference",
+      "description": "Actual supplier shipping charged on Amazon order 111-2775226-7205039 for the two MidNite breakers. Included in project cost and in the customs landed-value working basis, but not a goods line on the packing manifest."
     },
     {
       "id": "dse-baggage",
@@ -2823,7 +3300,7 @@
       "location": "Import",
       "procurement": "Allowance",
       "priority": "Must",
-      "description": "One additional checked piece at the Fiji Airways published ‘from $100’ USA rate. The 19 kg MultiPlus plus an iM2875 shell would exceed 23 kg, so transport it in a lighter protected bag or purchase an overweight allowance. The imported 24 ft 1/0 AWG cable set adds about 4.6 kg / 10.2 lb; distribute it, the Ekrano, 4.5 kg MPPT and other electronics across remaining luggage, perform a complete packed weigh-in, and confirm the booking-specific fee and 158 cm limit.",
+      "description": "One additional checked piece at the Fiji Airways published ‘from $100’ USA rate. The 19 kg MultiPlus plus an iM2875 shell would exceed 23 kg, so transport it in a lighter protected bag or purchase an overweight allowance. The imported about 23 ft 1/0 AWG cable set adds about 4.4 kg / 9.8 lb; distribute it, the Ekrano, 4.5 kg MPPT and other electronics across remaining luggage, perform a complete packed weigh-in, and confirm the booking-specific fee and 158 cm limit.",
       "productUrl": "https://www.fijiairways.com/media/246988/fiji-airways-terms-and-conditions-of-carriage.pdf"
     },
     {
@@ -2838,7 +3315,7 @@
       "location": "Import",
       "procurement": "Allowance",
       "priority": "Must",
-      "description": "Rounded-up allowance equal to approx. 12.5% of the current $3,955.80 imported-goods and inbound-supplier-freight estimate, including the preterminated battery-cable set. Professional/technical equipment and goods above the passenger allowance must be declared; seek any renewable-energy concession approval before travel.",
+      "description": "Conservative rounded allowance pending the final Fiji concession decision and broker/customs valuation. Professional/technical equipment and goods above the passenger allowance must be declared; include all receipts and supplier shipping, and seek any renewable-energy or school-donation concession approval before travel.",
       "productUrl": "https://frcs.org.fj/our-services/customs/visiting-fiji/arriving-in-fiji/",
       "specUrl": "https://frcs.org.fj/our-services/taxation-section/non-individuals/reporting-and-paying-taxes/vat-guide/"
     },
@@ -2910,19 +3387,19 @@
     "Run tool work mainly in sunny hours. Stop tool loads around 50% state of charge; reserve the lower half of the GEL bank for longevity and essentials.",
     "Keep the AC inverter off when no AC loads are required. Use the exterior INTERNET rocker to shut down both Starlink and UniFi overnight; general USB charging remains available. INSIDE and OUTSIDE rockers control their light branches independently.",
     "Leave the Ekrano GX powered so it can retain battery history and report alarms. Let its display time out when not in use; investigate alarms locally before resetting them.",
-    "Leave the whole-bank disconnect ON in normal service. Switch it OFF only after AC loads, MultiPlus, PV and generator charging are shut down.",
-    "If a battery or balancer alarm suggests a bad string: shut down every load and charge source, switch the whole bank OFF, verify individual battery and string voltages with a multimeter, and disconnect and insulate both leads of the diagnosed bad string. Only then may the healthy string be reconnected and the master switch returned ON. Reduce the Ekrano DVCC charge-current limit from 100 A to 50 A and treat one-string service as essentials-only limp mode: no power tools until both strings are healthy.",
+    "Keep both 125 A battery-string breakers ON in normal service. Switch both OFF only after AC loads, MultiPlus, PV and generator charging are shut down; together they provide whole-bank isolation.",
+    "If a battery or balancer alarm suggests a bad string: shut down every load and charge source, switch both string breakers OFF, verify individual battery and string voltages with a multimeter, and disconnect and insulate both leads of the diagnosed bad string. Only then may the healthy string's breaker be returned ON. Reduce the Ekrano DVCC charge-current limit from 100 A to 50 A. A single healthy 200 Ah string can still operate one ordinary power tool, but runtime and surge headroom are roughly halved: work in sun, monitor voltage and temperature, and stop immediately on excessive sag, alarm or breaker trip.",
     "Never equalize GEL batteries. Inspect individual battery voltage, temperature, swelling, torque and corrosion monthly.",
     "Keep all power electronics dry and away from direct salt air. Every three months, isolate the system, inspect for salt deposits or corrosion, clean/replace the alcove filter and correct any moisture source.",
     "Treat the generator as tested backup only. Confirm the MultiPlus accepts its voltage/frequency and verify RCD/earth behavior before relying on charging or bypass."
   ],
   "commissioning": [
     "Confirm all four panel and battery nameplates before terminating anything.",
-    "Before ordering the imported heavy-cable set, buy or fix the exact Class T holders, Blue Sea 6006 disconnect, SmartShunt and Blue Sea 2104 busbars; then make a full-size battery/box/MultiPlus layout from actual hardware and battery dimensions. Confirm the EverExceed terminal is M8, measure each supported route hole-to-hole, preserve broad bends, and keep the paired A/B positive and negative paths equal. Confirm that two finished M10 lugs fit the 6006 input stud with full nut engagement at specified torque. Order the 12 UL 1426 tinned-copper 1/0 AWG assemblies factory-crimped with tinned lugs and adhesive heat-shrink; no site crimping is planned.",
+    "Before ordering the imported heavy-cable set, receive and bench-check both MidNite 125 A breakers and their finger-safe enclosure, SmartShunt and AMOMD B0DG4WLVT7 covered busbar pair; then make a full-size battery/box/MultiPlus layout from actual hardware and battery dimensions. Confirm the EverExceed terminal is M8, measure each supported route hole-to-hole, preserve broad bends, and keep the paired A/B positive and negative paths equal. Confirm the breaker terminal preparation from the received instructions and land each protected positive output on its own M10 busbar stud. Order the 11 UL 1426 tinned-copper 1/0 AWG assemblies factory-prepared with tinned terminations and adhesive heat-shrink; no site heavy-cable crimping is planned.",
     "Separately fully charge and voltage-match the four batteries. Build two matched 24 V strings, install one balancer per string, and land each balancer alarm relay on its own Ekrano digital input.",
-    "Fit a 150 A Class T fuse close to each string positive. Make both positive and negative string paths equal in conductor size and length, identify A and B permanently, and prove that the Blue Sea 6006 switches the complete parallel bank ON / OFF with all charge sources and loads disabled. There must be no one-string selector position.",
+    "Fit one 125 A MidNite breaker close to each string positive in the separate finger-safe enclosure. Keep both breakers ON in normal operation, use both OFF for whole-bank isolation, and land the two protected outputs separately on the main positive bus. A faulted string may be isolated only after all loads and charging are stopped and the bank is diagnosed with a multimeter.",
     "With modules covered, build two independent two-panel series strings. Uncover and measure about 100.8 V Voc at 25°C on each string separately; confirm close agreement, polarity, labels and isolation before landing all four 4 mm² home-run conductors. Parallel them only at the protected indoor building-entry terminals, then confirm the SmartSolar's 100 A protected battery branch before closing the 40 A PV disconnect.",
-    "Before omitting individual string fuses, confirm the installed modules retain the published 25 A maximum series-fuse rating and 14.20 A Isc, verify each home-run cable and connector against the actual installation method and temperature, and have the final design checked against applicable Fiji/AS-NZS requirements. Record current from each string independently at commissioning.",
+    "Before energizing the purchased combiner, remove its supplied 32 A string links and install two correctly listed 20 A 10×38 mm gPV links; carry two identical spares. Confirm the installed modules retain the published 25 A maximum series-fuse rating and 14.20 A Isc, verify each home-run cable and connector against the actual installation method and temperature, and have the final design checked against applicable Fiji/AS-NZS requirements. Record current from each string independently at commissioning.",
     "Program MultiPlus and SmartSolar for the exact GEL label; planning values are 28.2 V absorption, 27.2 V float and equalization disabled. Install the temperature sensor supplied with the 24 V MultiPlus on Battery 1's negative terminal. In Ekrano DVCC, select the SmartShunt for Shared Voltage Sense and Shared Current Sense, select the MultiPlus sensor for Shared Temperature Sense, and set the system-wide charge-current limit to 100 A with both strings healthy. Do not add a Smart Battery Sense unless this wired sensing path is later removed or proves unusable.",
     "Set the MultiPlus to 230 V / 50 Hz with a 10 A AC input-current limit for the G3200P; verify generator acceptance before enabling unattended charging.",
     "With the 24 V bank isolated, make a full-size enclosure and wall-layout mock-up. Mount the Ekrano horizontally just above the approximately 14.6 × 10.4 inch junction box using its steel bracket, keep its rear and lower connectors sheltered, bond its protective-earth terminal and preserve clear service access around its face.",
@@ -2933,9 +3410,9 @@
     "Torque to each manufacturer specification; re-torque after the first week and mark fasteners with witness paint.",
     "Have a qualified electrical person test RCBO trip time, polarity, the continuous protective-earth path, lead strain relief, trailing-socket wiring and neutral-earth behavior in both inverter and generator/bypass modes. There are no fixed workshop wall outlets.",
     "Cut the Blue Sea 8259 opening in the fixed junction-box sidewall only after a 1:1 fit check. Install the 8287 DPST rocker as INTERNET and two 8282 SPST rockers as INSIDE and OUTSIDE; add a continuous closed-cell perimeter gasket, seal every fastener, insulate the rear terminals and leave the hinged door free of control wiring.",
-    "Install the resettable DC breaker map exactly as documented: MNEDC100 SmartSolar, MNEPV20 service feeder, MNEPV5 Starlink, MNEPV2 UniFi, MNEPV15 USB panel and 2 × MNEPV1 lights. Feed Starlink from its 5 A breaker into INTERNET pole A and return it to the main negative bus; INTERNET pole B switches UniFi, and the two SPST rockers switch only their light positives. Land the UniFi, USB and two light negatives directly on the Blue Sea 2314 return bus. Bring each low-current positive/negative pair through one bottom gland and separate the conductors only inside the box. Daisy-chain the three rocker indicator negatives with small black wire to the sixth used return-bus position, leaving one position spare. Label both ends of every conductor and each breaker.",
-    "Connect Starlink Ethernet directly to the UniFi Express WAN port. Feed UniFi directly from the 24 V bank through the dedicated 8–35 V Powerwerx USBbuddy2 on INTERNET switch pole B, export a UniFi backup, and bench-test at least ten cold starts and simultaneous Starlink/UniFi shutdowns before travel. Confirm general USB charging stays live with INTERNET off.",
-    "Build the six-port charging station from one Scanstrut SC-TILE-20 and two SC-TILE-10 modules in one dry interior faceplate/back box. Feed one 15 A protected 24 V pair from the junction box, split it locally through three Blue Sea 2132 resettable 10 A module breakers, label the four USB-C and two USB-A ports, and load-test all modules simultaneously before travel.",
+    "Install the resettable DC breaker map exactly as documented: MidNite MNEDC100 SmartSolar and MNEPV20 service feeder; downstream CHTAIXI B6 Starlink, B6 UniFi, B15 USB panel and 2 × B6 lights. Feed Starlink from its 6 A breaker into INTERNET pole A and return it to the main negative bus; INTERNET pole B switches UniFi, and the two SPST rockers switch only their light positives. Wire every CHTAIXI DC breaker in its marked polarity, use conductors rated for the selected breaker and have the qualified installer verify series coordination and Fiji acceptance.",
+    "Connect Starlink Ethernet directly to the UniFi Express WAN port. Feed UniFi directly from the 24 V bank through the dedicated junction-box 12–32 V-to-5 V converter on INTERNET switch pole B, export a UniFi backup, and bench-test at least ten cold starts and simultaneous Starlink/UniFi shutdowns before travel. Confirm general USB charging stays live with INTERNET off.",
+    "Build the six-port charging station from one Scanstrut SC-TILE-20 and two SC-TILE-10 modules in one dry interior faceplate/back box. Feed one 15 A protected 24 V pair from the junction box, split it locally through three CHTAIXI B10 resettable 10 A DC breakers, label the four USB-C and two USB-A ports, and load-test all modules simultaneously before travel.",
     "Use QHLightlux B0F1V59NXC 3000 K fixtures for both locations. Suspend the indoor unit from a short dry bracket with its lens down; mount the outdoor unit under an eave with 316 stainless fasteners and sealed bedding. Put two 3 A silicon rectifier diodes in series with each switched positive branch so the fixture stays below its 28 V input ceiling during GEL absorption. Heat-shrink and support the diode packs, verify polarity and voltage drop, and use one site-measured two-core marine cable to each fixture.",
     "Bench-test the Starlink Mini from the 24 V branch through its complete OEM 15 m cable: verify center-positive polarity at the bulkhead jack, cold-start it at low battery voltage, and confirm INTERNET simultaneously removes Starlink and UniFi 24 V feeds without interrupting USB or lights.",
     "Run the 1,800 W saw alone for 30 minutes in warm conditions with the 5 m lead fully uncoiled while monitoring inverter, lead, plug/socket, cable and terminal temperature; post the one-page operating rules and breaker map beside the equipment."
@@ -3062,9 +3539,9 @@
       "url": "https://www.batterycablesusa.com/0-gauge-1-0-awg-marine-grade-battery-cable-with-ends"
     },
     {
-      "title": "Class T 110–200 A fuse-holder terminal and environmental specifications",
-      "publisher": "Blue Sea Systems",
-      "url": "https://www.bluesea.com/products/5007100/"
+      "title": "DC fuse and circuit-breaker selection · interrupt rating guidance",
+      "publisher": "Victron Energy · Wiring Unlimited",
+      "url": "https://www.victronenergy.com/media/pg/The_Wiring_Unlimited_book/en/dc-wiring.html"
     },
     {
       "title": "Victron Battery Balancer manual",
@@ -3075,11 +3552,6 @@
       "title": "Victron Battery Balancer dimension drawing",
       "publisher": "Victron Energy",
       "url": "https://www.victronenergy.com/upload/documents/Battery-Balancer.PDF"
-    },
-    {
-      "title": "Blue Sea 6006 whole-bank disconnect ratings and dimensions",
-      "publisher": "Blue Sea Systems",
-      "url": "https://www.bluesea.com/products/6006"
     },
     {
       "title": "MidNite Solar MNEPV resettable breaker ratings · 150 VDC · 10 kA AIC",
@@ -3097,9 +3569,9 @@
       "url": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=464&sortOrder=2"
     },
     {
-      "title": "Blue Sea 2104 four-stud plus four-screw 600 A PowerBar",
-      "publisher": "Blue Sea Systems",
-      "url": "https://www.bluesea.com/products/2104/PowerBar_600A_BusBar_-_Four_3_8in-16_Studs"
+      "title": "AMOMD covered red/black 600 A busbar pair · four M10 studs plus eight M4 screws per bar",
+      "publisher": "Amazon product listing",
+      "url": "https://www.amazon.com/dp/B0DG4WLVT7"
     },
     {
       "title": "Blue Sea 2314 two-stud plus five-screw covered service-return MiniBus",
@@ -3142,9 +3614,9 @@
       "url": "https://www.bluesea.com/products/8259/Contura_Switch_Mounting_Panel_-_3_Position"
     },
     {
-      "title": "USBbuddy2 potted 8–35 V to 5 V converter",
-      "publisher": "Powerwerx",
-      "url": "https://powerwerx.com/usbbuddy2-powerpole-usb-device-charger"
+      "title": "YRDZXG 12/24 V to 5 V 5 A USB converter · B0G1W6JTX8",
+      "publisher": "Amazon / YRDZXG",
+      "url": "https://www.amazon.com/dp/B0G1W6JTX8"
     },
     {
       "title": "QHLightlux 12–28 V 3000 K IP67 utility light · B0F1V59NXC",
@@ -3185,6 +3657,31 @@
       "title": "Current Fiji VAT guide",
       "publisher": "Fiji Revenue & Customs Service",
       "url": "https://frcs.org.fj/our-services/taxation-section/non-individuals/reporting-and-paying-taxes/vat-guide/"
+    },
+    {
+      "title": "MNEPV125-80-1PNP 125 A / 80 VDC non-polarized breaker specifications",
+      "publisher": "MidNite Solar",
+      "url": "https://www.midnitesolar.com/productPhoto.php?productCat_ID=16&product_ID=729"
+    },
+    {
+      "title": "QL-VBB-6W IP65 enclosure dimensions and material",
+      "publisher": "QILIPSU",
+      "url": "https://qilipsu.com/product-265.html"
+    },
+    {
+      "title": "CHTAIXI 120 V Type AC RCBO · purchased but rejected for DSE",
+      "publisher": "Amazon / CHTAIXI",
+      "url": "https://www.amazon.com/dp/B0CSV93CTN"
+    },
+    {
+      "title": "CHTAIXI 12–110 VDC B-curve branch-breaker range",
+      "publisher": "Amazon / CHTAIXI",
+      "url": "https://www.amazon.com/stores/page/0C1264F8-9BBA-45D7-BDFB-B1A21EF78729"
+    },
+    {
+      "title": "ES200-12G published internal resistance and maximum discharge current",
+      "publisher": "EverExceed datasheet mirror",
+      "url": "https://jelakum.com/picture/dosya/everexceed-solar-gel-range-vrla_v20pdf17.pdf"
     }
   ]
 }

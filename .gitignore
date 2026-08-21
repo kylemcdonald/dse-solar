@@ -42,4 +42,5 @@ yarn-error.log*
 /outputs/
 /work/
 /.qa/
+/private/
 /tsconfig.tsbuildinfo

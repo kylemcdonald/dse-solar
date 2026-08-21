@@ -1,5 +1,10 @@
-import { junctionInteriorRouting } from "./junctionInteriorRouting";
-import { physicalLayout } from "./physicalLayout";
+import { junctionInteriorRouting } from "./junctionInteriorRouting.ts";
+import { physicalLayout } from "./physicalLayout.ts";
+import {
+  junctionCableSpecification,
+  physicalCableSpecification,
+  type CableSpecification,
+} from "./cableSpecifications.ts";
 
 export type ConnectorConnection = {
   kind: string;
@@ -9,9 +14,11 @@ export type ConnectorConnection = {
   otherDeviceName: string;
   routeId: string;
   routeName: string;
+  viaDeviceName?: string;
 };
 
 export type ConnectorDetails = {
+  cable: CableSpecification;
   cableDiameterMm: number;
   connections: ConnectorConnection[];
   deviceId?: string;
@@ -31,8 +38,7 @@ const DEVICE_NAMES: Record<string, string> = {
   battery2: "Battery 2 (string A +)",
   battery3: "Battery 3 (string B −)",
   battery4: "Battery 4 (string B +)",
-  classTA: "String A 150 A Class T holder",
-  classTB: "String B 150 A Class T holder",
+  batteryBreakerBox: "Dual 125 A battery-string breaker enclosure",
   earthBar: "Main protective-earth bus",
   earthElectrode: "Earth electrode",
   ekran: "Ekrano GX",
@@ -53,14 +59,14 @@ const DEVICE_NAMES: Record<string, string> = {
 
 const JUNCTION_COMPONENT_NAMES: Record<string, string> = {
   ekranoFuse: "Ekrano factory-fuse holder",
-  fuseBlock: "MidNite resettable DC breaker bank",
+  fuseBlock: "Resettable DC service-breaker bank",
   mpptFuse: "MidNite MPPT resettable DC breaker",
   negativeBus: "Main negative bus",
   positiveBus: "Main positive bus",
   returnBus: "Low-current return bus",
-  selector: "Main battery disconnect",
   shunt: "Victron SmartShunt",
   switchPanel: "External load switches",
+  unifiPower: "Dedicated UniFi 5 V converter",
 };
 
 function titleCaseIdentifier(value: string) {
@@ -89,16 +95,72 @@ function logicalPhysicalPeer(routeId: string, endpoint: "source" | "target") {
   return undefined;
 }
 
+function junctionConductorPorts(exteriorPortId: string) {
+  const gland = Object.values(junctionInteriorRouting.glands).find((candidate) => (
+    candidate.exteriorPortIds.includes(exteriorPortId)
+  ));
+  if (!gland) return [];
+
+  const conductorPortIds = Object.keys(gland.conductorPoints);
+  if (gland.exteriorPortIds.length === 1) return conductorPortIds;
+
+  const exteriorIndex = gland.exteriorPortIds.indexOf(exteriorPortId);
+  return conductorPortIds[exteriorIndex] ? [conductorPortIds[exteriorIndex]] : [];
+}
+
+function junctionInteriorPeers(exteriorPortId: string) {
+  return junctionConductorPorts(exteriorPortId).flatMap((conductorPortId) => (
+    Object.values(junctionInteriorRouting.wireSegments).flatMap((route) => {
+      const peerPortId = route.from === conductorPortId
+        ? route.to
+        : route.to === conductorPortId
+          ? route.from
+          : undefined;
+      if (!peerPortId) return [];
+
+      const peerPort = junctionInteriorRouting.ports[peerPortId];
+      const peerDeviceId = peerPort?.componentId;
+      if (!peerDeviceId) return [];
+      return [{
+        kind: titleCaseIdentifier(route.kind),
+        peerDeviceId,
+        peerDeviceName: JUNCTION_COMPONENT_NAMES[peerDeviceId] ?? titleCaseIdentifier(peerDeviceId),
+        peerPortId,
+        routeId: route.id,
+      }];
+    })
+  ));
+}
+
 export function physicalConnectorTopology() {
   const result = new Map<string, ConnectorDetails>();
   Object.entries(physicalLayout.portSpecifications).forEach(([portId, port]) => {
-    const connections = Object.values(physicalLayout.routes).flatMap((route) => {
+    const attachedRoutes = Object.values(physicalLayout.routes).filter((route) => (
+      route.sourcePortId === portId || route.targetPortId === portId
+    ));
+    const cable = physicalCableSpecification(attachedRoutes[0].id);
+    const connections = attachedRoutes.flatMap((route) => {
       const endpoint = route.sourcePortId === portId ? "source" : route.targetPortId === portId ? "target" : undefined;
       if (!endpoint) return [];
       const peerDeviceId = endpoint === "source"
         ? route.targetDeviceId ?? logicalPhysicalPeer(route.id, endpoint)
         : route.sourceDeviceId ?? logicalPhysicalPeer(route.id, endpoint);
       const peerPortId = endpoint === "source" ? route.targetPortId : route.sourcePortId;
+      if (peerDeviceId === "junction" && peerPortId) {
+        const interiorPeers = junctionInteriorPeers(peerPortId);
+        if (interiorPeers.length > 0) {
+          return interiorPeers.map((interiorPeer) => ({
+            kind: interiorPeer.kind,
+            otherConnectorId: interiorPeer.peerPortId,
+            otherConnectorName: titleCaseIdentifier(interiorPeer.peerPortId),
+            otherDeviceId: interiorPeer.peerDeviceId,
+            otherDeviceName: interiorPeer.peerDeviceName,
+            routeId: `${route.id} → ${interiorPeer.routeId}`,
+            routeName: `${titleCaseIdentifier(route.id)} → ${titleCaseIdentifier(interiorPeer.routeId)}`,
+            viaDeviceName: DEVICE_NAMES.junction,
+          }));
+        }
+      }
       return [{
         kind: titleCaseIdentifier(route.kind),
         otherConnectorId: peerPortId,
@@ -110,7 +172,8 @@ export function physicalConnectorTopology() {
       }];
     });
     result.set(portId, {
-      cableDiameterMm: port.cableRadiusM * 2000,
+      cable,
+      cableDiameterMm: cable.outsideDiameterMm,
       connections,
       deviceId: port.deviceId,
       deviceName: deviceName(port.deviceId),
@@ -134,7 +197,11 @@ export function junctionConnectorTopology() {
     const ownerName = port.componentId
       ? JUNCTION_COMPONENT_NAMES[port.componentId] ?? titleCaseIdentifier(port.componentId)
       : ownerGland?.label ?? "Junction-box cable entry";
-    const connections = Object.values(junctionInteriorRouting.wireSegments).flatMap((route) => {
+    const attachedRoutes = Object.values(junctionInteriorRouting.wireSegments).filter((route) => (
+      route.from === portId || route.to === portId
+    ));
+    const cable = junctionCableSpecification(attachedRoutes[0].id);
+    const connections = attachedRoutes.flatMap((route) => {
       const peerPortId = route.from === portId ? route.to : route.to === portId ? route.from : undefined;
       if (!peerPortId) return [];
       const peerPort = junctionInteriorRouting.ports[peerPortId];
@@ -154,7 +221,8 @@ export function junctionConnectorTopology() {
       }];
     });
     result.set(portId, {
-      cableDiameterMm: port.cableRadiusM * 2000,
+      cable,
+      cableDiameterMm: cable.outsideDiameterMm,
       connections,
       deviceId: ownerId,
       deviceName: ownerName,

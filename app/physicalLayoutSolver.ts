@@ -1,4 +1,5 @@
 import { junctionInteriorRouting } from "./junctionInteriorRouting.ts";
+import { physicalCableRadiusM } from "./cableSpecifications.ts";
 import optimizedPhysicalLayoutRaw from "../data/optimized-physical-layout.json" with { type: "json" };
 
 export type LayoutVector = [number, number, number];
@@ -995,8 +996,9 @@ function physicalPortDirection(portId: string, deviceId?: string): LayoutVector 
   // The small balancer ring is stacked on the same battery post as a heavy
   // lug. Give it the other physically available departure axis so both
   // connector barrels and straight-on approaches remain distinct.
-  if (deviceId?.startsWith("battery") && portId.endsWith("Balancer")) return [0, 0, 1];
-  if (deviceId?.startsWith("battery")) return [0, 1, 0];
+  const isFloorBattery = /^battery[1-4]$/.test(deviceId ?? "");
+  if (isFloorBattery && portId.endsWith("Balancer")) return [0, 0, 1];
+  if (isFloorBattery) return [0, 1, 0];
   return [0, -1, 0];
 }
 
@@ -1289,11 +1291,9 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     ekran: createDevice("ekran", [3.45, 2.06, z(0.0298)], [0.187, 0.124, 0.0298], "wall"),
     unifi: createDevice("unifi", [3.68, 2.06, z(0.03)], [0.098, 0.098, 0.03], "wall"),
     usb: createDevice("usb", [3.82, 2.06, z(0.075)], [0.18, 0.075, 0.075], "wall"),
-    unifiPower: createDevice("unifiPower", [3.68, 1.9, z(0.03)], [0.1, 0.044, 0.03], "wall"),
     balancerA: createDevice("balancerA", [3.9, 0.75, z(0.047)], [0.113, 0.1, 0.047], "wall"),
     balancerB: createDevice("balancerB", [4.08, 0.75, z(0.047)], [0.113, 0.1, 0.047], "wall"),
-    classTA: createDevice("classTA", [3.48, 0.53, z(0.06)], [0.15, 0.055, 0.06], "wall"),
-    classTB: createDevice("classTB", [3.78, 0.53, z(0.06)], [0.15, 0.055, 0.06], "wall"),
+    batteryBreakerBox: createDevice("batteryBreakerBox", [3.62, 0.58, z(0.11)], [0.172, 0.2, 0.11], "wall"),
     earthBar: createDevice("earthBar", [2.115, 1.16, z(0.026)], [0.14, 0.025, 0.026], "wall"),
     trailingSocket: createDevice("trailingSocket", [2.54, 1.48, -1.94], [0.09, 0.13, 0.07], "hanging"),
     generator: createDevice("generator", [0.15, 0.28, -2.8], [0.6, 0.56, 0.48], "exterior"),
@@ -1363,9 +1363,6 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     unifiLan: bottomPort(devices.unifi, 0.032),
     usbPositive: bottomPort(devices.usb, -0.02),
     usbNegative: bottomPort(devices.usb, 0.02),
-    unifiConverterPositive: bottomPort(devices.unifiPower, -0.035),
-    unifiConverterNegative: bottomPort(devices.unifiPower, 0),
-    unifiConverterUsb: bottomPort(devices.unifiPower, 0.035),
     starlinkEthernet: bottomPort(devices.starlink, 0.04),
     starlinkPowerCable: bottomPort(devices.starlink, -0.025),
     indoorLightPositive: bottomPort(devices.indoorLight, -0.018),
@@ -1381,10 +1378,10 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     multiPlusData: bottomPort(devices.multiPlus, 0.066),
     acBoardEarth: bottomPort(devices.acBoard, 0.06),
     ekranEarth: bottomPort(devices.ekran, 0.084),
-    classTAInput: bottomPort(devices.classTA, -0.04),
-    classTAOutput: bottomPort(devices.classTA, 0.04),
-    classTBInput: bottomPort(devices.classTB, -0.04),
-    classTBOutput: bottomPort(devices.classTB, 0.04),
+    batteryBreakerAInput: bottomPort(devices.batteryBreakerBox, -0.064),
+    batteryBreakerAOutput: bottomPort(devices.batteryBreakerBox, -0.022),
+    batteryBreakerBInput: bottomPort(devices.batteryBreakerBox, 0.022),
+    batteryBreakerBOutput: bottomPort(devices.batteryBreakerBox, 0.064),
     panelStringAPositive: [0.559, 0.925, -1.18],
     panelStringANegative: [-1.659, 0.205, -1.18],
     panelStringBPositive: [0.559, 0.925, 1.18],
@@ -1428,7 +1425,10 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     radiusM: number,
     conductors = 1,
     metadata?: Pick<PhysicalCableRoute, "routing" | "sourceDeviceId" | "sourcePortId" | "targetDeviceId" | "targetPortId">,
-  ) => { routes[id] = createRoute(id, kind, points, radiusM, conductors, metadata); };
+  ) => {
+    radiusM = physicalCableRadiusM(id);
+    routes[id] = createRoute(id, kind, points, radiusM, conductors, metadata);
+  };
   const occupiedWallRoutes: RoutedWallFootprint[] = [];
   const addAutomaticWallRoute = (
     id: string,
@@ -1440,6 +1440,7 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     radiusM: number,
     conductors = 1,
   ) => {
+    radiusM = physicalCableRadiusM(id);
     const source = ports[sourcePortId];
     const target = ports[targetPortId];
     if (!source || !target) throw new Error(`Unknown automatic route endpoint for ${id}`);
@@ -1679,6 +1680,7 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
     targetDeviceId: string;
     radiusM: number;
   }>) => {
+    requests = requests.map((request) => ({ ...request, radiusM: physicalCableRadiusM(request.id) }));
     // Solve the battery harness as one coherent bundle. Site, PV and wall
     // routes use their own depth-lane pass and do not force this local harness
     // in front of unrelated outdoor geometry.
@@ -1928,10 +1930,10 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
   addCollisionAwareEndpointBundle([
     { id: "junction-to-battery-negative-a", kind: "dc-negative", sourcePortId: "junctionBatteryNegativeA", targetPortId: "aNegative", sourceDeviceId: "junction", targetDeviceId: "battery1", radiusM: 0.0065 },
     { id: "junction-to-battery-negative-b", kind: "dc-negative", sourcePortId: "junctionBatteryNegativeB", targetPortId: "bNegative", sourceDeviceId: "junction", targetDeviceId: "battery3", radiusM: 0.0065 },
-    { id: "junction-to-class-t-a", kind: "dc-positive", sourcePortId: "junctionBatteryPositiveA", targetPortId: "classTAOutput", sourceDeviceId: "junction", targetDeviceId: "classTA", radiusM: 0.0065 },
-    { id: "junction-to-class-t-b", kind: "dc-positive", sourcePortId: "junctionBatteryPositiveB", targetPortId: "classTBOutput", sourceDeviceId: "junction", targetDeviceId: "classTB", radiusM: 0.0065 },
-    { id: "battery-a-to-class-t", kind: "dc-positive", sourcePortId: "aPositive", targetPortId: "classTAInput", sourceDeviceId: "battery2", targetDeviceId: "classTA", radiusM: 0.0065 },
-    { id: "battery-b-to-class-t", kind: "dc-positive", sourcePortId: "bPositive", targetPortId: "classTBInput", sourceDeviceId: "battery4", targetDeviceId: "classTB", radiusM: 0.0065 },
+    { id: "breaker-a-to-junction", kind: "dc-positive", sourcePortId: "junctionBatteryPositiveA", targetPortId: "batteryBreakerAOutput", sourceDeviceId: "junction", targetDeviceId: "batteryBreakerBox", radiusM: 0.0065 },
+    { id: "breaker-b-to-junction", kind: "dc-positive", sourcePortId: "junctionBatteryPositiveB", targetPortId: "batteryBreakerBOutput", sourceDeviceId: "junction", targetDeviceId: "batteryBreakerBox", radiusM: 0.0065 },
+    { id: "battery-a-to-breaker", kind: "dc-positive", sourcePortId: "aPositive", targetPortId: "batteryBreakerAInput", sourceDeviceId: "battery2", targetDeviceId: "batteryBreakerBox", radiusM: 0.0065 },
+    { id: "battery-b-to-breaker", kind: "dc-positive", sourcePortId: "bPositive", targetPortId: "batteryBreakerBInput", sourceDeviceId: "battery4", targetDeviceId: "batteryBreakerBox", radiusM: 0.0065 },
     { id: "balancer-a-positive", kind: "dc-positive", sourcePortId: "balancerAPositive", targetPortId: "aPositiveBalancer", sourceDeviceId: "balancerA", targetDeviceId: "battery2", radiusM: 0.0017 },
     { id: "balancer-a-midpoint", kind: "data", sourcePortId: "balancerAMidpoint", targetPortId: "aMidLeftBalancer", sourceDeviceId: "balancerA", targetDeviceId: "battery1", radiusM: 0.0017 },
     { id: "balancer-a-negative", kind: "dc-negative", sourcePortId: "balancerANegative", targetPortId: "aNegativeBalancer", sourceDeviceId: "balancerA", targetDeviceId: "battery1", radiusM: 0.0017 },
@@ -1942,7 +1944,7 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
   ]);
 
   // Route the two inverter trunks after the battery harness so their junction
-  // breakouts can yield to the adjacent Class-T conductors.
+  // breakouts can yield to the adjacent battery-breaker conductors.
   addAutomaticWallRoute("junction-to-multiplus-negative", "dc-negative", "junctionMultiPlusNegative", "multiPlusDcNegative", "junction", "multiPlus", 0.0065);
   addAutomaticWallRoute("junction-to-multiplus-positive", "dc-positive", "junctionMultiPlusPositive", "multiPlusDcPositive", "junction", "multiPlus", 0.0065);
 
@@ -1970,11 +1972,9 @@ export function solvePhysicalLayout(input: PhysicalLayoutInput = {}): PhysicalLa
   addAutomaticWallRoute("junction-to-ekrano-negative", "dc-negative", "junctionEkranNegative", "ekranPowerNegative", "junction", "ekran", 0.0018);
   addAutomaticWallRoute("junction-to-ekrano-positive", "dc-positive", "junctionEkranPositive", "ekranPowerPositive", "junction", "ekran", 0.0018);
   addAutomaticWallRoute("junction-to-starlink-power-cable", "two-core-dc", "junctionStarlinkCable", "starlinkPowerCable", "junction", "starlink", 0.004, 2);
-  addAutomaticWallRoute("junction-to-unifi-converter-positive", "dc-positive", "junctionLoadPositive2", "unifiConverterPositive", "junction", "unifiPower", 0.0018);
-  addAutomaticWallRoute("junction-to-unifi-converter-negative", "dc-negative", "junctionLoadNegative2", "unifiConverterNegative", "junction", "unifiPower", 0.0018);
   addAutomaticWallRoute("junction-to-usb-positive", "dc-positive", "junctionLoadPositive3", "usbPositive", "junction", "usb", 0.0022);
   addAutomaticWallRoute("junction-to-usb-negative", "dc-negative", "junctionLoadNegative3", "usbNegative", "junction", "usb", 0.0022);
-  addAutomaticWallRoute("unifi-converter-to-unifi-power", "data", "unifiConverterUsb", "unifiPower", "unifiPower", "unifi", 0.0017);
+  addAutomaticWallRoute("junction-to-unifi-power-usb", "data", "junctionUnifiUsb", "unifiPower", "junction", "unifi", 0.0022);
   addAutomaticWallRoute("unifi-to-ekrano-data", "data", "unifiLan", "ekranEthernet", "unifi", "ekran", 0.0017);
   addAutomaticWallRoute("smartsolar-to-ekrano-data", "data", "smartSolarData", "ekranVeDirect2", "smartSolar", "ekran", 0.0017);
   addAutomaticWallRoute("multiplus-to-ekrano-data", "data", "multiPlusData", "ekranVeBus", "multiPlus", "ekran", 0.0017);
