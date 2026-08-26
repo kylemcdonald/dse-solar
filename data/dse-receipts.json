@@ -1,0 +1,788 @@
+{
+  "schemaVersion": 1,
+  "generatedOn": "2026-08-26",
+  "privacy": "Public PII-free receipt index. Receipt filenames may be committed; source PDFs remain ignored under private/.",
+  "invoices": [
+    {
+      "number": 1,
+      "date": "2026-07-01",
+      "filename": "amazon-2026-07-01-order-113-3097966-7412218-takoci-batteries.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 2,
+      "date": "2026-07-04",
+      "filename": "ebay-2026-07-04-order-22-14835-56417-unifi-express.pdf",
+      "supplier": "eBay"
+    },
+    {
+      "number": 3,
+      "date": "2026-07-31",
+      "filename": "amazon-2026-07-31-order-113-5949244-9850620-storage-panels-card-readers.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 4,
+      "date": "2026-07-31",
+      "filename": "amazon-2026-07-31-order-113-9991885-2413009-garmin-case.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 5,
+      "date": "2026-07-31",
+      "filename": "swappa-2026-07-31-sale-SAID17517-galaxy-s24.pdf",
+      "supplier": "Swappa"
+    },
+    {
+      "number": 6,
+      "date": "2026-07-31",
+      "filename": "swappa-2026-07-31-sale-SAID21905-macbook-air.pdf",
+      "supplier": "Swappa"
+    },
+    {
+      "number": 7,
+      "date": "2026-07-31",
+      "filename": "swappa-2026-07-31-sale-SAID94445-galaxy-s24.pdf",
+      "supplier": "Swappa"
+    },
+    {
+      "number": 8,
+      "date": "2026-08-17",
+      "filename": "amazon-2026-08-17-order-111-1277449-5699436-qhlightlux-lights.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 9,
+      "date": "2026-08-17",
+      "filename": "amazon-2026-08-17-order-111-1878550-7816240-victron-equipment.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 10,
+      "date": "2026-08-20",
+      "filename": "amazon-2026-08-20-order-111-2775226-7205039-midnite-125a-breakers.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 11,
+      "date": "2026-08-20",
+      "filename": "amazon-2026-08-20-order-111-9047773-1321830-cables-busbars-tools-grease.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 12,
+      "date": "2026-08-21",
+      "filename": "amazon-2026-08-21-order-111-5362611-6708229-cxcesns-pv-combiner.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 13,
+      "date": "2026-08-21",
+      "filename": "amazon-2026-08-21-order-111-6534905-1228221-usb-chargers-switches-adapters.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 14,
+      "date": "2026-08-21",
+      "filename": "amazon-2026-08-21-order-111-6868471-0482610-wire-starlink-accessories.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 15,
+      "date": "2026-08-21",
+      "filename": "amazon-2026-08-21-order-111-9142760-2257055-ac-breakers-converter-tools.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 16,
+      "date": "2026-08-22",
+      "filename": "amazon-2026-08-22-order-111-0054377-1529833-victron-mppt-wirebox-mc4.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 17,
+      "date": "2026-08-23",
+      "filename": "amazon-2026-08-23-order-111-0348737-9573002-laptop-sleeve.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 18,
+      "date": "2026-08-23",
+      "filename": "amazon-2026-08-23-order-111-3303443-2964206-pv-breakers.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 19,
+      "date": "2026-08-23",
+      "filename": "amazon-2026-08-23-order-111-3546485-7664210-ac-protection-enclosure.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 20,
+      "date": "2026-08-23",
+      "filename": "amazon-2026-08-23-order-111-5116885-9721057-wago-connectors-usb-cables.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 21,
+      "date": "2026-08-23",
+      "filename": "amazon-2026-08-23-order-111-5451203-7685830-usb-breaker.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 22,
+      "date": "2026-08-23",
+      "filename": "amazon-2026-08-23-order-111-6124469-4561815-usb-c-charging-cables.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 23,
+      "date": "2026-08-23",
+      "filename": "amazon-2026-08-23-order-111-9984111-5737060-busbars-mppt-wirebox-tr.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 24,
+      "date": "2026-08-23",
+      "filename": "home-depot-2026-08-23-order-WN68394132-starlink-mini-kit.pdf",
+      "supplier": "Home Depot"
+    },
+    {
+      "number": 25,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-0039636-2784221-electrical-tools-terminations.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 26,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-2349613-5829811-cable-ferrules-lugs.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 27,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-3474952-7497041-grounding-busbar.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 28,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-3957253-6148202-smartsolar-b125-breaker.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 29,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-3979619-2780226-type-i-notebook-power-cord.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 30,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-4586976-7908250-battery-b125-breakers-paint-markers.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 31,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-4746944-9349806-din-rails.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 32,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-7720355-6806603-battery-terminal-clamps.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 33,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-8048902-1196269-mc4-connector-kit.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 34,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-8660524-3929849-service-busbars.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 35,
+      "date": "2026-08-24",
+      "filename": "amazon-2026-08-24-order-111-8905768-7147433-shelf-brackets.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 36,
+      "date": "2026-08-25",
+      "filename": "amazon-2026-08-25-order-111-3438994-8490617-dihool-10a-ac-protection.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 37,
+      "date": "2026-08-26",
+      "filename": "amazon-2026-08-26-order-111-1640261-9329869-pv-and-32a-breakers.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 38,
+      "date": "2026-08-26",
+      "filename": "amazon-2026-08-26-order-111-2558750-7633865-preterminated-battery-cables.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 39,
+      "date": "2026-08-26",
+      "filename": "amazon-2026-08-26-order-111-3622276-5853868-dihool-120a-breakers.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 40,
+      "date": "2026-08-26",
+      "filename": "amazon-2026-08-26-order-111-7124751-6454630-2awg-cable-pair.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 41,
+      "date": "2026-08-26",
+      "filename": "amazon-2026-08-26-order-111-8677249-8379458-glands-busbars-enclosure.pdf",
+      "supplier": "Amazon"
+    },
+    {
+      "number": 42,
+      "date": "2026-08-26",
+      "filename": "amazon-2026-08-26-order-111-8727607-1295455-glands-and-din-enclosure.pdf",
+      "supplier": "Amazon"
+    }
+  ],
+  "itemInvoices": {
+    "dse-battery-cable": [
+      38
+    ],
+    "dse-ac-rcbo": [
+      36
+    ],
+    "dse-ac-enclosure": [
+      19
+    ],
+    "dse-switch-array": [
+      13
+    ],
+    "dse-room-switch": [
+      13
+    ],
+    "dse-switch-connectors": [
+      20
+    ],
+    "dse-indoor-light": [
+      8
+    ],
+    "dse-outdoor-light": [
+      8
+    ],
+    "dse-light-spare": [
+      8
+    ],
+    "dse-mc4-dc-adapters": [
+      13
+    ],
+    "dse-ekrano-gx": [
+      9
+    ],
+    "dse-mppt-wirebox-tr": [
+      23
+    ],
+    "dse-smartsolar": [
+      9
+    ],
+    "dse-dielectric-grease": [
+      11
+    ],
+    "dse-balancers": [
+      9
+    ],
+    "dse-shunt": [
+      9
+    ],
+    "dse-orion-usb-converter": [
+      9
+    ],
+    "dse-unused-galaxy-s24-case": [
+      4
+    ],
+    "dse-unused-sandisk-portable-ssd": [
+      3
+    ],
+    "dse-unused-acer-card-readers": [
+      3
+    ],
+    "dse-unused-galaxy-s24-pair": [
+      5,
+      7
+    ],
+    "dse-unused-macbook-air-15-m4": [
+      6
+    ],
+    "dse-orion-input-breaker": [
+      37
+    ],
+    "dse-chargeit-branch-breaker": [
+      37
+    ],
+    "dse-airic-npt-cable-glands": [
+      41
+    ],
+    "dse-ventilated-ip65-enclosure": [
+      41
+    ],
+    "dse-pg11-cable-glands": [
+      42
+    ],
+    "dse-mollom-8-way-enclosure-second": [
+      42
+    ],
+    "dse-shirbly-2awg-cable-pairs": [
+      38,
+      40
+    ],
+    "dse-battery-string-breakers": [
+      39
+    ],
+    "dse-pv-string-breakers": [
+      37
+    ],
+    "dse-pv-protection": [
+      12
+    ],
+    "dse-breaker-mnedc100": [
+      39
+    ],
+    "dse-usb": [
+      13
+    ],
+    "dse-usb-sockets": [
+      13
+    ],
+    "dse-chargeit-mini-75": [
+      13
+    ],
+    "dse-unifi-converter": [
+      15
+    ],
+    "dse-unifi-usb-cable": [
+      20
+    ],
+    "dse-router": [
+      2
+    ],
+    "dse-main-busbars": [
+      41
+    ],
+    "dse-service-return-bus": [
+      23
+    ],
+    "dse-earth-busbar": [
+      23
+    ],
+    "dse-vedirect-cables": [
+      11
+    ],
+    "dse-vebus-cable": [
+      11
+    ],
+    "dse-ekrano-ethernet": [
+      11
+    ],
+    "dse-cat6-blue-spare": [
+      11
+    ],
+    "dse-starlink-ethernet": [
+      14
+    ],
+    "dse-inline-connectors": [
+      11
+    ],
+    "dse-mc4-tool-kit": [
+      11
+    ],
+    "dse-multimeter": [
+      15
+    ],
+    "dse-aa-aaa-charger": [
+      15
+    ],
+    "dse-10awg-duplex-wire": [
+      14
+    ],
+    "dse-starlink-portable-usbc-cables": [
+      14
+    ],
+    "dse-usb-c-cables-240w": [
+      22
+    ],
+    "dse-usb-c-cables-60w": [
+      22
+    ],
+    "dse-earth-minibus": [
+      27
+    ],
+    "dse-battery-terminal-clamps-additional": [
+      32
+    ],
+    "dse-din-rail-pack": [
+      31
+    ],
+    "dse-twin-ferrule-kit": [
+      26
+    ],
+    "dse-heavy-lug-kit-65": [
+      26
+    ],
+    "dse-1-0-battery-cables-1ft": [
+      26
+    ],
+    "dse-10awg-wire-30ft": [
+      26
+    ],
+    "dse-2awg-wire-pair-5ft": [
+      26
+    ],
+    "dse-1-0-battery-cables-2ft": [
+      26
+    ],
+    "dse-14awg-wire-pair-25ft": [
+      26
+    ],
+    "dse-6awg-wire-10ft": [
+      26
+    ],
+    "dse-18awg-wire-pair-50ft": [
+      26
+    ],
+    "dse-klein-wire-stripper": [
+      25
+    ],
+    "dse-8awg-wire-10ft": [
+      25
+    ],
+    "dse-ferrule-crimper-kit": [
+      25
+    ],
+    "dse-spade-terminals": [
+      25
+    ],
+    "dse-8awg-ring-lugs": [
+      25
+    ],
+    "dse-heavy-lug-assortment": [
+      25
+    ],
+    "dse-cable-cutters": [
+      25
+    ],
+    "dse-ring-fork-terminals": [
+      25
+    ],
+    "dse-service-return-bus-spares": [
+      34
+    ],
+    "dse-paint-markers": [
+      30
+    ],
+    "dse-mc4-connector-spares": [
+      33
+    ],
+    "dse-type-i-notebook-cord-additional": [
+      29
+    ],
+    "dse-shelf-brackets-additional": [
+      35
+    ],
+    "dse-laptop-sleeve-additional": [
+      17
+    ],
+    "dse-ex-starlink": [
+      24
+    ],
+    "dse-b125-chtaixi-unused": [
+      28,
+      30
+    ]
+  },
+  "itemAsins": {
+    "dse-battery-cable": [
+      "B0F93TT9CW",
+      "B0CHS4JBQW"
+    ],
+    "dse-chtai-ac-rcbos-rejected": [
+      "B0CSV93CTN"
+    ],
+    "dse-ac-rcbo": [
+      "B0CRKNJSRH"
+    ],
+    "dse-ac-30a-rejected": [
+      "B0DCN7HK57"
+    ],
+    "dse-ac-enclosure": [
+      "B09XJZDRNM"
+    ],
+    "dse-switch-array": [
+      "B0DM87L1Q3"
+    ],
+    "dse-room-switch": [
+      "B0FCYKC4R7"
+    ],
+    "dse-switch-connectors": [
+      "B0CJ5QF4Z2"
+    ],
+    "dse-indoor-light": [
+      "B0F1V59NXC"
+    ],
+    "dse-outdoor-light": [
+      "B0F1V59NXC"
+    ],
+    "dse-light-spare": [
+      "B0F1V59NXC"
+    ],
+    "dse-mc4-dc-adapters": [
+      "B083R5B97T"
+    ],
+    "dse-ekrano-gx": [
+      "B0C9N42K9Z"
+    ],
+    "dse-mppt-wirebox-mc4-rejected": [
+      "B08LBWWV47"
+    ],
+    "dse-mppt-wirebox-tr": [
+      "B08LBX79XY"
+    ],
+    "dse-smartsolar": [
+      "B08LP7JLLT"
+    ],
+    "dse-dielectric-grease": [
+      "B000AL8VD2"
+    ],
+    "dse-balancers": [
+      "B01DH6B2D2"
+    ],
+    "dse-shunt": [
+      "B0BF636VBX"
+    ],
+    "dse-orion-usb-converter": [
+      "B087CZC211"
+    ],
+    "dse-personal-garmin-montana-710i": [
+      "B0DQQVG24P"
+    ],
+    "dse-unused-galaxy-s24-case": [
+      "B0CPS8G2XB"
+    ],
+    "dse-unused-sandisk-portable-ssd": [
+      "B0C5JQ68FY"
+    ],
+    "dse-personal-flexsolar-panels": [
+      "B0DX25J31F"
+    ],
+    "dse-unused-acer-card-readers": [
+      "B0F1G2HRQ6"
+    ],
+    "dse-personal-takoci-hx870-batteries": [
+      "B0C7ZQNDFK"
+    ],
+    "dse-orion-input-breaker": [
+      "B09H4X8K1C"
+    ],
+    "dse-chargeit-branch-breaker": [
+      "B09H4X8K1C"
+    ],
+    "dse-b125-chtaixi-unused": [
+      "B0B1WC651R"
+    ],
+    "dse-airic-npt-cable-glands": [
+      "B0D8VS9ZGF"
+    ],
+    "dse-ventilated-ip65-enclosure": [
+      "B0DJNJ53MN"
+    ],
+    "dse-pg11-cable-glands": [
+      "B0H2V2JNPS"
+    ],
+    "dse-mollom-8-way-enclosure-second": [
+      "B09XJZDRNM"
+    ],
+    "dse-shirbly-2awg-cable-pairs": [
+      "B0CHS3JJ9F"
+    ],
+    "dse-amomd-600a-busbars-unused": [
+      "B0DG4WLVT7"
+    ],
+    "dse-battery-string-breakers": [
+      "B0BFF7F46Y"
+    ],
+    "dse-battery-string-breakers-midnite-unused": [
+      "B0CFX5PW79"
+    ],
+    "dse-pv-string-breakers": [
+      "B0D4JR95Y4"
+    ],
+    "dse-pv-breakers-32a-rejected": [
+      "B0D4JPXT4T"
+    ],
+    "dse-pv-protection": [
+      "B0FSQB97T2"
+    ],
+    "dse-breaker-mnedc100": [
+      "B0BFF7F46Y"
+    ],
+    "dse-usb": [
+      "B0H1DW6BD8"
+    ],
+    "dse-usb-sockets": [
+      "B07L5VV8SL"
+    ],
+    "dse-chargeit-mini-75": [
+      "B084P83JNW"
+    ],
+    "dse-usb-output-breaker": [
+      "B09H4W8CLY"
+    ],
+    "dse-unifi-converter": [
+      "B0G1W6JTX8"
+    ],
+    "dse-unifi-usb-cable": [
+      "B085S9XQ2M"
+    ],
+    "dse-main-busbars": [
+      "B0B2JGKTFN"
+    ],
+    "dse-service-return-bus": [
+      "B000OTJ89Q"
+    ],
+    "dse-earth-busbar": [
+      "B00821YF1E"
+    ],
+    "dse-vedirect-cables": [
+      "B01F9ESFZS"
+    ],
+    "dse-vebus-cable": [
+      "B003OCRW3E"
+    ],
+    "dse-ekrano-ethernet": [
+      "B003OCRW34"
+    ],
+    "dse-cat6-blue-spare": [
+      "B000KSEJV8"
+    ],
+    "dse-starlink-ethernet": [
+      "B0D8J3HC7Z"
+    ],
+    "dse-inline-connectors": [
+      "B0DZWYVYP8"
+    ],
+    "dse-mc4-tool-kit": [
+      "B0BWRHMHY9"
+    ],
+    "dse-multimeter": [
+      "B0B57L9FNL"
+    ],
+    "dse-aa-aaa-charger": [
+      "B0FZR3HX62"
+    ],
+    "dse-10awg-duplex-wire": [
+      "B0DGL7QVVF"
+    ],
+    "dse-starlink-portable-usbc-cables": [
+      "B0DD12LJNF"
+    ],
+    "dse-starlink-portable-battery-cable": [
+      "B0F7LDGP2P"
+    ],
+    "dse-usb-c-cables-240w": [
+      "B0CPN65CDG"
+    ],
+    "dse-usb-c-cables-60w": [
+      "B0F8PP44SD"
+    ],
+    "dse-earth-minibus": [
+      "B000K2MA9M"
+    ],
+    "dse-battery-terminal-clamps-additional": [
+      "B09T75Z1QR"
+    ],
+    "dse-din-rail-pack": [
+      "B07RFQGVXG"
+    ],
+    "dse-twin-ferrule-kit": [
+      "B0DS61TQF8"
+    ],
+    "dse-heavy-lug-kit-65": [
+      "B07LBQYGK6"
+    ],
+    "dse-1-0-battery-cables-1ft": [
+      "B0FMK1W3T5"
+    ],
+    "dse-10awg-wire-30ft": [
+      "B08HSC5NW5"
+    ],
+    "dse-2awg-wire-pair-5ft": [
+      "B0DTNX7S3S"
+    ],
+    "dse-1-0-battery-cables-2ft": [
+      "B0GR8WW7J7"
+    ],
+    "dse-14awg-wire-pair-25ft": [
+      "B0DTPC2RFJ"
+    ],
+    "dse-6awg-wire-10ft": [
+      "B09BFW8NB1"
+    ],
+    "dse-18awg-wire-pair-50ft": [
+      "B0G6D5GPNH"
+    ],
+    "dse-klein-wire-stripper": [
+      "B00CXKOEQ6"
+    ],
+    "dse-8awg-wire-10ft": [
+      "B093R538JV"
+    ],
+    "dse-ferrule-crimper-kit": [
+      "B0DRJ9CDNG"
+    ],
+    "dse-spade-terminals": [
+      "B08BZ972B5"
+    ],
+    "dse-8awg-ring-lugs": [
+      "B0FNWQ1H4P"
+    ],
+    "dse-heavy-lug-assortment": [
+      "B089K2RFN1"
+    ],
+    "dse-cable-cutters": [
+      "B099C1DSTQ"
+    ],
+    "dse-ring-fork-terminals": [
+      "B09YCRNGP9"
+    ],
+    "dse-service-return-bus-spares": [
+      "B000OTJ89Q"
+    ],
+    "dse-paint-markers": [
+      "B0BLYTMLZN",
+      "B0BK81BSJJ"
+    ],
+    "dse-mc4-connector-spares": [
+      "B0B17FXXL7"
+    ],
+    "dse-type-i-notebook-cord-additional": [
+      "B074F4959C"
+    ],
+    "dse-shelf-brackets-additional": [
+      "B0D8T2XBBL"
+    ],
+    "dse-laptop-sleeve-additional": [
+      "B0FH35VSC5"
+    ]
+  },
+  "purchasedWithoutReceipt": []
+}

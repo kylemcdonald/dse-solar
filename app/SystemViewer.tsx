@@ -1,97 +1,19 @@
 "use client";
 
-import {
-  type ComponentType,
-  type PointerEvent as ReactPointerEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type ComponentType, useEffect, useMemo, useRef, useState } from "react";
 import dseRaw from "@/data/dse-system.json";
-import dseDeliveryRaw from "@/data/dse-delivery.json";
-import pgRaw from "@/data/pg-system.json";
 import { CustomsView } from "./CustomsView";
-import type { ConnectorDetails } from "./connectorTopology";
-import { diameterBasisLabel } from "./cableSpecifications";
+import { GraphInspector } from "./GraphInspector";
+import { ShippingView } from "./ShippingView";
+import type { GraphSelection } from "./systemGraph";
+import { UnifiedSystemDiagram } from "./UnifiedSystemDiagram";
 
-const loadSystemModel3D = () =>
-  import("./SystemModel3D").then((module) => ({ default: module.SystemModel3D }));
-const loadJunctionBoxDiagram = () =>
-  import("./JunctionBoxDiagram").then((module) => ({ default: module.JunctionBoxDiagram }));
+const loadSystemModel3D = () => import("./UnifiedSystemModel3D")
+  .then((module) => ({ default: module.UnifiedSystemModel3D }));
 
-type FlowType =
-  | "all"
-  | "solar"
-  | "battery"
-  | "dc12"
-  | "ac"
-  | "generator"
-  | "data"
-  | "earth"
-  | "control";
+type ViewerMode = "diagram" | "model" | "system" | "bom" | "shipping" | "customs" | "notes";
 
-type ComponentKind =
-  | "solar"
-  | "battery"
-  | "protection"
-  | "conversion"
-  | "generator"
-  | "loadAc"
-  | "loadDc"
-  | "distribution"
-  | "control"
-  | "earth"
-  | "structure"
-  | "alternate";
-
-type ComponentData = {
-  id: string;
-  title: string;
-  kicker: string;
-  kind: ComponentKind;
-  summary: string;
-  specs: string[];
-  note?: string;
-  sourceUrl?: string;
-};
-
-type DiagramNode = {
-  id: string;
-  x: number;
-  y: number;
-  featured?: boolean;
-};
-
-type DiagramEdge = {
-  id: string;
-  from: string;
-  to: string;
-  type: Exclude<FlowType, "all">;
-  label: string;
-  portOffset?: number;
-  fromPortOffset?: number;
-  toPortOffset?: number;
-  waypoints?: Array<{ x: number; y: number }>;
-  labelAt?: { x: number; y: number };
-};
-
-type DiagramRegion = {
-  id: string;
-  label: string;
-  memberIds: string[];
-};
-
-type DiagramView = {
-  label: string;
-  canvas: { width: number; height: number };
-  nodes: DiagramNode[];
-  edges: DiagramEdge[];
-  regions?: DiagramRegion[];
-};
-
-type BomItem = {
+export type BomItem = {
   id: string;
   category: string;
   item: string;
@@ -106,51 +28,31 @@ type BomItem = {
   description: string;
   productUrl?: string;
   specUrl?: string;
+  accountingGroup?: BomAccountingGroup;
   includedInTotal?: boolean;
   paidFraction?: number;
+  unitWeightKg?: number;
+  totalWeightKg?: number;
+  weightBasis?: string;
+  weightSourceUrl?: string;
+  weightNote?: string;
 };
 
-type AmazonStatus =
-  | "purchased"
-  | "available"
-  | "substitute"
-  | "partial"
-  | "unavailable"
-  | "not-applicable";
+export type BomAccountingGroup = "system" | "additional" | "excluded";
 
-type EbayStatus = "available" | "partial" | "unavailable";
-
-type EbayOption = {
-  status: EbayStatus;
-  sourceLabel: string;
-  sourceUrl?: string;
-  secondaryLabel?: string;
-  secondaryUrl?: string;
-  eta: string;
-  price: string;
-  condition: string;
-  shipsFrom: string;
-  note: string;
-};
-
-type DeliveryItem = {
-  amazonStatus: AmazonStatus;
-  sourceLabel: string;
-  sourceUrl?: string;
-  eta: string;
-  time: string;
-  note: string;
-  ebay?: EbayOption;
-};
-
-type DeliverySnapshot = {
-  checkedOn: string;
-  destination: string;
-  items: Record<string, DeliveryItem>;
+export type BomAccountingTotals = {
+  systemTotal: number;
+  systemPaid: number;
+  systemRemaining: number;
+  systemRows: number;
+  additionalTotal: number;
+  additionalPaid: number;
+  additionalRemaining: number;
+  additionalRows: number;
 };
 
 type SystemData = {
-  id: "dse" | "pg";
+  id: "dse";
   shortName: string;
   name: string;
   subtitle: string;
@@ -159,1975 +61,260 @@ type SystemData = {
   status: string;
   summary: string;
   currency: { base: string; fjdPerUsd: number; note: string };
-  budget: {
-    targetUsd: number;
-    targetBasis?: "total" | "remaining";
-    donorFundedIncrementUsd?: number;
-    contingencyIncluded: boolean;
-    note: string;
-  };
+  budget: { targetUsd: number; targetBasis?: "total" | "remaining"; donorFundedIncrementUsd?: number; contingencyIncluded: boolean; note: string };
   keyFacts: Array<{ label: string; value: string; detail: string }>;
-  powerModel: {
-    nominalBatteryKwh: number;
-    usableBatteryKwh: number;
-    averageSolarKwhDay: number | null;
-    assumptions: string;
-  };
-  components: ComponentData[];
-  diagram: {
-    singleLineNote: string;
-    views: { overview: DiagramView; detail: DiagramView };
-  };
+  powerModel: { nominalBatteryKwh: number; usableBatteryKwh: number; averageSolarKwhDay: number | null; assumptions: string };
   bom: BomItem[];
   operatingRules: string[];
   commissioning: string[];
   research: Array<{ title: string; publisher: string; url: string }>;
 };
 
-type ViewerMode = "diagram" | "model" | "junction" | "system" | "bom" | "customs" | "notes";
-
-const systems: Record<"dse" | "pg", SystemData> = {
-  dse: dseRaw as SystemData,
-  pg: pgRaw as SystemData,
-};
-
-const dseDelivery = dseDeliveryRaw as DeliverySnapshot;
+const system = dseRaw as SystemData;
 
 function paidAmount(item: BomItem) {
-  if (item.procurement === "Purchased") return item.totalUsd;
-  const fraction = Math.max(0, Math.min(1, item.paidFraction ?? 0));
-  return item.totalUsd * fraction;
+  if (isPurchased(item)) return item.totalUsd;
+  return item.totalUsd * Math.max(0, Math.min(1, item.paidFraction ?? 0));
 }
-
-const amazonStatusLabels: Record<AmazonStatus, string> = {
-  purchased: "Purchased",
-  available: "Amazon",
-  substitute: "Amazon substitute",
-  partial: "Amazon components",
-  unavailable: "Not on Amazon",
-  "not-applicable": "N/A",
-};
-
-const ebayStatusLabels: Record<EbayStatus, string> = {
-  available: "eBay U.S.",
-  partial: "eBay components",
-  unavailable: "No eBay match",
-};
-
-// The 3D model uses system-component IDs while purchasing research is keyed to
-// BOM rows. Keep this bridge explicit so selecting modeled hardware always
-// resolves to the intended purchase, including assemblies made from several
-// BOM items such as the main DC distribution.
-const dseComponentBomIds: Record<string, readonly string[]> = {
-  array: ["dse-panels"],
-  panel1: ["dse-panels"],
-  panel2: ["dse-panels"],
-  panel3: ["dse-panels"],
-  panel4: ["dse-panels"],
-  pvSafety: ["dse-pv-protection"],
-  solarController: ["dse-smartsolar", "dse-dielectric-grease"],
-  inverter: ["dse-multiplus"],
-  systemMonitor: ["dse-ekrano-gx", "dse-vedirect-cables", "dse-vebus-cable", "dse-ekrano-ethernet"],
-  batteryBank: ["dse-batteries"],
-  battery1: ["dse-batteries"],
-  battery2: ["dse-batteries"],
-  battery3: ["dse-batteries"],
-  battery4: ["dse-batteries"],
-  mainDc: ["dse-shunt", "dse-main-busbars"],
-  batteryProtection: ["dse-battery-breaker-enclosure"],
-  batteryBreakerA: ["dse-battery-string-breakers"],
-  batteryBreakerB: ["dse-battery-string-breakers"],
-  positiveBus: ["dse-main-busbars"],
-  smartShunt: ["dse-shunt"],
-  negativeBus: ["dse-main-busbars"],
-  returnBus: ["dse-service-return-bus"],
-  balancers: ["dse-balancers"],
-  generatorInput: ["dse-gen-input"],
-  acBoard: ["dse-ac-rcbo", "dse-ac-enclosure"],
-  toolOutlet: ["dse-tool-lead"],
-  fuseBlock: ["dse-breaker-mnepv20", "dse-breaker-mnepv15", "dse-breaker-mnepv5", "dse-breaker-mnepv2", "dse-breaker-mnepv1", "dse-service-return-bus"],
-  mpptFuse: ["dse-breaker-mnedc100"],
-  ekranoFuse: ["dse-ekrano-gx"],
-  starlink: ["dse-ex-starlink"],
-  router: ["dse-router"],
-  unifiPower: ["dse-unifi-converter", "dse-unifi-usb-cable"],
-  usb: ["dse-usb", "dse-usb-mixed", "dse-usb-breakers"],
-  loadSwitches: ["dse-switch-internet", "dse-switch-lights", "dse-switch-frame", "dse-switch-accessories"],
-  indoorLight: ["dse-indoor-light"],
-  outdoorLight: ["dse-outdoor-light"],
-  mounting: ["dse-junction-box"],
-  earth: ["dse-earth"],
-  earthBus: ["dse-earth-busbar"],
-};
-
-const pgComponentBomIds: Record<string, readonly string[]> = {
-  pgArray: ["pg-1"],
-  pgPanel1: ["pg-1"],
-  pgPanel2: ["pg-1"],
-  pgPvBreaker: ["pg-20"],
-  pgScc: ["pg-8"],
-  pgChargeBreaker: ["pg-20"],
-  pgBatteryBank: ["pg-28"],
-  pgBattery1: ["pg-28"],
-  pgBattery2: ["pg-28"],
-  pgMainBreaker: ["pg-21"],
-  pgShunt: ["pg-14"],
-  pgDcBus: ["pg-19", "pg-22"],
-  pgStarBreaker: ["pg-26", "pg-27"],
-  pgStepup: ["pg-23"],
-  pgStarlink: ["pg-6"],
-  pgAccessoryFuse: ["pg-13"],
-  pgSocketSplit: ["pg-12"],
-  pgUsbDevices: ["pg-9", "pg-10", "pg-11"],
-  pgRouterBranch: ["pg-11", "pg-12"],
-  pgAltInverter: ["pg-7"],
-};
-
-const componentBomIdsBySystem: Record<SystemData["id"], Record<string, readonly string[]>> = {
-  dse: dseComponentBomIds,
-  pg: pgComponentBomIds,
-};
-
-// Existing site assets do not necessarily have a purchased BOM row. Keep the
-// classification explicit rather than inferring it from display copy such as
-// "existing" or from broad statuses such as "Outside scope" (which can also
-// mean excluded but not yet acquired).
-const existingComponentIdsBySystem: Record<SystemData["id"], readonly string[]> = {
-  dse: ["generator", "starlink"],
-  pg: [],
-};
-
-function purchasedComponentIdsFor(system: SystemData) {
-  const bomById = new Map(system.bom.map((item) => [item.id, item]));
-  return new Set([
-    ...existingComponentIdsBySystem[system.id],
-    ...Object.entries(componentBomIdsBySystem[system.id]).flatMap(([componentId, bomIds]) => (
-      bomIds.length > 0 && bomIds.every((bomId) => bomById.get(bomId)?.procurement === "Purchased")
-        ? [componentId]
-        : []
-    )),
-  ]);
+export function isPurchased(item: Pick<BomItem, "procurement">) {
+  return item.procurement.includes("Purchased");
 }
-
-const dsePurchasedComponentIds = [...purchasedComponentIdsFor(systems.dse)];
-
-function isAmazonUrl(url: string | undefined): url is string {
-  if (!url) return false;
-  try {
-    const hostname = new URL(url).hostname.toLowerCase();
-    return hostname === "amazon.com" || hostname.endsWith(".amazon.com");
-  } catch {
-    return false;
-  }
+export function isItemToPurchase(item: Pick<BomItem, "procurement">) {
+  return !/(?:Purchased|Donated|Outside scope|Deposit paid)/i.test(item.procurement);
 }
-
-const NODE_W = 226;
-const NODE_H = 104;
-
-const flowMeta: Array<{
-  id: FlowType;
-  label: string;
-  shortLabel: string;
-}> = [
-  { id: "all", label: "All circuits", shortLabel: "All" },
-  { id: "solar", label: "PV circuit", shortLabel: "PV" },
-  { id: "battery", label: "Battery circuit", shortLabel: "Battery" },
-  { id: "dc12", label: "Regulated DC", shortLabel: "12 V DC" },
-  { id: "ac", label: "AC output", shortLabel: "230 V AC" },
-  { id: "generator", label: "Generator input", shortLabel: "Generator" },
-  { id: "data", label: "Data", shortLabel: "Data" },
-  { id: "earth", label: "Earth / bonding", shortLabel: "Earth" },
-];
-
-const kindLabels: Record<ComponentKind, string> = {
-  solar: "Solar generation",
-  battery: "Energy storage",
-  protection: "Circuit protection",
-  conversion: "Power conversion",
-  generator: "Backup generation",
-  loadAc: "AC load",
-  loadDc: "DC load",
-  distribution: "Distribution",
-  control: "Monitoring / control",
-  earth: "Earthing / bonding",
-  structure: "Mounting",
-  alternate: "Alternate path",
-};
-
-function money(value: number, currency: "USD" | "FJD" = "USD") {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: currency === "FJD" ? 0 : 0,
-  }).format(value);
+export function getBomAccountingGroup(item: Pick<BomItem, "accountingGroup" | "includedInTotal">): BomAccountingGroup {
+  if (item.accountingGroup) return item.accountingGroup;
+  return item.includedInTotal === false ? "excluded" : "system";
 }
-
-function preciseMoney(value: number, currency: "USD" | "FJD") {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+function roundUsd(value: number) {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
 }
-
-function ComponentIcon({ kind }: { kind: ComponentKind }) {
-  const common = {
-    width: 20,
-    height: 20,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.8,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-  };
-
-  if (kind === "solar") {
-    return (
-      <svg {...common}>
-        <circle cx="12" cy="8" r="3.2" />
-        <path d="M12 2v1.7M12 12.3V14M6 8H4.3M19.7 8H18M7.8 3.8 6.6 2.6M17.4 13.4l-1.2-1.2M16.2 3.8l1.2-1.2M6.6 13.4l1.2-1.2M4 18h16M7 18l1-3h8l1 3M9 22h6" />
-      </svg>
-    );
-  }
-  if (kind === "battery") {
-    return (
-      <svg {...common}>
-        <rect x="3" y="7" width="17" height="11" rx="2" />
-        <path d="M20 10h1.5v5H20M7 10v5M4.5 12.5h5M13.5 12.5h3" />
-      </svg>
-    );
-  }
-  if (kind === "protection") {
-    return (
-      <svg {...common}>
-        <path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6l-7-3Z" />
-        <path d="m9.2 12 1.8 1.8 4-4" />
-      </svg>
-    );
-  }
-  if (kind === "conversion") {
-    return (
-      <svg {...common}>
-        <rect x="3" y="5" width="18" height="14" rx="3" />
-        <path d="m7 10 2-2 2 2M9 8v6M17 14l-2 2-2-2M15 16v-6" />
-      </svg>
-    );
-  }
-  if (kind === "generator") {
-    return (
-      <svg {...common}>
-        <rect x="3" y="5" width="18" height="14" rx="3" />
-        <path d="M6 12c1.5-3 3-3 4.5 0s3 3 4.5 0 3-3 4.5 0M7 8h2" />
-      </svg>
-    );
-  }
-  if (kind === "loadAc") {
-    return (
-      <svg {...common}>
-        <path d="M8 3v6M16 3v6M6 9h12v2a6 6 0 0 1-6 6v4M9 13h6" />
-      </svg>
-    );
-  }
-  if (kind === "loadDc") {
-    return (
-      <svg {...common}>
-        <path d="m13 2-7 12h6l-1 8 7-12h-6l1-8Z" />
-      </svg>
-    );
-  }
-  if (kind === "distribution") {
-    return (
-      <svg {...common}>
-        <path d="M12 3v6M5 21v-5h14v5M5 16v-4h14v4M12 9v3" />
-        <circle cx="5" cy="21" r="1" /><circle cx="12" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
-      </svg>
-    );
-  }
-  if (kind === "earth") {
-    return (
-      <svg {...common}>
-        <path d="M12 3v10M6 13h12M8 17h8M10 21h4" />
-      </svg>
-    );
-  }
-  if (kind === "structure") {
-    return (
-      <svg {...common}>
-        <path d="M4 21V4h16v17M4 8h16M8 4v17M16 4v17" />
-      </svg>
-    );
-  }
-  if (kind === "alternate") {
-    return (
-      <svg {...common}>
-        <path d="M4 6h8a5 5 0 0 1 5 5v7M14 15l3 3 3-3M4 18h4" strokeDasharray="3 2" />
-      </svg>
-    );
-  }
-  return (
-    <svg {...common}>
-      <circle cx="12" cy="12" r="8" />
-      <path d="M12 8v4l3 2M12 3v2M12 19v2M3 12h2M19 12h2" />
-    </svg>
-  );
-}
-
-function ProjectSelector({
-  current,
-  onChange,
-}: {
-  current: "dse" | "pg";
-  onChange: (id: "dse" | "pg") => void;
-}) {
-  return (
-    <div className="project-selector" aria-label="Choose system">
-      {(Object.keys(systems) as Array<"dse" | "pg">).map((id) => (
-        <button
-          type="button"
-          key={id}
-          className={current === id ? "active" : ""}
-          onClick={() => onChange(id)}
-          aria-pressed={current === id}
-        >
-          <span className={`system-dot system-dot-${id}`} />
-          <span>{systems[id].shortName}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function BudgetCard({ system }: { system: SystemData }) {
-  const included = system.bom.filter((item) => item.includedInTotal !== false);
-  const total = included.reduce((sum, item) => sum + item.totalUsd, 0);
-  const donorFunded = system.budget.donorFundedIncrementUsd ?? 0;
-  const baseTotal = total - donorFunded;
-  const purchased = included.reduce((sum, item) => sum + paidAmount(item), 0);
-  const remaining = total - purchased;
-  const baseRemaining = Math.max(0, remaining - donorFunded);
-  const targetIsRemaining = system.budget.targetBasis === "remaining";
-  const budgetMeasure = targetIsRemaining ? baseRemaining : baseTotal;
-  const delta = budgetMeasure - system.budget.targetUsd;
-  const progress = Math.min(100, (budgetMeasure / system.budget.targetUsd) * 100);
-  const purchasedShare = total ? (purchased / total) * 100 : 0;
-
-  return (
-    <section className="budget-card" aria-label="Project budget">
-      <div className="rail-section-label">Planning total</div>
-      <div className="budget-total-row">
-        <strong>{money(total)}</strong>
-        <span className={delta > 0.5 ? "budget-over" : "budget-ok"}>
-          {delta > 0.5
-            ? `+${money(delta)} ${targetIsRemaining ? "remaining" : "base"}`
-            : delta < -0.5
-              ? `${money(Math.abs(delta))} below target`
-              : `${targetIsRemaining ? "remaining" : "base"} at target`}
-        </span>
-      </div>
-      <div className="budget-target">
-        {targetIsRemaining ? "Remaining-spend" : "Base"} target {money(system.budget.targetUsd)}
-        {donorFunded > 0 && ` · ${money(donorFunded)} donor-funded`}
-      </div>
-      <div className="budget-bar" aria-hidden="true">
-        {!targetIsRemaining && (
-          <span
-            className="budget-bar-purchased"
-            style={{ width: `${Math.min(progress, purchasedShare)}%` }}
-          />
-        )}
-        <span
-          className="budget-bar-remaining"
-          style={{
-            left: targetIsRemaining ? "0%" : `${Math.min(progress, purchasedShare)}%`,
-            width: targetIsRemaining
-              ? `${progress}%`
-              : `${Math.max(0, Math.min(100, progress) - purchasedShare)}%`,
-          }}
-        />
-      </div>
-      <dl className={`budget-breakdown ${donorFunded > 0 ? "with-donor" : ""}`}>
-        <div>
-          <dt>Paid / purchased</dt>
-          <dd>{money(purchased)}</dd>
-        </div>
-        <div>
-          <dt>{donorFunded > 0 ? "Base remaining" : "Still to buy"}</dt>
-          <dd>{money(donorFunded > 0 ? baseRemaining : remaining)}</dd>
-        </div>
-        {donorFunded > 0 && (
-          <div>
-            <dt>Donor upgrade</dt>
-            <dd>{money(donorFunded)}</dd>
-          </div>
-        )}
-      </dl>
-      {!system.budget.contingencyIncluded && (
-        <p className="budget-caveat">No general contingency included.</p>
-      )}
-    </section>
-  );
-}
-
-function SystemOverview({ system }: { system: SystemData }) {
-  return (
-    <section className="system-view" aria-label={`${system.name} system overview`}>
-      <div className="system-view-heading">
-        <div>
-          <span>System planning</span>
-          <h1>{system.name}</h1>
-        </div>
-        <p>{system.shortName}</p>
-      </div>
-      <div className="system-overview-grid">
-        <BudgetCard system={system} />
-        <section className="system-facts-card">
-          <div className="rail-section-label">System at a glance</div>
-          <dl>
-            {system.keyFacts.map((fact) => (
-              <div key={fact.label}>
-                <dt>{fact.label}</dt>
-                <dd>{fact.value}</dd>
-                <span>{fact.detail}</span>
-              </div>
-            ))}
-          </dl>
-        </section>
-      </div>
-      <div className="planning-details-grid">
-        <article>
-          <div className="rail-section-label">Scope boundary</div>
-          <p>{system.budget.note}</p>
-        </article>
-        <article>
-          <div className="rail-section-label">Energy assumptions</div>
-          <p>{system.powerModel.assumptions}</p>
-        </article>
-      </div>
-    </section>
-  );
-}
-
-function nodeBoundaryPoint(
-  node: DiagramNode,
-  toward: { x: number; y: number },
-  portOffset = 0,
-) {
-  const center = { x: node.x + NODE_W / 2, y: node.y + NODE_H / 2 };
-  const dx = toward.x - center.x;
-  const dy = toward.y - center.y;
-
-  if (Math.abs(dx) >= Math.abs(dy) * 0.62) {
-    return {
-      x: center.x + (NODE_W / 2) * (dx >= 0 ? 1 : -1),
-      y: center.y + portOffset,
-    };
-  }
+export function getBomAccountingTotals(items: BomItem[]): BomAccountingTotals {
+  const totals = items.reduce((result, item) => {
+    const group = getBomAccountingGroup(item);
+    if (group === "system") {
+      result.systemTotal += item.totalUsd;
+      result.systemPaid += paidAmount(item);
+      result.systemRows += 1;
+    } else if (group === "additional") {
+      result.additionalTotal += item.totalUsd;
+      result.additionalPaid += paidAmount(item);
+      result.additionalRows += 1;
+    }
+    return result;
+  }, {
+    systemTotal: 0,
+    systemPaid: 0,
+    systemRows: 0,
+    additionalTotal: 0,
+    additionalPaid: 0,
+    additionalRows: 0,
+  });
+  const systemTotal = roundUsd(totals.systemTotal);
+  const systemPaid = roundUsd(totals.systemPaid);
+  const additionalTotal = roundUsd(totals.additionalTotal);
+  const additionalPaid = roundUsd(totals.additionalPaid);
   return {
-    x: center.x + portOffset,
-    y: center.y + (NODE_H / 2) * (dy >= 0 ? 1 : -1),
+    ...totals,
+    systemTotal,
+    systemPaid,
+    systemRemaining: roundUsd(Math.max(0, systemTotal - systemPaid)),
+    additionalTotal,
+    additionalPaid,
+    additionalRemaining: roundUsd(Math.max(0, additionalTotal - additionalPaid)),
   };
 }
-
-function edgeGeometry(from: DiagramNode, to: DiagramNode, edge: DiagramEdge) {
-  const fromCenter = { x: from.x + NODE_W / 2, y: from.y + NODE_H / 2 };
-  const toCenter = { x: to.x + NODE_W / 2, y: to.y + NODE_H / 2 };
-  const fromPortOffset = edge.fromPortOffset ?? edge.portOffset ?? 0;
-  const toPortOffset = edge.toPortOffset ?? edge.portOffset ?? 0;
-
-  if (edge.waypoints?.length) {
-    const start = nodeBoundaryPoint(from, edge.waypoints[0], fromPortOffset);
-    const end = nodeBoundaryPoint(
-      to,
-      edge.waypoints[edge.waypoints.length - 1],
-      toPortOffset,
-    );
-    const points = [start, ...edge.waypoints, end];
-    const longestSegment = points.slice(1).reduce(
-      (best, point, index) => {
-        const previous = points[index];
-        const length = Math.hypot(point.x - previous.x, point.y - previous.y);
-        return length > best.length ? { from: previous, to: point, length } : best;
-      },
-      { from: points[0], to: points[1], length: 0 },
-    );
-    return {
-      d: points
-        .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
-        .join(" "),
-      labelX:
-        edge.labelAt?.x ?? (longestSegment.from.x + longestSegment.to.x) / 2,
-      labelY:
-        edge.labelAt?.y ?? (longestSegment.from.y + longestSegment.to.y) / 2,
-    };
-  }
-
-  const dx = toCenter.x - fromCenter.x;
-  const dy = toCenter.y - fromCenter.y;
-  let sx: number;
-  let sy: number;
-  let tx: number;
-  let ty: number;
-  let d: string;
-
-  if (Math.abs(dx) >= Math.abs(dy) * 0.62) {
-    const direction = dx >= 0 ? 1 : -1;
-    sx = fromCenter.x + (NODE_W / 2) * direction;
-    sy = fromCenter.y + fromPortOffset;
-    tx = toCenter.x - (NODE_W / 2) * direction;
-    ty = toCenter.y + toPortOffset;
-    const curve = Math.max(54, Math.abs(tx - sx) * 0.42);
-    d = `M ${sx} ${sy} C ${sx + curve * direction} ${sy}, ${tx - curve * direction} ${ty}, ${tx} ${ty}`;
-  } else {
-    const direction = dy >= 0 ? 1 : -1;
-    sx = fromCenter.x + fromPortOffset;
-    sy = fromCenter.y + (NODE_H / 2) * direction;
-    tx = toCenter.x + toPortOffset;
-    ty = toCenter.y - (NODE_H / 2) * direction;
-    const curve = Math.max(42, Math.abs(ty - sy) * 0.42);
-    d = `M ${sx} ${sy} C ${sx} ${sy + curve * direction}, ${tx} ${ty - curve * direction}, ${tx} ${ty}`;
-  }
-  return {
-    d,
-    labelX: (sx + tx) / 2,
-    labelY: (sy + ty) / 2,
-  };
-}
-
-function placeEdgeLabel(
-  labelX: number,
-  labelY: number,
-  labelWidth: number,
-  view: DiagramView,
-  occupiedLabels: Array<{
-    left: number;
-    right: number;
-    top: number;
-    bottom: number;
-  }> = [],
-) {
-  const labelHeight = 30;
-  const direction = labelY < view.canvas.height / 2 ? -1 : 1;
-  const verticalOffsets = [
-    0,
-    76 * direction,
-    116 * direction,
-    156 * direction,
-    -76 * direction,
-    -116 * direction,
-    -156 * direction,
-    196 * direction,
-    -196 * direction,
-  ];
-  const horizontalDirection = labelX < view.canvas.width / 2 ? 1 : -1;
-  const horizontalShift = labelWidth / 2 + 48;
-  const horizontalOffsets = [
-    0,
-    horizontalShift * horizontalDirection,
-    -horizontalShift * horizontalDirection,
-  ];
-
-  for (const horizontalOffset of horizontalOffsets) {
-    for (const verticalOffset of verticalOffsets) {
-      const candidateX = labelX + horizontalOffset;
-      const candidateY = labelY + verticalOffset;
-      const labelRect = {
-        left: candidateX - labelWidth / 2,
-        right: candidateX + labelWidth / 2,
-        top: candidateY - labelHeight / 2,
-        bottom: candidateY + labelHeight / 2,
-      };
-      const insideCanvas =
-        labelRect.left >= 8 &&
-        labelRect.right <= view.canvas.width - 8 &&
-        labelRect.top >= 8 &&
-        labelRect.bottom <= view.canvas.height - 8;
-      const hitsNode = view.nodes.some(
-        (node) =>
-          labelRect.left < node.x + NODE_W &&
-          labelRect.right > node.x &&
-          labelRect.top < node.y + NODE_H &&
-          labelRect.bottom > node.y,
-      );
-      const hitsLabel = occupiedLabels.some(
-        (occupied) =>
-          labelRect.left < occupied.right + 10 &&
-          labelRect.right > occupied.left - 10 &&
-          labelRect.top < occupied.bottom + 8 &&
-          labelRect.bottom > occupied.top - 8,
-      );
-      if (insideCanvas && !hitsNode && !hitsLabel) {
-        occupiedLabels.push(labelRect);
-        return { x: candidateX, y: candidateY };
-      }
+export type BomSortKey = "weight" | "cost" | "status";
+export type SortDirection = "asc" | "desc";
+export function sortBomItems(items: BomItem[], key: BomSortKey, direction: SortDirection) {
+  const multiplier = direction === "asc" ? 1 : -1;
+  return [...items].sort((a, b) => {
+    if (key === "status") {
+      const comparison = a.procurement.localeCompare(b.procurement);
+      return comparison * multiplier || a.item.localeCompare(b.item);
     }
-  }
-
-  occupiedLabels.push({
-    left: labelX - labelWidth / 2,
-    right: labelX + labelWidth / 2,
-    top: labelY - labelHeight / 2,
-    bottom: labelY + labelHeight / 2,
+    const aValue = key === "weight" && !Number.isFinite(a.totalWeightKg) ? null : key === "weight" ? a.totalWeightKg! : a.totalUsd;
+    const bValue = key === "weight" && !Number.isFinite(b.totalWeightKg) ? null : key === "weight" ? b.totalWeightKg! : b.totalUsd;
+    if (aValue === null) return bValue === null ? a.item.localeCompare(b.item) : 1;
+    if (bValue === null) return -1;
+    return (aValue - bValue) * multiplier || a.item.localeCompare(b.item);
   });
-  return { x: labelX, y: labelY };
+}
+function money(value: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 }
 
-function DiagramCanvas({
-  system,
-  viewKey,
-  selectedId,
-  fadePurchased,
-  purchasedComponentIds,
-  onSelect,
-  onFadePurchasedChange,
-  onViewChange,
-}: {
-  system: SystemData;
-  viewKey: "overview" | "detail";
-  selectedId: string | null;
-  fadePurchased: boolean;
-  purchasedComponentIds: ReadonlySet<string>;
-  onSelect: (id: string) => void;
-  onFadePurchasedChange: (fade: boolean) => void;
-  onViewChange: (key: "overview" | "detail") => void;
-}) {
-  const view = system.diagram.views[viewKey];
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [flow, setFlow] = useState<FlowType>("all");
-  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
-  const zoomRef = useRef(1);
-  const panRef = useRef({ x: 0, y: 0 });
-  const wheelTargetRef = useRef({ zoom: 1, pan: { x: 0, y: 0 } });
-  const wheelFrameRef = useRef<number | null>(null);
-  const dragRef = useRef<{
-    startX: number;
-    startY: number;
-    panX: number;
-    panY: number;
-  } | null>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const components = useMemo(
-    () => new Map(system.components.map((component) => [component.id, component])),
-    [system],
-  );
-  const nodes = useMemo(
-    () => new Map(view.nodes.map((node) => [node.id, node])),
-    [view.nodes],
-  );
-  const connected = useMemo(() => {
-    const ids = new Set<string>(selectedId ? [selectedId] : []);
-    view.edges.forEach((edge) => {
-      if (edge.from === selectedId) ids.add(edge.to);
-      if (edge.to === selectedId) ids.add(edge.from);
-    });
-    return ids;
-  }, [selectedId, view.edges]);
-  const nodeRegions = useMemo(() => {
-    const memberships = new Map<string, DiagramRegion>();
-    view.regions?.forEach((region) => {
-      region.memberIds.forEach((memberId) => memberships.set(memberId, region));
-    });
-    return memberships;
-  }, [view.regions]);
-
-  function stopWheelMotion() {
-    if (wheelFrameRef.current !== null) {
-      cancelAnimationFrame(wheelFrameRef.current);
-      wheelFrameRef.current = null;
-    }
-    wheelTargetRef.current = {
-      zoom: zoomRef.current,
-      pan: panRef.current,
-    };
-  }
-
-  function setTransformNow(nextZoom: number, nextPan: { x: number; y: number }) {
-    zoomRef.current = nextZoom;
-    panRef.current = nextPan;
-    wheelTargetRef.current = { zoom: nextZoom, pan: nextPan };
-    setZoom(nextZoom);
-    setPan(nextPan);
-  }
-
-  function zoomBy(delta: number) {
-    stopWheelMotion();
-    const currentZoom = zoomRef.current;
-    const nextZoom = Math.min(1.8, Math.max(0.62, currentZoom + delta));
-    const centerX = view.canvas.width / 2;
-    const centerY = view.canvas.height / 2;
-    const worldX = (centerX - panRef.current.x) / currentZoom;
-    const worldY = (centerY - panRef.current.y) / currentZoom;
-    setTransformNow(nextZoom, {
-      x: centerX - worldX * nextZoom,
-      y: centerY - worldY * nextZoom,
-    });
-  }
-
-  useEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    function animateWheel() {
-      const target = wheelTargetRef.current;
-      const currentZoom = zoomRef.current;
-      const currentPan = panRef.current;
-      const easedZoom = currentZoom + (target.zoom - currentZoom) * 0.22;
-      const easedPan = {
-        x: currentPan.x + (target.pan.x - currentPan.x) * 0.22,
-        y: currentPan.y + (target.pan.y - currentPan.y) * 0.22,
-      };
-      const settled =
-        Math.abs(target.zoom - easedZoom) < 0.00025 &&
-        Math.abs(target.pan.x - easedPan.x) < 0.05 &&
-        Math.abs(target.pan.y - easedPan.y) < 0.05;
-      const nextZoom = settled ? target.zoom : easedZoom;
-      const nextPan = settled ? target.pan : easedPan;
-
-      zoomRef.current = nextZoom;
-      panRef.current = nextPan;
-      setZoom(nextZoom);
-      setPan(nextPan);
-
-      if (settled) {
-        wheelFrameRef.current = null;
-      } else {
-        wheelFrameRef.current = requestAnimationFrame(animateWheel);
-      }
-    }
-
-    function captureWheel(event: WheelEvent) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      const rect = stage!.getBoundingClientRect();
-      const canvasScale = Math.min(
-        rect.width / view.canvas.width,
-        rect.height / view.canvas.height,
-      );
-      const offsetX = (rect.width - view.canvas.width * canvasScale) / 2;
-      const offsetY = (rect.height - view.canvas.height * canvasScale) / 2;
-      const cursorX = (event.clientX - rect.left - offsetX) / canvasScale;
-      const cursorY = (event.clientY - rect.top - offsetY) / canvasScale;
-      const deltaPixels =
-        event.deltaMode === WheelEvent.DOM_DELTA_LINE
-          ? event.deltaY * 16
-          : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
-            ? event.deltaY * rect.height
-            : event.deltaY;
-      const boundedDelta = Math.max(-160, Math.min(160, deltaPixels));
-      const base = wheelTargetRef.current;
-      const nextZoom = Math.min(
-        1.8,
-        Math.max(0.62, base.zoom * Math.exp(-boundedDelta * 0.0006)),
-      );
-      const worldX = (cursorX - base.pan.x) / base.zoom;
-      const worldY = (cursorY - base.pan.y) / base.zoom;
-
-      wheelTargetRef.current = {
-        zoom: nextZoom,
-        pan: {
-          x: cursorX - worldX * nextZoom,
-          y: cursorY - worldY * nextZoom,
-        },
-      };
-      if (wheelFrameRef.current === null) {
-        wheelFrameRef.current = requestAnimationFrame(animateWheel);
-      }
-    }
-
-    stage.addEventListener("wheel", captureWheel, {
-      passive: false,
-      capture: true,
-    });
-    return () => {
-      stage.removeEventListener("wheel", captureWheel, true);
-      if (wheelFrameRef.current !== null) {
-        cancelAnimationFrame(wheelFrameRef.current);
-        wheelFrameRef.current = null;
-      }
-    };
-  }, [view.canvas.height, view.canvas.width]);
-
-  function onPointerDown(event: ReactPointerEvent<SVGSVGElement>) {
-    if ((event.target as Element).closest("[data-diagram-node]")) return;
-    stopWheelMotion();
-    dragRef.current = {
-      startX: event.clientX,
-      startY: event.clientY,
-      panX: panRef.current.x,
-      panY: panRef.current.y,
-    };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }
-
-  function onPointerMove(event: ReactPointerEvent<SVGSVGElement>) {
-    if (!dragRef.current || !stageRef.current) return;
-    const rect = stageRef.current.getBoundingClientRect();
-    const canvasScale = Math.min(
-      rect.width / view.canvas.width,
-      rect.height / view.canvas.height,
-    );
-    setTransformNow(zoomRef.current, {
-      x:
-        dragRef.current.panX +
-        (event.clientX - dragRef.current.startX) / canvasScale,
-      y:
-        dragRef.current.panY +
-        (event.clientY - dragRef.current.startY) / canvasScale,
-    });
-  }
-
-  function onPointerUp(event: ReactPointerEvent<SVGSVGElement>) {
-    dragRef.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-  }
-
-  const occupiedLabels: Array<{
-    left: number;
-    right: number;
-    top: number;
-    bottom: number;
-  }> = [];
-  const edgeLayouts = view.edges.flatMap((edge) => {
-    const from = nodes.get(edge.from);
-    const to = nodes.get(edge.to);
-    if (!from || !to) return [];
-
-    const geo = edgeGeometry(from, to, edge);
-    const selectedEdge = edge.from === selectedId || edge.to === selectedId;
-    const flowMuted = flow !== "all" && edge.type !== flow;
-    const selectionMuted = selectedId && !selectedEdge;
-    const muted = flowMuted || selectionMuted;
-    const labelWidth = Math.max(62, edge.label.length * 8 + 24);
-    let labelPosition: { x: number; y: number };
-
-    if (edge.labelAt) {
-      labelPosition = edge.labelAt;
-      occupiedLabels.push({
-        left: labelPosition.x - labelWidth / 2,
-        right: labelPosition.x + labelWidth / 2,
-        top: labelPosition.y - 15,
-        bottom: labelPosition.y + 15,
-      });
-    } else {
-      labelPosition = placeEdgeLabel(
-        geo.labelX,
-        geo.labelY,
-        labelWidth,
-        view,
-        occupiedLabels,
-      );
-    }
-
-    return [{ edge, geo, selectedEdge, flowMuted, muted, labelWidth, labelPosition }];
-  });
-  const orderedEdgeLayouts = hoveredEdgeId
-    ? [
-        ...edgeLayouts.filter(({ edge }) => edge.id !== hoveredEdgeId),
-        ...edgeLayouts.filter(({ edge }) => edge.id === hoveredEdgeId),
-      ]
-    : edgeLayouts;
-
-  return (
-    <section className="diagram-panel" aria-label={`${system.name} wiring diagram`}>
-      <div className="diagram-toolbar">
-        <div className="flow-filters" aria-label="Filter circuit type">
-          {flowMeta.map((item) => (
-            <button
-              type="button"
-              key={item.id}
-              className={flow === item.id ? "active" : ""}
-              onClick={() => setFlow(item.id)}
-              title={item.label}
-            >
-              {item.id !== "all" && (
-                <span className={`flow-swatch flow-${item.id}`} />
-              )}
-              {item.shortLabel}
-            </button>
-          ))}
-        </div>
-        <div className="diagram-toolbar-actions">
-          <button
-            type="button"
-            className={`purchased-fade-toggle ${fadePurchased ? "active" : ""}`}
-            aria-pressed={fadePurchased}
-            onClick={() => onFadePurchasedChange(!fadePurchased)}
-          >
-            <span aria-hidden="true" />
-            Fade acquired
-          </button>
-          <div className="view-toggle" aria-label="Diagram detail level">
-            {(Object.keys(system.diagram.views) as Array<"overview" | "detail">).map((key) => (
-              <button
-                type="button"
-                key={key}
-                className={viewKey === key ? "active" : ""}
-                onClick={() => onViewChange(key)}
-              >
-                {system.diagram.views[key].label}
-              </button>
-            ))}
-          </div>
-          <div className="zoom-controls" aria-label="Diagram zoom controls">
-            <button type="button" onClick={() => zoomBy(-0.1)} aria-label="Zoom out">
-              −
-            </button>
-            <span>{Math.round(zoom * 100)}%</span>
-            <button type="button" onClick={() => zoomBy(0.1)} aria-label="Zoom in">
-              +
-            </button>
-            <button
-              type="button"
-              className="fit-button"
-              onClick={() => {
-                stopWheelMotion();
-                setTransformNow(1, { x: 0, y: 0 });
-              }}
-            >
-              Fit
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="diagram-stage" ref={stageRef}>
-        <svg
-          viewBox={`0 0 ${view.canvas.width} ${view.canvas.height}`}
-          role="img"
-          aria-label={`${system.name} ${view.label} single-line diagram`}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-        >
-          <defs>
-            <pattern id={`grid-${system.id}`} width="24" height="24" patternUnits="userSpaceOnUse">
-              <path d="M 24 0 L 0 0 0 24" className="grid-line" />
-            </pattern>
-            {flowMeta
-              .filter((item) => item.id !== "all")
-              .map((item) => (
-                <marker
-                  key={item.id}
-                  id={`arrow-${system.id}-${item.id}`}
-                  viewBox="0 0 10 10"
-                  refX="9"
-                  refY="5"
-                  markerWidth="7"
-                  markerHeight="7"
-                  orient="auto-start-reverse"
-                >
-                  <path d="M 0 0 L 10 5 L 0 10 z" className={`marker-${item.id}`} />
-                </marker>
-              ))}
-          </defs>
-          <rect
-            width={view.canvas.width}
-            height={view.canvas.height}
-            fill={`url(#grid-${system.id})`}
-            data-canvas="true"
-          />
-          <g transform={`translate(${pan.x} ${pan.y}) scale(${zoom})`}>
-            {view.regions?.length ? (
-              <g className="diagram-regions" aria-hidden="true">
-                {view.regions.map((region) => (
-                  <g key={region.id} data-region-id={region.id}>
-                    {region.memberIds.map((memberId) => {
-                      const member = nodes.get(memberId);
-                      if (!member) return null;
-                      return (
-                        <rect
-                          key={memberId}
-                          className="diagram-region-halo"
-                          data-region-member={memberId}
-                          x={member.x - 15}
-                          y={member.y - 15}
-                          width={NODE_W + 30}
-                          height={NODE_H + 30}
-                          rx="17"
-                        />
-                      );
-                    })}
-                  </g>
-                ))}
-              </g>
-            ) : null}
-            <g className="diagram-edges">
-              {orderedEdgeLayouts.map(
-                ({ edge, geo, selectedEdge, flowMuted, muted, labelWidth, labelPosition }) => {
-                  const hovered = hoveredEdgeId === edge.id;
-                  const purchased = fadePurchased &&
-                    purchasedComponentIds.has(edge.from) &&
-                    purchasedComponentIds.has(edge.to);
-                return (
-                  <g
-                    key={edge.id}
-                    className={`diagram-edge edge-${edge.type} ${muted ? "muted" : ""} ${selectedEdge ? "selected" : ""} ${hovered ? "is-hovered" : ""} ${purchased ? "purchased-faded" : ""}`}
-                    data-edge-id={edge.id}
-                    data-edge-from={edge.from}
-                    data-edge-to={edge.to}
-                    onMouseEnter={() => setHoveredEdgeId(edge.id)}
-                    onMouseLeave={() =>
-                      setHoveredEdgeId((current) => (current === edge.id ? null : current))
-                    }
-                  >
-                    <path
-                      className="edge-hit"
-                      d={geo.d}
-                      fill="none"
-                    />
-                    <path
-                      className="edge-line"
-                      d={geo.d}
-                      fill="none"
-                      markerEnd={`url(#arrow-${system.id}-${edge.type})`}
-                    />
-                    {!flowMuted && (
-                      <g
-                        className="edge-label"
-                        transform={`translate(${labelPosition.x} ${labelPosition.y})`}
-                      >
-                        <rect
-                          x={-labelWidth / 2}
-                          y="-15"
-                          width={labelWidth}
-                          height="30"
-                          rx="9"
-                        />
-                        <text textAnchor="middle" dominantBaseline="central">
-                          {edge.label}
-                        </text>
-                      </g>
-                    )}
-                  </g>
-                );
-                },
-              )}
-            </g>
-            <g className="diagram-nodes">
-              {view.nodes.map((node) => {
-                const component = components.get(node.id);
-                if (!component) return null;
-                const containingRegion = nodeRegions.get(node.id);
-                const selected = selectedId === node.id;
-                const purchased = fadePurchased && purchasedComponentIds.has(node.id);
-                const muted = Boolean(selectedId) && !connected.has(node.id);
-                const flowConnected =
-                  flow === "all" ||
-                  view.edges.some(
-                    (edge) =>
-                      edge.type === flow &&
-                      (edge.from === node.id || edge.to === node.id),
-                  );
-                return (
-                  <foreignObject
-                    key={node.id}
-                    x={node.x}
-                    y={node.y}
-                    width={NODE_W}
-                    height={NODE_H}
-                    className={`${muted || !flowConnected ? "node-muted" : ""} ${purchased ? "node-purchased-faded" : ""}`}
-                    data-diagram-node="true"
-                    data-node-id={node.id}
-                    data-procurement-faded={purchased ? "true" : "false"}
-                    data-contained-in={containingRegion?.id}
-                  >
-                    <button
-                      type="button"
-                      className={`diagram-node kind-${component.kind} ${selected ? "selected" : ""} ${node.featured ? "featured" : ""} ${containingRegion ? "contained-node" : ""}`}
-                      onClick={() => onSelect(node.id)}
-                      title={`Inspect ${component.title}`}
-                    >
-                      <span className="node-icon">
-                        <ComponentIcon kind={component.kind} />
-                      </span>
-                      <span className="node-copy">
-                        <span className="node-kicker">{component.kicker}</span>
-                        <strong>{component.title}</strong>
-                      </span>
-                      <span className="node-chevron">›</span>
-                    </button>
-                  </foreignObject>
-                );
-              })}
-            </g>
-          </g>
-        </svg>
-        {view.regions?.map((region) => (
-          <div className="diagram-region-key" key={region.id} data-region-key={region.id}>
-            <span aria-hidden="true" />
-            {region.label}
-          </div>
-        ))}
-        <div className="canvas-hint">
-          <span className="mouse-glyph" aria-hidden="true" />
-          Scroll to zoom · drag canvas to pan · click a component
-        </div>
-      </div>
-    </section>
-  );
+function ModeIcon({ mode }: { mode: ViewerMode }) {
+  if (mode === "model") return <><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4 7.5 8 4.5 8-4.5M12 12v9" /></>;
+  if (mode === "diagram") return <><rect x="3" y="4" width="7" height="6" rx="1" /><rect x="14" y="14" width="7" height="6" rx="1" /><path d="M10 7h5a3 3 0 0 1 3 3v4M6.5 10v5a2 2 0 0 0 2 2H14" /></>;
+  if (mode === "system") return <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />;
+  if (mode === "bom") return <path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" />;
+  if (mode === "shipping") return <><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M3 12h11M14 4v16M14 13h7" /></>;
+  if (mode === "customs") return <path d="M5 3h10l4 4v14H5zM15 3v5h5M8 12h8M8 16h8" />;
+  return <path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5" />;
 }
 
-function Inspector({
-  system,
-  viewKey,
-  selectedId,
-  onSelect,
-  onClose,
-  showProcurement = false,
-}: {
-  system: SystemData;
-  viewKey: "overview" | "detail";
-  selectedId: string;
-  onSelect: (id: string) => void;
-  onClose: () => void;
-  showProcurement?: boolean;
-}) {
-  const component = system.components.find((item) => item.id === selectedId);
-  const view = system.diagram.views[viewKey];
-  const relatedIds = component
-    ? Array.from(
-        new Set(
-          view.edges.flatMap((edge) => {
-            if (edge.from === component.id) return [edge.to];
-            if (edge.to === component.id) return [edge.from];
-            return [];
-          }),
-        ),
-      )
-    : [];
-  const related = relatedIds
-    .map((id) => system.components.find((item) => item.id === id))
-    .filter((item): item is ComponentData => Boolean(item));
-
-  if (!component) return null;
-
-  const procurementItems = showProcurement && system.id === "dse"
-    ? (dseComponentBomIds[component.id] ?? []).flatMap((bomId) => {
-        const bom = system.bom.find((item) => item.id === bomId);
-        if (!bom) return [];
-        const delivery = dseDelivery.items[bomId];
-        return [{
-          bom,
-          delivery,
-          amazonUrl: isAmazonUrl(delivery?.sourceUrl) ? delivery.sourceUrl : undefined,
-        }];
-      })
-    : [];
-
+function SystemOverview() {
+  const accounting = getBomAccountingTotals(system.bom);
   return (
-    <aside className="inspector" aria-label="Component details" role="dialog">
-      <button
-        type="button"
-        className="inspector-close"
-        onClick={onClose}
-        aria-label="Close component details"
-      >
-        ×
-      </button>
-      <div className="inspector-topline">
-        <span className={`inspector-icon kind-${component.kind}`}>
-          <ComponentIcon kind={component.kind} />
-        </span>
-        <span>{kindLabels[component.kind]}</span>
-      </div>
-      <h2>{component.title}</h2>
-      <p className="inspector-kicker">{component.kicker}</p>
-      <p className="inspector-summary">{component.summary}</p>
-      <div className="inspector-section">
-        <div className="rail-section-label">Design values</div>
-        <ul className="spec-list">
-          {component.specs.map((spec) => (
-            <li key={spec}>{spec}</li>
-          ))}
-        </ul>
-      </div>
-      {showProcurement && system.id === "dse" && (
-        <div
-          className="inspector-section model-procurement"
-          data-model-procurement={component.id}
-        >
-          <div className="rail-section-label">Amazon &amp; purchasing</div>
-          {procurementItems.length > 0 ? (
-            <div className="model-procurement-list">
-              {procurementItems.map(({ bom, delivery, amazonUrl }) => (
-                <article className="model-procurement-item" key={bom.id}>
-                  <div className="model-procurement-heading">
-                    <strong>{bom.item}</strong>
-                    <span
-                      className={`delivery-pill delivery-${delivery?.amazonStatus ?? "not-applicable"}`}
-                    >
-                      {delivery ? amazonStatusLabels[delivery.amazonStatus] : "No listing data"}
-                    </span>
-                  </div>
-                  {amazonUrl && delivery ? (
-                    <a
-                      className="model-amazon-link"
-                      href={amazonUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`Open Amazon listing for ${bom.item}`}
-                    >
-                      <span>{delivery.sourceLabel}</span>
-                      <span aria-hidden="true">↗</span>
-                    </a>
-                  ) : (
-                    <>
-                      <p className="model-procurement-unavailable">
-                        {delivery?.amazonStatus === "not-applicable"
-                          ? "Amazon sourcing is not applicable to this item."
-                          : "No Amazon listing is recorded for this item."}
-                      </p>
-                      {delivery?.sourceUrl && (
-                        <a
-                          className="model-fallback-link"
-                          href={delivery.sourceUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Alternative: {delivery.sourceLabel} <span aria-hidden="true">↗</span>
-                        </a>
-                      )}
-                    </>
-                  )}
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p className="model-procurement-empty">
-              This is existing or site-supplied equipment; no Amazon purchase is specified in the BOM.
-            </p>
-          )}
-          <p className="model-procurement-snapshot">
-            Links checked {dseDelivery.checkedOn}. Confirm stock and delivery at checkout.
-          </p>
-        </div>
-      )}
-      {component.note && (
-        <div className="engineering-note">
-          <div className="engineering-note-title">
-            <span>!</span> Engineering note
-          </div>
-          <p>{component.note}</p>
-        </div>
-      )}
-      {related.length > 0 && (
-        <div className="inspector-section">
-          <div className="rail-section-label">Directly connected</div>
-          <div className="related-list">
-            {related.map((item) => (
-              <button type="button" key={item.id} onClick={() => onSelect(item.id)}>
-                <span className={`mini-kind kind-${item.kind}`}>
-                  <ComponentIcon kind={item.kind} />
-                </span>
-                <span>{item.title}</span>
-                <b>›</b>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-      {component.sourceUrl && component.sourceUrl.startsWith("http") && (
-        <a
-          className="source-button"
-          href={component.sourceUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Open technical source <span>↗</span>
-        </a>
-      )}
-    </aside>
-  );
-}
-
-function ConnectorInspector({
-  connector,
-  onClose,
-}: {
-  connector: ConnectorDetails;
-  onClose: () => void;
-}) {
-  return (
-    <aside className="inspector connector-inspector" aria-label="Connector details" role="dialog">
-      <button type="button" className="inspector-close" onClick={onClose} aria-label="Close connector details">×</button>
-      <div className="inspector-topline">
-        <span className="connector-symbol" aria-hidden="true" />
-        <span>{connector.scope}</span>
-      </div>
-      <h2>{connector.name}</h2>
-      <p className="inspector-kicker">Connector on {connector.deviceName}</p>
-      <p className="inspector-summary">{connector.direction}.</p>
-      <div className="inspector-section">
-        <div className="rail-section-label">Cable specification</div>
-        <dl className="connector-identity cable-specification-list">
-          <div><dt>Cable</dt><dd>{connector.cable.label}</dd></div>
-          <div><dt>Conductor size</dt><dd>{connector.cable.conductorSize}</dd></div>
-          <div><dt>AWG</dt><dd>{connector.cable.awg}</dd></div>
-          <div><dt>Outside diameter</dt><dd>{connector.cableDiameterMm.toFixed(1)} mm</dd></div>
-          <div><dt>Diameter basis</dt><dd>{diameterBasisLabel(connector.cable.diameterBasis)}</dd></div>
-        </dl>
-      </div>
-      <div className="inspector-section">
-        <div className="rail-section-label">Connection topology</div>
-        {connector.connections.length > 0 ? (
-          <div className="connector-connection-list">
-            {connector.connections.map((connection) => (
-              <article key={`${connection.routeId}:${connection.otherConnectorId ?? "termination"}`}>
-                <span>{connection.kind}</span>
-                <strong>{connection.otherDeviceName}</strong>
-                {connection.viaDeviceName && (
-                  <p className="connector-via">via {connection.viaDeviceName}</p>
-                )}
-                <dl>
-                  <div><dt>Other connector</dt><dd>{connection.otherConnectorName}</dd></div>
-                  <div><dt>Circuit</dt><dd>{connection.routeName}</dd></div>
-                  <div><dt>Route ID</dt><dd>{connection.routeId}</dd></div>
-                </dl>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="model-procurement-empty">This modeled connector has no cable route assigned.</p>
-        )}
-      </div>
-      <div className="inspector-section">
-        <div className="rail-section-label">Identity</div>
-        <dl className="connector-identity">
-          <div><dt>Connector ID</dt><dd>{connector.id}</dd></div>
-          <div><dt>Device</dt><dd>{connector.deviceName}</dd></div>
-        </dl>
-      </div>
-    </aside>
-  );
-}
-
-function BomView({ system }: { system: SystemData }) {
-  const [query, setQuery] = useState("");
-  const [selectedFilters, setSelectedFilters] = useState<{
-    location?: string;
-    procurement?: string;
-  }>({});
-  const [displayCurrency, setDisplayCurrency] = useState<"USD" | "FJD">("USD");
-  const deliverySnapshot = system.id === "dse" ? dseDelivery : null;
-  const filterOptions = useMemo<Array<{
-    dimension: "location" | "procurement";
-    label: string;
-    value: string;
-  }>>(() => {
-    const locations = Array.from(new Set(system.bom.map((item) => item.location)));
-    return [
-      { dimension: "procurement", label: "Purchased", value: "Purchased" },
-      { dimension: "procurement", label: "Deposit paid", value: "Deposit paid" },
-      { dimension: "procurement", label: "Buy", value: "Buy" },
-      ...locations.filter((item) => item !== "Excluded").map((location) => ({
-        dimension: "location" as const,
-        label: location,
-        value: location,
-      })),
-      { dimension: "location", label: "Excluded", value: "Excluded" },
-    ];
-  }, [system.bom]);
-  const included = system.bom.filter((item) => item.includedInTotal !== false);
-  const total = included.reduce((sum, item) => sum + item.totalUsd, 0);
-  const purchased = included.reduce((sum, item) => sum + paidAmount(item), 0);
-  const importTotal = included
-    .filter((item) => item.location === "Import")
-    .reduce((sum, item) => sum + item.totalUsd, 0);
-  const localTotal = total - importTotal;
-  const rows = system.bom.filter((item) => {
-    const delivery = deliverySnapshot?.items[item.id];
-    const needle = `${item.item} ${item.category} ${item.description} ${
-      delivery
-        ? `${amazonStatusLabels[delivery.amazonStatus]} ${delivery.sourceLabel} ${delivery.eta} ${delivery.note} ${
-            delivery.ebay
-              ? `${ebayStatusLabels[delivery.ebay.status]} ${delivery.ebay.sourceLabel} ${delivery.ebay.eta} ${delivery.ebay.price} ${delivery.ebay.note}`
-              : ""
-          }`
-        : ""
-    }`.toLowerCase();
-    const queryMatch = needle.includes(query.trim().toLowerCase());
-    const filterMatch =
-      (!selectedFilters.procurement || item.procurement === selectedFilters.procurement) &&
-      (!selectedFilters.location || item.location === selectedFilters.location);
-    return queryMatch && filterMatch;
-  });
-
-  const noFiltersSelected = !selectedFilters.procurement && !selectedFilters.location;
-
-  function toggleFilter(dimension: "location" | "procurement", value: string) {
-    setSelectedFilters((current) => {
-      const next = { ...current };
-      if (next[dimension] === value) delete next[dimension];
-      else next[dimension] = value;
-      return next;
-    });
-  }
-
-  function display(valueUsd: number) {
-    return displayCurrency === "USD"
-      ? money(valueUsd, "USD")
-      : money(valueUsd * system.currency.fjdPerUsd, "FJD");
-  }
-
-  return (
-    <section className="bom-view">
-      <div className="bom-summary-grid">
-        <article>
-          <span>Project total</span>
-          <strong>{display(total)}</strong>
-          <small>
-            {included.length} priced line items
-            {system.budget.donorFundedIncrementUsd
-              ? ` · ${display(system.budget.donorFundedIncrementUsd)} donor-funded`
-              : ""}
-          </small>
-        </article>
-        <article>
-          <span>Paid / purchased</span>
-          <strong>{display(purchased)}</strong>
-          <small>{total ? Math.round((purchased / total) * 100) : 0}% of known cost</small>
-        </article>
-        <article>
-          <span>{system.id === "dse" ? "Fiji / local" : "Local + purchased"}</span>
-          <strong>{display(localTotal)}</strong>
-          <small>Includes purchased hardware</small>
-        </article>
-        <article>
-          <span>Import / bring in</span>
-          <strong>{display(importTotal)}</strong>
-          <small>{system.id === "dse" ? "Includes LAX → Nadi bag" : "Original import list"}</small>
-        </article>
-      </div>
-      <div className="bom-controls">
-        <label className="bom-search">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m16 16 5 5" />
-          </svg>
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search items, categories or notes…"
-            aria-label="Search bill of materials"
-          />
-        </label>
-        <div className="bom-filter-list" aria-label="Filter bill of materials">
-          <button
-            type="button"
-            className={noFiltersSelected ? "active" : ""}
-            aria-pressed={noFiltersSelected}
-            onClick={() => setSelectedFilters({})}
-          >
-            All
-          </button>
-          {filterOptions.map((option) => (
-            <button
-              type="button"
-              key={`${option.dimension}:${option.value}`}
-              className={selectedFilters[option.dimension] === option.value ? "active" : ""}
-              aria-pressed={selectedFilters[option.dimension] === option.value}
-              onClick={() => toggleFilter(option.dimension, option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-        <div className="currency-toggle" aria-label="Display currency">
-          {(["USD", "FJD"] as const).map((currency) => (
-            <button
-              type="button"
-              key={currency}
-              className={displayCurrency === currency ? "active" : ""}
-              onClick={() => setDisplayCurrency(currency)}
-            >
-              {currency}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="bom-table-wrap">
-        <table className="bom-table">
-          <thead>
-            <tr>
-              <th>Item / specification</th>
-              <th>Source</th>
-              <th>Qty</th>
-              <th>Unit cost</th>
-              <th>Line total</th>
-              <th>Status</th>
-              <th>LA delivery</th>
-              <th aria-label="Product links" />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((item) => {
-              const originalUnit = preciseMoney(item.unitCost, item.currency);
-              const excluded = item.includedInTotal === false;
-              const delivery = deliverySnapshot?.items[item.id];
-              return (
-                <tr key={item.id} className={excluded ? "excluded-row" : ""}>
-                  <td>
-                    <div className="bom-item-title">{item.item}</div>
-                    <div className="bom-item-category">{item.category}</div>
-                    <p>{item.description}</p>
-                  </td>
-                  <td>
-                    <span className={`location-pill location-${item.location.toLowerCase()}`}>
-                      {item.location}
-                    </span>
-                  </td>
-                  <td className="numeric-cell">
-                    {item.qty} <span>{item.unit}</span>
-                  </td>
-                  <td className="numeric-cell">{excluded ? "—" : originalUnit}</td>
-                  <td className="numeric-cell line-total">
-                    {excluded ? "—" : display(item.totalUsd)}
-                  </td>
-                  <td>
-                    <span
-                      className={`procurement-pill procurement-${item.procurement
-                        .toLowerCase()
-                        .replaceAll(" ", "-")}`}
-                    >
-                      {item.procurement}
-                    </span>
-                    {item.paidFraction !== undefined && (
-                      <small className="procurement-progress">
-                        {Math.round(item.paidFraction * 100)}% paid · {Math.round((1 - item.paidFraction) * 100)}% due
-                      </small>
-                    )}
-                  </td>
-                  <td>
-                    {delivery ? (
-                      <div className="delivery-cell">
-                        <div className="delivery-option">
-                          <div className="delivery-option-heading">
-                            <span className={`delivery-pill delivery-${delivery.amazonStatus}`}>
-                              {amazonStatusLabels[delivery.amazonStatus]}
-                            </span>
-                            <strong>{delivery.eta}</strong>
-                          </div>
-                          {delivery.sourceUrl ? (
-                            <a href={delivery.sourceUrl} target="_blank" rel="noreferrer">
-                              {delivery.sourceLabel} <span aria-hidden="true">↗</span>
-                            </a>
-                          ) : (
-                            <span className="delivery-source">{delivery.sourceLabel}</span>
-                          )}
-                          <small>{delivery.time}</small>
-                          <small className="delivery-note">{delivery.note}</small>
-                        </div>
-                        {delivery.ebay && (
-                          <div className="delivery-option delivery-option-ebay">
-                            <div className="delivery-option-heading">
-                              <span className={`delivery-pill delivery-ebay-${delivery.ebay.status}`}>
-                                {ebayStatusLabels[delivery.ebay.status]}
-                              </span>
-                              <strong>{delivery.ebay.eta}</strong>
-                            </div>
-                            {delivery.ebay.sourceUrl ? (
-                              <a href={delivery.ebay.sourceUrl} target="_blank" rel="noreferrer">
-                                {delivery.ebay.sourceLabel} <span aria-hidden="true">↗</span>
-                              </a>
-                            ) : (
-                              <span className="delivery-source">{delivery.ebay.sourceLabel}</span>
-                            )}
-                            {delivery.ebay.secondaryUrl && delivery.ebay.secondaryLabel && (
-                              <a href={delivery.ebay.secondaryUrl} target="_blank" rel="noreferrer">
-                                {delivery.ebay.secondaryLabel} <span aria-hidden="true">↗</span>
-                              </a>
-                            )}
-                            <small>
-                              {delivery.ebay.price} · {delivery.ebay.condition} · {delivery.ebay.shipsFrom}
-                            </small>
-                            <small className="delivery-note">{delivery.ebay.note}</small>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="delivery-cell delivery-historical">
-                        <span className="delivery-pill delivery-not-applicable">Historical BOM</span>
-                        <small>No current shipping research</small>
-                      </div>
-                    )}
-                  </td>
-                  <td>
-                    <div className="bom-links">
-                      {item.productUrl && (
-                        <a href={item.productUrl} target="_blank" rel="noreferrer" title="Open product or price source">
-                          <span>↗</span>
-                        </a>
-                      )}
-                      {item.specUrl && (
-                        <a href={item.specUrl} target="_blank" rel="noreferrer" title="Open technical specification">
-                          <span>≡</span>
-                        </a>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={4}>
-                {rows.length} of {system.bom.length} rows shown
-              </td>
-              <td className="numeric-cell">{display(total)}</td>
-              <td colSpan={3}>Project total</td>
-            </tr>
-          </tfoot>
-        </table>
-        {rows.length === 0 && (
-          <div className="empty-state">No BOM items match that search and filter.</div>
-        )}
-      </div>
-      <div className="bom-footnotes">
-        <span>Planning FX: 1 USD = {system.currency.fjdPerUsd.toFixed(2)} FJD.</span>
-        <span>Prices are planning values; verify before ordering.</span>
-        {deliverySnapshot && (
-          <span>
-            Delivery snapshot checked {deliverySnapshot.checkedOn} for {deliverySnapshot.destination};
-            Amazon inventory and arrival dates can change at checkout.
-          </span>
-        )}
-        {deliverySnapshot && (
-          <span>Exact matches, substitutes and multi-item Amazon kits are labeled separately.</span>
-        )}
-        {deliverySnapshot && (
-          <span>U.S.-origin eBay options were checked for the exact imported equipment where they could materially help.</span>
-        )}
-        {system.budget.donorFundedIncrementUsd && (
-          <span>{display(system.budget.donorFundedIncrementUsd)} net Ekrano upgrade is donor-funded.</span>
-        )}
-        <span>{system.budget.contingencyIncluded ? "Contingency included." : "No general contingency included."}</span>
-      </div>
-    </section>
-  );
-}
-
-function FieldNotes({ system }: { system: SystemData }) {
-  return (
-    <section className="field-notes">
-      <div className="notes-grid">
-        <article>
-          <div className="notes-heading">
-            <span>01</span>
-            <div>
-              <p>Operations</p>
-              <h2>Rules to post beside the system</h2>
-            </div>
-          </div>
-          <ol>
-            {system.operatingRules.map((rule) => (
-              <li key={rule}>{rule}</li>
-            ))}
-          </ol>
-        </article>
-        <article>
-          <div className="notes-heading">
-            <span>02</span>
-            <div>
-              <p>Before handoff</p>
-              <h2>Commissioning checklist</h2>
-            </div>
-          </div>
-          <ol>
-            {system.commissioning.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-        </article>
-      </div>
-      <article className="research-card">
-        <div>
-          <p>Research trail</p>
-          <h2>Primary technical sources</h2>
-          <span>Product data and current pricing references used by this revision.</span>
-        </div>
-        <div className="research-links">
-          {system.research.map((source) =>
-            source.url.startsWith("http") ? (
-              <a key={source.title} href={source.url} target="_blank" rel="noreferrer">
-                <span>
-                  <b>{source.title}</b>
-                  <small>{source.publisher}</small>
-                </span>
-                <em>↗</em>
-              </a>
-            ) : (
-              <div key={source.title} className="research-local">
-                <span>
-                  <b>{source.title}</b>
-                  <small>{source.publisher}</small>
-                </span>
-                <em>local</em>
-              </div>
-            ),
-          )}
-        </div>
+    <section className="system-overview-v2">
+      <article className="system-hero-v2">
+        <div><p className="eyebrow">{system.location} · {system.revision}</p><h1>{system.name}</h1><p>{system.summary}</p></div>
+        <span className="system-status-pill">{system.status}</span>
       </article>
+      <div className="system-fact-grid">
+        {system.keyFacts.map((fact) => <article key={fact.label}><small>{fact.label}</small><strong>{fact.value}</strong><p>{fact.detail}</p></article>)}
+        <article data-system-total="solar-internet"><small>Solar + internet BOM</small><strong>{money(accounting.systemTotal)}</strong><p>{money(accounting.systemPaid)} paid or committed. {money(accounting.additionalTotal)} in additional purchases is tracked separately.</p></article>
+      </div>
+      <div className="system-columns-v2">
+        <article><h2>Operating rules</h2><ol>{system.operatingRules.map((rule) => <li key={rule}>{rule}</li>)}</ol></article>
+        <article><h2>Commissioning</h2><ol>{system.commissioning.map((rule) => <li key={rule}>{rule}</li>)}</ol></article>
+      </div>
+    </section>
+  );
+}
+
+function BomView() {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("All");
+  const [unpurchasedOnly, setUnpurchasedOnly] = useState(false);
+  const [sort, setSort] = useState<{ key: BomSortKey; direction: SortDirection } | null>(null);
+  const categories = useMemo(() => ["All", ...new Set(system.bom.map((item) => item.category))], []);
+  const items = useMemo(() => {
+    const filtered = system.bom.filter((item) => (
+    (category === "All" || item.category === category) &&
+    (!unpurchasedOnly || isItemToPurchase(item)) &&
+    `${item.item} ${item.description} ${item.procurement}`.toLowerCase().includes(query.trim().toLowerCase())
+    ));
+    return sort ? sortBomItems(filtered, sort.key, sort.direction) : filtered;
+  }, [category, query, sort, unpurchasedOnly]);
+  const changeSort = (key: BomSortKey) => setSort((current) => current?.key === key
+    ? { key, direction: current.direction === "asc" ? "desc" : "asc" }
+    : { key, direction: key === "status" ? "asc" : "desc" });
+  const ariaSort = (key: BomSortKey) => sort?.key === key ? (sort.direction === "asc" ? "ascending" : "descending") : "none";
+  const accounting = getBomAccountingTotals(system.bom);
+  const physicalWeightKg = system.bom.reduce((sum, item) => sum + (Number.isFinite(item.totalWeightKg) ? item.totalWeightKg! : 0), 0);
+  const weightedRows = system.bom.filter((item) => Number.isFinite(item.totalWeightKg)).length;
+  return (
+    <section className="bom-v2">
+      <header className="bom-summary-v2">
+        <div><p className="eyebrow">DSE / Fiji purchase tracking</p><h1>Bill of materials</h1><p>{system.bom.length} tracked rows. Solar/internet materials and additional managed purchases are accounted for separately.</p></div>
+        <div className="bom-totals-v2">
+          <span data-bom-total="design"><small>Design total</small><strong>{money(accounting.systemTotal)}</strong><small className="bom-total-detail">Solar + internet only · {accounting.systemRows} rows</small></span>
+          <span><small>Design paid</small><strong>{money(accounting.systemPaid)}</strong></span>
+          <span><small>Design remaining</small><strong>{money(accounting.systemRemaining)}</strong></span>
+          <span className="bom-total-additional" data-bom-total="additional"><small>Additional purchases</small><strong>{money(accounting.additionalTotal)}</strong><small className="bom-total-detail">{money(accounting.additionalPaid)} paid · {accounting.additionalRows} rows</small></span>
+          <span><small>All tracked weight</small><strong>{physicalWeightKg.toFixed(1)} kg</strong><small className="bom-total-detail">{weightedRows}/{system.bom.length} rows</small></span>
+        </div>
+      </header>
+      <div className="bom-filters-v2">
+        <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search equipment, status, or notes" aria-label="Search bill of materials" />
+        <select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Filter bill of materials by category">
+          {categories.map((value) => <option key={value}>{value}</option>)}
+        </select>
+        <button type="button" className={unpurchasedOnly ? "active" : ""} aria-pressed={unpurchasedOnly} onClick={() => setUnpurchasedOnly((value) => !value)}>
+          {unpurchasedOnly ? "Show All" : "Show Items To Purchase"}
+        </button>
+        <span className="bom-filter-count">{items.length} rows</span>
+      </div>
+      <div className="bom-table-wrap-v2">
+        <table>
+          <thead><tr><th>Item</th><th>Qty</th><th aria-sort={ariaSort("status")}><button type="button" className="bom-sort-button" onClick={() => changeSort("status")}>Status<span aria-hidden="true">{sort?.key === "status" ? sort.direction === "asc" ? "↑" : "↓" : "↕"}</span></button></th><th>Location</th><th aria-sort={ariaSort("weight")}><button type="button" className="bom-sort-button" onClick={() => changeSort("weight")}>Weight<span aria-hidden="true">{sort?.key === "weight" ? sort.direction === "asc" ? "↑" : "↓" : "↕"}</span></button></th><th aria-sort={ariaSort("cost")}><button type="button" className="bom-sort-button" onClick={() => changeSort("cost")}>Cost<span aria-hidden="true">{sort?.key === "cost" ? sort.direction === "asc" ? "↑" : "↓" : "↕"}</span></button></th><th>Sources</th></tr></thead>
+          <tbody>{items.map((item) => (
+            <tr key={item.id} data-bom-id={item.id}>
+              <td><strong>{item.item}</strong><small>{item.description}</small></td><td>{item.qty} {item.unit}</td>
+              <td><span className={`procurement-pill procurement-${item.procurement.toLowerCase().replace(/[^a-z]+/g, "-")}`}>{item.procurement}</span></td>
+              <td>{item.location}</td>
+              <td className="bom-weight-cell">{Number.isFinite(item.totalWeightKg)
+                ? <><strong>{item.totalWeightKg!.toFixed(2)} kg</strong>{item.qty > 1 && Number.isFinite(item.unitWeightKg) && <small>{item.unitWeightKg!.toFixed(2)} kg each</small>}</>
+                : <span aria-label="Weight pending">Pending</span>}</td>
+              <td>{money(item.totalUsd)}</td>
+              <td><div className="bom-source-links">{item.productUrl && <a href={item.productUrl} target="_blank" rel="noreferrer">Buy</a>}{item.specUrl && <a href={item.specUrl} target="_blank" rel="noreferrer">Technical</a>}{item.weightSourceUrl && <a href={item.weightSourceUrl} target="_blank" rel="noreferrer" title={item.weightNote ?? item.weightBasis}>Weight</a>}</div>{(item.weightNote || item.weightBasis) && <small className="bom-weight-note" title={item.weightNote}>{item.weightNote ?? item.weightBasis}</small>}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function FieldNotes() {
+  return (
+    <section className="notes-v2">
+      <header><p className="eyebrow">Field handoff</p><h1>Operating, commissioning, and source notes</h1></header>
+      <div className="system-columns-v2">
+        <article><h2>Operating rules</h2><ol>{system.operatingRules.map((rule) => <li key={rule}>{rule}</li>)}</ol></article>
+        <article><h2>Commissioning sequence</h2><ol>{system.commissioning.map((rule) => <li key={rule}>{rule}</li>)}</ol></article>
+      </div>
+      <article className="research-v2"><h2>Technical sources</h2>{system.research.map((source) => source.url
+        ? <a key={source.title} href={source.url} target="_blank" rel="noreferrer"><strong>{source.title}</strong><small>{source.publisher}</small></a>
+        : <div key={source.title}><strong>{source.title}</strong><small>{source.publisher} · local reference</small></div>)}</article>
     </section>
   );
 }
 
 export function SystemViewer() {
   const shellRef = useRef<HTMLDivElement>(null);
-  const [systemId, setSystemId] = useState<"dse" | "pg">("dse");
   const [mode, setMode] = useState<ViewerMode>("diagram");
   const [modelMounted, setModelMounted] = useState(false);
-  const [dseModelMounted, setDseModelMounted] = useState(false);
   const [Model3D, setModel3D] = useState<ComponentType<{
-    system: SystemData;
-    dseMounted: boolean;
     fadePurchased: boolean;
-    purchasedComponentIds: readonly string[];
     onFadePurchasedChange: (fade: boolean) => void;
-    onSelect: (componentId: string) => void;
-    onSelectConnector: (connector: ConnectorDetails) => void;
-    onOpenDse: () => void;
+    onSelect: (selection: GraphSelection) => void;
+    onClearSelection: () => void;
   }> | null>(null);
-  const [JunctionDiagram, setJunctionDiagram] = useState<ComponentType | null>(null);
-  const [viewKey, setViewKey] = useState<"overview" | "detail">("overview");
   const [fadePurchased, setFadePurchased] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [selectedConnector, setSelectedConnector] = useState<ConnectorDetails | null>(null);
-  const system = systems[systemId];
-  const purchasedComponentIds = useMemo(() => purchasedComponentIdsFor(system), [system]);
-  const handleModelSelect = useCallback((componentId: string) => {
-    setSelectedConnector(null);
-    setSelectedId(componentId);
-  }, []);
-  const handleConnectorSelect = useCallback((connector: ConnectorDetails) => {
-    setSelectedId(null);
-    setSelectedConnector(connector);
-  }, []);
+  const [selection, setSelection] = useState<GraphSelection | null>(null);
 
+  useEffect(() => { shellRef.current?.setAttribute("data-viewer-ready", "true"); }, []);
   useEffect(() => {
-    shellRef.current?.setAttribute("data-viewer-ready", "true");
-  }, []);
+    if (!selection) return;
+    const closeInspector = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setSelection(null);
+    };
+    window.addEventListener("keydown", closeInspector);
+    return () => window.removeEventListener("keydown", closeInspector);
+  }, [selection]);
 
-  function changeSystem(id: "dse" | "pg") {
-    if (id === "dse" && mode === "model") setDseModelMounted(true);
-    if (id === "pg" && (mode === "customs" || mode === "junction")) setMode("system");
-    setSystemId(id);
-    setViewKey("overview");
-    setSelectedId(null);
-    setSelectedConnector(null);
-    window.scrollTo({ top: 0 });
-  }
-
-  function changeView(key: "overview" | "detail") {
-    setViewKey(key);
-    if (
-      selectedId &&
-      !system.diagram.views[key].nodes.some((node) => node.id === selectedId)
-    ) {
-      setSelectedId(null);
-    }
-  }
-
-  function changeMode(nextMode: ViewerMode) {
+  const changeMode = (nextMode: ViewerMode) => {
     if (nextMode === "model") {
       setModelMounted(true);
-      if (systemId === "dse") setDseModelMounted(true);
-      if (!Model3D) {
-        void loadSystemModel3D().then(({ default: component }) => setModel3D(() => component));
-      }
+      if (!Model3D) void loadSystemModel3D().then(({ default: component }) => setModel3D(() => component));
     }
-    if (nextMode === "junction" && !JunctionDiagram) {
-      void loadJunctionBoxDiagram().then(({ default: component }) => setJunctionDiagram(() => component));
-    }
-    if ((nextMode === "customs" || nextMode === "junction") && systemId !== "dse") setSystemId("dse");
     setMode(nextMode);
-    setSelectedId(null);
-    setSelectedConnector(null);
+    setSelection(null);
     window.scrollTo({ top: 0 });
-  }
+  };
+
+  const tabs: Array<{ id: ViewerMode; label: string }> = [
+    { id: "diagram", label: "Detailed diagram" }, { id: "model", label: "3D model" },
+    { id: "system", label: "System" }, { id: "bom", label: "Bill of materials" },
+    { id: "shipping", label: "Shipping" }, { id: "customs", label: "Customs" }, { id: "notes", label: "Field notes" },
+  ];
 
   return (
-    <div className="app-shell" data-viewer-ready="false" ref={shellRef}>
+    <div className="app-shell" data-viewer-ready="false" data-project="dse-fiji" ref={shellRef}>
       <header className="app-header">
-        <nav className="mode-tabs" aria-label="Viewer mode">
-          <button
-            type="button"
-            className={mode === "diagram" ? "active" : ""}
-            onClick={() => changeMode("diagram")}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="3" y="4" width="7" height="6" rx="1" />
-              <rect x="14" y="14" width="7" height="6" rx="1" />
-              <path d="M10 7h5a3 3 0 0 1 3 3v4M6.5 10v5a2 2 0 0 0 2 2H14" />
-            </svg>
-            Diagram
-          </button>
-          <button
-            type="button"
-            className={mode === "model" ? "active" : ""}
-            onClick={() => changeMode("model")}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" />
-              <path d="m4 7.5 8 4.5 8-4.5M12 12v9" />
-            </svg>
-            3D model
-          </button>
-          <button
-            type="button"
-            className={mode === "junction" ? "active" : ""}
-            onClick={() => changeMode("junction")}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M7 8h4v3H7zM13 8h4v3h-4zM7 14h10M9 17h6" />
-            </svg>
-            Junction box
-          </button>
-          <button
-            type="button"
-            className={mode === "system" ? "active" : ""}
-            onClick={() => changeMode("system")}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
-            </svg>
-            System
-          </button>
-          <button
-            type="button"
-            className={mode === "bom" ? "active" : ""}
-            onClick={() => changeMode("bom")}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" />
-            </svg>
-            Bill of materials
-            <span>{system.bom.length}</span>
-          </button>
-          <button
-            type="button"
-            className={mode === "customs" ? "active" : ""}
-            onClick={() => changeMode("customs")}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 3h10l4 4v14H5zM15 3v5h5M8 12h8M8 16h8" />
-            </svg>
-            Customs
-          </button>
-          <button
-            type="button"
-            className={mode === "notes" ? "active" : ""}
-            onClick={() => changeMode("notes")}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5" />
-            </svg>
-            Field notes
-          </button>
-        </nav>
-        <ProjectSelector current={systemId} onChange={changeSystem} />
+        <nav className="mode-tabs" aria-label="Viewer mode">{tabs.map((tab) => <button key={tab.id} type="button" className={mode === tab.id ? "active" : ""} onClick={() => changeMode(tab.id)}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><ModeIcon mode={tab.id} /></svg>{tab.label}{tab.id === "bom" && <span>{system.bom.length}</span>}
+        </button>)}</nav>
+        <div className="project-lockup" aria-label="Current project"><span>DSE</span><strong>Fiji</strong></div>
       </header>
-
       <main>
-        {mode === "diagram" && (
-          <div className="diagram-workspace">
-            <div className="diagram-main">
-              <DiagramCanvas
-                key={`${system.id}-${viewKey}`}
-                system={system}
-                viewKey={viewKey}
-                selectedId={selectedId}
-                fadePurchased={fadePurchased}
-                purchasedComponentIds={purchasedComponentIds}
-                onSelect={setSelectedId}
-                onFadePurchasedChange={setFadePurchased}
-                onViewChange={changeView}
-              />
-            </div>
-            {selectedId && (
-              <div className="inspector-layer">
-                <button
-                  type="button"
-                  className="inspector-backdrop"
-                  onClick={() => setSelectedId(null)}
-                  aria-label="Close component details"
-                />
-                <Inspector
-                  system={system}
-                  viewKey={viewKey}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                  onClose={() => setSelectedId(null)}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {modelMounted && (
-          <div className="model-workspace" hidden={mode !== "model"}>
-            {Model3D ? (
-              <Model3D
-                system={system}
-                dseMounted={dseModelMounted}
-                fadePurchased={fadePurchased}
-                purchasedComponentIds={dsePurchasedComponentIds}
-                onFadePurchasedChange={setFadePurchased}
-                onSelect={handleModelSelect}
-                onSelectConnector={handleConnectorSelect}
-                onOpenDse={() => changeSystem("dse")}
-              />
-            ) : (
-              <div className="model-loading">Preparing measured 3D scene…</div>
-            )}
-            {(selectedId || selectedConnector) && (
-              <div className="inspector-layer">
-                <button
-                  type="button"
-                  className="inspector-backdrop"
-                  onClick={() => {
-                    setSelectedId(null);
-                    setSelectedConnector(null);
-                  }}
-                  aria-label="Close details"
-                />
-                {selectedConnector ? (
-                  <ConnectorInspector connector={selectedConnector} onClose={() => setSelectedConnector(null)} />
-                ) : selectedId ? (
-                  <Inspector
-                    system={system}
-                    viewKey="detail"
-                    selectedId={selectedId}
-                    onSelect={setSelectedId}
-                    onClose={() => setSelectedId(null)}
-                    showProcurement
-                  />
-                ) : null}
-              </div>
-            )}
-          </div>
-        )}
-
-        {mode === "junction" && (
-          JunctionDiagram ? <JunctionDiagram /> : <div className="model-loading">Preparing junction wiring map…</div>
-        )}
-        {mode === "system" && <SystemOverview system={system} />}
-        {mode === "bom" && <BomView key={system.id} system={system} />}
-        {mode === "customs" && (
-          <CustomsView
-            bom={systems.dse.bom}
-            planningFjdPerUsd={systems.dse.currency.fjdPerUsd}
-          />
-        )}
-        {mode === "notes" && <FieldNotes system={system} />}
+        {mode === "diagram" && <UnifiedSystemDiagram fadePurchased={fadePurchased} onFadePurchasedChange={setFadePurchased}
+          onSelect={setSelection} onClearSelection={() => setSelection(null)} inspectorOpen={selection !== null} />}
+        {modelMounted && <div className="model-workspace" hidden={mode !== "model"}>{Model3D
+          ? <Model3D fadePurchased={fadePurchased} onFadePurchasedChange={setFadePurchased} onSelect={setSelection} onClearSelection={() => setSelection(null)} />
+          : <div className="model-loading">Loading precomputed canonical scene…</div>}</div>}
+        {mode === "system" && <SystemOverview />}{mode === "bom" && <BomView />}
+        {mode === "shipping" && <ShippingView bom={system.bom} />}
+        {mode === "customs" && <CustomsView bom={system.bom} planningFjdPerUsd={system.currency.fjdPerUsd} />}
+        {mode === "notes" && <FieldNotes />}
       </main>
+      {selection && <div className="inspector-layer">
+        <GraphInspector selection={selection} bom={system.bom} onClose={() => setSelection(null)} onSelect={setSelection} /></div>}
     </div>
   );
 }

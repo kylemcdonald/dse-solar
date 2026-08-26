@@ -1,263 +1,1075 @@
 {
-  "checkedOn": "2026-08-21",
+  "checkedOn": "2026-08-26",
   "manifestTitle": "Drua Sailing Experience solar-system equipment",
   "declaredPurpose": "Permanent donated equipment for a remote Fiji school teaching Polynesian voyaging; not for resale.",
-  "defaultConsignee": "Drua Sailing Experience — confirm legal Fiji consignee",
-  "defaultDestination": "Lau Group, Fiji — confirm village and island",
+  "defaultConsignee": "Drua Saing Experiences Pte Limited",
+  "defaultDestination": "Fulaga, Lau Group",
   "departureDate": "2026-08-29",
   "vatRate": 0.125,
   "itemMeta": {
     "dse-battery-cable": {
-      "model": "Custom 1/0 AWG UL 1426 tinned-copper set",
-      "origin": "Confirm from invoice",
-      "serialRequired": false
+      "make": "Shirbly",
+      "model": "Preterminated 1/0 AWG OFC battery cable pairs",
+      "additionalInfo": "3 × 1.5 ft pairs + 2 × 2 ft pairs · red / black · 3/8 in lugs",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0F93TT9CW",
+      "originNote": "Confirm manufacturing country from the received product and packaging before filing.",
+      "originReviewedOn": "2026-08-26"
     },
     "dse-multiplus": {
-      "model": "PMP242305010",
-      "origin": "Confirm from product label",
-      "serialRequired": true
+      "model": "MultiPlus-II 24/3000/70-32 230 V",
+      "origin": "",
+      "serialRequired": true,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.victronenergy.com/inverters-chargers/multiplus-ii",
+      "originReviewedOn": "2026-08-25",
+      "make": "Victron",
+      "additionalInfo": "PMP242305010"
     },
     "dse-ekrano-gx": {
-      "model": "BPP900480100",
-      "origin": "Confirm from product label",
+      "model": "Ekrano GX",
+      "origin": "",
       "serialRequired": true,
-      "tafPermitRequired": true
+      "tafPermitRequired": true,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0C9N42K9Z",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "defaultSerials": "HQ2509RURDF",
+      "make": "Victron",
+      "additionalInfo": "BPP900480100"
     },
     "dse-smartsolar": {
-      "model": "SCC115085411",
-      "origin": "Confirm from product label",
+      "model": "SmartSolar MPPT 150/85-Tr VE.Can",
+      "origin": "",
       "serialRequired": true,
-      "tafPermitRequired": true
+      "tafPermitRequired": true,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B08LP7JLLT",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "defaultSerials": "HQ2522V4MVF",
+      "make": "Victron",
+      "additionalInfo": "SCC115085411"
     },
     "dse-dielectric-grease": {
-      "model": "Permatex 22058 · 3 oz tube",
-      "origin": "Confirm from product label",
-      "serialRequired": false
+      "model": "Dielectric Tune-Up Grease",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B000AL8VD2",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Permatex",
+      "additionalInfo": "22058 · 3 oz"
     },
     "dse-balancers": {
-      "model": "BBA000100100",
-      "origin": "Confirm from product label",
+      "model": "Battery Balancer",
+      "origin": "",
       "serialRequired": true,
-      "defaultCondition": "1 new; 1 used - mint"
+      "defaultCondition": "1 new; 1 used - mint",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B01DH6B2D2",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Victron",
+      "additionalInfo": "BBA000100100"
     },
     "dse-shunt": {
-      "model": "SmartShunt IP65 500 A - confirm exact part number from label",
-      "origin": "Confirm from product label",
+      "model": "SmartShunt IP65 500 A",
+      "origin": "",
       "serialRequired": true,
-      "tafPermitRequired": true
+      "tafPermitRequired": true,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0BF636VBX",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "defaultSerials": "",
+      "make": "Victron",
+      "additionalInfo": "Part number pending label"
     },
     "dse-pv-protection": {
-      "model": "CXCESNS DC600V 40 A 2-string / 1-output PV combiner · ASIN B0FSQB97T2",
-      "origin": "Confirm from product label",
-      "serialRequired": false
+      "model": "Two-string PV combiner",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0FSQB97T2",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "CXCESNS",
+      "additionalInfo": "600 VDC · 40 A · disconnect + SPD"
     },
     "dse-breaker-mnedc100": {
-      "model": "MidNite Solar MNEDC100 100 A DC breaker",
-      "origin": "United States — confirm from packaging",
-      "serialRequired": false
+      "make": "DIHOOL",
+      "model": "DZ47X-125-frame non-polarized single-pole breaker",
+      "additionalInfo": "120 A · AC/DC",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0BFF7F46Y",
+      "originNote": "Confirm manufacturing country from the received product and packaging before filing.",
+      "originReviewedOn": "2026-08-26"
     },
-    "dse-breaker-mnepv20": {
-      "model": "MidNite Solar MNEPV20 20 A DC breaker",
-      "origin": "United States — confirm from packaging",
-      "serialRequired": false
+    "dse-switch-array": {
+      "model": "Six-gang marine switch panel",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0DM87L1Q3",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": "12/24 V"
     },
-    "dse-breaker-mnepv15": {
-      "model": "CHTAIXI 12–110 VDC B15 single-pole breaker · ASIN B09H4WQ1QJ",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+    "dse-room-switch": {
+      "model": "Inline DPST cord switch",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0FCYKC4R7",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": "IP67 · 12 V · red indicator"
     },
-    "dse-breaker-mnepv5": {
-      "model": "2 × CHTAIXI 12–110 VDC B6 single-pole breakers · ASIN B09H4XZLCR",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-breaker-mnepv2": {
-      "model": "CHTAIXI 12–110 VDC B6 single-pole breaker · ASIN B09H4XZLCR",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-breaker-mnepv1": {
-      "model": "2 × CHTAIXI 12–110 VDC B6 single-pole breakers · ASIN B09H4XZLCR",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-switch-internet": {
-      "model": "Blue Sea 8287 DPST OFF-ON rocker",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-switch-lights": {
-      "model": "Blue Sea 8282 SPST OFF-ON rocker",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-switch-frame": {
-      "model": "Blue Sea 8259 three-position Contura frame",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-switch-accessories": {
-      "model": "Starlink DC jack, 1N5408 diodes and switch-panel installation parts",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+    "dse-switch-connectors": {
+      "model": "221 compact connector assortment",
+      "origin": "DE",
+      "serialRequired": false,
+      "originBasis": "datasheet",
+      "originSourceUrl": "https://todistribution.co.za/wp-content/uploads/2021/07/Data_Sheet221-413_19.07.2021.pdf",
+      "originNote": "The WAGO 221-413 datasheet states country of origin DE.",
+      "originReviewedOn": "2026-08-25",
+      "make": "WAGO",
+      "additionalInfo": "221-2401 · 221-412 · 221-413 · 221-415"
     },
     "dse-indoor-light": {
-      "model": "QHLightlux 12–28 V utility light, 3000 K · Amazon B0F1V59NXC",
-      "origin": "Confirm from product label",
-      "serialRequired": false
+      "model": "Utility light",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0F1V59NXC",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "QHLightlux",
+      "additionalInfo": "12–28 V · 3000 K · 900 lm · IP67"
     },
     "dse-outdoor-light": {
-      "model": "QHLightlux 12–28 V utility light, 3000 K · Amazon B0F1V59NXC",
-      "origin": "Confirm from product label",
-      "serialRequired": false
+      "model": "Utility light",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0F1V59NXC",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "QHLightlux",
+      "additionalInfo": "12–28 V · 3000 K · 900 lm · IP67"
     },
     "dse-light-spare": {
-      "model": "QHLightlux 12–28 V utility light, 3000 K · Amazon B0F1V59NXC",
-      "origin": "Confirm from product label",
-      "serialRequired": false
-    },
-    "dse-orion-spare": {
-      "model": "Orion-Tr Smart 24/12-30 A 360 W - confirm exact part number from label",
-      "origin": "Confirm from product label",
-      "serialRequired": true,
-      "tafPermitRequired": true
+      "model": "Utility light",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0F1V59NXC",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "QHLightlux",
+      "additionalInfo": "12–28 V · 3000 K · 900 lm · IP67"
     },
     "dse-usb": {
-      "model": "Scanstrut SC-TILE-20 dual USB-C module",
-      "origin": "Confirm from product labels",
-      "serialRequired": false
-    },
-    "dse-usb-mixed": {
-      "model": "2 × Scanstrut SC-TILE-10 USB-C + USB-A modules",
-      "origin": "Confirm from product labels",
-      "serialRequired": false
+      "model": "CG-C145C-145W dual USB-C PD 3.1 charger",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.coolgear.com/product/145w-dual-usb-c-pd-3-1-vehicle-charger-with-mountable-flanges",
+      "originNote": "The exact Coolgear product listing states Country of Origin: China.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Coolgear",
+      "additionalInfo": "145 W EPR"
     },
     "dse-unifi-converter": {
-      "model": "YRDZXG B0G1W6JTX8 12/24 V-to-5 V USB converter",
-      "origin": "Confirm from product label",
-      "serialRequired": false
+      "model": "DC-to-USB converter",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0G1W6JTX8",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "YRDZXG",
+      "additionalInfo": "12/24 V input · 5 V / 5 A output"
     },
     "dse-unifi-usb-cable": {
-      "model": "Amazon Basics USB-A to USB-C cable, 3 ft",
-      "origin": "Confirm from product labels",
-      "serialRequired": false
+      "model": "USB-C to USB-A 2.0 cable",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://m.media-amazon.com/images/I/B1pqHcZKsLL.pdf",
+      "originNote": "Amazon Basics product documentation states Made in China; verify the exact received cable package.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Amazon Basics",
+      "additionalInfo": "1.8 m"
     },
     "dse-router": {
-      "model": "Ubiquiti UniFi Express UX-US",
-      "origin": "Confirm from product label",
+      "model": "UniFi Express",
+      "origin": "CN",
       "serialRequired": true,
-      "tafPermitRequired": true
+      "tafPermitRequired": true,
+      "originBasis": "listing",
+      "originSourceUrl": "https://www.adiglobaldistribution.us/Product/KX-UXUS",
+      "originNote": "The UX-US distributor listing states China; origin is subject to change.",
+      "originReviewedOn": "2026-08-25",
+      "defaultSerials": "942A6F249E89",
+      "make": "Ubiquiti",
+      "additionalInfo": "UX-US"
     },
     "dse-main-busbars": {
-      "model": "AMOMD 600 A red/black covered busbar pair · ASIN B0DG4WLVT7",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "make": "Joinfworld",
+      "model": "Covered positive/negative main busbar pair",
+      "additionalInfo": "250 A · four 3/8 in studs per bar · red / black",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0B2JGKTFN",
+      "originNote": "Confirm the manufacturing country from the received product and packaging before filing.",
+      "originReviewedOn": "2026-08-26"
     },
     "dse-service-return-bus": {
-      "model": "Blue Sea 2314 MiniBus 100 A covered busbar",
-      "origin": "United States — confirm from packaging",
-      "serialRequired": false
+      "model": "2314 MiniBus",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B000OTJ89Q",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Blue Sea",
+      "additionalInfo": "100 A · covered"
     },
     "dse-earth-busbar": {
-      "model": "Blue Sea 2128 MaxiBus 250 A",
-      "origin": "United States — confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-earth-bus-cover": {
-      "model": "Blue Sea 2719 MaxiBus insulating cover",
-      "origin": "United States — confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-usb-breakers": {
-      "model": "3 × CHTAIXI 12–110 VDC B10 single-pole breakers · ASIN B09H4W5HSW",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "model": "2128 MaxiBus",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B00821YF1E",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Blue Sea",
+      "additionalInfo": "250 A"
     },
     "dse-vedirect-cables": {
-      "model": "Victron ASS030530209 VE.Direct cable 0.9 m",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "model": "VE.Direct cable",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B01F9ESFZS",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Victron",
+      "additionalInfo": "ASS030530209 · 0.9 m"
     },
     "dse-vebus-cable": {
-      "model": "StarTech N6PATCH10YL 10 ft yellow Cat6 patch cable",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "model": "Cat6 patch cable",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "listing",
+      "originSourceUrl": "https://www.directdial.com/us/item/startech-com-10ft-cat6-ethernet-cable/n6patch10yl",
+      "originNote": "The product-family distributor record states China; verify each received package revision.",
+      "originReviewedOn": "2026-08-25",
+      "make": "StarTech",
+      "additionalInfo": "N6PATCH10YL · 10 ft · yellow · VE.Bus"
     },
     "dse-ekrano-ethernet": {
-      "model": "StarTech N6PATCH10RD 10 ft red Cat6 patch cable",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-junction-box": {
-      "model": "IP-rated enclosure · about 14.6 × 10.4 × 5.9 in",
-      "origin": "Confirm from product label",
-      "serialRequired": false
-    },
-    "dse-service-spares": {
-      "model": "Mixed electrical service spares — attach detailed sub-list",
-      "origin": "Multiple — attach supplier invoices",
-      "serialRequired": false
+      "model": "Cat6 patch cable",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "listing",
+      "originSourceUrl": "https://www.directdial.com/us/item/startech-com-10ft-cat6-ethernet-cable/n6patch10yl",
+      "originNote": "The product-family distributor record states China; verify each received package revision.",
+      "originReviewedOn": "2026-08-25",
+      "make": "StarTech",
+      "additionalInfo": "N6PATCH10RD · 10 ft · red"
     },
     "dse-battery-string-breakers": {
-      "model": "2 × MidNite Solar MNEPV125-80-1PNP 125 A / 80 VDC breakers",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
-    },
-    "dse-battery-breaker-enclosure": {
-      "model": "QILIPSU QL-VBB-6W IP65 six-way enclosure",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "make": "DIHOOL",
+      "model": "DZ47X-125-frame non-polarized single-pole breaker",
+      "additionalInfo": "120 A · AC/DC",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0BFF7F46Y",
+      "originNote": "Confirm manufacturing country from the received product and packaging before filing.",
+      "originReviewedOn": "2026-08-26"
     },
     "dse-starlink-ethernet": {
-      "model": "CHGRNLF Starlink Mini weatherproof Ethernet cable, 15 ft · ASIN B0D8J3HC7Z",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "model": "Starlink Mini weatherproof Ethernet cable",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0D8J3HC7Z",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "CHGRNLF",
+      "additionalInfo": "15 ft"
     },
     "dse-inline-connectors": {
-      "model": "Oyviny IP68 three-pole inline connectors · 4-pack",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "model": "Three-pole inline junction connector",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0DZWYVYP8",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Oyviny",
+      "additionalInfo": "IP68"
     },
     "dse-mc4-tool-kit": {
-      "model": "MUYI 47-piece MC4 assembly tool kit",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "model": "MC4 assembly tool kit",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0BWRHMHY9",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "MUYI",
+      "additionalInfo": ""
     },
     "dse-chtai-ac-rcbos-rejected": {
-      "model": "2 × CHTAIXI TXB7sLE-63 / sLE-1PN C10 RCBO · ASIN B0CSV93CTN · not for installation",
-      "origin": "Confirm from packaging",
+      "model": "TXB7sLE-63 C10 RCBO",
+      "origin": "CN",
       "serialRequired": false,
-      "defaultCondition": "New — purchased but rejected for DSE installation"
+      "defaultCondition": "New — purchased but rejected for DSE installation",
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.chtaixi.com/contact",
+      "originNote": "TAIXI identifies its manufacturing operation and address in Zhejiang, China; verify the received product label before filing.",
+      "originReviewedOn": "2026-08-25",
+      "excludedFromManifest": true,
+      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "make": "CHTAIXI",
+      "additionalInfo": "120 VAC · 30 mA · 1P+N · Type AC"
     },
     "dse-multimeter": {
-      "model": "Klein Tools MM325 digital multimeter · ASIN B0B57L9FNL",
-      "origin": "Confirm from product label",
-      "serialRequired": false
+      "model": "MM325 digital multimeter",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "listing",
+      "originSourceUrl": "https://www.mouser.com/ProductDetail/Klein-Tools/MM325",
+      "originNote": "The distributor compliance record for Klein MM325 states CN.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Klein Tools",
+      "additionalInfo": ""
     },
     "dse-aa-aaa-charger": {
-      "model": "EBL universal AA/AAA USB-C charger · ASIN B0FZR3HX62",
-      "origin": "Confirm from product label",
-      "serialRequired": false
+      "model": "Universal AA/AAA battery charger",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0FZR3HX62",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "EBL",
+      "additionalInfo": "USB-C"
     },
     "dse-10awg-duplex-wire": {
-      "model": "10 AWG red/black duplex copper wire, 10 ft · ASIN B0DGL7QVVF",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "model": "10 AWG red/black duplex copper wire",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0DGL7QVVF",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": "10 ft"
     },
     "dse-starlink-portable-usbc-cables": {
-      "model": "2 × Genioss Starlink Mini USB-C PD power cable, 6.6 ft · ASIN B0DD12LJNF",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "model": "Starlink Mini USB-C PD power cable",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0DD12LJNF",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Genioss",
+      "additionalInfo": "6.6 ft"
     },
     "dse-starlink-portable-battery-cable": {
-      "model": "SegurVelo Starlink Mini direct-battery cable, 16.4 ft · ASIN B0F7LDGP2P",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "model": "Starlink Mini direct-battery power cable",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0F7LDGP2P",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "excludedFromManifest": true,
+      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "make": "SegurVelo",
+      "additionalInfo": "16.4 ft"
     },
     "dse-cat6-blue-spare": {
-      "model": "StarTech N6PATCH10BL 10 ft blue Cat6 patch cable",
-      "origin": "Confirm from packaging",
-      "serialRequired": false
+      "model": "Cat6 patch cable",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "listing",
+      "originSourceUrl": "https://www.directdial.com/us/item/startech-com-10ft-cat6-ethernet-cable/n6patch10yl",
+      "originNote": "The product-family distributor record states China; verify each received package revision.",
+      "originReviewedOn": "2026-08-25",
+      "make": "StarTech",
+      "additionalInfo": "N6PATCH10BL · 10 ft · blue"
+    },
+    "dse-orion-usb-converter": {
+      "model": "Orion-Tr Smart 24/12-30 A non-isolated",
+      "origin": "",
+      "serialRequired": true,
+      "tafPermitRequired": true,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B087CZC211",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "defaultSerials": "HQ2524CKDAW",
+      "make": "Victron",
+      "additionalInfo": "ORI241236140 · 360 W"
+    },
+    "dse-usb-sockets": {
+      "model": "Female cigarette-lighter socket harness",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B07L5VV8SL",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "YCIND",
+      "additionalInfo": "12 AWG · 6 ft"
+    },
+    "dse-chargeit-mini-75": {
+      "model": "ChargeIT! Mini USB module",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.coolgear.com/product/usb-car-charger-board-60w-high-power-pcb-ccg3pa",
+      "originNote": "The exact Coolgear CG-PD60PPS product listing states Country of Origin: China.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Coolgear",
+      "additionalInfo": "CG-PD60PPS · 75 W · USB-C + USB-A"
+    },
+    "dse-usb-station-wiring": {
+      "model": "USB charging-station installation hardware",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Various",
+      "additionalInfo": "Cable · mounting · terminations"
+    },
+    "dse-usb-output-breaker": {
+      "model": "B60 single-pole DC breaker",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.chtaixi.com/contact",
+      "originNote": "TAIXI identifies its manufacturing operation and address in Zhejiang, China; verify the received product label before filing.",
+      "originReviewedOn": "2026-08-25",
+      "excludedFromManifest": true,
+      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "make": "CHTAIXI",
+      "additionalInfo": "12–110 VDC"
+    },
+    "dse-mppt-wirebox-mc4-rejected": {
+      "model": "MPPT WireBox-XL MC4 VE.Can",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B08LBWWV47",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "excludedFromManifest": true,
+      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "make": "Victron",
+      "additionalInfo": "SCC950400300"
+    },
+    "dse-mppt-wirebox-tr": {
+      "model": "MPPT WireBox-XL Tr",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B08LBX79XY",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Victron",
+      "additionalInfo": "SCC950400210"
+    },
+    "dse-mc4-dc-adapters": {
+      "model": "MC4-to-DC adapter cable",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B083R5B97T",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "zdyCGTime",
+      "additionalInfo": "5.5 × 2.1 mm · 1.5 m · 16 AWG"
+    },
+    "dse-pv-string-breakers": {
+      "make": "CHTAIXI",
+      "model": "DZ47NZ-63 two-pole PV breaker",
+      "additionalInfo": "600 VDC · 20 A",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "CN",
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.chtaixi.com/contact",
+      "originNote": "CHTAIXI identifies its manufacturing operation in Zhejiang, China; verify the received label before filing.",
+      "originReviewedOn": "2026-08-26"
+    },
+    "dse-ac-rcbo": {
+      "make": "DIHOOL",
+      "model": "Two-pole ground-fault breaker with integrated surge protection",
+      "additionalInfo": "10 A · 120–240 VAC · received safety markings pending",
+      "origin": "CN",
+      "originBasis": "manufacturer/listing",
+      "originSourceUrl": "https://www.amazon.com/dp/B0CRKNJSRH",
+      "originNote": "The product-family listing identifies DIHOOL ELECTRIC and China; verify the exact received label before filing.",
+      "originReviewedOn": "2026-08-26",
+      "serialRequired": false,
+      "defaultCondition": "New"
+    },
+    "dse-usb-c-cables-240w": {
+      "model": "USB-C to USB-C charging cable",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0CPN65CDG",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Cable Matters",
+      "additionalInfo": "240 W · 6 ft · white"
+    },
+    "dse-usb-c-cables-60w": {
+      "model": "USB-C to USB-C charging cable",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0F8PP44SD",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Cable Matters",
+      "additionalInfo": "60 W · 6 ft · multicolor"
+    },
+    "dse-ex-starlink": {
+      "model": "Mini Kit",
+      "origin": "",
+      "serialRequired": true,
+      "tafPermitRequired": true,
+      "defaultCondition": "New",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.homedepot.com/s/Starlink%20Mini%20Kit",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "defaultSerials": "",
+      "make": "Starlink",
+      "additionalInfo": "Hardware ID pending label"
+    },
+    "dse-ac-enclosure": {
+      "model": "HT-8 DIN enclosure",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B09XJZDRNM",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Mollom",
+      "additionalInfo": "8-way · 200 × 155 × 92 mm"
+    },
+    "dse-ac-30a-rejected": {
+      "model": "GFCI breaker and Type 2 SPD assembly",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.dihool.net/",
+      "originNote": "DIHOOL identifies DIHOOL Electric Zhejiang Co., Ltd. as its manufacturer in Zhejiang, China; verify the received product label before filing.",
+      "originReviewedOn": "2026-08-25",
+      "excludedFromManifest": true,
+      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "make": "DIHOOL",
+      "additionalInfo": "30 A · 30 mA"
+    },
+    "dse-pv-breakers-32a-rejected": {
+      "model": "DZ47NZ-63 two-pole PV breaker",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.chtaixi.com/contact",
+      "originNote": "TAIXI identifies its manufacturing operation and address in Zhejiang, China; verify the received product label before filing.",
+      "originReviewedOn": "2026-08-25",
+      "excludedFromManifest": true,
+      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "make": "CHTAIXI",
+      "additionalInfo": "600 VDC · 32 A"
+    },
+    "dse-battery-string-breakers-midnite-unused": {
+      "model": "MNEPV125-80-1PNP breaker",
+      "origin": "US",
+      "serialRequired": false,
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.midnitesolar.com/doc_prod_list.php?menuItem=products&productCat_ID=17",
+      "originNote": "MidNite product documentation identifies the relevant breaker family as made in the USA; verify the received label.",
+      "originReviewedOn": "2026-08-25",
+      "excludedFromManifest": true,
+      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "make": "MidNite Solar",
+      "additionalInfo": "125 A · 80 VDC"
+    },
+    "dse-earth-minibus": {
+      "model": "2306 Mini Grounding BusBar",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B000K2MA9M",
+      "originReviewedOn": "2026-08-25",
+      "make": "Blue Sea",
+      "additionalInfo": "100 A · six-gang"
+    },
+    "dse-battery-terminal-clamps-additional": {
+      "model": "Automotive battery-terminal connector",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B09T75Z1QR",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": ""
+    },
+    "dse-din-rail-pack": {
+      "model": "DIN rail",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B07RFQGVXG",
+      "originReviewedOn": "2026-08-25",
+      "make": "mxuteuk",
+      "additionalInfo": "4 in"
+    },
+    "dse-twin-ferrule-kit": {
+      "model": "Twin-wire ferrule assortment",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0DS61TQF8",
+      "originReviewedOn": "2026-08-25",
+      "make": "Preciva",
+      "additionalInfo": ""
+    },
+    "dse-heavy-lug-kit-65": {
+      "model": "Heavy copper-lug assortment",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B07LBQYGK6",
+      "originReviewedOn": "2026-08-25",
+      "make": "Glarks",
+      "additionalInfo": ""
+    },
+    "dse-1-0-battery-cables-1ft": {
+      "model": "1/0 AWG red/black battery cable",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0FMK1W3T5",
+      "originReviewedOn": "2026-08-25",
+      "make": "iGreely",
+      "additionalInfo": "1 ft"
+    },
+    "dse-10awg-wire-30ft": {
+      "model": "10 AWG red/black wire",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B08HSC5NW5",
+      "originReviewedOn": "2026-08-25",
+      "make": "iGreely",
+      "additionalInfo": "30 ft"
+    },
+    "dse-2awg-wire-pair-5ft": {
+      "model": "2 AWG red/black battery cable",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0DTNX7S3S",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": "5 ft"
+    },
+    "dse-1-0-battery-cables-2ft": {
+      "model": "1/0 AWG red/black battery cable",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0GR8WW7J7",
+      "originReviewedOn": "2026-08-25",
+      "make": "iGreely",
+      "additionalInfo": "2 ft"
+    },
+    "dse-14awg-wire-pair-25ft": {
+      "model": "14 AWG red/black wire",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0DTPC2RFJ",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": "25 ft"
+    },
+    "dse-6awg-wire-10ft": {
+      "model": "6 AWG red/black wire",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B09BFW8NB1",
+      "originReviewedOn": "2026-08-25",
+      "make": "iGreely",
+      "additionalInfo": "10 ft"
+    },
+    "dse-18awg-wire-pair-50ft": {
+      "model": "18 AWG red/black wire",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0G6D5GPNH",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": "50 ft"
+    },
+    "dse-klein-wire-stripper": {
+      "model": "Self-adjusting wire stripper/cutter",
+      "origin": "TW",
+      "serialRequired": false,
+      "originBasis": "listing",
+      "originSourceUrl": "https://www.grainger.com/product/KLEIN-TOOLS-Wire-Stripper-Auto-58UR30",
+      "originNote": "The industrial distributor listing for Klein 11061 states Taiwan; verify the received package because origin is subject to change.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Klein Tools",
+      "additionalInfo": "11061"
+    },
+    "dse-8awg-wire-10ft": {
+      "model": "8 AWG red/black wire",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B093R538JV",
+      "originReviewedOn": "2026-08-25",
+      "make": "iGreely",
+      "additionalInfo": "10 ft"
+    },
+    "dse-ferrule-crimper-kit": {
+      "model": "Ferrule crimper and ferrule assortment",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0DRJ9CDNG",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": ""
+    },
+    "dse-spade-terminals": {
+      "model": "Insulated spade-terminal assortment",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B08BZ972B5",
+      "originReviewedOn": "2026-08-25",
+      "make": "TICONN",
+      "additionalInfo": ""
+    },
+    "dse-8awg-ring-lugs": {
+      "model": "8 AWG ring lug",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0FNWQ1H4P",
+      "originReviewedOn": "2026-08-25",
+      "make": "RED WOLF",
+      "additionalInfo": "5/16 in"
+    },
+    "dse-heavy-lug-assortment": {
+      "model": "Heavy copper-lug assortment",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B089K2RFN1",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": ""
+    },
+    "dse-cable-cutters": {
+      "model": "Cable cutters",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B099C1DSTQ",
+      "originReviewedOn": "2026-08-25",
+      "make": "Mutt Tools",
+      "additionalInfo": "10 in"
+    },
+    "dse-ring-fork-terminals": {
+      "model": "Insulated ring-and-fork terminal assortment",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B09YCRNGP9",
+      "originReviewedOn": "2026-08-25",
+      "make": "haisstronica",
+      "additionalInfo": ""
+    },
+    "dse-service-return-bus-spares": {
+      "model": "2314 MiniBus",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B000OTJ89Q",
+      "originReviewedOn": "2026-08-25",
+      "make": "Blue Sea",
+      "additionalInfo": "100 A · covered"
+    },
+    "dse-paint-markers": {
+      "model": "Oil-based paint marker",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0BLYTMLZN",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": "Black / white"
+    },
+    "dse-mc4-connector-spares": {
+      "model": "MC4-compatible connector kit",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0B17FXXL7",
+      "originReviewedOn": "2026-08-25",
+      "make": "MUYI",
+      "additionalInfo": ""
+    },
+    "dse-type-i-notebook-cord-additional": {
+      "model": "AS/NZS 3112 Type I-to-IEC C5 power cord",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B074F4959C",
+      "originReviewedOn": "2026-08-25",
+      "make": "Cable Leader",
+      "additionalInfo": "6 ft"
+    },
+    "dse-shelf-brackets-additional": {
+      "model": "Shelf bracket",
+      "origin": "",
+      "serialRequired": false,
+      "originBasis": "unresolved",
+      "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
+      "originSourceUrl": "https://www.amazon.com/dp/B0D8T2XBBL",
+      "originReviewedOn": "2026-08-25",
+      "make": "Unbranded",
+      "additionalInfo": ""
+    },
+    "dse-laptop-sleeve-additional": {
+      "model": "Gauntlet laptop sleeve",
+      "origin": "CN",
+      "serialRequired": false,
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.thule.com/en-ca/laptop-bags-sleeves/laptop-sleeves-and-cases/thule-gauntlet-macbook-pro-attache-16-_-3205415",
+      "originNote": "Thule's product specification states Country of origin: China.",
+      "originReviewedOn": "2026-08-25",
+      "make": "Thule",
+      "additionalInfo": "16 in"
+    },
+    "dse-unused-galaxy-s24-case": {
+      "make": "Lanhiem",
+      "model": "Waterproof case for Galaxy S24",
+      "additionalInfo": "IP68 · 6.2 in · light blue",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0CPS8G2XB",
+      "originNote": "Confirm manufacturing country from the received label or packaging before filing.",
+      "originReviewedOn": "2026-08-25"
+    },
+    "dse-unused-sandisk-portable-ssd": {
+      "make": "SanDisk",
+      "model": "Portable SSD",
+      "additionalInfo": "SDSSDE30-1T00-G26 · 1 TB · USB-C · USB 3.2 Gen 2",
+      "serialRequired": true,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.sandisk.com/en-il/products/ssd/external-ssd/sandisk-usb-3-2-ssd?sku=SDSSDE30-1T00-G26",
+      "originNote": "Confirm manufacturing country from the received label or packaging before filing.",
+      "originReviewedOn": "2026-08-25"
+    },
+    "dse-unused-acer-card-readers": {
+      "make": "Acer",
+      "model": "Three-in-one USB-C SD card reader",
+      "additionalInfo": "ODK4H0 · dual card slots · USB 3.0",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0F1G2HRQ6",
+      "originNote": "Confirm manufacturing country from the received label or packaging before filing.",
+      "originReviewedOn": "2026-08-25"
+    },
+    "dse-unused-galaxy-s24-pair": {
+      "make": "Samsung",
+      "model": "Galaxy S24",
+      "additionalInfo": "SM-S921U1 · 256 GB · black · unlocked",
+      "serialRequired": true,
+      "tafPermitRequired": true,
+      "defaultCondition": "Used · good",
+      "defaultSerials": "",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.samsung.com/ph/smartphones/galaxy-s24/specs/",
+      "originNote": "Confirm manufacturing country from the received label or packaging before filing.",
+      "originReviewedOn": "2026-08-25"
+    },
+    "dse-unused-macbook-air-15-m4": {
+      "make": "Apple",
+      "model": "15-inch MacBook Air (M4, 2025)",
+      "additionalInfo": "512 GB · Midnight",
+      "serialRequired": true,
+      "tafPermitRequired": true,
+      "defaultCondition": "Used · good",
+      "defaultSerials": "",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://support.apple.com/en-us/122210",
+      "originNote": "Confirm manufacturing country from the received label or packaging before filing.",
+      "originReviewedOn": "2026-08-25"
+    },
+    "dse-orion-input-breaker": {
+      "make": "CHTAIXI",
+      "model": "Single-pole DC miniature breaker",
+      "additionalInfo": "12–110 VDC · 32 A",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "CN",
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.chtaixi.com/contact",
+      "originNote": "CHTAIXI identifies its manufacturing operation in Zhejiang, China; verify the received label before filing.",
+      "originReviewedOn": "2026-08-26"
+    },
+    "dse-chargeit-branch-breaker": {
+      "make": "CHTAIXI",
+      "model": "Single-pole DC miniature breaker",
+      "additionalInfo": "12–110 VDC · 32 A",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "CN",
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.chtaixi.com/contact",
+      "originNote": "CHTAIXI identifies its manufacturing operation in Zhejiang, China; verify the received label before filing.",
+      "originReviewedOn": "2026-08-26"
+    },
+    "dse-b125-chtaixi-unused": {
+      "make": "CHTAIXI",
+      "model": "DZ47NZ-125 B125 single-pole breaker",
+      "additionalInfo": "125 A · return pending",
+      "serialRequired": false,
+      "excludedFromManifest": true,
+      "exclusionReason": "Superseded and return pending; item will not be imported into Fiji.",
+      "origin": "CN",
+      "originBasis": "manufacturer",
+      "originSourceUrl": "https://www.chtaixi.com/contact",
+      "originNote": "CHTAIXI identifies its manufacturing operation in Zhejiang, China; verify the received label before filing.",
+      "originReviewedOn": "2026-08-26"
+    },
+    "dse-airic-npt-cable-glands": {
+      "make": "AIRIC",
+      "model": "Waterproof cable-gland set",
+      "additionalInfo": "3/4 in NPT",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0D8VS9ZGF",
+      "originNote": "Confirm the manufacturing country from the received product and packaging before filing.",
+      "originReviewedOn": "2026-08-26"
+    },
+    "dse-ventilated-ip65-enclosure": {
+      "make": "Unbranded",
+      "model": "Ventilated ABS electrical enclosure",
+      "additionalInfo": "IP65 · grey cover · 11.9 × 11.9 × 7 in",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0DJNJ53MN",
+      "originNote": "Confirm the manufacturing country from the received product and packaging before filing.",
+      "originReviewedOn": "2026-08-26"
+    },
+    "dse-pg11-cable-glands": {
+      "make": "Oimyalsi",
+      "model": "Waterproof nylon cable-gland kit",
+      "additionalInfo": "PG11 · 25 pack",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0H2V2JNPS",
+      "originNote": "Confirm the manufacturing country from the received product and packaging before filing.",
+      "originReviewedOn": "2026-08-26"
+    },
+    "dse-mollom-8-way-enclosure-second": {
+      "make": "Mollom",
+      "model": "HT-8 DIN enclosure",
+      "additionalInfo": "8-way · integration pending",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B09XJZDRNM",
+      "originNote": "Confirm the manufacturing country from the received product and packaging before filing.",
+      "originReviewedOn": "2026-08-26"
+    },
+    "dse-shirbly-2awg-cable-pairs": {
+      "make": "Shirbly",
+      "model": "Preterminated 2 AWG OFC battery cable pairs",
+      "additionalInfo": "2 × 3 ft pairs · red / black · 3/8 in lugs",
+      "serialRequired": false,
+      "defaultCondition": "New",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0CHS3JJ9F",
+      "originNote": "Confirm manufacturing country from the received product and packaging before filing.",
+      "originReviewedOn": "2026-08-26"
     }
   },
   "sources": [
@@ -287,9 +1099,9 @@
     },
     {
       "id": "brokers",
-      "title": "Approved customs brokers and agents",
+      "title": "Customs licensing and agent checklists",
       "publisher": "Fiji Revenue and Customs Service",
-      "url": "https://frcs.org.fj/our-services/customs/customs-agents/customs-shipping-and-airline-agents/"
+      "url": "https://frcs.org.fj/our-services/customs/trade-business/customs-license/customs-licence-checklist/"
     },
     {
       "id": "charity-concession",
@@ -321,5 +1133,15 @@
       "publisher": "Telecommunications Authority of Fiji",
       "url": "https://taf.org.fj/wp-content/uploads/2026/02/Application-for-Import-Permit-TAF.pdf"
     }
-  ]
+  ],
+  "miscGrouping": {
+    "label": "Miscellaneous Electrical Accessories",
+    "maximumLineUsd": 30,
+    "explanation": "Combines every goods line below USD 30. The grouped description lists only each make and model; quantities, ASINs and references remain available in the on-screen disclosure."
+  },
+  "defaultConsigneeTin": "2900306318",
+  "defaultBusinessRegistrationNumber": "2020RC000914",
+  "defaultTraveler": "Kyle McDonald",
+  "defaultFlight": "FJ811",
+  "defaultArrivalDate": "2026-08-30"
 }

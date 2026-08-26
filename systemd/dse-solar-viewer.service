@@ -1,0 +1,15 @@
+[Unit]
+Description=DSE solar system viewer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/kyle/Documents/GitHub/dse-solar/viewer
+Environment=DSE_PRIVATE_MODE=1
+ExecStart=/usr/bin/env bash -lc 'exec npm run start -- --host 0.0.0.0 --port 3000'
+Restart=on-failure
+RestartSec=2s
+
+[Install]
+WantedBy=default.target

@@ -1,6 +1,7 @@
 import vinext from "vinext";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import hostingConfig from "./.openai/hosting.json";
+import { loadReceiptArchive, privateModeEnabled, receiptAllowlist } from "./app/api/receipts/receiptServer";
 import { sites } from "./build/sites-vite-plugin";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
@@ -14,6 +15,13 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const localBindingConfig = {
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
+  // The app runs in a Workers-compatible dev runtime, so host environment
+  // variables must be forwarded explicitly as Worker bindings. Keep private
+  // mode opt-in: the trusted local service supplies this flag, public builds
+  // and deployments do not.
+  vars: process.env.DSE_PRIVATE_MODE
+    ? { DSE_PRIVATE_MODE: process.env.DSE_PRIVATE_MODE }
+    : {},
   d1_databases: d1
     ? [
         {
@@ -33,6 +41,44 @@ const localBindingConfig = {
     : [],
 };
 
+function privateReceiptsDevPlugin(): Plugin {
+  return {
+    name: "dse-private-receipts-dev",
+    apply: "serve",
+    configureServer(server) {
+      if (!privateModeEnabled()) return;
+      server.middlewares.use((request, response, next) => {
+        if (request.method !== "GET") return next();
+        const pathname = new URL(request.url ?? "/", "http://localhost").pathname;
+        if (pathname === "/api/receipts/status") {
+          response.statusCode = 200;
+          response.setHeader("Cache-Control", "no-store");
+          response.setHeader("Content-Type", "application/json");
+          response.end(JSON.stringify({ privateMode: true }));
+          return;
+        }
+        if (pathname !== "/api/receipts/download") return next();
+        try {
+          const archive = loadReceiptArchive();
+          response.statusCode = 200;
+          response.setHeader("Cache-Control", "no-store");
+          response.setHeader("Content-Disposition", 'attachment; filename="dse-fiji-receipts.zip"');
+          response.setHeader("Content-Length", String(archive.length));
+          response.setHeader("Content-Type", "application/zip");
+          response.setHeader("X-Content-Type-Options", "nosniff");
+          response.setHeader("X-Receipt-Count", String(receiptAllowlist().size));
+          response.end(archive);
+        } catch {
+          response.statusCode = 409;
+          response.setHeader("Cache-Control", "no-store");
+          response.setHeader("Content-Type", "text/plain; charset=utf-8");
+          response.end("Receipt archive is incomplete");
+        }
+      });
+    },
+  };
+}
+
 export default defineConfig(async () => {
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
@@ -44,10 +90,14 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
-    server: isCodexSeatbeltSandbox
-      ? { watch: { useFsEvents: false, usePolling: true } }
-      : undefined,
+    server: {
+      allowedHosts: ["vibecheck.local", "vibecheck.taildd340.ts.net"],
+      ...(isCodexSeatbeltSandbox
+        ? { watch: { useFsEvents: false, usePolling: true } }
+        : {}),
+    },
     plugins: [
+      privateReceiptsDevPlugin(),
       vinext(),
       sites(),
       cloudflare({

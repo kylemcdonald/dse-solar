@@ -1,445 +1,238 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import customsRaw from "@/data/dse-customs.json";
+import receiptsRaw from "@/data/dse-receipts.json";
 
-type CustomsBomItem = {
-  id: string;
-  item: string;
-  qty: number;
-  unit: string;
-  unitCost: number;
-  currency: "USD" | "FJD";
-  totalUsd: number;
-  location: string;
-  procurement: string;
+export type CustomsBomItem = {
+  id: string; category: string; item: string; qty: number; unit: string; unitCost: number;
+  currency: "USD" | "FJD"; totalUsd: number; location: string; procurement: string;
+  totalWeightKg?: number; productUrl?: string;
 };
-
 type ItemMeta = {
-  defaultCondition?: string;
-  model: string;
-  origin: string;
-  serialRequired: boolean;
-  tafPermitRequired?: boolean;
+  defaultCondition?: string; make: string; model: string; additionalInfo?: string; origin: string;
+  originBasis?: string; originSourceUrl?: string; originNote?: string; originReviewedOn?: string;
+  serialRequired: boolean; defaultSerials?: string; tafPermitRequired?: boolean;
+  excludedFromManifest?: boolean; exclusionReason?: string;
 };
-
 type CustomsData = {
-  checkedOn: string;
-  manifestTitle: string;
-  declaredPurpose: string;
-  defaultConsignee: string;
-  defaultDestination: string;
-  departureDate: string;
-  vatRate: number;
+  checkedOn: string; manifestTitle: string; declaredPurpose: string; defaultConsignee: string;
+  defaultConsigneeTin: string; defaultBusinessRegistrationNumber: string; defaultTraveler: string;
+  defaultFlight: string; defaultArrivalDate: string; defaultDestination: string; departureDate: string; vatRate: number;
+  miscGrouping: { label: string; maximumLineUsd: number; explanation: string };
   itemMeta: Record<string, ItemMeta>;
-  sources: Array<{
-    id: string;
-    title: string;
-    publisher: string;
-    url: string;
-  }>;
+  sources: Array<{ id: string; title: string; publisher: string; url: string }>;
 };
-
-type ManifestEdit = {
-  qty: string;
-  unitCost: string;
-  origin: string;
-  condition: string;
-  receipt: string;
-  serials: string;
-  caseNo: string;
+type ReceiptData = {
+  invoices: Array<{ number: number; date: string; filename: string; supplier: string }>;
+  itemInvoices: Record<string, number[]>; itemAsins: Record<string, string[]>;
+  purchasedWithoutReceipt: string[];
 };
-
+type ManifestEdit = { qty: string; unitCost: string; origin: string; condition: string; serials: string };
 type HeaderFields = {
-  consignee: string;
-  tin: string;
-  traveler: string;
-  passport: string;
-  flight: string;
-  arrivalDate: string;
+  consignee: string; tin: string; businessRegistrationNumber: string; traveler: string; flight: string; arrivalDate: string;
   destination: string;
-  customsAgent: string;
-  customsEntry: string;
-  concessionReference: string;
-  tafPermit: string;
-  purpose: string;
-  fjdPerUsd: string;
-  supplierFreight: string;
-  internationalFreight: string;
-  insurance: string;
+  purpose: string; fjdPerUsd: string; supplierFreight: string; internationalFreight: string; insurance: string;
+};
+export type CustomsLine = {
+  id: string; make: string; model: string; additionalInfo: string; qty: number; unit: string; unitCost: number; lineTotal: number;
+  origin: string; asins: string[]; invoiceRefs: number[]; serialRequired: boolean; tafPermitRequired: boolean;
+  serials: string; receiptMissing: boolean; groupedItemIds?: string[];
 };
 
 const customs = customsRaw as CustomsData;
+const receipts = receiptsRaw as ReceiptData;
+const valueOf = (input: string) => Number.isFinite(Number.parseFloat(input)) ? Number.parseFloat(input) : 0;
+const usd = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+const fjd = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "FJD" }).format(value);
+export function unitCostInput(item: Pick<CustomsBomItem, "qty" | "totalUsd">) {
+  const value = item.totalUsd / item.qty;
+  for (const decimals of [2, 3, 4]) {
+    const encoded = value.toFixed(decimals);
+    if (Math.abs(Number(encoded) * item.qty - item.totalUsd) < 0.000_001) return encoded;
+  }
+  return value.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+}
+export const stripAsinFromDescription = (value: string) => value
+  .replace(/\s*[·,;(-]*\s*(?:(?:ASIN|Amazon)\s+)?B[A-Z0-9]{9}(?![A-Z0-9])\)?/gi, "")
+  .replace(/\s{2,}/g, " ")
+  .trim();
+const normalizedDescription = (value: string) => value.replace(/\s+/g, " ").trim().toLocaleLowerCase();
+export const hasDistinctModel = (item: string, model: string) => Boolean(model) && normalizedDescription(item) !== normalizedDescription(model);
 
-function valueOf(input: string) {
-  const parsed = Number.parseFloat(input);
-  return Number.isFinite(parsed) ? parsed : 0;
+export function isCustomsManifestItem(item: CustomsBomItem, itemMeta = customs.itemMeta) {
+  const meta = itemMeta[item.id];
+  return item.location === "Import" && Number(item.totalWeightKg) > 0 && Boolean(meta) && !meta.excludedFromManifest;
 }
 
-function usd(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+export function sortCustomsItems(items: CustomsBomItem[], itemMeta = customs.itemMeta) {
+  return [...items].sort((a, b) =>
+    Number(Boolean(itemMeta[b.id]?.tafPermitRequired)) - Number(Boolean(itemMeta[a.id]?.tafPermitRequired)) ||
+    a.item.localeCompare(b.item));
 }
 
-function fjd(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "FJD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+export function isMiscGroupingCandidate(edit: ManifestEdit) {
+  const lineTotal = valueOf(edit.qty) * valueOf(edit.unitCost);
+  return lineTotal < customs.miscGrouping.maximumLineUsd;
 }
 
-export function CustomsView({
-  bom,
-  planningFjdPerUsd,
-}: {
-  bom: CustomsBomItem[];
-  planningFjdPerUsd: number;
-}) {
+export function buildCustomsLines(items: CustomsBomItem[], edits: Record<string, ManifestEdit>, groupMiscellaneous: boolean): CustomsLine[] {
+  const ordinary: CustomsLine[] = [];
+  const grouped: CustomsLine[] = [];
+  for (const item of sortCustomsItems(items)) {
+    const edit = edits[item.id];
+    const meta = customs.itemMeta[item.id];
+    if (!edit || !meta || meta.excludedFromManifest) continue;
+    const line: CustomsLine = {
+      id: item.id,
+      make: stripAsinFromDescription(meta.make),
+      model: stripAsinFromDescription(meta.model),
+      additionalInfo: stripAsinFromDescription(meta.additionalInfo ?? ""),
+      qty: valueOf(edit.qty), unit: item.unit, unitCost: valueOf(edit.unitCost),
+      lineTotal: valueOf(edit.qty) * valueOf(edit.unitCost), origin: edit.origin,
+      asins: receipts.itemAsins[item.id] ?? [], invoiceRefs: receipts.itemInvoices[item.id] ?? [],
+      serialRequired: meta.serialRequired, tafPermitRequired: Boolean(meta.tafPermitRequired), serials: edit.serials,
+      receiptMissing: receipts.purchasedWithoutReceipt.includes(item.id),
+    };
+    if (groupMiscellaneous && isMiscGroupingCandidate(edit)) grouped.push(line);
+    else ordinary.push(line);
+  }
+  if (grouped.length > 1) {
+    const origins = [...new Set(grouped.map((line) => line.origin))];
+    ordinary.push({
+      id: "miscellaneous-electrical-accessories", make: customs.miscGrouping.label,
+      model: grouped.map((line) => `${line.make} / ${line.model}`).join("; "), additionalInfo: "",
+      qty: 1, unit: "lot", unitCost: grouped.reduce((sum, line) => sum + line.lineTotal, 0),
+      lineTotal: grouped.reduce((sum, line) => sum + line.lineTotal, 0), origin: origins.length === 1 ? origins[0] : "Various",
+      asins: [...new Set(grouped.flatMap((line) => line.asins))],
+      invoiceRefs: [...new Set(grouped.flatMap((line) => line.invoiceRefs))].sort((a, b) => a - b),
+      serialRequired: false, tafPermitRequired: false, serials: "",
+      receiptMissing: grouped.some((line) => line.receiptMissing), groupedItemIds: grouped.map((line) => line.id),
+    });
+  } else ordinary.push(...grouped);
+  return ordinary.sort((a, b) =>
+    Number(Boolean(a.groupedItemIds)) - Number(Boolean(b.groupedItemIds)) ||
+    Number(b.tafPermitRequired) - Number(a.tafPermitRequired) ||
+    a.make.localeCompare(b.make) || a.model.localeCompare(b.model));
+}
+
+export function customsLineDescription(line: CustomsLine) {
+  if (line.groupedItemIds) return `${line.make}\n${line.model}`;
+  return `${line.make} / ${line.model}${line.additionalInfo ? `\n${line.additionalInfo}` : ""}`;
+}
+
+const csvCell = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`;
+const csvNumber = (value: number, maximumDecimals = 2) => value.toFixed(maximumDecimals).replace(/\.?0+$/, "");
+export function buildCustomsCsv(lines: CustomsLine[], fjdPerUsd: number) {
+  const headings = ["No.", "Make / model", "ASIN", "Qty", "Country of origin", "Unit value USD", "Total USD", "Total FJD", "Ref", "Serial number(s)"];
+  const rows = lines.map((line, index) => [
+    index + 1, customsLineDescription(line), line.asins.join(", ") || "—", `${csvNumber(line.qty, 6)} ${line.unit}`, line.origin || "N/A",
+    csvNumber(line.unitCost, 6), csvNumber(line.lineTotal), csvNumber(line.lineTotal * fjdPerUsd),
+    line.invoiceRefs.join(", ") || (line.receiptMissing ? "PDF not provided" : "—"), line.serials || "N/A",
+  ]);
+  return `${[headings, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n")}\r\n`;
+}
+
+export function CustomsView({ bom, planningFjdPerUsd }: { bom: CustomsBomItem[]; planningFjdPerUsd: number }) {
   const manifestItems = useMemo(
-    () => bom.filter((item) => item.location === "Import" && customs.itemMeta[item.id]),
+    () => bom.filter((item) => isCustomsManifestItem(item)),
     [bom],
   );
+  const tafPermitCount = manifestItems.filter((item) => customs.itemMeta[item.id].tafPermitRequired).length;
+  const [groupMiscellaneous, setGroupMiscellaneous] = useState(false);
+  const [privateMode, setPrivateMode] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/receipts/status", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() as Promise<{ privateMode?: boolean }> : null)
+      .then((status) => { if (active) setPrivateMode(Boolean(status?.privateMode)); })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
   const [fields, setFields] = useState<HeaderFields>(() => ({
-    consignee: customs.defaultConsignee,
-    tin: "",
-    traveler: "",
-    passport: "",
-    flight: "",
-    arrivalDate: "",
-    destination: customs.defaultDestination,
-    customsAgent: "",
-    customsEntry: "",
-    concessionReference: "",
-    tafPermit: "",
-    purpose: customs.declaredPurpose,
-    fjdPerUsd: planningFjdPerUsd.toFixed(2),
+    consignee: customs.defaultConsignee, tin: customs.defaultConsigneeTin,
+    businessRegistrationNumber: customs.defaultBusinessRegistrationNumber, traveler: customs.defaultTraveler,
+    flight: customs.defaultFlight, arrivalDate: customs.defaultArrivalDate, destination: customs.defaultDestination,
+    purpose: customs.declaredPurpose, fjdPerUsd: planningFjdPerUsd.toFixed(2),
     supplierFreight: bom.find((item) => item.id === "dse-supplier-freight")?.totalUsd.toFixed(2) ?? "0.00",
-    internationalFreight: bom.find((item) => item.id === "dse-baggage")?.totalUsd.toFixed(2) ?? "0.00",
-    insurance: "0.00",
+    internationalFreight: bom.find((item) => item.id === "dse-baggage")?.totalUsd.toFixed(2) ?? "0.00", insurance: "0.00",
   }));
-  const [edits, setEdits] = useState<Record<string, ManifestEdit>>(() =>
-    Object.fromEntries(
-      manifestItems.map((item) => [
-        item.id,
-        {
-          qty: String(item.qty),
-          unitCost: Number.isInteger(item.totalUsd / item.qty * 100)
-            ? (item.totalUsd / item.qty).toFixed(2)
-            : (item.totalUsd / item.qty).toFixed(3),
-          origin: customs.itemMeta[item.id].origin,
-          condition: customs.itemMeta[item.id].defaultCondition ?? "New",
-          receipt: "",
-          serials: "",
-          caseNo: "",
-        },
-      ]),
-    ),
-  );
-
-  const grossGoodsTotal = manifestItems.reduce((sum, item) => {
-    const edit = edits[item.id];
-    return sum + valueOf(edit.qty) * valueOf(edit.unitCost);
-  }, 0);
+  const [edits, setEdits] = useState<Record<string, ManifestEdit>>(() => Object.fromEntries(manifestItems.map((item) => [item.id, {
+    qty: String(item.qty), unitCost: unitCostInput(item),
+    origin: customs.itemMeta[item.id].origin,
+    condition: customs.itemMeta[item.id].defaultCondition ?? "New", serials: customs.itemMeta[item.id].defaultSerials ?? "",
+  }])));
+  const lines = useMemo(() => buildCustomsLines(manifestItems, edits, groupMiscellaneous), [manifestItems, edits, groupMiscellaneous]);
+  const grossGoodsTotal = lines.reduce((sum, line) => sum + line.lineTotal, 0);
   const orderLevelDiscount = bom.find((item) => item.id === "dse-amazon-promotion")?.totalUsd ?? 0;
   const goodsTotal = grossGoodsTotal + orderLevelDiscount;
-  const freightAndInsurance =
-    valueOf(fields.supplierFreight) +
-    valueOf(fields.internationalFreight) +
-    valueOf(fields.insurance);
-  const planningCif = goodsTotal + freightAndInsurance;
+  const planningCif = goodsTotal + valueOf(fields.supplierFreight) + valueOf(fields.internationalFreight) + valueOf(fields.insurance);
   const fxRate = valueOf(fields.fjdPerUsd);
   const planningVatFloor = planningCif * customs.vatRate;
+  const groupedLine = lines.find((line) => line.groupedItemIds);
+  const visibleInvoiceRefs = new Set(lines.flatMap((line) => line.invoiceRefs));
+  const visibleInvoices = receipts.invoices.filter((invoice) => visibleInvoiceRefs.has(invoice.number));
+  const updateField = (key: keyof HeaderFields, value: string) => setFields((current) => ({ ...current, [key]: value }));
+  const updateEdit = (id: string, key: keyof ManifestEdit, value: string) => setEdits((current) => ({ ...current, [id]: { ...current[id], [key]: value } }));
+  const downloadCsv = () => {
+    const url = URL.createObjectURL(new Blob([buildCustomsCsv(lines, fxRate)], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "dse-fiji-customs-manifest.csv";
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
 
-  function updateField(key: keyof HeaderFields, value: string) {
-    setFields((current) => ({ ...current, [key]: value }));
-  }
-
-  function updateEdit(id: string, key: keyof ManifestEdit, value: string) {
-    setEdits((current) => ({
-      ...current,
-      [id]: { ...current[id], [key]: value },
-    }));
-  }
-
-  return (
-    <section className="customs-view" aria-label="Fiji customs planning and packing manifest">
-      <div className="customs-screen-only">
-        <div className="customs-heading">
-          <div>
-            <span>Fiji arrival planning · researched {customs.checkedOn}</span>
-            <h1>Customs &amp; packing manifest</h1>
-            <p>
-              This is project equipment worth more than FJ$1,000. Pre-clear it; do not rely on
-              completing everything at the baggage desk.
-            </p>
-          </div>
-          <button type="button" className="customs-print-button" onClick={() => window.print()}>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M7 14h10v7H7z" />
-            </svg>
-            Print / save PDF
-          </button>
-        </div>
-
-        <div className="customs-alert-grid">
-          <article className="customs-alert customs-alert-urgent">
-            <span>Clearance route</span>
-            <strong>Licensed agent before arrival</strong>
-            <p>Without pre-clearance, FRCS says goods over FJ$1,000 will be detained.</p>
-          </article>
-          <article className="customs-alert">
-            <span>Planning goods value</span>
-            <strong>{usd(goodsTotal)}</strong>
-            <p>Replace every allowance with the final receipt amount before printing.</p>
-          </article>
-          <article className="customs-alert">
-            <span>Planning CIF</span>
-            <strong>{usd(planningCif)}</strong>
-            <p>Goods + entered freight + insurance; the customs agent controls the final basis.</p>
-          </article>
-          <article className="customs-alert customs-alert-warn">
-            <span>Telecom permit</span>
-            <strong>Five radio models</strong>
-            <p>Apply for the UniFi plus four wireless Victron models, including the carried Orion spare; TAF may also require type approval.</p>
-          </article>
-        </div>
-
-        <div className="customs-guidance-grid">
-          <article>
-            <div className="customs-card-number">01</div>
-            <h2>Do this before the flight</h2>
-            <ol>
-              <li>Confirm the Fiji legal consignee and its TIN.</li>
-              <li>
-                Engage a <a href={customs.sources.find((source) => source.id === "brokers")?.url}>licensed Nadi customs agent</a> now.
-              </li>
-              <li>Send the agent this manifest, every invoice, flight details and consignee TIN.</li>
-              <li>Ask the agent to pre-register the ASYCUDA SAD within FRCS&apos;s three-day pre-advance window.</li>
-              <li>Apply to TAF for the UniFi Express, Ekrano GX, SmartSolar, SmartShunt and carried Orion spare. Ask which models already hold Fiji type approval; a new type approval can take 10 working days.</li>
-            </ol>
-          </article>
-          <article>
-            <div className="customs-card-number">02</div>
-            <h2>What to carry on arrival</h2>
-            <ul>
-              <li>Printed signed manifest and a copy for Customs</li>
-              <li>Commercial invoices, eBay/Amazon receipts and proof of payment</li>
-              <li>Donation letter plus beneficiary acceptance letter</li>
-              <li>Customs Entry/SAD and duty receipt if pre-cleared</li>
-              <li>TAF permit(s) listing all four wireless models</li>
-              <li>Any written FRCS concession approval and registration certificate</li>
-            </ul>
-            <p className="customs-arrival-note">
-              Declare the goods on the Passenger Arrival Card and present them at the Customs Secondary Checkpoint in the baggage hall.
-            </p>
-          </article>
-          <article>
-            <div className="customs-card-number">03</div>
-            <h2>School status is not automatic relief</h2>
-            <p>
-              Calling the recipient a school does not by itself remove duty or VAT. The clearly relevant published route is Concession Code 215, and it applies only if the Fiji recipient is a legally registered charitable or religious organisation and FRCS approves the goods case by case before import.
-            </p>
-            <p>
-              If eligible, send a request letter, registration certificate, packing list and transport document to <a href="mailto:tariff&trade@frcs.org.fj">tariff&amp;trade@frcs.org.fj</a>. Ask for written approval; do not assume the airport officer can grant it on arrival.
-            </p>
-          </article>
-          <article>
-            <div className="customs-card-number">04</div>
-            <h2>How charges are determined</h2>
-            <p>
-              FRCS bases duty on CIF: cost + insurance + freight. Fiscal duty and import excise depend on the agent&apos;s HS classification. VAT is currently 12.5% and is applied after any dutiable additions.
-            </p>
-            <dl className="customs-fee-preview">
-              <div><dt>CIF in FJD</dt><dd>{fjd(planningCif * fxRate)}</dd></div>
-              <div><dt>12.5% VAT-only floor</dt><dd>{usd(planningVatFloor)}</dd></div>
-            </dl>
-            <p className="customs-caution">
-              The VAT-only figure assumes zero fiscal duty and zero import excise. It is not a quote and excludes broker, storage and permit fees.
-            </p>
-          </article>
-        </div>
-
-        <section className="customs-sources">
-          <div>
-            <span>Official references</span>
-            <h2>Current Fiji government guidance</h2>
-          </div>
-          <div className="customs-source-links">
-            {customs.sources.map((source) => (
-              <a href={source.url} target="_blank" rel="noreferrer" key={source.id}>
-                <b>{source.title}</b>
-                <small>{source.publisher}</small>
-                <em>↗</em>
-              </a>
-            ))}
-          </div>
-          <p>
-            FRCS: <a href="mailto:CustomsRevenue@frcs.org.fj">CustomsRevenue@frcs.org.fj</a> · duty help: <a href="mailto:customshelp@frcs.org.fj">customshelp@frcs.org.fj</a> · TAF: <a href="mailto:contact@taf.org.fj">contact@taf.org.fj</a>
-          </p>
-        </section>
+  return <section className="customs-view" aria-label="Fiji customs planning manifest" data-private-mode={privateMode ? "true" : "false"}>
+    <div className="customs-screen-only">
+      <div className="customs-heading"><div><span>Fiji arrival planning · researched {customs.checkedOn}</span><h1>Customs manifest</h1><p>Pre-clear project equipment and retain every numbered invoice referenced below.</p></div>
+        <div className="customs-actions">
+          <button type="button" className={`customs-secondary-button ${groupMiscellaneous ? "active" : ""}`} aria-pressed={groupMiscellaneous} onClick={() => setGroupMiscellaneous((value) => !value)}>Group low-cost accessories</button>
+          {privateMode && <a className="customs-secondary-button" href="/api/receipts/download" download>Download receipts (.zip)</a>}
+          <button type="button" className="customs-secondary-button" onClick={downloadCsv}>Export CSV</button>
+          <button type="button" className="customs-print-button" onClick={() => window.print()}>Print / save PDF</button>
+        </div></div>
+      <div className="customs-alert-grid">
+        <article className="customs-alert customs-alert-urgent"><span>Clearance route</span><strong>Licensed agent before arrival</strong><p>FRCS says goods over FJ$1,000 require formal clearance.</p></article>
+        <article className="customs-alert"><span>Planning goods value</span><strong>{usd(goodsTotal)}</strong><p>Use actual transaction values and preserve discounts.</p></article>
+        <article className="customs-alert"><span>Planning CIF</span><strong>{usd(planningCif)}</strong><p>Goods, freight, and insurance; the agent controls the final basis.</p></article>
+        <article className="customs-alert customs-alert-warn"><span>Telecom permit</span><strong>{tafPermitCount} radio models</strong><p>Radio items remain separate and appear first in the manifest.</p></article>
       </div>
+      <div className="customs-guidance-grid">
+        <article><div className="customs-card-number">01</div><h2>Before the flight</h2><ol><li>Confirm the Fiji consignee and TIN.</li><li>Engage a licensed Nadi customs agent.</li><li>Send the agent this manifest, all numbered invoices, travel details, and donation paperwork.</li><li>Apply to TAF for every flagged radio model.</li></ol></article>
+        <article><div className="customs-card-number">02</div><h2>Carry on arrival</h2><ul><li>Signed manifest and a copy</li><li>Invoices and proof of payment</li><li>Donation and beneficiary letters</li><li>TAF permits and Customs Entry/SAD</li></ul><p className="customs-arrival-note">Declare the goods and present them at the Customs Secondary Checkpoint.</p></article>
+        <article><div className="customs-card-number">03</div><h2>Relief is not automatic</h2><p>School use alone does not remove duty or VAT. Ask FRCS about Concession Code 215 only if the recipient meets the published requirements.</p></article>
+        <article><div className="customs-card-number">04</div><h2>Planning valuation</h2><p>FRCS bases duty on CIF. Fiscal duty and import excise depend on the agent&apos;s HS classification.</p><dl className="customs-fee-preview"><div><dt>CIF in FJD</dt><dd>{fjd(planningCif * fxRate)}</dd></div><div><dt>VAT-only floor</dt><dd>{usd(planningVatFloor)}</dd></div></dl></article>
+      </div>
+      <section className="customs-sources"><div><span>Official references</span><h2>Fiji government guidance</h2></div><div className="customs-source-links">{customs.sources.map((source) => <a href={source.url} target="_blank" rel="noreferrer" key={source.id}><b>{source.title}</b><small>{source.publisher}</small><em>↗</em></a>)}</div></section>
+    </div>
 
-      <section className="customs-manifest-section">
-        <div className="customs-manifest-title">
-          <div>
-            <span>Commercial / project equipment · accompanied baggage</span>
-            <h2>{customs.manifestTitle}</h2>
-            <p>Planning manifest — replace estimates with actual receipts before submission.</p>
-          </div>
-          <button type="button" className="customs-print-button customs-screen-only" onClick={() => window.print()}>
-            Print / save PDF
-          </button>
-        </div>
-
-        <div className="customs-form-grid">
-          <label>
-            <span>Fiji consignee / legal recipient</span>
-            <input value={fields.consignee} onChange={(event) => updateField("consignee", event.target.value)} />
-          </label>
-          <label>
-            <span>Consignee TIN</span>
-            <input value={fields.tin} onChange={(event) => updateField("tin", event.target.value)} placeholder="Required for pre-clearance" />
-          </label>
-          <label>
-            <span>Traveler / importer</span>
-            <input value={fields.traveler} onChange={(event) => updateField("traveler", event.target.value)} />
-          </label>
-          <label>
-            <span>Passport number</span>
-            <input value={fields.passport} onChange={(event) => updateField("passport", event.target.value)} />
-          </label>
-          <label>
-            <span>Flight number</span>
-            <input value={fields.flight} onChange={(event) => updateField("flight", event.target.value)} placeholder="LAX → NAN" />
-          </label>
-          <label>
-            <span>Arrival date in Fiji</span>
-            <input type="date" value={fields.arrivalDate} onChange={(event) => updateField("arrivalDate", event.target.value)} />
-          </label>
-          <label className="customs-field-wide">
-            <span>Final destination</span>
-            <input value={fields.destination} onChange={(event) => updateField("destination", event.target.value)} />
-          </label>
-          <label>
-            <span>Licensed customs agent</span>
-            <input value={fields.customsAgent} onChange={(event) => updateField("customsAgent", event.target.value)} />
-          </label>
-          <label>
-            <span>Customs Entry / SAD reference</span>
-            <input value={fields.customsEntry} onChange={(event) => updateField("customsEntry", event.target.value)} />
-          </label>
-          <label>
-            <span>Concession approval reference</span>
-            <input value={fields.concessionReference} onChange={(event) => updateField("concessionReference", event.target.value)} placeholder="If approved; otherwise N/A" />
-          </label>
-          <label>
-            <span>TAF permit reference(s)</span>
-            <input value={fields.tafPermit} onChange={(event) => updateField("tafPermit", event.target.value)} />
-          </label>
-          <label className="customs-field-full">
-            <span>Purpose / end use</span>
-            <textarea value={fields.purpose} onChange={(event) => updateField("purpose", event.target.value)} rows={2} />
-          </label>
-        </div>
-
-        <div className="customs-table-wrap">
-          <table className="customs-table">
-            <thead>
-              <tr>
-                <th>No.</th>
-                <th>Description / model</th>
-                <th>Qty</th>
-                <th>Country of origin</th>
-                <th>Condition</th>
-                <th>Unit value USD</th>
-                <th>Total USD</th>
-                <th>Invoice / receipt</th>
-                <th>Serial number(s)</th>
-                <th>Bag / case</th>
-              </tr>
-            </thead>
-            <tbody>
-              {manifestItems.map((item, index) => {
-                const edit = edits[item.id];
-                const meta = customs.itemMeta[item.id];
-                const lineTotal = valueOf(edit.qty) * valueOf(edit.unitCost);
-                return (
-                  <tr key={item.id}>
-                    <td>{index + 1}</td>
-                    <td>
-                      <strong>{item.item}</strong>
-                      <span>{meta.model}</span>
-                      {meta.tafPermitRequired && <em className="customs-taf-flag">TAF radio permit</em>}
-                    </td>
-                    <td>
-                      <input aria-label={`${item.item} quantity`} inputMode="decimal" value={edit.qty} onChange={(event) => updateEdit(item.id, "qty", event.target.value)} />
-                      <small>{item.unit}</small>
-                    </td>
-                    <td><input aria-label={`${item.item} country of origin`} value={edit.origin} onChange={(event) => updateEdit(item.id, "origin", event.target.value)} /></td>
-                    <td><input aria-label={`${item.item} condition`} value={edit.condition} onChange={(event) => updateEdit(item.id, "condition", event.target.value)} /></td>
-                    <td><input aria-label={`${item.item} unit value`} inputMode="decimal" value={edit.unitCost} onChange={(event) => updateEdit(item.id, "unitCost", event.target.value)} /></td>
-                    <td className="customs-total-cell">{usd(lineTotal)}</td>
-                    <td><input aria-label={`${item.item} invoice or receipt`} value={edit.receipt} onChange={(event) => updateEdit(item.id, "receipt", event.target.value)} placeholder="Attach" /></td>
-                    <td>
-                      <input aria-label={`${item.item} serial numbers`} value={edit.serials} onChange={(event) => updateEdit(item.id, "serials", event.target.value)} placeholder={meta.serialRequired ? "Required" : "N/A"} />
-                    </td>
-                    <td><input aria-label={`${item.item} bag or case`} value={edit.caseNo} onChange={(event) => updateEdit(item.id, "caseNo", event.target.value)} placeholder="IM2875 #" /></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={6}>Declared goods line items</td>
-                <td>{usd(grossGoodsTotal)}</td>
-                <td colSpan={3}>Actual transaction values required</td>
-              </tr>
-              {orderLevelDiscount !== 0 && (
-                <tr>
-                  <td colSpan={6}>Order-level commercial discount</td>
-                  <td>{usd(orderLevelDiscount)}</td>
-                  <td colSpan={3}>Retain the matching receipt</td>
-                </tr>
-              )}
-              <tr>
-                <td colSpan={6}>Net declared goods subtotal</td>
-                <td>{usd(goodsTotal)}</td>
-                <td colSpan={3}>Before freight and insurance</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-        <div className="customs-valuation-grid">
-          <label><span>Supplier freight to LAX · USD</span><input inputMode="decimal" value={fields.supplierFreight} onChange={(event) => updateField("supplierFreight", event.target.value)} /></label>
-          <label><span>International baggage/freight · USD</span><input inputMode="decimal" value={fields.internationalFreight} onChange={(event) => updateField("internationalFreight", event.target.value)} /></label>
-          <label><span>Insurance · USD</span><input inputMode="decimal" value={fields.insurance} onChange={(event) => updateField("insurance", event.target.value)} /></label>
-          <label><span>Planning FJD per USD</span><input inputMode="decimal" value={fields.fjdPerUsd} onChange={(event) => updateField("fjdPerUsd", event.target.value)} /></label>
-          <div><span>Planning CIF · USD</span><strong>{usd(planningCif)}</strong></div>
-          <div><span>Planning CIF · FJD</span><strong>{fjd(planningCif * fxRate)}</strong></div>
-        </div>
-
-        <div className="customs-manifest-notes">
-          <div>
-            <h3>Attachments</h3>
-            <p>□ Itemized receipts/invoices &nbsp; □ Proof of payment &nbsp; □ Donation letter &nbsp; □ Beneficiary acceptance &nbsp; □ TAF permit(s) &nbsp; □ SAD/Customs Entry &nbsp; □ Concession approval, if any</p>
-          </div>
-          <div>
-            <h3>Declaration</h3>
-            <p>I declare that this manifest is complete and that the values shown are the actual prices paid or payable. The goods are permanent project equipment for the stated recipient and are not for resale.</p>
-            <div className="customs-signature-lines"><span>Traveler signature</span><span>Date</span><span>Customs agent / witness</span></div>
-          </div>
-          <p className="customs-fine-print">
-            Classification, customs value, exchange rate, concessions and final taxes are determined by FRCS and the licensed customs agent. Split mixed kits into invoice-level sub-lines if requested. Used eBay goods still require the actual purchase receipt and an honest used condition/value.
-          </p>
-        </div>
-      </section>
+    <section className="customs-manifest-section">
+      <div className="customs-manifest-title"><div><h2>{customs.manifestTitle}</h2><p>{groupMiscellaneous ? `${customs.miscGrouping.explanation} Optional presentation for broker review; confirm that FRCS accepts aggregation.` : "Detailed item-level declaration"}</p></div><button type="button" className="customs-print-button customs-screen-only" onClick={() => window.print()}>Print / save PDF</button></div>
+      <div className="customs-form-grid">
+        {([ ["consignee", "Business name / Fiji consignee"], ["businessRegistrationNumber", "Business registration number"], ["tin", "TIN"], ["traveler", "Traveler / importer"], ["flight", "Flight number"], ["arrivalDate", "Arrival date in Fiji"], ["destination", "Final destination"] ] as Array<[keyof HeaderFields, string]>).map(([key, label]) => <label key={key}><span>{label}</span><input type={key === "arrivalDate" ? "date" : "text"} value={fields[key]} onChange={(event) => updateField(key, event.target.value)} /></label>)}
+        <label className="customs-field-full customs-purpose-editor"><span>Purpose / end use</span><textarea value={fields.purpose} onChange={(event) => updateField("purpose", event.target.value)} rows={2} /></label>
+        <div className="customs-purpose-print"><span>Purpose / end use</span><p>{fields.purpose || "N/A"}</p></div>
+      </div>
+      <div className="customs-table-wrap"><table className="customs-table">
+        <thead><tr><th>No.</th><th>Make / model</th><th>ASIN</th><th>Qty</th><th>Country of origin</th><th>Unit value USD</th><th>Total USD</th><th className="customs-fjd-column">Total FJD</th><th>Ref</th><th className="customs-serial-column">Serial number(s)</th></tr></thead>
+        <tbody>{lines.map((line, index) => { const meta = customs.itemMeta[line.id]; return <tr key={line.id} data-customs-id={line.id} data-taf={line.tafPermitRequired ? "true" : "false"} data-receipt-missing={line.receiptMissing ? "true" : "false"}>
+          <td>{index + 1}</td><td><strong>{line.groupedItemIds ? line.make : `${line.make} / ${line.model}`}</strong>{line.groupedItemIds ? <span>{line.model}</span> : line.additionalInfo && <span>{line.additionalInfo}</span>}{!line.groupedItemIds && (line.serialRequired || line.serials) && <span className="customs-serial-print">Serial: {line.serials || "N/A"}</span>}{line.tafPermitRequired && <em className="customs-taf-flag">TAF radio permit</em>}</td>
+          <td className="customs-asin-cell">{line.asins.length ? line.asins.join(", ") : "—"}</td>
+          <td>{line.groupedItemIds ? <>{line.qty}<small> {line.unit}</small></> : <><input aria-label={`${line.make} / ${line.model} quantity`} inputMode="decimal" value={edits[line.id].qty} onChange={(event) => updateEdit(line.id, "qty", event.target.value)} /><small>{line.unit}</small></>}</td>
+          <td title={meta?.originNote ?? "Combined origins"}>{line.groupedItemIds ? line.origin || "N/A" : <input aria-label={`${line.make} / ${line.model} country of origin`} value={edits[line.id].origin} onChange={(event) => updateEdit(line.id, "origin", event.target.value)} placeholder="N/A" />}</td>
+          <td>{line.groupedItemIds ? usd(line.unitCost) : <input aria-label={`${line.make} / ${line.model} unit value`} inputMode="decimal" value={edits[line.id].unitCost} onChange={(event) => updateEdit(line.id, "unitCost", event.target.value)} />}</td>
+          <td className="customs-total-cell">{usd(line.lineTotal)}</td><td className="customs-total-cell customs-fjd-column">{fjd(line.lineTotal * fxRate)}</td><td className="customs-invoice-refs">{line.invoiceRefs.length
+            ? line.invoiceRefs.map((ref) => <sup key={ref}>{ref}</sup>)
+            : line.receiptMissing ? <span className="customs-receipt-missing">PDF not provided</span> : "—"}</td>
+          <td className="customs-serial-column">{line.groupedItemIds ? "N/A" : <input aria-label={`${line.make} / ${line.model} serial numbers`} value={edits[line.id].serials} onChange={(event) => updateEdit(line.id, "serials", event.target.value)} placeholder="N/A" />}</td>
+        </tr>; })}</tbody>
+        <tfoot><tr><td colSpan={6}>Declared goods line items</td><td>{usd(grossGoodsTotal)}</td><td className="customs-fjd-column">{fjd(grossGoodsTotal * fxRate)}</td><td>Actual transaction values required</td><td className="customs-serial-column" /></tr>{orderLevelDiscount !== 0 && <tr><td colSpan={6}>Order-level commercial discount</td><td>{usd(orderLevelDiscount)}</td><td className="customs-fjd-column">{fjd(orderLevelDiscount * fxRate)}</td><td>Retain matching receipts</td><td className="customs-serial-column" /></tr>}<tr><td colSpan={6}>Net declared goods subtotal</td><td>{usd(goodsTotal)}</td><td className="customs-fjd-column">{fjd(goodsTotal * fxRate)}</td><td>Before freight and insurance</td><td className="customs-serial-column" /></tr></tfoot>
+      </table></div>
+      {groupedLine?.groupedItemIds && <details className="customs-group-disclosure customs-screen-only"><summary>Show {groupedLine.groupedItemIds.length} underlying lines combined for optional broker review</summary><ul>{groupedLine.groupedItemIds.map((id) => { const meta = customs.itemMeta[id]; return <li key={id}>{meta.make} / {meta.model} · {usd(valueOf(edits[id].qty) * valueOf(edits[id].unitCost))} · invoice {(receipts.itemInvoices[id] ?? []).join(", ") || "not identified"}</li>; })}</ul></details>}
+      <section className="customs-invoice-index" aria-label="Invoice reference index"><h3>Invoice / receipt references</h3><table><thead><tr><th>No.</th><th>Date</th><th>Filename</th><th>Supplier</th></tr></thead><tbody>{visibleInvoices.map((invoice) => <tr key={invoice.number}><td><strong>{invoice.number}</strong></td><td>{invoice.date}</td><td>{invoice.filename}</td><td>{invoice.supplier}</td></tr>)}</tbody></table></section>
+      <div className="customs-valuation-grid customs-export-excluded"><label><span>Supplier freight to LAX · USD</span><input inputMode="decimal" value={fields.supplierFreight} onChange={(event) => updateField("supplierFreight", event.target.value)} /></label><label><span>International baggage/freight · USD</span><input inputMode="decimal" value={fields.internationalFreight} onChange={(event) => updateField("internationalFreight", event.target.value)} /></label><label><span>Insurance · USD</span><input inputMode="decimal" value={fields.insurance} onChange={(event) => updateField("insurance", event.target.value)} /></label><label><span>Planning FJD per USD</span><input inputMode="decimal" value={fields.fjdPerUsd} onChange={(event) => updateField("fjdPerUsd", event.target.value)} /></label><div><span>Planning CIF · USD</span><strong>{usd(planningCif)}</strong></div><div><span>Planning CIF · FJD</span><strong>{fjd(planningCif * fxRate)}</strong></div></div>
+      <div className="customs-manifest-notes customs-export-excluded"><div><h3>Attachments</h3><p>□ Numbered invoices &nbsp; □ Proof of payment &nbsp; □ Donation letter &nbsp; □ Beneficiary acceptance &nbsp; □ TAF permit(s) &nbsp; □ SAD/Customs Entry</p></div><div><h3>Declaration</h3><p>I declare that this manifest is complete and that the values shown are the actual prices paid or payable.</p><div className="customs-signature-lines"><span>Traveler signature</span><span>Date</span><span>Customs agent / witness</span></div></div></div>
     </section>
-  );
+  </section>;
 }

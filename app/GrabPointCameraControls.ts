@@ -15,9 +15,14 @@ type GrabPointCameraOptions = {
 };
 
 type DragMode = "orbit" | "pan" | "touch-transform";
+type WheelMode = "idle" | "zoom" | "pinch-zoom";
+type NativeGestureEvent = Event & { clientX?: number; clientY?: number; scale?: number };
 
 const EPSILON = 1e-8;
 const ORBIT_RADIANS_PER_PIXEL = 0.0042;
+// The previous local pinch mapping used 0.0014. Wheel and trackpad-scroll
+// zoom now share this deliberately doubled response.
+const WHEEL_ZOOM_EXPONENT_PER_PIXEL = 0.0028;
 const MAX_FORWARD_Y = 0.965;
 
 /**
@@ -50,7 +55,11 @@ export class GrabPointCameraControls {
   private lastPointer = new THREE.Vector2();
   private readonly touchPoints = new Map<number, THREE.Vector2>();
   private readonly lastTouchCentroid = new THREE.Vector2();
-  private lastTouchDistance = 0;
+  private lastWheelMode: WheelMode = "idle";
+  private wheelZoomEvents = 0;
+  private wheelPinchEvents = 0;
+  private nativeGesturePinchEvents = 0;
+  private nativeGestureScale: number | null = null;
 
   minDistance = 0.055;
   maxDistance = 70;
@@ -68,6 +77,10 @@ export class GrabPointCameraControls {
     this.domElement.addEventListener("pointercancel", this.handlePointerUp);
     this.domElement.addEventListener("lostpointercapture", this.handleLostPointerCapture);
     this.domElement.addEventListener("wheel", this.handleWheel, { passive: false });
+    this.domElement.addEventListener("gesturestart", this.handleGestureStart, { passive: false });
+    this.domElement.addEventListener("gesturechange", this.handleGestureChange, { passive: false });
+    this.domElement.addEventListener("gestureend", this.handleGestureEnd, { passive: false });
+    this.domElement.addEventListener("contextmenu", this.handleContextMenu);
   }
 
   setPose(position: THREE.Vector3, target: THREE.Vector3) {
@@ -120,7 +133,14 @@ export class GrabPointCameraControls {
       .join(",");
     element.dataset.grabAnchorScreen = `${screenX.toFixed(2)},${screenY.toFixed(2)}`;
     element.dataset.grabMode = this.dragMode ?? "idle";
-    element.dataset.touchGestures = "one-finger-orbit-two-finger-pan-pinch";
+    element.dataset.touchGestures = "one-finger-orbit-two-finger-pan";
+    element.dataset.mouseGestures = "left-orbit-right-pan-wheel-zoom-ctrl-wheel-pinch-zoom";
+    element.dataset.wheelGestures = "wheel-and-two-finger-scroll-zoom-2x";
+    element.dataset.lastWheelMode = this.lastWheelMode;
+    element.dataset.wheelZoomEvents = String(this.wheelZoomEvents);
+    element.dataset.wheelPinchEvents = String(this.wheelPinchEvents);
+    element.dataset.nativeGesturePinchEvents = String(this.nativeGesturePinchEvents);
+    element.dataset.nativeGestureCapture = "local-pinch-zoom";
     element.dataset.activeTouchPoints = String(this.touchPoints.size);
     element.dataset.panWorldPerPixel = this.getPanWorldPerPixel().toFixed(7);
     element.dataset.cameraUprightError = Math.abs(right.y).toExponential(3);
@@ -133,6 +153,10 @@ export class GrabPointCameraControls {
     this.domElement.removeEventListener("pointercancel", this.handlePointerUp);
     this.domElement.removeEventListener("lostpointercapture", this.handleLostPointerCapture);
     this.domElement.removeEventListener("wheel", this.handleWheel);
+    this.domElement.removeEventListener("gesturestart", this.handleGestureStart);
+    this.domElement.removeEventListener("gesturechange", this.handleGestureChange);
+    this.domElement.removeEventListener("gestureend", this.handleGestureEnd);
+    this.domElement.removeEventListener("contextmenu", this.handleContextMenu);
   }
 
   private clientToNdc(clientX: number, clientY: number) {
@@ -221,14 +245,10 @@ export class GrabPointCameraControls {
       if (this.touchPoints.size >= 2) {
         const [first, second] = [...this.touchPoints.values()];
         const centroid = first.clone().add(second).multiplyScalar(0.5);
-        const distance = Math.max(1, first.distanceTo(second));
         const deltaX = centroid.x - this.lastTouchCentroid.x;
         const deltaY = centroid.y - this.lastTouchCentroid.y;
-        const scale = THREE.MathUtils.clamp(this.lastTouchDistance / distance, 0.72, 1.38);
-        if (Number.isFinite(scale) && Math.abs(scale - 1) > 0.0001) this.zoomByScale(scale);
         if (Math.abs(deltaX) + Math.abs(deltaY) > 0.01) this.pan(deltaX, deltaY);
         this.lastTouchCentroid.copy(centroid);
-        this.lastTouchDistance = distance;
         return;
       }
       if (this.touchPoints.size === 1 && this.dragMode === "orbit") {
@@ -288,15 +308,77 @@ export class GrabPointCameraControls {
 
   private handleWheel = (event: WheelEvent) => {
     event.preventDefault();
+    event.stopPropagation();
     this.onInteractionStart?.();
     const anchor = this.grabAt(event.clientX, event.clientY);
-    const deltaPixels = event.deltaMode === WheelEvent.DOM_DELTA_LINE
-      ? event.deltaY * 16
+    this.focusPoint.copy(anchor);
+    const deltaScale = event.deltaMode === WheelEvent.DOM_DELTA_LINE
+      ? 16
       : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
-        ? event.deltaY * this.domElement.clientHeight
-        : event.deltaY;
-    const scale = Math.exp(THREE.MathUtils.clamp(deltaPixels, -240, 240) * 0.0014);
+        ? this.domElement.clientHeight
+        : 1;
+    const deltaX = event.deltaX * deltaScale;
+    const deltaY = event.deltaY * deltaScale;
+
+    // Browsers expose a trackpad pinch as a ctrl-modified wheel event. Capture
+    // that gesture so it zooms only the model rather than the entire page.
+    if (event.ctrlKey) {
+      this.lastWheelMode = "pinch-zoom";
+      this.wheelPinchEvents += 1;
+      const scale = Math.exp(THREE.MathUtils.clamp(deltaY, -240, 240) * WHEEL_ZOOM_EXPONENT_PER_PIXEL);
+      this.zoomByScale(scale, anchor);
+      return;
+    }
+
+    // A mouse wheel and an ordinary two-finger trackpad scroll both arrive as
+    // unmodified wheel events. They intentionally share the same cursor-
+    // anchored zoom mapping; right-drag and two-touch drag remain pan.
+    this.lastWheelMode = "zoom";
+    this.wheelZoomEvents += 1;
+    const dominantDelta = Math.abs(deltaY) >= Math.abs(deltaX) ? deltaY : deltaX;
+    const scale = Math.exp(THREE.MathUtils.clamp(dominantDelta, -240, 240) * WHEEL_ZOOM_EXPONENT_PER_PIXEL);
     this.zoomByScale(scale, anchor);
+  };
+
+  private handleGestureStart = (rawEvent: Event) => {
+    const event = rawEvent as NativeGestureEvent;
+    event.preventDefault();
+    event.stopPropagation();
+    this.onInteractionStart?.();
+    const rect = this.domElement.getBoundingClientRect();
+    const clientX = event.clientX ?? rect.left + rect.width / 2;
+    const clientY = event.clientY ?? rect.top + rect.height / 2;
+    const anchor = this.grabAt(clientX, clientY);
+    this.focusPoint.copy(anchor);
+    this.nativeGestureScale = Math.max(0.01, event.scale ?? 1);
+    this.lastWheelMode = "pinch-zoom";
+    this.onChange?.();
+  };
+
+  private handleGestureChange = (rawEvent: Event) => {
+    const event = rawEvent as NativeGestureEvent;
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.nativeGestureScale === null) return;
+    const nextScale = Math.max(0.01, event.scale ?? this.nativeGestureScale);
+    const incrementalCameraScale = (this.nativeGestureScale / nextScale) ** 2;
+    this.nativeGestureScale = nextScale;
+    this.lastWheelMode = "pinch-zoom";
+    this.nativeGesturePinchEvents += 1;
+    this.zoomByScale(incrementalCameraScale, this.grabPoint);
+  };
+
+  private handleGestureEnd = (event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    this.nativeGestureScale = null;
+    this.onChange?.();
+  };
+
+  private handleContextMenu = (event: MouseEvent) => {
+    // Right-drag is the primary pan gesture; suppress the browser menu so the
+    // gesture behaves continuously from pointer-down through release.
+    event.preventDefault();
   };
 
   private configureTouchGesture(repick: boolean) {
@@ -304,7 +386,6 @@ export class GrabPointCameraControls {
     if (points.length === 0) {
       this.activePointerId = null;
       this.dragMode = null;
-      this.lastTouchDistance = 0;
       return;
     }
     if (points.length === 1) {
@@ -323,7 +404,6 @@ export class GrabPointCameraControls {
     this.activePointerId = null;
     this.dragMode = "touch-transform";
     this.lastTouchCentroid.copy(first).add(second).multiplyScalar(0.5);
-    this.lastTouchDistance = Math.max(1, first.distanceTo(second));
     this.grabAt(this.lastTouchCentroid.x, this.lastTouchCentroid.y);
     this.focusPoint.copy(this.grabPoint);
   }

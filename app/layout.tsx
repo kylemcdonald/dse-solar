@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DSE & PG Solar Systems",
-  description: "Interactive solar system diagrams, physical 3D layout and bills of materials.",
+  title: "DSE Fiji Solar System",
+  description: "Canonical wiring diagram, routed 3D installation model, and bill of materials for DSE Fiji.",
   icons: {
     icon: "/favicon.svg",
   },
