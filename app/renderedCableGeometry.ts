@@ -25,6 +25,10 @@ export type RenderedSemanticCable = {
   conductorKey: string;
   radiusM: number;
   color: ConductorKind | "white";
+  /** Integrated breakouts use the routed multicore sheath as their trunk.
+   * Renderers trim that route to `splitPoint` and suppress the otherwise
+   * duplicated white terminal post without changing the graph endpoint. */
+  routedCableEndpoint?: string;
   /** Common physical fusion point for every arm of one declared Y symbol. */
   splitPoint: Vec3;
   branchAngleDegrees?: number;
@@ -250,9 +254,16 @@ export function renderedSemanticCables(
         const centerDistance = dot(subtract(device.position, resolved.position), scale(direction, -1));
         const trunkLength = Math.max(0.012, Math.min(0.050, centerDistance));
         // An integrated device's routed multicore cable already is the visible
-        // white trunk. Split its internal colored cores exactly at that field
-        // terminal rather than drawing a duplicate white tube over the route.
-        const split = integrated ? resolved.position : add(resolved.position, scale(direction, -trunkLength));
+        // white trunk. Its colored cores leave their real posts normally, then
+        // merge in clear space along that trunk. Keeping this geometry here—
+        // rather than as a renderer-only exception—makes the exact collision
+        // audit and the Three.js scene share one physical authority.
+        const cableRadius = Math.max(0.0024, (resolved.terminalDiameterMm ?? 6) / 2400);
+        const integratedLandingDistance = cableRadius + 0.003;
+        const integratedSplitDistance = integratedLandingDistance + 0.020;
+        const split = integrated
+          ? add(resolved.position, scale(direction, integratedSplitDistance))
+          : add(resolved.position, scale(direction, -trunkLength));
         if (!integrated) {
           rendered.push({
             id: `${device.id}:trunk`, deviceId: device.id, conductorKey: resolved.key,
@@ -260,18 +271,32 @@ export function renderedSemanticCables(
             color: "white", splitPoint: split, pieces: [semanticLine(resolved.position, split)],
           });
         }
-        const forward = scale(direction, -1);
+        const forward = integrated ? direction : scale(direction, -1);
         const angleByKey = breakoutAngles(mates);
         const lateral = stableLateral(forward, split, mates, angleByKey);
         mates.forEach((mate) => {
           const angleDegrees = angleByKey.get(mate.key) ?? 0;
           const angle = angleDegrees * Math.PI / 180;
           const initialDirection = normalize(add(scale(forward, Math.cos(angle)), scale(lateral, Math.sin(angle))));
+          const pieces = integrated ? (() => {
+            const offset = subtract(mate.position, resolved.position);
+            const lateralOffset = subtract(offset, scale(direction, dot(offset, direction)));
+            const landing = add(
+              add(resolved.position, scale(direction, integratedLandingDistance)),
+              lateralOffset,
+            );
+            const towardSplit = normalize(subtract(split, landing));
+            return [
+              semanticLine(mate.position, landing),
+              semanticBranch(landing, direction, split, towardSplit),
+            ];
+          })() : [semanticBranch(split, initialDirection, mate.position, normalize(mate.direction))];
           rendered.push({
             id: `${device.id}:${mate.id}`, deviceId: device.id, conductorKey: mate.key,
             radiusM: Math.max(0.0017, (mate.terminalDiameterMm ?? 4) / 2400),
-            color: mate.kind, splitPoint: split, branchAngleDegrees: angleDegrees,
-            pieces: [semanticBranch(split, initialDirection, mate.position, normalize(mate.direction))],
+            color: mate.kind, routedCableEndpoint: integrated ? resolved.key : undefined,
+            splitPoint: split, branchAngleDegrees: angleDegrees,
+            pieces,
           });
         });
       });
@@ -340,4 +365,44 @@ export function renderedSemanticCables(
     });
   });
   return rendered;
+}
+
+function pointsEqual(first: Vec3, second: Vec3, epsilon = 1e-8) {
+  return distance(first, second) <= epsilon;
+}
+
+function pointOnSegment(point: Vec3, first: Vec3, second: Vec3) {
+  return Math.abs(distance(first, point) + distance(point, second) - distance(first, second)) <= 1e-7;
+}
+
+function trimPolylineToPoint(points: readonly Vec3[], point: Vec3, fromStart: boolean) {
+  const segmentIndex = points.slice(0, -1).findIndex((first, index) => (
+    pointOnSegment(point, first, points[index + 1])
+  ));
+  if (segmentIndex < 0) return [...points];
+  if (fromStart) {
+    const tail = points.slice(segmentIndex + 1);
+    return pointsEqual(point, tail[0]) ? tail : [point, ...tail];
+  }
+  const head = points.slice(0, segmentIndex + 1);
+  return pointsEqual(head.at(-1)!, point) ? head : [...head, point];
+}
+
+/** Visible route geometry. Canonical route endpoints remain the real graph
+ * terminals; only an integrated white sheath is shortened to the external
+ * fusion shared by its three colored cores. */
+export function renderedRoutePoints(
+  route: RoutedConnection,
+  semanticCables: readonly RenderedSemanticCable[],
+) {
+  const fusionByEndpoint = new Map<string, Vec3>();
+  semanticCables.forEach((semantic) => {
+    if (semantic.routedCableEndpoint) fusionByEndpoint.set(semantic.routedCableEndpoint, semantic.splitPoint);
+  });
+  let points = [...route.points];
+  const fromFusion = fusionByEndpoint.get(route.from);
+  if (fromFusion) points = trimPolylineToPoint(points, fromFusion, true);
+  const toFusion = fusionByEndpoint.get(route.to);
+  if (toFusion) points = trimPolylineToPoint(points, toFusion, false);
+  return points;
 }

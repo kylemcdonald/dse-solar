@@ -5,7 +5,11 @@ import { dseRuntime } from "../app/dseRuntime";
 import { dseTopology } from "../app/dseTopology";
 import { routeVoxelForTest, sampledRouteWallPlaneCrossings } from "../app/systemGraphRuntime";
 import { GEOMETRY_UNIT_M, WORLD_ROUTING_STEP_UNITS } from "../app/systemGraph";
-import { renderedSemanticCables } from "../app/renderedCableGeometry";
+import {
+  renderedRoutePoints,
+  renderedSemanticCables,
+  sampleCableCurve,
+} from "../app/renderedCableGeometry";
 import type { Vec3 } from "../app/systemGraph";
 
 const runtime = dseRuntime;
@@ -33,11 +37,8 @@ const topologyDeviceById = (id: string) => {
 test("canonical graph resolves every device, conductor and connection", () => {
   assert.equal(runtime.devices.length, dseTopology.devices.length);
   assert.equal(runtime.routes.length, dseTopology.connections.length);
-  assert.equal(runtime.devices.length, 92);
-  assert.equal(runtime.conductors.length, 322);
-  assert.equal(runtime.routes.length, 148);
   assert.equal(runtime.diagnostics.fallbacks, 0);
-  assert.equal(runtime.diagnostics.routed, 148);
+  assert.equal(runtime.diagnostics.routed, dseTopology.connections.length);
   assert.equal(runtime.diagnostics.centerlineConflicts, 0);
   assert.equal(runtime.diagnostics.sweptCableConflicts, 0);
   assert.equal(runtime.diagnostics.selfIntersections, 0);
@@ -144,7 +145,7 @@ test("Orion and ChargeIT inputs use their dedicated 32 A breakers without output
     ["chargeItBreaker32.load", "join-usbMiniA-positive.branch"]);
   assert.equal(runtime.devices.some((device) => /output.*breaker|breaker.*output/i.test(device.id)), false);
   const usbRoutes = runtime.routes.filter((route) => /orion|socket-|mini-/.test(route.id));
-  assert.equal(usbRoutes.filter((route) => route.status === "hold").length, 4);
+  assert.equal(usbRoutes.filter((route) => route.status === "hold").length, 0);
 });
 
 test("USB power is explicitly daisy chained without distribution buses", () => {
@@ -165,14 +166,24 @@ test("USB power is explicitly daisy chained without distribution buses", () => {
   }
 });
 
-test("every field terminal has at most one wire and every fanout is an explicit selectable join", () => {
+test("only warning-policy and approved-stack landings may retain multiple direct field wires", () => {
   const uses = new Map<string, number>();
   dseTopology.connections.forEach((connection) => {
     for (const endpoint of [connection.from, connection.to]) uses.set(endpoint, (uses.get(endpoint) ?? 0) + 1);
   });
-  assert.deepEqual([...uses].filter(([, count]) => count > 1), []);
+  const repeated = [...uses].filter(([, count]) => count > 1).toSorted(([first], [second]) => first.localeCompare(second));
+  assert.deepEqual(repeated, [
+    ["mainPositiveBus.post4", 3],
+    ["secondaryNegativeBus.post5", 2],
+    ["secondaryNegativeBus.post7", 2],
+  ]);
+  repeated.forEach(([endpoint]) => {
+    const [deviceId, portId] = endpoint.split(".");
+    const policy = topologyDeviceById(deviceId).conductors.find((port) => port.id === portId)?.sharedConnectionPolicy;
+    assert.ok(policy === "warning" || policy === "approved-stack", endpoint);
+  });
   const joins = runtime.devices.filter((device) => device.presentation === "wire-join");
-  assert.equal(joins.length, 19);
+  assert.equal(joins.length, dseTopology.devices.filter((device) => device.presentation === "wire-join").length);
   joins.forEach((join) => {
     assert.ok(join.attachment, join.id);
     assert.deepEqual(join.conductors.map((port) => port.id), ["device", "through", "branch"]);
@@ -298,29 +309,45 @@ test("main-bus covers, uncovered SmartShunt and approved positive-lug stacking r
 
   const positivePost4 = topologyDeviceById("mainPositiveBus").conductors.find((port) => port.id === "post4");
   assert.ok(positivePost4);
+  assert.equal(positivePost4.sharedConnectionPolicy, "approved-stack");
   assert.match(positivePost4.terminalNote ?? "", /lug stacking and clearance under the supplied cover are approved/i);
   assert.equal(dseTopology.devices.filter((device) => (
     device.attachment?.endpoint === "mainPositiveBus.post4"
     || device.attachment?.endpoint.startsWith("join-mainPositiveBus-post4-")
-  )).length, 2, "the approved three-lead landing remains two explicit adjacent Y joins");
+  )).length, 0, "approved hardware stacking does not invent join devices");
+  assert.deepEqual(dseTopology.connections.filter((connection) => (
+    connection.from === "mainPositiveBus.post4" || connection.to === "mainPositiveBus.post4"
+  )).map((connection) => connection.id).toSorted(), [
+    "mppt-breaker-bus", "secondary-feeder-positive", "shunt-sense",
+  ]);
 });
 
-test("MultiPlus is horizontally between the MPPT and secondary enclosure with both AC breakouts below it", () => {
-  const smartSolar = topologyDeviceById("smartSolar");
+test("MultiPlus rigid assembly is aligned with the balancers between main negative and battery cutoffs", () => {
+  const mainNegative = topologyDeviceById("mainNegativeBus");
   const multiPlus = topologyDeviceById("multiPlus");
-  const secondary = topologyDeviceById("secondaryJunction");
+  const cutoff = topologyDeviceById("batteryCutoffJunction");
+  const balancers = [topologyDeviceById("balancerA"), topologyDeviceById("balancerB")];
   const acBreakouts = [topologyDeviceById("multiAcInBreakout"), topologyDeviceById("multiAcOutBreakout")];
-  for (const device of [smartSolar, multiPlus, secondary, ...acBreakouts]) {
+  for (const device of [mainNegative, multiPlus, cutoff, ...balancers, ...acBreakouts]) {
     assert.equal(device.placement.space, "world", device.id);
     if (device.placement.space === "world") assert.equal(device.placement.surface, "wall", device.id);
   }
-  if (smartSolar.placement.space !== "world" || multiPlus.placement.space !== "world" || secondary.placement.space !== "world") return;
-  const smartSolarRight = smartSolar.placement.position[0] + smartSolar.size[0] / 2;
+  if (mainNegative.placement.space !== "world" || multiPlus.placement.space !== "world" || cutoff.placement.space !== "world") return;
+  const mainNegativeRight = mainNegative.placement.position[0] + mainNegative.size[0] / 2;
   const multiPlusLeft = multiPlus.placement.position[0] - multiPlus.size[0] / 2;
   const multiPlusRight = multiPlus.placement.position[0] + multiPlus.size[0] / 2;
-  const secondaryLeft = secondary.placement.position[0] - secondary.size[0] / 2;
-  assert.ok(smartSolarRight < multiPlusLeft, "MultiPlus must remain to the right of the MPPT without overlap");
-  assert.ok(multiPlusRight < secondaryLeft, "MultiPlus must remain to the left of the secondary enclosure without overlap");
+  const cutoffLeft = cutoff.placement.position[0] - cutoff.size[0] / 2;
+  const multiPlusY = multiPlus.placement.position[1];
+  assert.ok(mainNegativeRight < multiPlusLeft, "MultiPlus must remain right of main negative without overlap");
+  assert.ok(multiPlusRight < cutoffLeft, "MultiPlus must remain left of the battery-cutoff enclosure without overlap");
+  assert.ok(balancers.every((balancer) => (
+    balancer.placement.space === "world"
+    && Math.abs(balancer.placement.position[1] - multiPlusY) < 1e-9
+  )), "MultiPlus and both balancers share the fixed y=0.82 mounting row");
+  assert.deepEqual(multiPlus.placement.position, [1.70, 0.82, 0.071]);
+  assert.deepEqual(acBreakouts.map((breakout) => (
+    breakout.placement.space === "world" ? breakout.placement.position : undefined
+  )), [[1.64, 0.42, 0.018], [1.78, 0.42, 0.018]]);
 
   const multiPlusBottom = multiPlus.placement.position[1] - multiPlus.size[1] / 2;
   for (const breakout of acBreakouts) {
@@ -372,15 +399,40 @@ test("secondary service branches take positive sources and negative returns from
   }
 
   const negativeReturns = [
-    "service-return-trunk",
+    "secondary-feeder-negative",
+    "room-light-negative",
+    "outdoor-light-negative",
+    "internet-starlink-negative",
+    "internet-unifi-negative",
+    "ekrano-negative",
     "orion-common-ground",
     "socket-negative-feed",
     "mini-negative-feed",
   ];
   for (const routeId of negativeReturns) {
     const route = runtime.routeById.get(routeId)!;
-    assert.equal(attachmentRootDeviceId(route.from), "secondaryNegativeBus", `${routeId} return source`);
+    const roots = [attachmentRootDeviceId(route.from), attachmentRootDeviceId(route.to)];
+    assert.ok(roots.includes("secondaryNegativeBus"), `${routeId} lands directly on the secondary-negative bus`);
+    if (routeId !== "secondary-feeder-negative") {
+      assert.equal(attachmentRootDeviceId(route.from), "secondaryNegativeBus", `${routeId} return source`);
+    }
   }
+  assert.equal(dseTopology.devices.some((device) => /serviceReturn|internetReturn/i.test(device.id)), false);
+});
+
+test("the socket return leaves secondary-negative post 3 through the right-hand gland approach", () => {
+  const enclosure = runtime.deviceById.get("secondaryJunction")!;
+  const port = runtime.conductorByKey.get("secondaryNegativeBus.post3")!;
+  const route = runtime.routeById.get("socket-negative-feed")!;
+  const gland = runtime.glands.find((candidate) => candidate.connectionIds.includes(route.id))!;
+  const enclosureBottom = enclosure.position[1] - enclosure.size[1] / 2;
+  const exteriorPoints = route.points.filter((point) => point[1] < enclosureBottom - 1e-8);
+
+  assert.ok(port.position[0] > enclosure.position[0], "post 3 is on the bus's right half");
+  assert.ok(gland.position[0] >= enclosure.position[0], "socket return uses a right-half gland");
+  assert.ok(exteriorPoints.length > 0);
+  assert.ok(exteriorPoints.every((point) => point[0] >= gland.position[0] - 1e-8),
+    "the exterior run never detours around the enclosure's left side");
 });
 
 test("battery source leads remain materially shorter than the retired 6.58 m arrangement", () => {
@@ -530,6 +582,41 @@ test("generator and Type I outlet retain their bodies and expose integrated thre
     assert.deepEqual(new Set(arms.map((arm) => arm.conductorKey)), new Set([
       `${deviceId}.line`, `${deviceId}.neutral`, `${deviceId}.earth`,
     ]));
+    const cablePort = runtime.conductorByKey.get(`${deviceId}.cable`)!;
+    const outwardScale = 1 / magnitude(cablePort.direction);
+    const outward = cablePort.direction.map((value) => value * outwardScale) as unknown as Vec3;
+    arms.forEach((arm) => {
+      const conductor = runtime.conductorByKey.get(arm.conductorKey)!;
+      const points = sampleCableCurve(arm.pieces);
+      assert.deepEqual(points[0], conductor.position, `${arm.id} begins at its real colored post`);
+      assert.deepEqual(points.at(-1), arm.splitPoint, `${arm.id} terminates at the common white-cable split`);
+      assert.ok(dot(subtract(arm.splitPoint, cablePort.position), outward) > 0.020,
+        `${arm.id} split is outside the device body`);
+      assert.ok(points.slice(1).every((point) => dot(subtract(point, conductor.position), outward) >= -1e-9),
+        `${arm.id} remains outside its terminal face`);
+    });
+    assert.equal(new Set(arms.map((arm) => arm.splitPoint.join(","))).size, 1,
+      `${deviceId} cores combine at one external point`);
+    assert.ok(arms.every((arm) => arm.routedCableEndpoint === `${deviceId}.cable`),
+      `${deviceId} arms identify the routed white sheath they replace`);
+    const whiteRoute = runtime.routes.find((route) => (
+      route.from === `${deviceId}.cable` || route.to === `${deviceId}.cable`
+    ));
+    assert.ok(whiteRoute, `${deviceId} has one routed white multicore sheath`);
+    const canonicalPoints = whiteRoute.points.map((point) => [...point] as Vec3);
+    const cableAtStart = whiteRoute.from === `${deviceId}.cable`;
+    const cableRouteEndpoint = cableAtStart ? whiteRoute.points[0] : whiteRoute.points.at(-1)!;
+    assert.deepEqual(cableRouteEndpoint, cablePort.position,
+      `${deviceId} graph route retains its physical terminal endpoint`);
+    const visiblePoints = renderedRoutePoints(whiteRoute, semantic);
+    const visibleCableEndpoint = cableAtStart ? visiblePoints[0] : visiblePoints.at(-1)!;
+    assert.deepEqual(visibleCableEndpoint, arms[0].splitPoint,
+      `${deviceId} visible white route begins at the external three-core fusion`);
+    assert.ok(!visiblePoints.some((point) => point.every((coordinate, index) => (
+      Math.abs(coordinate - cablePort.position[index]) < 1e-9
+    ))), `${deviceId} duplicate white terminal segment is hidden`);
+    assert.deepEqual(whiteRoute.points, canonicalPoints,
+      `${deviceId} visible trimming does not mutate canonical graph geometry`);
     device.conductors.forEach((port) => {
       assert.ok((port.internalMates?.length ?? 0) > 0, `${deviceId}.${port.id} has internal continuity`);
       port.internalMates!.forEach((mateId) => {
@@ -538,6 +625,37 @@ test("generator and Type I outlet retain their bodies and expose integrated thre
       });
     });
   }
+  const toolOutlet = topologyDeviceById("toolOutlet");
+  assert.deepEqual(toolOutlet.conductors.map((port) => [port.id, port.face, port.order]), [
+    ["line", "bottom", 0],
+    ["cable", "bottom", 1],
+    ["neutral", "bottom", 2],
+    ["earth", "bottom", 3],
+  ]);
+  assert.equal(toolOutlet.placement.space, "world");
+  const acJunction = topologyDeviceById("acJunction");
+  if (toolOutlet.placement.space === "world" && acJunction.placement.space === "world") {
+    const toolRight = toolOutlet.placement.position[0] + toolOutlet.size[0] / 2;
+    const enclosureLeft = acJunction.placement.position[0] - acJunction.size[0] / 2;
+    assert.ok(toolRight < enclosureLeft, "tool outlet remains left of and outside the AC enclosure footprint");
+  }
+});
+
+test("source topology references only the purchased MPPT wirebox and AC protection BOM rows", () => {
+  assert.deepEqual(topologyDeviceById("smartSolar").bomIds, ["dse-smartsolar", "dse-mppt-wirebox-tr"]);
+  assert.deepEqual(topologyDeviceById("acJunction").bomIds, ["dse-ac-rcbo"]);
+});
+
+test("SmartShunt sense and VE.Direct terminals share the ordered top face", () => {
+  const shunt = topologyDeviceById("smartShunt");
+  const ordered = ["vBattPlus", "veDirect"].map((id) => {
+    const terminal = shunt.conductors.find((port) => port.id === id)!;
+    return [terminal.id, terminal.face, terminal.order];
+  });
+  assert.deepEqual(ordered, [
+    ["vBattPlus", "top", 0],
+    ["veDirect", "top", 1],
+  ]);
 });
 
 test("every conductor has selectable physical terminal metadata", () => {
@@ -563,9 +681,9 @@ test("purchased six-gang panel has the three assigned controls and three spares"
   const panel = runtime.deviceById.get("switchPanel")!;
   assert.equal(panel.status, "purchased");
   assert.deepEqual(panel.conductors.slice(1).map((port) => port.label), [
-    "Switch 1 · Starlink + UniFi",
-    "Switch 2 · outdoor light",
-    "Switch 3 · Orion H remote",
+    "To Starlink Mini / UniFi 24 V to 5 V USB-A converter",
+    "To Outdoor utility light",
+    "To Victron Orion-Tr Smart 24/12-30",
     "Switch 4 · spare",
     "Switch 5 · spare",
     "Switch 6 · spare",

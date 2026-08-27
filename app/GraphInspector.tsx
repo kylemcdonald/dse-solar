@@ -3,7 +3,12 @@
 import type { ReactNode } from "react";
 import { dseRuntime } from "./dseRuntime";
 import { titleCase } from "./systemGraph";
-import type { GraphSelection } from "./systemGraph";
+import type {
+  CurrentSafetyConnectionCheck,
+  CurrentSafetyDeviceCheck,
+  CurrentSafetyIssue,
+  GraphSelection,
+} from "./systemGraph";
 
 export type InspectorBomItem = {
   id: string;
@@ -26,12 +31,76 @@ function ExternalLink({ href, children }: { href?: string; children: ReactNode }
   return <a href={href} target="_blank" rel="noreferrer">{children}</a>;
 }
 
+const currentSafety = dseRuntime.diagnostics.currentSafety;
+const currentSourceLabelById = new Map(currentSafety.sources.map((source) => [source.id, source.label]));
+
+function protectionEvidenceLabel(id: string) {
+  const separator = id.indexOf(":");
+  const kind = separator < 0 ? "" : id.slice(0, separator);
+  const target = separator < 0 ? id : id.slice(separator + 1);
+  if (kind === "source") return currentSourceLabelById.get(target) ?? titleCase(target);
+  if (kind === "device") return dseRuntime.deviceById.get(target)?.label ?? titleCase(target);
+  if (kind === "connection") return dseRuntime.routeById.get(target)?.label ?? titleCase(target);
+  return titleCase(id);
+}
+
+function CurrentSafetyDetails({
+  checks,
+  issues,
+}: {
+  checks: readonly (CurrentSafetyConnectionCheck | CurrentSafetyDeviceCheck)[];
+  issues: readonly CurrentSafetyIssue[];
+}) {
+  if (checks.length === 0 && issues.length === 0) return null;
+  const status = checks.some((check) => check.status === "incomplete") || issues.some((issue) => issue.severity === "error")
+    ? "incomplete"
+    : checks.some((check) => check.status === "provisional") || issues.length > 0 ? "provisional" : "verified";
+  return (
+    <div className={`graph-current-safety graph-current-safety-${status}`} data-current-safety-status={status}>
+      <strong>Programmatic current-protection audit · {status}</strong>
+      {checks.map((check) => (
+        <div className="graph-current-check"
+          key={`${"connectionId" in check ? `connection:${check.connectionId}` : `device:${check.deviceId}`}:${check.channel}`}>
+          <b>{titleCase(check.channel)} · {check.status}</b>
+          {"connectionId" in check
+            ? <small>{check.ampacityA === undefined ? "Ampacity missing" : `${check.ampacityA} A declared ampacity`}
+              {check.pairedActiveConnectionId ? ` · paired with ${dseRuntime.routeById.get(check.pairedActiveConnectionId)?.label ?? titleCase(check.pairedActiveConnectionId)}` : ""}</small>
+            : <small>{check.ratingA === undefined ? "Device/input rating missing" : `${check.ratingA} A declared device/input rating`}</small>}
+          <small>Aggregate protection envelope · verified {check.verifiedProtectionEnvelopeA === "unbounded" ? "unbounded" : `${check.verifiedProtectionEnvelopeA} A`}
+            {` · including provisional ${check.provisionalProtectionEnvelopeA === "unbounded" ? "unbounded" : `${check.provisionalProtectionEnvelopeA} A`}`}</small>
+          {check.protectionBySource.map((evidence) => {
+            const source = currentSourceLabelById.get(evidence.sourceId) ?? titleCase(evidence.sourceId);
+            const protection = evidence.verifiedBy.length > 0
+              ? `verified current-envelope coordination via ${evidence.verifiedBy.map(protectionEvidenceLabel).join(" / ")}`
+              : evidence.provisionalBy.length > 0
+                ? `provisional via ${evidence.provisionalBy.map(protectionEvidenceLabel).join(" / ")}`
+                : "no coordinating cut set";
+            const fault = evidence.prospectiveFaultCurrentA === "unbounded"
+              ? "unbounded prospective fault contribution"
+              : `${evidence.prospectiveFaultCurrentA} A prospective fault contribution`;
+            return <small key={evidence.sourceId}>{source} · {protection} · {fault}</small>;
+          })}
+        </div>
+      ))}
+      {issues.length > 0 && <ul>{issues.map((issue, index) => (
+        <li key={`${issue.code}:${issue.connectionId ?? issue.deviceId ?? issue.endpoint ?? index}:${issue.channel ?? "all"}`}>
+          <b>{issue.severity === "error" ? "Error" : "Warning"}</b> · {issue.message}
+        </li>
+      ))}</ul>}
+    </div>
+  );
+}
+
 export function GraphInspector({ selection, bom, onClose, onSelect }: Props) {
   const bomById = new Map(bom.map((item) => [item.id, item]));
   if (selection.type === "device") {
     const device = dseRuntime.deviceById.get(selection.deviceId);
     if (!device) return null;
     const items = (device.bomIds ?? []).flatMap((id) => bomById.get(id) ?? []);
+    const safetyIssues = [...currentSafety.errors, ...currentSafety.warnings].filter((issue) => (
+      issue.deviceId === device.id || issue.endpoint?.startsWith(`${device.id}.`)
+    ));
+    const safetyChecks = currentSafety.devices.filter((check) => check.deviceId === device.id);
     return (
       <aside className="inspector graph-inspector" aria-label="Device details">
         <button type="button" className="inspector-close" onClick={onClose} aria-label="Close details">×</button>
@@ -43,6 +112,7 @@ export function GraphInspector({ selection, bom, onClose, onSelect }: Props) {
           <div><dt>Location</dt><dd>{device.placement.space === "junction" ? `Inside ${dseRuntime.deviceById.get(device.placement.junctionId)?.label ?? device.placement.junctionId}` : titleCase(device.placement.surface)}</dd></div>
           {device.poles && <div><dt>Breaker width</dt><dd>{device.poles} way · {Math.round(device.size[0] * 1000)} mm</dd></div>}
         </dl>
+        <CurrentSafetyDetails checks={safetyChecks} issues={safetyIssues} />
         {device.holdReason && <div className="graph-hold"><strong>Installation hold</strong><p>{device.holdReason}</p></div>}
         <div className="graph-inspector-links">
           <ExternalLink href={device.purchaseUrl ?? items[0]?.productUrl}>Purchase source</ExternalLink>
@@ -78,6 +148,12 @@ export function GraphInspector({ selection, bom, onClose, onSelect }: Props) {
   const internalMates = (conductor.internalMates ?? []).map((id) => (
     dseRuntime.conductorByKey.get(`${device.id}.${id}`)?.label ?? id
   ));
+  const safetyChecks = selectedRoute
+    ? currentSafety.connections.filter((check) => check.connectionId === selectedRoute.id)
+    : [];
+  const safetyIssues = selectedRoute
+    ? [...currentSafety.errors, ...currentSafety.warnings].filter((issue) => issue.connectionId === selectedRoute.id)
+    : [];
   return (
     <aside className="inspector graph-inspector" aria-label="Conductor details">
       <button type="button" className="inspector-close" onClick={onClose} aria-label="Close details">×</button>
@@ -96,6 +172,7 @@ export function GraphInspector({ selection, bom, onClose, onSelect }: Props) {
         {selectedRoute && <div><dt>Routed length</dt><dd>{selectedRoute.lengthM.toFixed(2)} m · serial weighted voxel A*</dd></div>}
         {internalMates.length > 0 && <div><dt>Internal cores</dt><dd>{internalMates.join(" · ")}</dd></div>}
       </dl>
+      <CurrentSafetyDetails checks={safetyChecks} issues={safetyIssues} />
       {conductor.terminalNote && <div className="graph-hold graph-terminal-note"><strong>Terminal note</strong><p>{conductor.terminalNote}</p></div>}
       <h3>Attached to</h3>
       <div className="graph-conductor-list">
@@ -107,7 +184,7 @@ export function GraphInspector({ selection, bom, onClose, onSelect }: Props) {
           return (
             <button key={route.id} type="button" onClick={() => onSelect({ type: "conductor", conductorKey: peerKey, connectionId: route.id })}>
               <span className={`conductor-dot conductor-${route.kind}`} />
-              <span><strong>{peerDevice.label}</strong><small>{peer.label} · {route.id}</small></span>
+              <span><strong>{peerDevice.label}</strong><small>{peer.label} · {route.label ?? route.id}</small></span>
             </button>
           );
         })}

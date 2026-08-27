@@ -2,15 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { CurrentSafetySummary } from "./CurrentSafetySummary";
 import { dseRuntime } from "./dseRuntime";
 import { GrabPointCameraControls } from "./GrabPointCameraControls";
 import {
   MIN_ROUTE_BEND_SEGMENTS,
+  renderedRoutePoints,
   renderedSemanticCables,
   roundedRoutePieces,
 } from "./renderedCableGeometry";
 import type { CableCurvePiece } from "./renderedCableGeometry";
-import { conductorColor, EQUIPMENT_WALL_VOLUME } from "./systemGraph";
+import { conductorColor, EQUIPMENT_WALL_VOLUME, isPurchasedDevice } from "./systemGraph";
 import type { GraphSelection, ResolvedConductor, ResolvedDevice, Vec3 } from "./systemGraph";
 
 type Props = {
@@ -119,11 +121,11 @@ const presetPose: Record<CameraPreset, CameraPose> = {
   }),
   cutoff: frontCameraPose(batteryCutoffBounds, { widthScale: 1.65, heightScale: 2.1, minimumDistance: 0.45, xOffset: 0.04, yOffset: 0.20 }),
   services: frontCameraPose(secondaryServicesBounds, {
-    widthScale: 1.65,
-    heightScale: 2.1,
-    minimumDistance: 0.72,
-    xOffset: 1.10,
-    yOffset: 0.20,
+    widthScale: 1.9,
+    heightScale: 2.35,
+    minimumDistance: 0.90,
+    xOffset: 0.02,
+    yOffset: 0.12,
   }),
 };
 
@@ -150,7 +152,9 @@ dseRuntime.conductors.forEach((port) => {
 });
 const unusedConductorCount = dseRuntime.conductors.filter((port) => !connectedConductorKeys.has(port.key)).length;
 const semanticCables = renderedSemanticCables(dseRuntime.devices, dseRuntime.conductors, dseRuntime.routes);
-const semanticConductorKeys = new Set(semanticCables.map((cable) => cable.conductorKey));
+const semanticConductorKeys = new Set(semanticCables.flatMap((cable) => (
+  cable.routedCableEndpoint ? [cable.conductorKey, cable.routedCableEndpoint] : [cable.conductorKey]
+)));
 const cableBreakoutCount = dseRuntime.devices.filter((device) => (
   device.presentation === "cable-breakout" || device.presentation === "integrated-cable-breakout"
 )).length;
@@ -161,6 +165,19 @@ const rigidRailCount = dseRuntime.devices.filter((device) => device.presentation
 const suppliedBusbarCoverCount = dseRuntime.devices.filter((device) => (
   device.kind === "busbar" && device.presentation !== "rigid-rail"
 )).length;
+
+type UsbOutletKind = "usb-a" | "usb-c";
+
+function usbOutletKind(port: Pick<ResolvedConductor, "terminal" | "terminalSize">): UsbOutletKind | undefined {
+  const signature = `${port.terminal ?? ""} ${port.terminalSize ?? ""}`.toLowerCase();
+  if (/usb(?:\s+type)?-?c\b/.test(signature)) return "usb-c";
+  if (/usb(?:\s+type)?-?a\b/.test(signature)) return "usb-a";
+  return undefined;
+}
+
+const usbCOutletCount = dseRuntime.conductors.filter((port) => usbOutletKind(port) === "usb-c").length;
+const usbAOutletCount = dseRuntime.conductors.filter((port) => usbOutletKind(port) === "usb-a").length;
+
 function junctionBreakerOrder(junctionId: string) {
   return dseRuntime.devices
     .filter((device) => device.kind === "breaker"
@@ -218,6 +235,77 @@ function cylinderBetween(
   mesh.position.copy(start).add(end).multiplyScalar(0.5);
   mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
   return mesh;
+}
+
+function roundedRectangleShape(width: number, height: number, radius: number) {
+  const halfWidth = width / 2;
+  const halfHeight = height / 2;
+  const corner = Math.min(radius, halfWidth, halfHeight);
+  const shape = new THREE.Shape();
+  shape.moveTo(-halfWidth + corner, -halfHeight);
+  shape.lineTo(halfWidth - corner, -halfHeight);
+  shape.quadraticCurveTo(halfWidth, -halfHeight, halfWidth, -halfHeight + corner);
+  shape.lineTo(halfWidth, halfHeight - corner);
+  shape.quadraticCurveTo(halfWidth, halfHeight, halfWidth - corner, halfHeight);
+  shape.lineTo(-halfWidth + corner, halfHeight);
+  shape.quadraticCurveTo(-halfWidth, halfHeight, -halfWidth, halfHeight - corner);
+  shape.lineTo(-halfWidth, -halfHeight + corner);
+  shape.quadraticCurveTo(-halfWidth, -halfHeight, -halfWidth + corner, -halfHeight);
+  return shape;
+}
+
+/** Receptacle geometry is derived from terminal metadata rather than device
+ * identity. USB-C receives its symmetric pill opening; USB-A keeps the taller
+ * rectangular shell and an offset internal tongue. */
+function usbOutletObject(port: ResolvedConductor, kind: UsbOutletKind) {
+  const group = new THREE.Group();
+  group.name = `${port.key}:${kind}-receptacle`;
+  group.userData.conductorKey = port.key;
+  group.userData.hoverConductorKey = port.key;
+  group.userData.deviceId = port.deviceId;
+  group.userData.usbOutletKind = kind;
+  const direction = new THREE.Vector3(...port.direction).normalize();
+  group.position.copy(new THREE.Vector3(...port.position).addScaledVector(direction, 0.0006));
+  group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), direction);
+
+  const dimensions = kind === "usb-c"
+    ? { width: 0.0100, height: 0.0042, radius: 0.0021 }
+    : { width: 0.0130, height: 0.0060, radius: 0.0007 };
+  const shellMaterial = new THREE.MeshStandardMaterial({ color: "#b8bcc0", metalness: 0.72, roughness: 0.28 });
+  const apertureMaterial = new THREE.MeshStandardMaterial({ color: "#171a1c", metalness: 0.04, roughness: 0.76 });
+  const outer = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(
+      roundedRectangleShape(dimensions.width, dimensions.height, dimensions.radius),
+      { depth: 0.0018, bevelEnabled: false, curveSegments: 10, steps: 1 },
+    ),
+    shellMaterial,
+  );
+  outer.name = `${port.key}:${kind}-shell`;
+  outer.position.z = -0.0009;
+  const innerWidth = dimensions.width - 0.0015;
+  const innerHeight = dimensions.height - 0.0015;
+  const aperture = new THREE.Mesh(
+    new THREE.ShapeGeometry(roundedRectangleShape(
+      innerWidth,
+      innerHeight,
+      kind === "usb-c" ? innerHeight / 2 : 0.00035,
+    ), 10),
+    apertureMaterial,
+  );
+  aperture.name = `${port.key}:${kind}-aperture`;
+  aperture.position.z = 0.0010;
+  group.add(outer, aperture);
+
+  if (kind === "usb-a") {
+    const tongue = new THREE.Mesh(
+      new THREE.BoxGeometry(innerWidth * 0.72, innerHeight * 0.22, 0.0007),
+      new THREE.MeshStandardMaterial({ color: "#d7ddd9", metalness: 0.10, roughness: 0.64 }),
+    );
+    tongue.name = `${port.key}:usb-a-tongue`;
+    tongue.position.set(0, -innerHeight * 0.20, 0.0014);
+    group.add(tongue);
+  }
+  return { group, dimensions };
 }
 
 type RouteCurvePiece = {
@@ -520,8 +608,8 @@ function deviceBody(device: ResolvedDevice) {
   } else {
     const material = new THREE.MeshStandardMaterial({
       color: baseColor,
-      roughness: device.kind === "busbar" ? 0.28 : 0.62,
-      metalness: device.kind === "busbar" ? 0.55 : 0.05,
+      roughness: 0.62,
+      metalness: 0.05,
       transparent: opacity < 1,
       opacity,
     });
@@ -688,7 +776,7 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
         if (mesh.isMesh) {
           mesh.layers.enable(DEVICE_SHADOW_CASTER_LAYER);
           interactive.push(child);
-          if (device.status === "purchased") {
+          if (isPurchasedDevice(device)) {
             const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
             materials.forEach((material) => purchasedMaterials.push({
               material,
@@ -723,7 +811,10 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
       const cable = cableById.get(route.cableId)!;
       const sheathColor = cable.sheath === "white" ? "#f8f6ef" : conductorColor[route.kind];
       const radius = Math.max(0.0012, route.diameterMm / 2000);
-      const curve = roundedRouteCurve(route.points, Math.max(0.009, radius * 4.25));
+      const curve = roundedRouteCurve(
+        renderedRoutePoints(route, semanticCables),
+        Math.max(0.009, radius * 4.25),
+      );
       if (curve.tubularSegments === 0) return;
       renderedTubeSegments += curve.tubularSegments;
       renderedBends += curve.bendCount;
@@ -772,7 +863,6 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
       radius: number,
       color = conductorColor[port.kind],
       branchAngleDegrees?: number,
-      overlayOnDevice = false,
     ) => {
       const segments = semanticTubeSegments(curve);
       const visible = new THREE.Mesh(
@@ -784,11 +874,6 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
       visible.userData.deviceId = port.deviceId;
       visible.userData.branchAngleDegrees = branchAngleDegrees;
       visible.userData.radialSegments = 8;
-      if (overlayOnDevice) {
-        const materials = Array.isArray(visible.material) ? visible.material : [visible.material];
-        materials.forEach((material) => { material.depthTest = false; });
-        visible.renderOrder = 60;
-      }
       visible.layers.enable(DEVICE_SHADOW_CASTER_LAYER);
       visible.castShadow = true;
       interactive.push(visible);
@@ -809,6 +894,35 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
 
     dseRuntime.conductors.forEach((port) => {
       if (semanticConductorKeys.has(port.key)) return;
+      const outletKind = usbOutletKind(port);
+      if (outletKind) {
+        const { group, dimensions } = usbOutletObject(port, outletKind);
+        group.traverse((object) => {
+          const mesh = object as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          mesh.userData.conductorKey = port.key;
+          mesh.userData.hoverConductorKey = port.key;
+          mesh.userData.deviceId = port.deviceId;
+          mesh.userData.usbOutletKind = outletKind;
+          mesh.layers.enable(DEVICE_SHADOW_CASTER_LAYER);
+          mesh.castShadow = true;
+          interactive.push(mesh);
+        });
+        const hit = new THREE.Mesh(
+          new THREE.BoxGeometry(dimensions.width + 0.005, dimensions.height + 0.005, 0.008),
+          new THREE.MeshBasicMaterial({ visible: false }),
+        );
+        hit.position.z = 0.002;
+        hit.userData.conductorKey = port.key;
+        hit.userData.hoverConductorKey = port.key;
+        hit.userData.deviceId = port.deviceId;
+        hit.userData.usbOutletKind = outletKind;
+        interactive.push(hit);
+        group.add(hit);
+        conductorObjects.set(port.key, group);
+        scene.add(group);
+        return;
+      }
       const length = Math.max(0.010, (port.terminalLengthMm ?? 10) / 1000);
       const radius = Math.max(0.0025, (port.terminalDiameterMm ?? 5) / 2000);
       const start = new THREE.Vector3(...port.position);
@@ -866,7 +980,6 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
         semantic.radiusM,
         semantic.color === "white" ? "#f8f6ef" : conductorColor[semantic.color],
         semantic.branchAngleDegrees,
-        owner.presentation === "integrated-cable-breakout",
       );
     });
     semanticGroups.forEach((group, deviceId) => {
@@ -1078,6 +1191,10 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
       data-breakout-rendering="true-y-two-way-plus-minus-45-three-way-red-45-black-0-green-minus-45"
       data-cable-breakout-count={cableBreakoutCount}
       data-integrated-cable-breakout-count={integratedCableBreakoutCount}
+      data-integrated-breakout-rendering="external-fusion-trimmed-depth-tested-core-fan"
+      data-usb-outlet-rendering="metadata-driven-usb-c-pill-usb-a-rectangle"
+      data-usb-c-outlet-count={usbCOutletCount}
+      data-usb-a-outlet-count={usbAOutletCount}
       data-conductor-usage="field-routes-plus-reciprocal-internal-mates"
       data-wire-join-rendering="presentation-driven-selectable-y"
       data-wire-join-count={wireJoinCount}
@@ -1091,6 +1208,9 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
       data-wall-penetrations="1"
       data-battery-cutoff-breaker-order={batteryCutoffBreakerOrder}
       data-secondary-services-breaker-order={secondaryServicesBreakerOrder}
+      data-current-safety-status={dseRuntime.diagnostics.currentSafety.status}
+      data-current-safety-errors={dseRuntime.diagnostics.currentSafety.errors.length}
+      data-current-safety-warnings={dseRuntime.diagnostics.currentSafety.warnings.length}
     >
       <div className="model-toolbar" aria-label="3D model controls">
         <div className="model-preset-buttons">
@@ -1104,6 +1224,7 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
           <input type="checkbox" checked={fadePurchased} onChange={(event) => onFadePurchasedChange(event.target.checked)} />
           Fade purchased
         </label>
+        <CurrentSafetySummary />
         <span className="route-runtime">
           {dseRuntime.devices.length} devices · {dseRuntime.routes.length} cables · precomputed · {dseRuntime.diagnostics.hydrateMs.toFixed(2)} ms hydrate
         </span>

@@ -9,8 +9,9 @@ import {
   useState,
 } from "react";
 import diagramLayoutsArtifact from "../data/generated/diagram-layouts.json";
+import { CurrentSafetySummary } from "./CurrentSafetySummary";
 import { dseRuntime } from "./dseRuntime";
-import { conductorColor } from "./systemGraph";
+import { conductorColor, isPurchasedDevice } from "./systemGraph";
 import type {
   ConductorKind,
   GraphSelection,
@@ -101,6 +102,11 @@ type DiagramLayout = {
 };
 type ViewTransform = { x: number; y: number; scale: number };
 
+export type DiagramMacroCenterOverrides = Readonly<Record<string, Readonly<{
+  x: number;
+  y: number;
+}>>>;
+
 const GRID = 12;
 const ROUTE_GRID = 6;
 const MIN_WIRE_LANE_SPACING = ROUTE_GRID * 2;
@@ -127,6 +133,13 @@ const BOUNDARY_PORT_PITCH = 42;
 const WIRE_LANE_CLEARANCE = 0.05;
 const MIN_SCALE = 0.16;
 const MAX_SCALE = 2.4;
+const diagramConductorColor: Record<ConductorKind, string> = {
+  ...conductorColor,
+  // The shared graph color is intentionally conservative for the light 3D
+  // scene. The diagram sits on a mid-grey field, where a brighter PE green is
+  // needed to keep protective earth distinct from black returns at fit scale.
+  earth: "#4af287",
+};
 
 const snap = (value: number, step = GRID) => Math.round(value / step) * step;
 const snapUp = (value: number, step = GRID * 2) => Math.ceil(value / step) * step;
@@ -279,7 +292,7 @@ function attachedDevice(device: ResolvedDevice) {
   return dseRuntime.deviceById.get(endpointDeviceId(device.attachment.endpoint));
 }
 
-function dcRole(device: ResolvedDevice) {
+function dcRole(device: ResolvedDevice): DcRole | undefined {
   const ownRole = device.componentId ? DC_ROLE_BY_COMPONENT.get(device.componentId) : undefined;
   if (ownRole) return ownRole;
   const attached = attachedDevice(device);
@@ -555,10 +568,29 @@ function layoutWorldNodes(nodes: DiagramNode[]) {
       )));
       const horizontalShift = snap((dcLeft + dcRight - localLeft - localRight) / 2);
       const verticalShift = snap(cursor);
+      const gridLocalLeft = Math.min(...gridMembers.map((node) => {
+        const local = localPositionById.get(node.device.id)!;
+        return local.x - node.width / 2 - attachedReach(node.device.id, -1);
+      }));
+      const gridLocalRight = Math.max(...gridMembers.map((node) => {
+        const local = localPositionById.get(node.device.id)!;
+        return local.x + node.width / 2 + attachedReach(node.device.id, 1);
+      }));
+      const cutoffMembers = dcMembers.filter((node) => dcRole(node.device) === "cutoff");
+      const cutoffCenter = cutoffMembers.length > 0
+        ? mean(cutoffMembers.map((node) => node.x))
+        : (dcLeft + dcRight) / 2;
+      const gridHorizontalShift = snap(cutoffCenter - (gridLocalLeft + gridLocalRight) / 2);
+      const dcBottom = Math.max(...dcMembers.map((node) => node.y + node.height / 2));
+      const attachmentHalfHeight = Math.max(0, ...gridMembers.map((node) => (
+        Math.max(0, ...(attachedNodesByOwner.get(node.device.id) ?? []).map((join) => join.height / 2))
+      )));
+      const gridVerticalShift = snap(dcBottom + attachmentHalfHeight + GRID - rowCenters[0]);
       members.forEach((node) => {
         const local = localPositionById.get(node.device.id)!;
-        node.x = snap(horizontalShift + local.x);
-        node.y = snap(verticalShift + local.y);
+        const isBattery = node.device.kind === "battery";
+        node.x = snap((isBattery ? gridHorizontalShift : horizontalShift) + local.x);
+        node.y = snap((isBattery ? gridVerticalShift : verticalShift) + local.y);
       });
       const laneBottom = Math.max(...members.map((node) => node.y + node.height / 2));
       laneCenters.set(lane, snap((verticalShift + laneBottom) / 2));
@@ -850,7 +882,61 @@ function junctionEdgeSide(route: RoutedConnection, junctionId: string, externalE
   return junctionOwner(endpointDeviceId(route.from)) === junctionId ? "output" : "input";
 }
 
-function systemProjection() {
+function diagramMacroRootId(deviceId: string, nodeById: ReadonlyMap<string, DiagramNode>) {
+  const visited = new Set<string>();
+  let current = deviceId;
+  while (!visited.has(current)) {
+    visited.add(current);
+    const attachment = nodeById.get(current)?.device.attachment;
+    if (!attachment) return current;
+    const ownerId = endpointDeviceId(attachment.endpoint);
+    if (!nodeById.has(ownerId)) return current;
+    current = ownerId;
+  }
+  throw new Error(`Diagram attachment cycle includes ${deviceId}.`);
+}
+
+/** Apply optimizer proposals only after the canonical layout has established
+ * every real node size and local attachment fan. An override names a macro
+ * root; all attached join descendants receive the same snapped translation.
+ * The production port ordering and router still run on the resulting nodes. */
+function applyDiagramMacroCenterOverrides(
+  nodes: DiagramNode[],
+  overrides: DiagramMacroCenterOverrides,
+) {
+  const entries = Object.entries(overrides);
+  if (entries.length === 0) return nodes;
+  const nodeById = new Map(nodes.map((node) => [node.device.id, node]));
+  const rootById = new Map(nodes.map((node) => [
+    node.device.id,
+    diagramMacroRootId(node.device.id, nodeById),
+  ]));
+  const deltaByRoot = new Map<string, Point>();
+  entries.toSorted(([first], [second]) => first.localeCompare(second)).forEach(([deviceId, center]) => {
+    const node = nodeById.get(deviceId);
+    if (!node) throw new Error(`Unknown system-diagram macro root ${deviceId}.`);
+    const rootId = rootById.get(deviceId)!;
+    if (rootId !== deviceId) {
+      throw new Error(`${deviceId} is attached to ${rootId}; override the macro root instead.`);
+    }
+    if (!Number.isFinite(center.x) || !Number.isFinite(center.y)) {
+      throw new Error(`${deviceId}: diagram macro center must contain finite x/y coordinates.`);
+    }
+    deltaByRoot.set(deviceId, {
+      x: snap(center.x) - node.x,
+      y: snap(center.y) - node.y,
+    });
+  });
+  nodes.forEach((node) => {
+    const delta = deltaByRoot.get(rootById.get(node.device.id)!);
+    if (!delta) return;
+    node.x += delta.x;
+    node.y += delta.y;
+  });
+  return nodes;
+}
+
+function systemProjection(macroCenterOverrides: DiagramMacroCenterOverrides = {}) {
   const { glandByConnection, glandOrder } = glandMaps();
   const portSets = new Map<string, DiagramPort[]>();
   const passthroughs = dseRuntime.devices.filter((device) => device.presentation === "wall-passthrough");
@@ -865,14 +951,13 @@ function systemProjection() {
       if (!owner) return endpoint;
       const gland = glandByConnection.get(physicalRoute.id);
       if (!gland) return undefined;
-      const endpointPort = dseRuntime.conductorByKey.get(endpoint)!;
       const id = `${owner}::${physicalRoute.id}`;
       const ports = portSets.get(owner)!;
       if (!ports.some((port) => port.endpointId === id)) {
         const externalEndpoint = endpoint === physicalRoute.from ? physicalRoute.to : physicalRoute.from;
         const side = junctionEdgeSide(physicalRoute, owner, externalEndpoint);
         ports.push({ id: `${gland.id}-${physicalRoute.id}`, endpointId: id,
-          label: `${gland.id} · ${endpointPort.label}`, kind: physicalRoute.kind, side,
+          label: gland.label, kind: physicalRoute.kind, side,
           selectionKey: endpoint, connectionId: physicalRoute.id, glandId: gland.id });
       }
       return id;
@@ -929,7 +1014,10 @@ function systemProjection() {
     return (glandOrder.get(first.glandId) ?? 0) - (glandOrder.get(second.glandId) ?? 0)
       || (first.connectionId ?? "").localeCompare(second.connectionId ?? "");
   }));
-  const nodes = layoutWorldNodes(worldDevices.map((device) => prepareWorldNode(device, portSets.get(device.id)!)));
+  const nodes = applyDiagramMacroCenterOverrides(
+    layoutWorldNodes(worldDevices.map((device) => prepareWorldNode(device, portSets.get(device.id)!))),
+    macroCenterOverrides,
+  );
   orderPortsTowardPeers(nodes, seeds);
   alignHubPortsTowardPeers(nodes, seeds);
   return { nodes, seeds };
@@ -970,7 +1058,7 @@ function junctionProjection(junctionId: string) {
     const externalConductor = dseRuntime.conductorByKey.get(externalEndpoint)!;
     const gland = glandByConnection.get(route.id);
     return { id: `boundary-${route.id}`, endpointId: `boundary::${route.id}`,
-      label: `${gland?.id ?? "Boundary gland"} · ${externalConductor.label}`, kind: route.kind,
+      label: gland?.label ?? externalConductor.label, kind: route.kind,
       side: junctionEdgeSide(route, junctionId, externalEndpoint), selectionKey: internalEndpoint, connectionId: route.id,
       glandId: gland?.id, point: { x: 0, y: 0 } };
   });
@@ -1245,7 +1333,16 @@ function routeWires(nodes: readonly DiagramNode[], boundaryPorts: readonly Bound
   seeds.forEach((seed) => [seed.fromEndpointId, seed.toEndpointId].forEach((endpointId) => {
     const ids = attachmentRoutes.get(endpointId) ?? []; ids.push(seed.route.id); attachmentRoutes.set(endpointId, ids);
   }));
-  attachmentRoutes.forEach((ids) => ids.sort());
+  const routeById = new Map(seeds.map((seed) => [seed.route.id, seed.route]));
+  attachmentRoutes.forEach((ids, endpointId) => {
+    ids.sort((first, second) => (
+      routeById.get(second)!.diameterMm - routeById.get(first)!.diameterMm
+      || first.localeCompare(second)
+    ));
+    if (ids.length > 3) {
+      throw new Error(`${endpointId}: a diagram terminal supports at most three direct fan directions`);
+    }
+  });
   const routeSpan = (seed: WireSeed) => {
     const from = endpoints.get(seed.fromEndpointId)!.point; const to = endpoints.get(seed.toEndpointId)!.point;
     return Math.abs(to.x - from.x) + Math.abs(to.y - from.y);
@@ -1263,9 +1360,45 @@ function routeWires(nodes: readonly DiagramNode[], boundaryPorts: readonly Bound
         : endpoint.side === "output" ? { x: -1, y: 0 }
           : { x: 0, y: -1 }
       : outwardVector(endpoint.side);
-    const leadDistance = ROUTE_LEAD + fanIndex * GRID;
-    return { outward, point: { x: snap(endpoint.point.x + outward.x * leadDistance, ROUTE_GRID),
-      y: snap(endpoint.point.y + outward.y * leadDistance, ROUTE_GRID) } };
+    const tangentBase = { x: -outward.y, y: outward.x };
+    const peerPoint = (routeId: string) => {
+      const candidate = seeds.find((entry) => entry.route.id === routeId)!;
+      const peerId = candidate.fromEndpointId === endpointId ? candidate.toEndpointId : candidate.fromEndpointId;
+      return endpoints.get(peerId)!.point;
+    };
+    const fanCost = (routeId: string, sign: -1 | 1) => {
+      const peer = peerPoint(routeId);
+      const lead = {
+        x: endpoint.point.x + tangentBase.x * sign * MIN_WIRE_LANE_SPACING + outward.x * ROUTE_LEAD,
+        y: endpoint.point.y + tangentBase.y * sign * MIN_WIRE_LANE_SPACING + outward.y * ROUTE_LEAD,
+      };
+      return Math.abs(peer.x - lead.x) + Math.abs(peer.y - lead.y);
+    };
+    let fanSign: -1 | 1 | undefined;
+    if (fanIndex > 0 && ids.length === 2) {
+      const peer = peerPoint(seed.route.id);
+      const projection = (peer.x - endpoint.point.x) * tangentBase.x
+        + (peer.y - endpoint.point.y) * tangentBase.y;
+      fanSign = projection < 0 ? -1 : 1;
+    } else if (fanIndex > 0) {
+      const positiveFirst = fanCost(ids[1], 1) + fanCost(ids[2], -1);
+      const negativeFirst = fanCost(ids[1], -1) + fanCost(ids[2], 1);
+      const firstSign: -1 | 1 = positiveFirst <= negativeFirst ? 1 : -1;
+      fanSign = fanIndex === 1 ? firstSign : firstSign === 1 ? -1 : 1;
+    }
+    const tangent = fanSign === undefined ? undefined : {
+      x: tangentBase.x * fanSign,
+      y: tangentBase.y * fanSign,
+    };
+    const fork = tangent ? {
+      x: endpoint.point.x + tangent.x * MIN_WIRE_LANE_SPACING,
+      y: endpoint.point.y + tangent.y * MIN_WIRE_LANE_SPACING,
+    } : endpoint.point;
+    const point = {
+      x: snap(fork.x + outward.x * ROUTE_LEAD, ROUTE_GRID),
+      y: snap(fork.y + outward.y * ROUTE_LEAD, ROUTE_GRID),
+    };
+    return { outward, point, terminalPath: simplifyOrthogonal([endpoint.point, fork, point]) };
   };
   // Reserve every terminal's straight approach before routing any middle
   // section. This prevents an early cable from consuming the only legal
@@ -1275,8 +1408,8 @@ function routeWires(nodes: readonly DiagramNode[], boundaryPorts: readonly Bound
     const fromLead = endpointLead(seed, seed.fromEndpointId, from);
     const toLead = endpointLead(seed, seed.toEndpointId, to);
     const width = routeStrokeWidth(seed.route);
-    reserveRoute([from.point, fromLead.point], width, usedEdges, occupiedCells);
-    reserveRoute([to.point, toLead.point], width, usedEdges, occupiedCells);
+    reserveRoute(fromLead.terminalPath, width, usedEdges, occupiedCells);
+    reserveRoute(toLead.terminalPath, width, usedEdges, occupiedCells);
   });
   const fallbackRouteIds: string[] = [];
   const routed = sortedSeeds.map((seed): RoutedWire => {
@@ -1294,10 +1427,14 @@ function routeWires(nodes: readonly DiagramNode[], boundaryPorts: readonly Bound
       middle = simplifyOrthogonal([fromLead.point, bend, toLead.point]);
     }
     reserveRoute(middle, width, usedEdges, occupiedCells);
-    const selectedPoints = simplifyOrthogonal([from.point, ...middle, to.point]);
+    const selectedPoints = simplifyOrthogonal([
+      ...fromLead.terminalPath,
+      ...middle,
+      ...[...toLead.terminalPath].reverse(),
+    ]);
     const cable = dseRuntime.graph.cables.find((candidate) => candidate.id === seed.route.cableId)!;
     return { ...seed, points: selectedPoints, bridges: [], fromNodeId: from.ownerDeviceId, toNodeId: to.ownerDeviceId,
-      color: cable.sheath === "white" ? "#f8fafc" : conductorColor[seed.route.kind],
+      color: cable.sheath === "white" ? "#f8fafc" : diagramConductorColor[seed.route.kind],
       width };
   });
   const crossings = annotateLocalBridges(routed);
@@ -1491,9 +1628,15 @@ function wireLength(wires: readonly RoutedWire[]) {
   ), 0), 0);
 }
 
-export function buildDiagramLayout(activeJunctionId?: string): DiagramLayout {
+export function buildDiagramLayout(
+  activeJunctionId?: string,
+  systemMacroCenterOverrides: DiagramMacroCenterOverrides = {},
+): DiagramLayout {
   const layoutStarted = performance.now();
   if (activeJunctionId) {
+    if (Object.keys(systemMacroCenterOverrides).length > 0) {
+      throw new Error("System macro-center overrides cannot be applied to a junction subpatch.");
+    }
     const projection = junctionProjection(activeJunctionId);
     const width = snapUp(projection.width); const height = snapUp(projection.height);
     const routed = routeWires(projection.nodes, projection.boundaryPorts, projection.seeds, { width, height });
@@ -1511,7 +1654,7 @@ export function buildDiagramLayout(activeJunctionId?: string): DiagramLayout {
       wireTurns: wireTurnCount(routed.routed), wireLength: wireLength(routed.routed),
       layoutMs: performance.now() - layoutStarted };
   }
-  const projection = systemProjection();
+  const projection = systemProjection(systemMacroCenterOverrides);
   const width = snapUp(Math.max(...projection.nodes.map((node) => node.x + node.width / 2)) + LAYOUT_MARGIN);
   const height = snapUp(Math.max(...projection.nodes.map((node) => node.y + node.height / 2)) + LAYOUT_MARGIN);
   const routed = routeWires(projection.nodes, [], projection.seeds, { width, height });
@@ -1630,11 +1773,48 @@ function localJumpPath(jump: WireJumpGeometry) {
   return `M${jump.start.x},${jump.start.y} ${jumpCurveCommands(jump)}`;
 }
 
+const INTEGRATED_FUSION_OFFSET = 22;
+
+function isIntegratedCableEndpoint(endpointId: string) {
+  const port = dseRuntime.conductorByKey.get(endpointId);
+  const owner = port ? dseRuntime.deviceById.get(port.deviceId) : undefined;
+  return owner?.presentation === "integrated-cable-breakout"
+    && port?.kind === "multicore" && (port.internalMates?.length ?? 0) >= 2;
+}
+
+function trimDiagramPolyline(points: readonly Point[], fromStart: boolean, trimDistance: number) {
+  const ordered = fromStart ? [...points] : [...points].reverse();
+  let remaining = trimDistance;
+  let segmentIndex = 0;
+  for (; segmentIndex < ordered.length - 1; segmentIndex += 1) {
+    const first = ordered[segmentIndex]; const second = ordered[segmentIndex + 1];
+    const length = Math.hypot(second.x - first.x, second.y - first.y);
+    if (remaining < length) {
+      const amount = remaining / length;
+      const fusion = { x: first.x + (second.x - first.x) * amount, y: first.y + (second.y - first.y) * amount };
+      const trimmed = [fusion, ...ordered.slice(segmentIndex + 1)];
+      return fromStart ? trimmed : trimmed.reverse();
+    }
+    remaining -= length;
+  }
+  return [...points];
+}
+
 function wireRenderGeometry(wire: RoutedWire) {
-  const segmentBridges = wire.points.slice(0, -1).map(() => [] as Array<RoutedWire["bridges"][number]>);
+  const trimmedEndpoints: string[] = [];
+  let visiblePoints = [...wire.points];
+  if (isIntegratedCableEndpoint(wire.fromEndpointId)) {
+    visiblePoints = trimDiagramPolyline(visiblePoints, true, INTEGRATED_FUSION_OFFSET);
+    trimmedEndpoints.push(wire.fromEndpointId);
+  }
+  if (isIntegratedCableEndpoint(wire.toEndpointId)) {
+    visiblePoints = trimDiagramPolyline(visiblePoints, false, INTEGRATED_FUSION_OFFSET);
+    trimmedEndpoints.push(wire.toEndpointId);
+  }
+  const segmentBridges = visiblePoints.slice(0, -1).map(() => [] as Array<RoutedWire["bridges"][number]>);
   wire.bridges.forEach((bridge) => {
-    const candidates = wire.points.slice(0, -1).flatMap((first, segmentIndex) => {
-      const second = wire.points[segmentIndex + 1];
+    const candidates = visiblePoints.slice(0, -1).flatMap((first, segmentIndex) => {
+      const second = visiblePoints[segmentIndex + 1];
       if (!bridgeIsOnSegment(bridge, first, second)) return [];
       const coordinate = axisCoordinate(bridge.point, bridge.axis);
       const clearance = Math.min(
@@ -1648,7 +1828,7 @@ function wireRenderGeometry(wire: RoutedWire) {
   });
 
   const jumpsBySegment = segmentBridges.map((bridges, segmentIndex) => {
-    const first = wire.points[segmentIndex]; const second = wire.points[segmentIndex + 1];
+    const first = visiblePoints[segmentIndex]; const second = visiblePoints[segmentIndex + 1];
     const axis = segmentAxis(first, second);
     if (!axis || bridges.length === 0) return [];
     const firstCoordinate = axisCoordinate(first, axis); const secondCoordinate = axisCoordinate(second, axis);
@@ -1678,15 +1858,15 @@ function wireRenderGeometry(wire: RoutedWire) {
     return direction > 0 ? jumps : jumps.reverse();
   });
 
-  const path = [`M${wire.points[0].x},${wire.points[0].y}`];
-  wire.points.slice(0, -1).forEach((_, segmentIndex) => {
+  const path = [`M${visiblePoints[0].x},${visiblePoints[0].y}`];
+  visiblePoints.slice(0, -1).forEach((_, segmentIndex) => {
     jumpsBySegment[segmentIndex].forEach((jump) => {
       path.push(`L${jump.start.x},${jump.start.y}`, jumpCurveCommands(jump));
     });
-    const end = wire.points[segmentIndex + 1];
+    const end = visiblePoints[segmentIndex + 1];
     path.push(`L${end.x},${end.y}`);
   });
-  return { path: path.join(" "), jumps: jumpsBySegment.flat() };
+  return { path: path.join(" "), jumps: jumpsBySegment.flat(), trimmedEndpoints };
 }
 
 function wrappedLabel(label: string, maxCharacters: number, maxLines: number) {
@@ -1746,13 +1926,14 @@ function PortGraphic({ port, point, ownerLabel, viewScale, onSelect, boundary = 
     <g className="diagram-port-anchor" transform={`translate(${point.x} ${point.y})`}>
       <g className={`diagram-port diagram-port-${port.side}`}
         data-port-side={port.side} data-boundary-port={boundary ? "true" : "false"}
+        data-endpoint-id={port.selectionKey}
         role="button" tabIndex={0} aria-label={`${ownerLabel} · ${port.label}`}
         onClick={(event) => { event.stopPropagation(); onSelect({ type: "conductor", conductorKey: port.selectionKey, connectionId: port.connectionId }); }}
         onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") {
           event.stopPropagation(); onSelect({ type: "conductor", conductorKey: port.selectionKey, connectionId: port.connectionId });
         } }}>
         <circle r={PORT_RADIUS + 6} className="diagram-port-hit" />
-        <circle r={PORT_RADIUS} className="diagram-conductor" style={{ fill: conductorColor[port.kind] }} />
+        <circle r={PORT_RADIUS} className="diagram-conductor" style={{ fill: diagramConductorColor[port.kind] }} />
         <title>{port.label}</title>
       </g>
       <g className="diagram-port-label" transform={`translate(${labelX} ${labelY}) scale(${inverseScale})`}>
@@ -1781,18 +1962,14 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
   const moved = useRef(false); const suppressClickUntil = useRef(0);
   const viewFrame = useRef<number | undefined>(undefined);
   const viewCommitTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const fittedKey = useRef<string | undefined>(undefined);
+  const rememberedViews = useRef(new Map<string, ViewTransform>());
+  const mountedLayoutKey = useRef<string | undefined>(undefined);
   const layout = useMemo(() => hydrateDiagramLayout(activeJunctionId), [activeJunctionId]);
   const renderedWires = useMemo(() => layout.wires.map((wire) => ({
     wire,
     ...wireRenderGeometry(wire),
   })), [layout]);
   const hoveredWire = renderedWires.find(({ wire }) => wire.route.id === hoveredWireId);
-  const exitJunction = useCallback(() => {
-    onClearSelection?.();
-    setActiveJunctionId(undefined);
-  }, [onClearSelection]);
-
   const applyViewToDom = useCallback((value: ViewTransform) => {
     contentRef.current?.setAttribute("transform", `translate(${value.x} ${value.y}) scale(${value.scale})`);
     if (diagramRef.current) {
@@ -1815,14 +1992,40 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
       viewFrame.current = undefined; applyViewToDom(viewRef.current);
     });
   }, [applyViewToDom]);
+  const setViewImmediately = useCallback((value: ViewTransform) => {
+    viewRef.current = value;
+    if (viewCommitTimer.current !== undefined) {
+      clearTimeout(viewCommitTimer.current);
+      viewCommitTimer.current = undefined;
+    }
+    if (viewFrame.current !== undefined) {
+      cancelAnimationFrame(viewFrame.current);
+      viewFrame.current = undefined;
+    }
+    applyViewToDom(value);
+    setViewState(value);
+  }, [applyViewToDom]);
   const fitLayout = useCallback((target = layout) => {
     if (!viewportSize.width || !viewportSize.height) return;
     const padding = 46;
     const scale = Math.max(MIN_SCALE, Math.min(1.18,
       (viewportSize.width - padding * 2) / target.width, (viewportSize.height - padding * 2) / target.height));
-    setView({ scale, x: (viewportSize.width - target.width * scale) / 2,
+    setViewImmediately({ scale, x: (viewportSize.width - target.width * scale) / 2,
       y: (viewportSize.height - target.height * scale) / 2 });
-  }, [layout, setView, viewportSize]);
+  }, [layout, setViewImmediately, viewportSize]);
+  const rememberCurrentView = useCallback(() => {
+    rememberedViews.current.set(layout.key, { ...viewRef.current });
+  }, [layout.key]);
+  const enterJunction = useCallback((junctionId: string) => {
+    rememberCurrentView();
+    onClearSelection?.();
+    setActiveJunctionId(junctionId);
+  }, [onClearSelection, rememberCurrentView]);
+  const exitJunction = useCallback(() => {
+    rememberCurrentView();
+    onClearSelection?.();
+    setActiveJunctionId(undefined);
+  }, [onClearSelection, rememberCurrentView]);
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
@@ -1831,9 +2034,12 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
     observer.observe(viewport); return () => observer.disconnect();
   }, []);
   useLayoutEffect(() => {
-    if (!viewportSize.width || fittedKey.current === layout.key) return;
-    fittedKey.current = layout.key; fitLayout(layout);
-  }, [fitLayout, layout, viewportSize]);
+    if (!viewportSize.width || mountedLayoutKey.current === layout.key) return;
+    mountedLayoutKey.current = layout.key;
+    const remembered = rememberedViews.current.get(layout.key);
+    if (remembered) setViewImmediately(remembered);
+    else fitLayout(layout);
+  }, [fitLayout, layout, setViewImmediately, viewportSize]);
   useLayoutEffect(() => { applyViewToDom(viewRef.current); }, [applyViewToDom, layout, view]);
   useEffect(() => () => {
     if (viewFrame.current !== undefined) cancelAnimationFrame(viewFrame.current);
@@ -1937,12 +2143,16 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
       data-node-overlaps={layout.nodeOverlaps} data-wire-turns={layout.wireTurns}
       data-wire-length={layout.wireLength}
       data-routing-fallbacks={layout.routingFallbacks} data-layout-hydration="index-only"
+      data-current-safety-status={dseRuntime.diagnostics.currentSafety.status}
+      data-current-safety-errors={dseRuntime.diagnostics.currentSafety.errors.length}
+      data-current-safety-warnings={dseRuntime.diagnostics.currentSafety.warnings.length}
       data-precomputed-layout-ms={layout.precomputedLayoutMs?.toFixed(1)}
       data-diagram-routing-ms="0.0" data-layout-source="build-generated-artifact"
       data-wire-geometry="orthogonal-grid" data-wire-crossing-rendering="arched-jumps"
       data-wire-continuity="single-path-with-integrated-jumps"
       data-port-layout="inputs-left-outputs-right-storage-signals-bottom" data-page-zoom-captured="true"
       data-zoom-rendering="raf-transform-idle-react-reconcile"
+      data-view-memory="per-layout-preserved" data-earth-color={diagramConductorColor.earth}
       data-escape-navigation={inspectorOpen ? "close-inspector" : activeJunctionId ? "back-to-system" : "inactive"}
       data-view-x={view.x.toFixed(2)} data-view-y={view.y.toFixed(2)} data-view-scale={view.scale.toFixed(4)}
       data-touch-navigation="pinch-zoom-two-finger-pan">
@@ -1961,6 +2171,7 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
               + `${layout.boundaryPorts.filter((port) => port.side === "neutral").length} battery / earth / data below`}</span>
         </div>
         <div className="diagram-zoom-controls" aria-label="Diagram zoom">
+          <CurrentSafetySummary />
           <button type="button" onClick={() => zoomAt({ x: viewportSize.width / 2, y: viewportSize.height / 2 }, 0.82)} aria-label="Zoom out">−</button>
           <button type="button" onClick={() => fitLayout()} aria-label="Fit diagram">{Math.round(view.scale * 100)}%</button>
           <button type="button" onClick={() => zoomAt({ x: viewportSize.width / 2, y: viewportSize.height / 2 }, 1.22)} aria-label="Zoom in">+</button>
@@ -2010,11 +2221,13 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
           <g ref={contentRef} key={layout.key} className="diagram-content"
             transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
             <g className="diagram-wire-layer">
-              {renderedWires.map(({ wire, path, jumps }) => <g key={wire.route.id}>
+              {renderedWires.map(({ wire, path, jumps, trimmedEndpoints }) => <g key={wire.route.id}>
                 <path d={path}
                   className={`diagram-wire ${wire.route.status === "hold" ? "hold" : ""}`}
                   style={{ stroke: wire.color, strokeWidth: wire.width }} data-connection-id={wire.route.id}
                   data-from-endpoint={wire.fromEndpointId} data-to-endpoint={wire.toEndpointId}
+                  data-integrated-fusion-trimmed={trimmedEndpoints.length > 0
+                    ? trimmedEndpoints.join(" ") : undefined}
                   data-crossing-count={wire.bridges.length} data-jump-count={jumps.length}
                   onPointerEnter={() => setHoveredWireId(wire.route.id)}
                   onPointerLeave={() => setHoveredWireId((current) => current === wire.route.id ? undefined : current)}
@@ -2037,10 +2250,25 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
               </g>
             </g>
             {layout.nodes.map((node) => {
-              const faded = fadePurchased && node.device.status === "purchased";
+              const faded = fadePurchased && isPurchasedDevice(node.device);
               const label = deviceLabelLayout(node.device.label, node.width, node.height, view.scale);
               const wireJoin = isDiagramJoin(node.device);
               const rigidRail = node.device.presentation === "rigid-rail";
+              const integratedCable = node.device.presentation === "integrated-cable-breakout"
+                ? node.device.conductors.find((conductor) => (
+                  conductor.kind === "multicore" && (conductor.internalMates?.length ?? 0) >= 2
+                ))
+                : undefined;
+              const integratedCablePort = integratedCable
+                ? node.ports.find((port) => port.id === integratedCable.id)
+                : undefined;
+              const integratedCablePoint = integratedCablePort ? portPoint(node, integratedCablePort) : undefined;
+              const integratedFusion = integratedCablePort && integratedCablePoint ? (() => {
+                const local = { x: integratedCablePoint.x - node.x, y: integratedCablePoint.y - node.y };
+                if (integratedCablePort.side === "input") return { x: -node.width / 2 - 22, y: local.y };
+                if (integratedCablePort.side === "output") return { x: node.width / 2 + 22, y: local.y };
+                return { x: local.x, y: node.height / 2 + 22 };
+              })() : undefined;
               const joinArmWidths = wireJoin ? node.ports.map((port) => wireJoinArmWidth(node, port)) : [];
               const railGroups = rigidRail
                 ? Object.values(Object.groupBy(node.ports, (port) => port.kind)).filter(Boolean)
@@ -2050,10 +2278,10 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
                 transform={`translate(${node.x} ${node.y})`} role="button" tabIndex={0} aria-label={node.device.label}
                 data-device-id={node.device.id}
                 onClick={(event) => { event.stopPropagation(); if (performance.now() < suppressClickUntil.current) return;
-                  if (node.abstractJunction) { onClearSelection?.(); setActiveJunctionId(node.device.id); return; }
+                  if (node.abstractJunction) { enterJunction(node.device.id); return; }
                   onSelect({ type: "device", deviceId: node.device.id }); }}
                 onKeyDown={(event) => { if (event.key !== "Enter" && event.key !== " ") return;
-                  if (node.abstractJunction) { onClearSelection?.(); setActiveJunctionId(node.device.id); return; }
+                  if (node.abstractJunction) { enterJunction(node.device.id); return; }
                   onSelect({ type: "device", deviceId: node.device.id }); }}>
                 {wireJoin ? <>
                   <circle className="diagram-wire-join-hit" r={node.width / 2} />
@@ -2062,11 +2290,11 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
                     return <path key={port.id} className="diagram-wire-join-arm"
                       data-endpoint-id={`${node.device.id}.${port.id}`}
                       d={`M${point.x - node.x},${point.y - node.y} L0,0`}
-                      style={{ stroke: conductorColor[port.kind], strokeWidth: wireJoinArmWidth(node, port) }} />;
+                      style={{ stroke: diagramConductorColor[port.kind], strokeWidth: wireJoinArmWidth(node, port) }} />;
                   })}
                   <circle className="diagram-wire-join-center"
                     r={Math.max(5, ...joinArmWidths.map((width) => width / 2 + 2))}
-                    style={{ fill: conductorColor[node.ports[0]?.kind ?? "data"] }} />
+                    style={{ fill: diagramConductorColor[node.ports[0]?.kind ?? "data"] }} />
                 </> : rigidRail ? <>
                   <rect className="diagram-rigid-rail-hit" x={-node.width / 2} y={-node.height / 2}
                     width={node.width} height={node.height} rx="8" />
@@ -2077,16 +2305,30 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
                     return <g key={present[0].kind}>
                       <path className="diagram-rigid-rail-backbone" d={`M${left},0 H${right}`} />
                       <path className="diagram-rigid-rail-core" d={`M${left},0 H${right}`}
-                        style={{ stroke: conductorColor[present[0].kind] }} />
+                        style={{ stroke: diagramConductorColor[present[0].kind] }} />
                       {present.map((port, index) => <path key={port.id} className="diagram-rigid-rail-tooth"
                         d={`M${points[index].x - node.x},${points[index].y - node.y} V0`}
-                        style={{ stroke: conductorColor[port.kind] }} />)}
+                        style={{ stroke: diagramConductorColor[port.kind] }} />)}
                     </g>;
                   })}
                   <text className="diagram-rigid-rail-label" textAnchor="middle" y="-15">{node.device.label}</text>
                 </> : <>
                   <rect x={-node.width / 2} y={-node.height / 2} width={node.width} height={node.height}
                     rx={node.device.kind === "breaker" ? 5 : 11} />
+                  {integratedCable && integratedFusion && <g className="diagram-integrated-breakout"
+                    data-integrated-cable-endpoint={`${node.device.id}.${integratedCable.id}`}>
+                    {integratedCable.internalMates?.map((mateId) => {
+                      const mate = node.ports.find((port) => port.id === mateId);
+                      if (!mate) return null;
+                      const point = portPoint(node, mate);
+                      return <path key={mate.id} className="diagram-integrated-breakout-arm"
+                        data-endpoint-id={`${node.device.id}.${mate.id}`}
+                        d={`M${point.x - node.x},${point.y - node.y} L${integratedFusion.x},${integratedFusion.y}`}
+                        style={{ stroke: diagramConductorColor[mate.kind], strokeWidth: wireJoinArmWidth(node, mate) }} />;
+                    })}
+                    <circle className="diagram-integrated-breakout-center" cx={integratedFusion.x}
+                      cy={integratedFusion.y} r="5" />
+                  </g>}
                   {node.abstractJunction && <>
                     <path className="diagram-subpatch-arrow" d={`M${node.width / 2 - 42},${-node.height / 2 + 27} h18 m-7,-7 7,7 -7,7`} />
                     {node.ports.some((port) => port.side === "input") && <text className="diagram-junction-edge-label"
@@ -2104,9 +2346,10 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
                 <title>{node.device.label}</title>
               </g>;
             })}
-            {layout.nodes.flatMap((node) => isDiagramJoin(node.device) ? [] : node.ports.map((port) => <PortGraphic
-              key={`${node.device.id}-${port.id}`} port={port} point={portPoint(node, port)}
-              ownerLabel={node.device.label} viewScale={view.scale} onSelect={onSelect} />))}
+            {layout.nodes.flatMap((node) => isDiagramJoin(node.device) ? [] : node.ports
+              .filter((port) => !isIntegratedCableEndpoint(port.selectionKey))
+              .map((port) => <PortGraphic key={`${node.device.id}-${port.id}`} port={port} point={portPoint(node, port)}
+                ownerLabel={node.device.label} viewScale={view.scale} onSelect={onSelect} />))}
             {layout.scope === "junction" && <g className="diagram-boundary-glands">
               {Object.entries(Object.groupBy(layout.boundaryPorts, (port) => port.glandId ?? port.id)).map(([glandId, ports]) => {
                 const present = ports!; const vertical = present[0].side !== "neutral";

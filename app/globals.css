@@ -5222,6 +5222,19 @@ main {
   pointer-events: none;
 }
 
+.diagram-integrated-breakout-arm {
+  fill: none;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.diagram-integrated-breakout-center {
+  fill: #f8fafc;
+  stroke: #53636a;
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
 .diagram-rigid-rail-node > .diagram-rigid-rail-hit {
   fill: transparent;
   stroke: none;
@@ -5400,6 +5413,40 @@ main {
   overscroll-behavior: none;
 }
 
+.current-safety-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 27px;
+  padding: 0 9px;
+  border: 1px solid #455761;
+  border-radius: 999px;
+  color: #cbd6dc;
+  background: #192630;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.current-safety-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5dbd77;
+  box-shadow: 0 0 0 2px rgb(93 189 119 / 0.16);
+}
+
+.current-safety-provisional .current-safety-dot {
+  background: #e3a339;
+  box-shadow: 0 0 0 2px rgb(227 163 57 / 0.18);
+}
+
+.current-safety-incomplete .current-safety-dot {
+  background: #e16d63;
+  box-shadow: 0 0 0 2px rgb(225 109 99 / 0.18);
+}
+
 .graph-inspector h3 {
   margin: 26px 0 10px;
   color: #657371;
@@ -5456,6 +5503,58 @@ main {
   color: #6d4b28;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.graph-current-safety {
+  display: grid;
+  gap: 9px;
+  margin-top: 18px;
+  padding: 13px 14px;
+  border: 1px solid #9fbba7;
+  border-left: 4px solid #4f9b68;
+  border-radius: 8px;
+  color: #294a34;
+  background: #eef8f1;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.graph-current-safety > strong {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.graph-current-safety-provisional {
+  border-color: #d9b96f;
+  border-left-color: #c28a21;
+  color: #634718;
+  background: #fff7e7;
+}
+
+.graph-current-safety-incomplete {
+  border-color: #dda19b;
+  border-left-color: #c55248;
+  color: #71342e;
+  background: #fff0ee;
+}
+
+.graph-current-check {
+  display: grid;
+  gap: 3px;
+  padding-top: 8px;
+  border-top: 1px solid currentcolor;
+}
+
+.graph-current-check small {
+  opacity: 0.86;
+}
+
+.graph-current-safety ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 17px;
 }
 
 .graph-inspector-links {
@@ -5558,6 +5657,12 @@ main {
 .unified-model .fade-toggle,
 .unified-model .route-runtime {
   color: #697166;
+}
+
+.unified-model .current-safety-summary {
+  border-color: #b9ad9a;
+  color: #4d574d;
+  background: #fffaf0;
 }
 
 .unified-model-stage {

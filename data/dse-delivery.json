@@ -52,14 +52,14 @@
       "sourceUrl": "https://www.amazon.com/dp/B0CRKNJSRH",
       "eta": "Arriving Aug 26",
       "time": "Two purchased · $23.99 each",
-      "note": "Assigned as AC-in and AC-out candidates; exact Type A, 30 mA and SPD markings remain a commissioning hold."
+      "note": "Two units are purchased and assigned one each to AC-in and AC-out; exact Type A, 30 mA, SPD, pole, interrupt and 230 V / 50 Hz markings remain commissioning holds."
     },
     "dse-ac-enclosure": {
       "amazonStatus": "purchased",
       "sourceLabel": "Amazon · Mollom HT-8 B09XJZDRNM",
       "eta": "Arriving Aug 25",
       "time": "Purchased Aug 23 · $17.99",
-      "note": "Too small for the AC routing envelope. Retain this first HT-8 as an owned spare; the separately tracked second unit is the accepted verified-fit R27 three-breaker battery/MPPT cutoff enclosure.",
+      "note": "Too small for the AC routing envelope. Retain this first HT-8 as an owned spare; the separately tracked second unit is the accepted verified-fit R28 three-breaker battery/MPPT cutoff enclosure.",
       "sourceUrl": "https://www.amazon.com/dp/B09XJZDRNM"
     },
     "dse-tool-lead": {
@@ -208,7 +208,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B0BF636VBX",
       "eta": "Delivered Aug 20",
       "time": "Purchased Aug 17",
-      "note": "New IP65 500 A SmartShunt purchased for $98.93 before the order-level promotion and tax. R27 wall-mounts it outside the enclosures beside the main negative bus and leaves it uncovered."
+      "note": "New IP65 500 A SmartShunt purchased for $98.93 before the order-level promotion and tax. R28 wall-mounts it outside the enclosures beside the main negative bus and leaves it uncovered."
     },
     "dse-amazon-promotion": {
       "amazonStatus": "not-applicable",
@@ -254,7 +254,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B0G1W6JTX8",
       "eta": "Aug 22",
       "time": "Purchased Aug 21",
-      "note": "Mount inside the R27 secondary-services enclosure and bench-test repeated UniFi Express cold starts before travel."
+      "note": "Mount inside the R28 secondary-services enclosure and bench-test repeated UniFi Express cold starts before travel."
     },
     "dse-unifi-usb-cable": {
       "amazonStatus": "purchased",
@@ -286,7 +286,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B000OTJ89Q",
       "eta": "Arriving Aug 25",
       "time": "Purchased Aug 23 · $16.35",
-      "note": "R27 allocates this purchased 100 A Blue Sea 2314 as the secondary negative bus inside the secondary-services enclosure."
+      "note": "R28 allocates this purchased 100 A Blue Sea 2314 as the secondary negative bus. Nine direct graph connections against seven physical positions remain an onsite terminal-count warning; no negative-return splitter is implied."
     },
     "dse-earth-busbar": {
       "amazonStatus": "purchased",
@@ -784,7 +784,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B000OTJ89Q",
       "eta": "Check retailer tracking",
       "time": "Purchased Aug 23–24",
-      "note": "Two-unit receipt row preserved: R27 allocates one Blue Sea 2314 as the secondary positive bus and retains one as installer stock."
+      "note": "Two-unit receipt row preserved: R28 allocates one Blue Sea 2314 as the secondary positive bus and retains one as installer stock."
     },
     "dse-paint-markers": {
       "amazonStatus": "purchased",
@@ -928,7 +928,7 @@
       "sourceLabel": "Engineering selection pending · no purchased studs",
       "eta": "Optional after verification",
       "time": "Not purchased · price unknown",
-      "note": "Current R27 geometry uses one protected positive and one negative feeder through ordinary strain-relieved glands. Select insulated bulkhead studs only after electrical, mechanical, sealing and guarding verification; zero BOM cost is not a quote."
+      "note": "Current R28 geometry uses one held positive feeder and one negative feeder through ordinary strain-relieved glands, with no separate 80 A incomer. Select insulated bulkhead studs only after electrical, mechanical, sealing and guarding verification; zero BOM cost is not a quote."
     },
     "dse-orion-input-breaker": {
       "amazonStatus": "purchased",
@@ -936,7 +936,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B09H4X8K1C",
       "eta": "Arriving",
       "time": "Ordered Aug 26 · one allocated",
-      "note": "Purchased 32 A Orion input branch breaker allocated inside the R27 secondary-services enclosure; overnight ETA."
+      "note": "Purchased 32 A Orion input branch breaker allocated inside the R28 secondary-services enclosure; overnight ETA."
     },
     "dse-chargeit-branch-breaker": {
       "amazonStatus": "purchased",
@@ -944,7 +944,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B09H4X8K1C",
       "eta": "Arriving",
       "time": "Ordered Aug 26 · one allocated",
-      "note": "Purchased 32 A ChargeIT branch breaker allocated inside the R27 secondary-services enclosure; overnight ETA."
+      "note": "Purchased 32 A ChargeIT branch breaker allocated inside the R28 secondary-services enclosure; overnight ETA."
     },
     "dse-b125-chtaixi-unused": {
       "amazonStatus": "return-pending",
@@ -968,7 +968,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B0DJNJ53MN",
       "eta": "Arriving",
       "time": "Overnight Aug 27",
-      "note": "Purchased nominal 11.9 × 11.9 × 7 in (about 302 × 302 × 178 mm) ABS shell is the accepted verified-fit R27 secondary-services enclosure."
+      "note": "Purchased nominal 11.9 × 11.9 × 7 in (about 302 × 302 × 178 mm) ABS shell is the accepted verified-fit R28 secondary-services enclosure; acceptance comes from the received-hardware fit check, not rendered scale."
     },
     "dse-pg11-cable-glands": {
       "amazonStatus": "purchased",
@@ -984,7 +984,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B09XJZDRNM",
       "eta": "Arriving",
       "time": "Arriving Aug 28",
-      "note": "Second purchased HT-8 tracked separately and accepted as the verified-fit R27 battery/MPPT cutoff enclosure for exactly three 120 A breakers."
+      "note": "Second purchased HT-8 tracked separately and accepted as the verified-fit R28 battery/MPPT cutoff enclosure for exactly three 120 A breakers; acceptance comes from the received-hardware fit check, not rendered scale."
     },
     "dse-shirbly-2awg-cable-pairs": {
       "amazonStatus": "purchased",

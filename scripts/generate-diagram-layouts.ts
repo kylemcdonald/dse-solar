@@ -6,7 +6,7 @@ import { buildDiagramLayout } from "../app/UnifiedSystemDiagram";
 import { dseRuntime } from "../app/dseRuntime";
 
 const SCHEMA_VERSION = 1 as const;
-const GENERATOR_VERSION = "dse-diagram-layout-v6-doubled-wire-spacing";
+const GENERATOR_VERSION = "dse-diagram-layout-v7-shared-terminal-fans";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const outputPath = path.join(root, "data", "generated", "diagram-layouts.json");

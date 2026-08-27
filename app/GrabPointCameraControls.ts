@@ -20,9 +20,7 @@ type NativeGestureEvent = Event & { clientX?: number; clientY?: number; scale?: 
 
 const EPSILON = 1e-8;
 const ORBIT_RADIANS_PER_PIXEL = 0.0042;
-// The previous local pinch mapping used 0.0014. Wheel and trackpad-scroll
-// zoom now share this deliberately doubled response.
-const WHEEL_ZOOM_EXPONENT_PER_PIXEL = 0.0028;
+const WHEEL_ZOOM_EXPONENT_PER_PIXEL = 0.0014;
 const MAX_FORWARD_Y = 0.965;
 
 /**
@@ -135,7 +133,7 @@ export class GrabPointCameraControls {
     element.dataset.grabMode = this.dragMode ?? "idle";
     element.dataset.touchGestures = "one-finger-orbit-two-finger-pan";
     element.dataset.mouseGestures = "left-orbit-right-pan-wheel-zoom-ctrl-wheel-pinch-zoom";
-    element.dataset.wheelGestures = "wheel-and-two-finger-scroll-zoom-2x";
+    element.dataset.wheelGestures = "wheel-and-two-finger-scroll-zoom-1x";
     element.dataset.lastWheelMode = this.lastWheelMode;
     element.dataset.wheelZoomEvents = String(this.wheelZoomEvents);
     element.dataset.wheelPinchEvents = String(this.wheelPinchEvents);
@@ -361,7 +359,7 @@ export class GrabPointCameraControls {
     event.stopPropagation();
     if (this.nativeGestureScale === null) return;
     const nextScale = Math.max(0.01, event.scale ?? this.nativeGestureScale);
-    const incrementalCameraScale = (this.nativeGestureScale / nextScale) ** 2;
+    const incrementalCameraScale = this.nativeGestureScale / nextScale;
     this.nativeGestureScale = nextScale;
     this.lastWheelMode = "pinch-zoom";
     this.nativeGesturePinchEvents += 1;

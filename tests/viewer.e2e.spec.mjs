@@ -20,12 +20,12 @@ test("DSE-only shell exposes only retained tabs", async ({ page }) => {
 
 test("detailed diagram and canonical counts render", async ({ page }) => {
   const diagram = page.locator(".unified-diagram");
-  await expect(diagram).toHaveAttribute("data-device-count", "92");
-  await expect(diagram).toHaveAttribute("data-wire-count", "148");
+  await expect(diagram).toHaveAttribute("data-device-count", "87");
+  await expect(diagram).toHaveAttribute("data-wire-count", "143");
   await expect(diagram).toHaveAttribute("data-layout-source", "build-generated-artifact");
   await expect(diagram).toHaveAttribute("data-junctions-abstracted", "true");
-  await expect(diagram).toHaveAttribute("data-visible-device-count", "60");
-  await expect(diagram).toHaveAttribute("data-visible-wire-count", "99");
+  await expect(diagram).toHaveAttribute("data-visible-device-count", "58");
+  await expect(diagram).toHaveAttribute("data-visible-wire-count", "97");
   await expect(diagram).toHaveAttribute("data-routing-fallbacks", "0");
   await expect(diagram).toHaveAttribute("data-coincident-wire-segments", "0");
   await expect(diagram).toHaveAttribute("data-non-orthogonal-wire-segments", "0");
@@ -43,6 +43,12 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   await expect(diagram).toHaveAttribute("data-wire-geometry", "orthogonal-grid");
   await expect(diagram).toHaveAttribute("data-page-zoom-captured", "true");
   await expect(diagram).toHaveAttribute("data-zoom-rendering", "raf-transform-idle-react-reconcile");
+  await expect(diagram).toHaveAttribute("data-view-memory", "per-layout-preserved");
+  await expect(diagram).toHaveAttribute("data-earth-color", "#4af287");
+  await expect(diagram).toHaveAttribute("data-current-safety-status", "incomplete");
+  await expect(diagram).toHaveAttribute("data-current-safety-errors", /[1-9]\d*/);
+  await expect(diagram).toHaveAttribute("data-current-safety-warnings", /[1-9]\d*/);
+  await expect(page.getByRole("status", { name: /Current protection audit incomplete/i })).toBeVisible();
   await expect(page.locator(".diagram-wire-layer[mask]")).toHaveCount(0);
   const viewport = page.locator(".unified-diagram-viewport");
   await expect(viewport).toHaveCSS("background-color", "rgb(133, 139, 144)");
@@ -63,12 +69,19 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   expect(capturedPinch).toEqual({ defaultPrevented: true, dispatchResult: false });
   await expect.poll(() => diagram.getAttribute("data-view-scale")).not.toBe(beforePanScale);
   expect(await page.evaluate(() => window.visualViewport?.scale ?? 1)).toBe(pageScaleBefore);
-  await expect(page.locator(".diagram-device")).toHaveCount(60);
-  await expect(page.locator(".diagram-wire")).toHaveCount(99);
+  const rememberedSystemView = {
+    x: await diagram.getAttribute("data-view-x"),
+    y: await diagram.getAttribute("data-view-y"),
+    scale: await diagram.getAttribute("data-view-scale"),
+  };
+  await expect(page.locator('.diagram-wire[data-connection-id="pv-spd-earth"]'))
+    .toHaveCSS("stroke", "rgb(74, 242, 135)");
+  await expect(page.locator(".diagram-device")).toHaveCount(58);
+  await expect(page.locator(".diagram-wire")).toHaveCount(97);
   await expect(page.locator('[data-device-id="servicePenetration"]')).toHaveCount(0);
-  await expect(page.locator(".diagram-wire-join-node")).toHaveCount(22);
+  await expect(page.locator(".diagram-wire-join-node")).toHaveCount(20);
   await expect(page.locator(".diagram-wire-join-node > rect")).toHaveCount(0);
-  await expect(page.locator(".diagram-wire-join-center")).toHaveCount(22);
+  await expect(page.locator(".diagram-wire-join-center")).toHaveCount(20);
   await expect(page.locator(".diagram-wire-join-node .diagram-conductor")).toHaveCount(0);
   const joinGeometry = await page.locator(".diagram-wire-join-node").evaluateAll((joins) => joins.map((join) => {
     const center = join.querySelector(":scope > .diagram-wire-join-center");
@@ -91,6 +104,39 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
     && (!deviceId.startsWith("join-") || colorMatched)
     && widthMatched && vectorEffects.every((effect) => effect === "none"))).toBe(true);
   expect(joinGeometry.filter(({ arms }) => arms === 4)).toHaveLength(2);
+  for (const { id, endpoint } of [
+    { id: "generator", endpoint: "generator.cable" },
+    { id: "toolOutlet", endpoint: "toolOutlet.cable" },
+  ]) {
+    const integrated = page.locator(`[data-device-id="${id}"] .diagram-integrated-breakout`);
+    await expect(integrated).toHaveCount(1);
+    await expect(integrated.locator(".diagram-integrated-breakout-arm")).toHaveCount(3);
+    await expect(integrated.locator(".diagram-integrated-breakout-center")).toHaveCount(1);
+    await expect(page.locator(`.diagram-port[data-endpoint-id="${endpoint}"]`)).toHaveCount(0);
+    const whiteRoute = page.locator(
+      `.diagram-wire[data-from-endpoint="${endpoint}"], .diagram-wire[data-to-endpoint="${endpoint}"]`,
+    );
+    await expect(whiteRoute).toHaveCount(1);
+    await expect(whiteRoute).toHaveAttribute("data-integrated-fusion-trimmed", endpoint);
+    const fusionGap = await whiteRoute.evaluate((path, input) => {
+      const center = document.querySelector(
+        `[data-device-id="${input.id}"] .diagram-integrated-breakout-center`,
+      );
+      if (!(path instanceof SVGPathElement) || !(center instanceof SVGCircleElement)) return null;
+      const routePoint = path.getPointAtLength(
+        path.dataset.fromEndpoint === input.endpoint ? 0 : path.getTotalLength(),
+      );
+      const routeMatrix = path.getCTM(); const centerMatrix = center.getCTM();
+      if (!routeMatrix || !centerMatrix) return null;
+      const routeScreen = new DOMPoint(routePoint.x, routePoint.y).matrixTransform(routeMatrix);
+      const centerScreen = new DOMPoint(
+        center.cx.baseVal.value, center.cy.baseVal.value,
+      ).matrixTransform(centerMatrix);
+      return Math.hypot(routeScreen.x - centerScreen.x, routeScreen.y - centerScreen.y);
+    }, { id, endpoint });
+    expect(fusionGap).not.toBeNull();
+    expect(fusionGap).toBeLessThan(0.5);
+  }
   await expect(page.locator(".diagram-device-kind")).toHaveCount(0);
   const deviceFontSizes = await page.locator(".diagram-device-title").evaluateAll((labels) => (
     labels.map((label) => Number.parseFloat(getComputedStyle(label).fontSize))
@@ -226,11 +272,14 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   await expect(page.locator(".diagram-subpatch-frame, .diagram-patcher-background")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Back to full-system diagram" }).click();
+  await expect(diagram).toHaveAttribute("data-view-x", rememberedSystemView.x);
+  await expect(diagram).toHaveAttribute("data-view-y", rememberedSystemView.y);
+  await expect(diagram).toHaveAttribute("data-view-scale", rememberedSystemView.scale);
   await page.locator('[data-device-id="secondaryJunction"]').click();
   await expect(diagram).toHaveAttribute("data-diagram-scope", "junction");
   await expect(diagram).toHaveAttribute("data-junction-id", "secondaryJunction");
-  await expect(diagram).toHaveAttribute("data-visible-device-count", "14");
-  await expect(diagram).toHaveAttribute("data-visible-wire-count", "30");
+  await expect(diagram).toHaveAttribute("data-visible-device-count", "11");
+  await expect(diagram).toHaveAttribute("data-visible-wire-count", "27");
   await expect(diagram).toHaveAttribute("data-escape-navigation", "back-to-system");
   await expect(page.locator(".diagram-boundary-glands rect")).toHaveCount(15);
   await expect(page.locator(".diagram-boundary-glands text")).toHaveCount(0);
@@ -245,21 +294,26 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
     ["orionBreaker32", "Orion input · 32 A"],
     ["chargeItBreaker32", "ChargeIT! branch · 32 A"],
     ["switchPanel", "Six-gang service switch panel"],
-    ["unifiPower", "UniFi 24 V to USB-C converter"],
+    ["unifiPower", "UniFi 24 V to 5 V USB-A converter"],
     ["starlinkBreakout", "Starlink factory-lead breakout"],
   ]) {
     await expect(page.locator(`[data-device-id="${id}"]`)).toHaveAttribute("aria-label", label);
   }
-  await expect(page.locator(".diagram-wire-join-node")).toHaveCount(7);
+  await expect(page.locator(".diagram-wire-join-node")).toHaveCount(4);
   for (const id of [
-    "serviceSplit", "internetSplit", "serviceReturnSplit", "lightingReturnSplit",
-    "internetReturnSplit", "starlinkBreakout", "outdoorLightBreakout",
+    "serviceSplit", "internetSplit", "starlinkBreakout", "outdoorLightBreakout",
   ]) {
     const join = page.locator(`[data-device-id="${id}"]`);
     await expect(join).toHaveClass(/diagram-wire-join-node/);
     await expect(join.locator(":scope > rect")).toHaveCount(0);
     await expect(join.locator(":scope > .diagram-wire-join-arm")).toHaveCount(3);
   }
+  for (const removedId of ["serviceReturnSplit", "lightingReturnSplit", "internetReturnSplit"]) {
+    await expect(page.locator(`[data-device-id="${removedId}"]`)).toHaveCount(0);
+  }
+  await expect(page.locator('.diagram-port[data-boundary-port="false"][data-endpoint-id="secondaryNegativeBus.post2"]'))
+    .toHaveAttribute("aria-label", /Victron Orion/);
+  await expect(page.locator('[data-boundary-port="true"][aria-label*="Victron Ekrano GX"]')).toHaveCount(2);
   await expect(page.locator(".diagram-subpatch-frame, .diagram-patcher-background")).toHaveCount(0);
   await expect(page.locator(".graph-inspector")).toHaveCount(0);
   await page.locator('[data-device-id="serviceSplit"]').click();
@@ -271,6 +325,9 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   await expect(diagram).toHaveAttribute("data-escape-navigation", "back-to-system");
   await page.keyboard.press("Escape");
   await expect(diagram).toHaveAttribute("data-diagram-scope", "system");
+  await expect(diagram).toHaveAttribute("data-view-x", rememberedSystemView.x);
+  await expect(diagram).toHaveAttribute("data-view-y", rememberedSystemView.y);
+  await expect(diagram).toHaveAttribute("data-view-scale", rememberedSystemView.scale);
   await expect(diagram).toHaveAttribute("data-escape-navigation", "inactive");
   await expect(page.getByRole("button", { name: "Back to full-system diagram" })).toHaveCount(0);
   await page.locator('[aria-label="PV protection / combiner junction box"]').click();
@@ -290,15 +347,33 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
     await expect(breakout.locator(":scope > rect")).toHaveCount(0);
     await expect(breakout.locator(":scope > .diagram-wire-join-arm")).toHaveCount(4);
   }
+  for (const id of ["acInputProtection", "acOutputProtection"]) {
+    await expect(page.locator(`[data-device-id="${id}"]`)).toHaveClass(/hold/);
+    await expect(page.locator(`[data-device-id="${id}"]`)).not.toHaveClass(/faded/);
+  }
+  await page.getByRole("checkbox", { name: "Fade purchased" }).check();
+  for (const id of ["acInputProtection", "acOutputProtection"]) {
+    await expect(page.locator(`[data-device-id="${id}"]`)).toHaveClass(/hold/);
+    await expect(page.locator(`[data-device-id="${id}"]`)).toHaveClass(/faded/);
+  }
 });
 
 test("device and conductor inspection use graph data", async ({ page }) => {
   await page.locator('[aria-label="Victron Orion-Tr Smart 24/12-30"]').click();
   await expect(page.getByRole("heading", { name: "Victron Orion-Tr Smart 24/12-30" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Conductors" })).toBeVisible();
-  await page.locator(".graph-inspector").getByRole("button", { name: /Remote H/ }).click();
+  await page.locator(".graph-inspector").getByRole("button", { name: /12 V cigarette-lighter socket A/ }).click();
+  await expect(page.locator(".graph-current-safety")).toHaveAttribute("data-current-safety-status", "incomplete");
+  await expect(page.locator(".graph-current-safety")).toContainText("30 A declared ampacity");
+  await expect(page.locator(".graph-current-safety")).toContainText("60 A prospective fault contribution");
+  await page.locator('[aria-label="Victron Orion-Tr Smart 24/12-30"]').click();
+  await page.locator(".graph-inspector").getByRole("button", {
+    name: /From Six-gang service switch panel/,
+  }).click();
   await expect(page.getByText("usbOrion.remoteH", { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Six-gang service switch panel Switch 3 · Orion H remote/ })).toBeVisible();
+  await expect(page.getByRole("button", {
+    name: /Six-gang service switch panel.*To Victron Orion-Tr Smart 24\/12-30/,
+  })).toBeVisible();
   await page.locator('[aria-label="PV panel 1 · string A"]').click();
   await expect(page.getByRole("heading", { name: "PV panel 1 · string A" })).toBeVisible();
   await page.locator(".unified-diagram-viewport").click({ position: { x: 8, y: 8 } });
@@ -334,7 +409,7 @@ test("BOM reflects purchased protection and cables, selected busbars and current
   }
   for (const id of ["dse-ventilated-ip65-enclosure", "dse-mollom-8-way-enclosure-second"]) {
     const row = page.locator(`[data-bom-id="${id}"]`);
-    await expect(row).toContainText(/R27 fit is accepted and verified/i);
+    await expect(row).toContainText(/R28 fit is accepted and verified/i);
   }
   const mainBusbars = page.locator('[data-bom-id="dse-main-busbars"]');
   await expect(mainBusbars).toBeVisible();
@@ -361,12 +436,17 @@ test("3D model uses canonical router and has no removed controls", async ({ page
   await expect(model).toHaveAttribute("data-wire-min-bend-segments", "8");
   await expect(model).toHaveAttribute("data-wire-terminal-tangent-errors", "0");
   await expect(model).toHaveAttribute("data-unused-terminal-opacity", "0.5");
-  await expect(model).toHaveAttribute("data-unused-terminal-count", "20");
+  await expect(model).toHaveAttribute("data-unused-terminal-count", "19");
   await expect(model).toHaveAttribute("data-conductor-usage", "field-routes-plus-reciprocal-internal-mates");
   await expect(model).toHaveAttribute("data-pe-bus-rendering", "rectangular-busbar");
   await expect(model).toHaveAttribute("data-breakout-rendering", "true-y-two-way-plus-minus-45-three-way-red-45-black-0-green-minus-45");
   await expect(model).toHaveAttribute("data-cable-breakout-count", /[1-9]\d*/);
   await expect(model).toHaveAttribute("data-integrated-cable-breakout-count", "2");
+  await expect(model).toHaveAttribute("data-integrated-breakout-rendering",
+    "external-fusion-trimmed-depth-tested-core-fan");
+  await expect(model).toHaveAttribute("data-usb-outlet-rendering", "metadata-driven-usb-c-pill-usb-a-rectangle");
+  await expect(model).toHaveAttribute("data-usb-c-outlet-count", /[1-9]\d*/);
+  await expect(model).toHaveAttribute("data-usb-a-outlet-count", "5");
   await expect(model).toHaveAttribute("data-wire-join-rendering", "presentation-driven-selectable-y");
   await expect(model).toHaveAttribute("data-wire-join-count", /[1-9]\d*/);
   await expect(model).toHaveAttribute("data-supplied-busbar-cover-count", "4");
@@ -377,13 +457,16 @@ test("3D model uses canonical router and has no removed controls", async ({ page
     "batteryBreakerA,batteryBreakerB,mpptBreaker");
   await expect(model).toHaveAttribute("data-secondary-services-breaker-order",
     "sharedServicesBreaker,orionBreaker32,chargeItBreaker32");
+  await expect(model).toHaveAttribute("data-current-safety-status", "incomplete");
+  await expect(model).toHaveAttribute("data-current-safety-errors", /[1-9]\d*/);
+  await expect(model).toHaveAttribute("data-current-safety-warnings", /[1-9]\d*/);
   await expect(model).toHaveAttribute("data-device-shadow-floor", "excluded-by-light-layer");
   await expect(page.locator("canvas")).toBeVisible();
   await expect(model).toHaveCSS("background-color", "rgb(239, 232, 216)");
   await expect(page.locator(".model-hover-tooltip")).toBeHidden();
   const canvas = page.locator(".unified-model canvas");
   await expect(canvas).toHaveAttribute("data-mouse-gestures", "left-orbit-right-pan-wheel-zoom-ctrl-wheel-pinch-zoom");
-  await expect(canvas).toHaveAttribute("data-wheel-gestures", "wheel-and-two-finger-scroll-zoom-2x");
+  await expect(canvas).toHaveAttribute("data-wheel-gestures", "wheel-and-two-finger-scroll-zoom-1x");
   await expect(canvas).toHaveAttribute("data-touch-gestures", "one-finger-orbit-two-finger-pan");
   await expect(canvas).toHaveAttribute("data-native-gesture-capture", "local-pinch-zoom");
   await expect(canvas).toHaveAttribute("data-unused-conductor-opacity", "0.5");
@@ -448,8 +531,8 @@ test("3D model uses canonical router and has no removed controls", async ({ page
   const centerY = canvasBounds.y + canvasBounds.height / 2;
   const parseVector = (value) => value.split(",").map(Number);
 
-  // An ordinary wheel/two-finger trackpad scroll zooms locally at twice the
-  // former exponent. A zero-delta event first establishes the exact picked
+  // An ordinary wheel/two-finger trackpad scroll uses the original local
+  // exponent. A zero-delta event first establishes the exact picked
   // surface used as the distance reference for the coefficient assertion.
   await page.getByRole("button", { name: "DC distribution" }).click();
   const dispatchWheel = (deltaY) => canvas.evaluate((element, input) => {
@@ -470,7 +553,7 @@ test("3D model uses canonical router and has no removed controls", async ({ page
   expect(await dispatchWheel(-20)).toEqual({ defaultPrevented: true, dispatchResult: false });
   await expect(canvas).toHaveAttribute("data-last-wheel-mode", "zoom");
   const wheelAfterDistance = Number(await canvas.getAttribute("data-camera-distance"));
-  expect(wheelAfterDistance / wheelBeforeDistance).toBeCloseTo(Math.exp(-20 * 0.0028), 3);
+  expect(wheelAfterDistance / wheelBeforeDistance).toBeCloseTo(Math.exp(-20 * 0.0014), 3);
   const wheelAfterQuaternion = parseVector(await canvas.getAttribute("data-camera-quaternion"));
   wheelAfterQuaternion.forEach((coordinate, index) => expect(coordinate).toBeCloseTo(wheelBeforeQuaternion[index], 6));
   expect(await page.evaluate(() => window.visualViewport?.scale ?? 1)).toBe(1);

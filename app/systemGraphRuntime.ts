@@ -3,6 +3,10 @@ import {
   GEOMETRY_UNIT_M,
   JUNCTION_ROUTING_STEP_UNITS,
   WORLD_ROUTING_STEP_UNITS,
+  graphConnectionDisplayLabel,
+  graphEndpointDisplayLabel,
+  graphEndpointOwnerLabels,
+  currentSourcesFromDevices,
   geometryMetres,
   geometryUnits,
   snapGeometry,
@@ -15,6 +19,11 @@ import {
   sampleCableCurve,
 } from "./renderedCableGeometry";
 import type {
+  CurrentSafetyChannel,
+  CurrentSafetyConnectionCheck,
+  CurrentSafetyDeviceCheck,
+  CurrentSafetyIssue,
+  CurrentSafetyReport,
   Device,
   Face,
   Gland,
@@ -406,6 +415,10 @@ function resolveDevices(graph: SystemGraph) {
     .map((junction) => junction.deviceId));
   const layoutDevices = graph.devices.map((device): Device => ({
     ...device,
+    conductors: device.conductors.map((conductor) => ({
+      ...conductor,
+      label: graphEndpointDisplayLabel(graph, `${device.id}.${conductor.id}`),
+    })),
     // Verified enclosure shells are already real external measurements. Their
     // 20 mm-grid dimensions must not be rounded to the generic 40 mm body
     // quantum used for routable equipment bodies.
@@ -1076,11 +1089,26 @@ function resolveConductors(devices: readonly ResolvedDevice[]) {
 function resolveGlands(graph: SystemGraph, devices: readonly ResolvedDevice[]): Gland[] {
   const deviceById = new Map(devices.map((device) => [device.id, device]));
   const connectionById = new Map(graph.connections.map((connection) => [connection.id, connection]));
+  const cableById = new Map(graph.cables.map((cable) => [cable.id, cable]));
   const conductorX = new Map<string, number>(devices.flatMap((device) => device.conductors.map((candidate) => (
     [`${device.id}.${candidate.id}`, terminalPosition(device, candidate.id)[0]] as const
   ))));
   return graph.junctions.flatMap((junction) => {
     const container = deviceById.get(junction.deviceId)!;
+    const inside = new Set(devices
+      .filter((device) => device.placement.space === "junction" && device.placement.junctionId === junction.deviceId)
+      .map((device) => device.id));
+    const attachmentRoot = (device: ResolvedDevice) => {
+      const visited = new Set<string>();
+      let current = device;
+      while (current.attachment && !visited.has(current.id)) {
+        visited.add(current.id);
+        const root = deviceById.get(endpointDeviceId(current.attachment.endpoint));
+        if (!root) break;
+        current = root;
+      }
+      return current;
+    };
     const bundleInsideX = (connectionIds: readonly string[]) => {
       const positions = connectionIds.flatMap((id) => {
         const connection = connectionById.get(id)!;
@@ -1107,19 +1135,92 @@ function resolveGlands(graph: SystemGraph, devices: readonly ResolvedDevice[]): 
       });
       return faces.includes("bottom") ? 0 : faces.includes("top") ? 1 : 2;
     };
+    const bundleExternalX = (connectionIds: readonly string[]) => {
+      const positions = connectionIds.flatMap((id) => {
+        const connection = connectionById.get(id)!;
+        return [connection.from, connection.to].flatMap((endpoint) => {
+          const device = deviceById.get(endpointDeviceId(endpoint));
+          return device && !inside.has(device.id) ? [attachmentRoot(device).position[0]] : [];
+        });
+      });
+      return positions.length > 0
+        ? positions.reduce((sum, value) => sum + value, 0) / positions.length
+        : container.position[0];
+    };
+    const bundleLabel = (connectionIds: readonly string[]) => {
+      const labels = new Set<string>();
+      connectionIds.forEach((id) => {
+        const connection = connectionById.get(id)!;
+        [connection.from, connection.to].forEach((endpoint) => {
+          if (inside.has(endpointDeviceId(endpoint))) return;
+          graphEndpointOwnerLabels(graph, endpoint, new Set([connection.id])).forEach((label) => labels.add(label));
+        });
+      });
+      if (labels.size > 0) return [...labels].toSorted().join(" / ");
+      return connectionIds.map((id) => graphConnectionDisplayLabel(graph, connectionById.get(id)!)).join(" / ");
+    };
     // Lay glands out in the same left-to-right order as their internal
     // terminals. Alphabetical gland ordering made large conductors swap sides
     // inside the enclosure (notably MultiPlus +/−) even though both endpoint
     // layouts were individually clean.
-    const bundles = [...crossingBundles(graph, junction.deviceId).entries()].toSorted((first, second) => (
-      bundleInsideX(first[1]) - bundleInsideX(second[1])
-      || bundleInsideFaceOrder(first[1]) - bundleInsideFaceOrder(second[1])
-      || first[0].localeCompare(second[0])
+    const bundleRecords = [...crossingBundles(graph, junction.deviceId).entries()].map(([bundleId, connectionIds]) => ({
+      bundleId,
+      connectionIds,
+      insideX: bundleInsideX(connectionIds),
+      outsideX: bundleExternalX(connectionIds),
+      faceOrder: bundleInsideFaceOrder(connectionIds),
+      diameterMm: Math.max(...connectionIds.map((id) => cableById.get(connectionById.get(id)!.cableId)?.outsideDiameterMm ?? 0)),
+    }));
+    const normalizedRank = (key: "insideX" | "outsideX") => {
+      const values = [...new Set(bundleRecords.map((record) => Number(record[key].toFixed(7))))].toSorted((a, b) => a - b);
+      return new Map(bundleRecords.map((record) => {
+        const rank = values.indexOf(Number(record[key].toFixed(7)));
+        return [record.bundleId, values.length <= 1 ? 0 : rank / (values.length - 1)] as const;
+      }));
+    };
+    const outsideRank = normalizedRank("outsideX");
+    const externalTarget = (record: (typeof bundleRecords)[number]) => {
+      const absolute = 0.5 + (record.outsideX - container.position[0]) / Math.max(container.size[0], junction.glandSpacing);
+      const ranked = outsideRank.get(record.bundleId) ?? 0.5;
+      // Absolute side is authoritative; normalized rank deterministically
+      // orders peers that all clamp to the same enclosure edge.
+      return Math.max(0, Math.min(1, absolute)) * 0.9 + ranked * 0.1;
+    };
+    // Start with the collision-safe internal order, then apply only a bounded
+    // number of pair exchanges that strictly reduce normalized external
+    // cross-over. This keeps the one bottom row and its spacing invariant while
+    // allowing several independent left/right inversions to be corrected in a
+    // dense fixed enclosure (rather than fixing only the single worst pair).
+    const bundles = bundleRecords.toSorted((first, second) => (
+      first.insideX - second.insideX
+      || first.faceOrder - second.faceOrder
+      || first.bundleId.localeCompare(second.bundleId)
     ));
+    if (junction.sizePolicy === "verified-fixed" && bundles.length >= 8) {
+      const maximumSwaps = Math.ceil(bundles.length / 4);
+      for (let swap = 0; swap < maximumSwaps; swap += 1) {
+        let best: { first: number; second: number; improvement: number } | undefined;
+        for (let first = 0; first < bundles.length; first += 1) {
+          for (let second = first + 1; second < bundles.length; second += 1) {
+            const firstSlot = first / (bundles.length - 1);
+            const secondSlot = second / (bundles.length - 1);
+            const firstExternal = externalTarget(bundles[first]);
+            const secondExternal = externalTarget(bundles[second]);
+            const before = Math.abs(firstSlot - firstExternal) + Math.abs(secondSlot - secondExternal);
+            const after = Math.abs(secondSlot - firstExternal) + Math.abs(firstSlot - secondExternal);
+            const improvement = before - after;
+            if (improvement > (best?.improvement ?? 0) + 1e-9) best = { first, second, improvement };
+          }
+        }
+        if (!best || best.improvement < 0.01) break;
+        [bundles[best.first], bundles[best.second]] = [bundles[best.second], bundles[best.first]];
+      }
+    }
     const glandSpacing = junction.glandSpacing;
     const width = Math.max(0, (bundles.length - 1) * glandSpacing);
-    return bundles.map(([bundleId, connectionIds], index): Gland => ({
+    return bundles.map(({ bundleId, connectionIds }, index): Gland => ({
       id: `${junction.id}-gland-${index + 1}`,
+      label: bundleLabel(connectionIds),
       junctionId: junction.deviceId,
       bundleId,
       position: snapRoutingVec([
@@ -2460,6 +2561,143 @@ function buildRoutes(
       ? junctionSpaces.get(device.placement.junctionId)!
       : worldSpaceByRegion.get(conductorWorldRegion(device, port))!
   );
+  const connectionById = new Map(graph.connections.map((connection) => [connection.id, connection]));
+  const connectionsByEndpoint = new Map<string, SystemGraph["connections"][number][]>();
+  graph.connections.forEach((connection) => [connection.from, connection.to].forEach((endpoint) => {
+    connectionsByEndpoint.set(endpoint, [...(connectionsByEndpoint.get(endpoint) ?? []), connection]);
+  }));
+  const sharedLaunchByConnectionEndpoint = new Map<string, Vec3[]>();
+  const launchKey = (connectionId: string, endpoint: string) => `${connectionId}|${endpoint}`;
+
+  // A declared stacked/over-capacity terminal is one physical contact, but
+  // its cables must become distinct immediately outside the terminal body.
+  // Keep the thickest cable on-axis and assign the remaining cables to unique
+  // orthogonal tangents. This is derived solely from endpoint multiplicity,
+  // cable diameter and available routing bounds—never a device-id exception.
+  [...connectionsByEndpoint].filter(([, entries]) => entries.length > 1).forEach(([endpoint, entries]) => {
+    const port = conductorByKey.get(endpoint)!;
+    const device = deviceById.get(port.deviceId)!;
+    const space = routingSpaceFor(port, device);
+    const ordered = [...entries].toSorted((first, second) => (
+      (cableById.get(second.cableId)?.outsideDiameterMm ?? 0) - (cableById.get(first.cableId)?.outsideDiameterMm ?? 0)
+      || first.id.localeCompare(second.id)
+    ));
+    const normalAxis = [0, 1, 2].toSorted((first, second) => (
+      Math.abs(port.direction[second]) - Math.abs(port.direction[first])
+    ))[0];
+    const tangentAxes = [2, 0, 1].filter((axis) => axis !== normalAxis);
+    const tangentDirections = tangentAxes.flatMap((axis) => ([1, -1].map((sign) => {
+      const direction: [number, number, number] = [0, 0, 0];
+      direction[axis] = sign;
+      return direction as Vec3;
+    })));
+    const usedDirections = new Set<string>();
+    ordered.forEach((connection, index) => {
+      const cable = cableById.get(connection.cableId)!;
+      const base = protectedTerminalLaunch(port, device, space, cable.outsideDiameterMm);
+      if (index === 0) {
+        sharedLaunchByConnectionEndpoint.set(launchKey(connection.id, endpoint), base);
+        return;
+      }
+      const otherEndpoint = connection.from === endpoint ? connection.to : connection.from;
+      const allowedBodyless = new Set([device.id, endpointDeviceId(otherEndpoint)]);
+      const fork = base.at(-2)!;
+      const ingress = base.at(-1)!;
+      const candidate = tangentDirections.map((direction) => {
+        const key = direction.join(",");
+        const fan = add(fork, scale(direction, space.cell));
+        const escape = add(ingress, scale(direction, space.cell));
+        const points = [...base.slice(0, -1), fan, escape];
+        const inside = points.every((point) => point.every((value, axis) => (
+          value >= space.min[axis] - 1e-9 && value <= space.max[axis] + 1e-9
+        )));
+        const conflict = inside ? terminalApproachDeviceConflict(
+          points, device, devices, cable.outsideDiameterMm, space, allowedBodyless,
+        ) : "routing-bounds";
+        return { key, points, conflict };
+      }).find((choice) => !usedDirections.has(choice.key) && !choice.conflict);
+      if (!candidate) throw new Error(`${endpoint}: no generic shared-terminal fan direction for ${connection.id}`);
+      usedDirections.add(candidate.key);
+      sharedLaunchByConnectionEndpoint.set(launchKey(connection.id, endpoint), candidate.points);
+    });
+  });
+  const connectionsByBundle = new Map<string, SystemGraph["connections"][number][]>();
+  graph.connections.forEach((connection) => {
+    if (!connection.bundleId) return;
+    connectionsByBundle.set(connection.bundleId, [...(connectionsByBundle.get(connection.bundleId) ?? []), connection]);
+  });
+  const crowdedBundleLaunch = (
+    connection: SystemGraph["connections"][number],
+    port: ResolvedConductor,
+    device: ResolvedDevice,
+    space: RoutingSpace,
+    outsideDiameterMm: number,
+  ) => {
+    const base = protectedTerminalLaunch(port, device, space, outsideDiameterMm);
+    const bundle = connection.bundleId ? connectionsByBundle.get(connection.bundleId) ?? [] : [];
+    if (!isWorldRoutingSpace(space) || bundle.length < 2 || base.length < 3) return base;
+    const peerPorts = bundle.flatMap((peerConnection) => [peerConnection.from, peerConnection.to])
+      .map((endpoint) => conductorByKey.get(endpoint))
+      .filter((peer): peer is ResolvedConductor => Boolean(
+        peer && peer.deviceId === port.deviceId && peer.face === port.face,
+      ));
+    if (peerPorts.length < 3) return base;
+    const ranges = [0, 1, 2].map((axis) => (
+      Math.max(...peerPorts.map((peer) => peer.position[axis])) - Math.min(...peerPorts.map((peer) => peer.position[axis]))
+    ));
+    const tangentAxis = [0, 1, 2]
+      .filter((axis) => Math.abs(port.direction[axis]) < 1e-9)
+      .toSorted((first, second) => ranges[second] - ranges[first])[0];
+    if (tangentAxis === undefined || ranges[tangentAxis] < space.cell - 1e-9) return base;
+    const centre = peerPorts.reduce((sum, peer) => sum + peer.position[tangentAxis], 0) / peerPorts.length;
+    const side = Math.sign(port.position[tangentAxis] - centre);
+    if (side === 0) return base;
+    const fork = base.at(-2)!;
+    const ingress = base.at(-1)!;
+    const directionCandidates = [
+      [tangentAxis, side] as const,
+      ...[2, 0, 1].filter((axis) => axis !== tangentAxis && Math.abs(port.direction[axis]) < 1e-9)
+        .flatMap((axis) => [[axis, 1] as const, [axis, -1] as const]),
+    ];
+    for (const [axis, sign] of directionCandidates) {
+      const direction: [number, number, number] = [0, 0, 0];
+      direction[axis] = sign;
+      const blockedByAdjacentOwnerTerminal = device.conductors.some((peer) => {
+        if (peer.id === port.id || peerPorts.some((bundlePeer) => bundlePeer.id === peer.id)) return false;
+        const position = terminalPosition(device, peer.id);
+        const delta = subtract(position, port.position);
+        const axial = dot(delta, direction);
+        const transverse = Math.hypot(...subtract(delta, scale(direction, axial)));
+        return axial > 1e-9 && axial <= space.cell * 1.6 && transverse <= space.cell * 0.75;
+      });
+      if (blockedByAdjacentOwnerTerminal) continue;
+      const points = [
+        ...base.slice(0, -1),
+        add(fork, scale(direction, space.cell)),
+        add(ingress, scale(direction, space.cell)),
+      ];
+      const inside = points.every((point) => point.every((value, candidateAxis) => (
+        value >= space.min[candidateAxis] - 1e-9 && value <= space.max[candidateAxis] + 1e-9
+      )));
+      if (inside) return points;
+    }
+    return base;
+  };
+  const terminalLaunchFor = (
+    connection: SystemGraph["connections"][number],
+    port: ResolvedConductor,
+    device: ResolvedDevice,
+    space: RoutingSpace,
+    outsideDiameterMm: number,
+  ) => sharedLaunchByConnectionEndpoint.get(launchKey(connection.id, port.key))
+    ?? crowdedBundleLaunch(connection, port, device, space, outsideDiameterMm);
+  const launchGeometry = new Map<string, Vec3[][]>();
+  const fixedGeometry = new Map<string, Vec3[][]>();
+  const geometryKey = (space: RoutingSpace, owner: string) => `${space.key}|${owner}`;
+  const recordGeometry = (target: Map<string, Vec3[][]>, space: RoutingSpace, owner: string, points: readonly Vec3[]) => {
+    const key = geometryKey(space, owner);
+    target.set(key, [...(target.get(key) ?? []), [...points]]);
+  };
 
   // A rendered Y has no rectangular body. Reserve the actual centre-to-port
   // capsules instead: this protects the selectable internal splice from
@@ -2474,8 +2712,10 @@ function buildRoutes(
     const diameterMm = Math.max(1, ...device.conductors.map((port) => port.terminalDiameterMm ?? 1));
     const rotatedAdapter = !isRouteGridPoint(device.position, space);
     device.conductors.forEach((port) => {
+      const internalArm = [device.position, terminalPosition(device, port.id)] as const;
+      recordGeometry(fixedGeometry, space, owner, internalArm);
       reserveLine(
-        [device.position, terminalPosition(device, port.id)],
+        internalArm,
         space,
         owner,
         diameterMm,
@@ -2501,12 +2741,13 @@ function buildRoutes(
     const toSpace = routingSpaceFor(to, toDevice);
     const direct = directMatingPath(from, to);
     if (direct && fromSpace === toSpace) {
+      recordGeometry(launchGeometry, fromSpace, owner, direct);
       reserveLine(direct, fromSpace, owner, cable.outsideDiameterMm, false, !isAxisAlignedVector(from.direction));
       return;
     }
     const stub = (port: ResolvedConductor, space: RoutingSpace): Vec3[] => {
       const ownerDevice = deviceById.get(port.deviceId)!;
-      const approach = protectedTerminalLaunch(port, ownerDevice, space, cable.outsideDiameterMm);
+      const approach = terminalLaunchFor(connection, port, ownerDevice, space, cable.outsideDiameterMm);
       const conflict = terminalApproachDeviceConflict(
         approach,
         ownerDevice,
@@ -2522,8 +2763,12 @@ function buildRoutes(
     // every external arm just like an ordinary terminal; only its own route is
     // allowed through that throat. Rendering style never weakens collision
     // semantics.
-    reserveLine(stub(from, fromSpace), fromSpace, owner, cable.outsideDiameterMm, false, !isAxisAlignedVector(from.direction));
-    reserveLine(stub(to, toSpace), toSpace, owner, cable.outsideDiameterMm, false, !isAxisAlignedVector(to.direction));
+    const fromStub = stub(from, fromSpace);
+    const toStub = stub(to, toSpace);
+    recordGeometry(launchGeometry, fromSpace, owner, fromStub);
+    recordGeometry(launchGeometry, toSpace, owner, toStub);
+    reserveLine(fromStub, fromSpace, owner, cable.outsideDiameterMm, false, !isAxisAlignedVector(from.direction));
+    reserveLine(toStub, toSpace, owner, cable.outsideDiameterMm, false, !isAxisAlignedVector(to.direction));
     const gland = glandByConnection.get(connection.id);
     if (gland) {
       const localSpace = junctionSpaces.get(gland.junctionId)!;
@@ -2539,9 +2784,13 @@ function buildRoutes(
       // A gland is another fixed physical terminal. Reserve only its short
       // throat on each side of the shell; the future cable's enclosure/world
       // lanes remain entirely unreserved and cannot displace thick routes.
-      reserveLine([gland.position, glandInside], localSpace, owner, cable.outsideDiameterMm, true);
+      const insideThroat = [gland.position, glandInside] as const;
+      const outsideThroat = glandExternalApproach(gland, junction, preferredWorldDepth(externalSpace), cable.outsideDiameterMm);
+      recordGeometry(fixedGeometry, localSpace, owner, insideThroat);
+      recordGeometry(fixedGeometry, externalSpace, owner, outsideThroat);
+      reserveLine(insideThroat, localSpace, owner, cable.outsideDiameterMm, true);
       reserveLine(
-        glandExternalApproach(gland, junction, preferredWorldDepth(externalSpace), cable.outsideDiameterMm),
+        outsideThroat,
         externalSpace,
         owner,
         cable.outsideDiameterMm,
@@ -2553,8 +2802,20 @@ function buildRoutes(
   // Mandatory terminal launches are physical geometry, not suggestions. Two
   // future field wires may never reserve the same cell; the only allowed fixed
   // contact is a route touching its own declared bodyless Y arm endpoint.
-  const connectionById = new Map(graph.connections.map((connection) => [connection.id, connection]));
   allRoutingSpaces.forEach((space) => {
+    const exactGeometryConflict = (
+      first: readonly Vec3[][],
+      firstDiameterMm: number,
+      second: readonly Vec3[][],
+      secondDiameterMm: number,
+    ) => {
+      const required = firstDiameterMm / 2000 + secondDiameterMm / 2000 + ROUTING_CABLE_CLEARANCE_M;
+      return first.some((firstPath) => firstPath.slice(1).some((firstEnd, firstIndex) => (
+        second.some((secondPath) => secondPath.slice(1).some((secondEnd, secondIndex) => (
+          closestSegmentPoints(firstPath[firstIndex], firstEnd, secondPath[secondIndex], secondEnd).distance + 1e-9 < required
+        )))
+      )));
+    };
     for (const [key, owners] of space.reserved) {
       const sharedBodylessEndpoint = devices.find((device) => isBodylessPresentation(device) && (
         [...owners].every((owner) => {
@@ -2562,7 +2823,17 @@ function buildRoutes(
           return connection && [connection.from, connection.to].some((endpoint) => endpointDeviceId(endpoint) === device.id);
         })
       ));
-      if (owners.size > 1 && !sharedBodylessEndpoint) {
+      const commonEndpoint = owners.size > 1
+        ? [...(connectionById.get([...owners][0]) ? [connectionById.get([...owners][0])!.from, connectionById.get([...owners][0])!.to] : [])]
+          .find((endpoint) => [...owners].every((owner) => {
+            const connection = connectionById.get(owner);
+            return connection && (connection.from === endpoint || connection.to === endpoint);
+          }))
+        : undefined;
+      const commonPort = commonEndpoint ? conductorByKey.get(commonEndpoint) : undefined;
+      const declaredSharedTerminal = commonPort
+        && ["warning", "approved-stack"].includes(commonPort.sharedConnectionPolicy ?? "expand");
+      if (owners.size > 1 && !sharedBodylessEndpoint && !declaredSharedTerminal) {
         throw new Error(`${space.key}: mandatory terminal launches overlap at ${key}: ${[...owners].join(", ")}`);
       }
       const fixedOwners = space.fixedReserved.get(key) ?? new Set<string>();
@@ -2573,23 +2844,59 @@ function buildRoutes(
           return endpointDevice && isBodylessPresentation(endpointDevice) ? [`internal-y:${endpointDevice.id}`] : [];
         }) : []);
         fixedOwners.forEach((fixedOwner) => {
-          if (fixedOwner !== owner && !allowedFixed.has(fixedOwner)) {
+          const ownerGeometry = launchGeometry.get(geometryKey(space, owner)) ?? [];
+          const obstacleGeometry = fixedGeometry.get(geometryKey(space, fixedOwner)) ?? [];
+          const exactConflict = ownerGeometry.length === 0 || obstacleGeometry.length === 0 || exactGeometryConflict(
+            ownerGeometry,
+            space.ownerDiameterMm.get(owner) ?? 1,
+            obstacleGeometry,
+            space.ownerDiameterMm.get(fixedOwner) ?? 1,
+          );
+          if (fixedOwner !== owner && !allowedFixed.has(fixedOwner) && exactConflict) {
             throw new Error(`${space.key}: terminal launch ${owner} intersects fixed geometry ${fixedOwner} at ${key}`);
           }
         });
       });
     }
     for (const [key, owners] of space.fixedReserved) {
-      if (owners.size > 1) throw new Error(`${space.key}: fixed routing geometry overlaps at ${key}: ${[...owners].join(", ")}`);
+      if (owners.size > 1) {
+        const orderedOwners = [...owners];
+        for (let first = 0; first < orderedOwners.length; first += 1) {
+          for (let second = first + 1; second < orderedOwners.length; second += 1) {
+            const firstOwner = orderedOwners[first];
+            const secondOwner = orderedOwners[second];
+            const firstGeometry = fixedGeometry.get(geometryKey(space, firstOwner)) ?? [];
+            const secondGeometry = fixedGeometry.get(geometryKey(space, secondOwner)) ?? [];
+            if (firstGeometry.length === 0 || secondGeometry.length === 0 || exactGeometryConflict(
+              firstGeometry,
+              space.ownerDiameterMm.get(firstOwner) ?? 1,
+              secondGeometry,
+              space.ownerDiameterMm.get(secondOwner) ?? 1,
+            )) throw new Error(`${space.key}: fixed routing geometry overlaps at ${key}: ${firstOwner}, ${secondOwner}`);
+          }
+        }
+      }
     }
   });
 
   const isDirectConnection = (connection: SystemGraph["connections"][number]) => (
     Boolean(directMatingPath(conductorByKey.get(connection.from)!, conductorByKey.get(connection.to)!))
   );
+  const terminalCrowding = (connection: SystemGraph["connections"][number]) => (
+    [connection.from, connection.to].reduce((sum, endpoint) => {
+      const port = conductorByKey.get(endpoint)!;
+      const owner = deviceById.get(port.deviceId)!;
+      return sum + owner.conductors.filter((peer) => (
+        peer.id !== port.id
+        && peer.face === port.face
+        && distance(terminalPosition(owner, peer.id), port.position) <= 0.050 + 1e-9
+      )).length;
+    }, 0)
+  );
   const sorted = [...graph.connections].toSorted((first, second) => (
     (cableById.get(second.cableId)?.outsideDiameterMm ?? 0) - (cableById.get(first.cableId)?.outsideDiameterMm ?? 0)
     || Number(isDirectConnection(second)) - Number(isDirectConnection(first))
+    || terminalCrowding(second) - terminalCrowding(first)
     || first.id.localeCompare(second.id)
   ));
 
@@ -2647,11 +2954,19 @@ function buildRoutes(
       }
       markOccupied(direct, directSpace, cable.outsideDiameterMm, occupancyOwner, !axisAligned);
       const lengthM = direct.slice(1).reduce((sum, point, index) => sum + distance(direct[index], point), 0);
-      routes.push({ ...connection, points: direct, lengthM, diameterMm: cable.outsideDiameterMm, routed: true, routingRank: routingIndex });
+      routes.push({
+        ...connection,
+        label: connection.label ?? graphConnectionDisplayLabel(graph, connection),
+        points: direct,
+        lengthM,
+        diameterMm: cable.outsideDiameterMm,
+        routed: true,
+        routingRank: routingIndex,
+      });
       return;
     }
-    const fromApproach = protectedTerminalLaunch(from, fromDevice, fromSpace, cable.outsideDiameterMm);
-    const toApproach = protectedTerminalLaunch(to, toDevice, toSpace, cable.outsideDiameterMm);
+    const fromApproach = terminalLaunchFor(connection, from, fromDevice, fromSpace, cable.outsideDiameterMm);
+    const toApproach = terminalLaunchFor(connection, to, toDevice, toSpace, cable.outsideDiameterMm);
     const fromEscape = fromApproach.at(-1)!;
     const toEscape = toApproach.at(-1)!;
     const fromIngressDirection = routingIngressDirection(from, fromSpace, fromEscape);
@@ -2752,13 +3067,1132 @@ function buildRoutes(
       ...toApproach.toReversed(),
     ].filter((point, index, all) => index === 0 || distance(point, all[index - 1]) > 1e-9));
     const lengthM = points.slice(1).reduce((sum, point, index) => sum + distance(points[index], point), 0);
-    routes.push({ ...connection, points, lengthM, diameterMm: cable.outsideDiameterMm, routed: true, routingRank: routingIndex });
+    routes.push({
+      ...connection,
+      label: connection.label ?? graphConnectionDisplayLabel(graph, connection),
+      points,
+      lengthM,
+      diameterMm: cable.outsideDiameterMm,
+      routed: true,
+      routingRank: routingIndex,
+    });
   });
 
   return {
     routes: graph.connections.map((connection) => routes.find((route) => route.id === connection.id)!),
     fallbackCount: 0,
     occupiedCells: allRoutingSpaces.reduce((sum, space) => sum + space.occupied.size, 0),
+  };
+}
+
+const UNBOUNDED_CURRENT_A = 1_000_000_000;
+type CurrentNetworkEdge = {
+  first: string;
+  second: string;
+  capacityA: number;
+  protectionId?: string;
+};
+
+function currentVertex(endpoint: string, channel: CurrentSafetyChannel) {
+  return `${channel}|endpoint|${endpoint}`;
+}
+
+function currentConnectionVertex(connectionId: string, channel: CurrentSafetyChannel) {
+  return `${channel}|connection|${connectionId}`;
+}
+
+function maximumCurrentFlow(
+  edges: readonly CurrentNetworkEdge[],
+  sources: readonly { id: string; vertex: string; capacityA: number }[],
+  targets: ReadonlySet<string>,
+) {
+  const sourceNode = "__current_super_source__";
+  const sinkNode = "__current_target__";
+  const nodes = new Set<string>([sourceNode, sinkNode]);
+  edges.forEach((edge) => { nodes.add(edge.first); nodes.add(edge.second); });
+  sources.forEach((source) => nodes.add(source.vertex));
+  targets.forEach((target) => nodes.add(target));
+  const indexByNode = new Map([...nodes].map((node, index) => [node, index]));
+  type FlowEdge = { to: number; reverse: number; capacity: number };
+  const adjacency: FlowEdge[][] = Array.from({ length: nodes.size }, () => []);
+  const addDirected = (from: string, to: string, capacity: number) => {
+    const fromIndex = indexByNode.get(from)!;
+    const toIndex = indexByNode.get(to)!;
+    const forward: FlowEdge = { to: toIndex, reverse: adjacency[toIndex].length, capacity };
+    const reverse: FlowEdge = { to: fromIndex, reverse: adjacency[fromIndex].length, capacity: 0 };
+    adjacency[fromIndex].push(forward);
+    adjacency[toIndex].push(reverse);
+  };
+  edges.forEach((edge) => {
+    addDirected(edge.first, edge.second, edge.capacityA);
+    addDirected(edge.second, edge.first, edge.capacityA);
+  });
+  sources.forEach((source) => addDirected(sourceNode, source.vertex, source.capacityA));
+  targets.forEach((target) => addDirected(target, sinkNode, UNBOUNDED_CURRENT_A));
+  const sourceIndex = indexByNode.get(sourceNode)!;
+  const sinkIndex = indexByNode.get(sinkNode)!;
+  let total = 0;
+  while (total < UNBOUNDED_CURRENT_A) {
+    const level = Array(nodes.size).fill(-1);
+    level[sourceIndex] = 0;
+    const queue = [sourceIndex];
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      adjacency[current].forEach((edge) => {
+        if (edge.capacity > 1e-9 && level[edge.to] < 0) {
+          level[edge.to] = level[current] + 1;
+          queue.push(edge.to);
+        }
+      });
+    }
+    if (level[sinkIndex] < 0) break;
+    const nextEdge = Array(nodes.size).fill(0);
+    const send = (node: number, available: number): number => {
+      if (node === sinkIndex) return available;
+      for (; nextEdge[node] < adjacency[node].length; nextEdge[node] += 1) {
+        const edge = adjacency[node][nextEdge[node]];
+        if (edge.capacity <= 1e-9 || level[edge.to] !== level[node] + 1) continue;
+        const sent = send(edge.to, Math.min(available, edge.capacity));
+        if (sent <= 1e-9) continue;
+        edge.capacity -= sent;
+        adjacency[edge.to][edge.reverse].capacity += sent;
+        return sent;
+      }
+      return 0;
+    };
+    while (total < UNBOUNDED_CURRENT_A) {
+      const sent = send(sourceIndex, UNBOUNDED_CURRENT_A - total);
+      if (sent <= 1e-9) break;
+      total += sent;
+    }
+  }
+  const residualReachable = new Set<number>([sourceIndex]);
+  const residualQueue = [sourceIndex];
+  while (residualQueue.length > 0) {
+    const current = residualQueue.shift()!;
+    adjacency[current].forEach((edge) => {
+      if (edge.capacity <= 1e-9 || residualReachable.has(edge.to)) return;
+      residualReachable.add(edge.to);
+      residualQueue.push(edge.to);
+    });
+  }
+  const crossesResidualCut = (first: string, second: string) => (
+    residualReachable.has(indexByNode.get(first)!) !== residualReachable.has(indexByNode.get(second)!)
+  );
+  return {
+    currentA: total,
+    cutProtectionIds: edges
+      .filter((edge) => edge.protectionId && crossesResidualCut(edge.first, edge.second))
+      .map((edge) => edge.protectionId!)
+      .toSorted(),
+    cutSourceIds: sources
+      .filter((source) => crossesResidualCut(sourceNode, source.vertex))
+      .map((source) => source.id)
+      .toSorted(),
+  };
+}
+
+const R28_ACTIVE_CHANNELS = ["positive", "ac-line"] as const;
+const R28_RETURN_CHANNELS = ["negative", "ac-neutral"] as const;
+
+type R28ActiveChannel = (typeof R28_ACTIVE_CHANNELS)[number];
+type R28NetworkEdge = { first: string; second: string; protectionId?: string };
+type R28Protection = NonNullable<Device["currentProtection"]>;
+type R28Source = NonNullable<SystemGraph["currentSources"]>[number];
+type R28ProtectionCredit = "none" | "provisional" | "verified";
+type R28CreditedProtection = { protection: R28Protection; credit: R28ProtectionCredit };
+
+const r28SourceAssemblyPathKey = (deviceId: string, index: number) => `${deviceId}|${index}`;
+
+function r28ConnectionCarries(
+  graph: SystemGraph,
+  connection: SystemGraph["connections"][number],
+  channel: CurrentSafetyChannel,
+) {
+  if (connection.kind === channel) return true;
+  if (connection.kind !== "multicore") return false;
+  return Boolean(graph.cables.find((cable) => cable.id === connection.cableId)?.carriedChannels?.includes(channel));
+}
+
+function r28ConnectionSupportsChannel(
+  graph: SystemGraph,
+  connection: SystemGraph["connections"][number],
+  channel: CurrentSafetyChannel,
+) {
+  if (!r28ConnectionCarries(graph, connection, channel)) return false;
+  const port = (endpoint: string) => {
+    const separator = endpoint.lastIndexOf(".");
+    const device = graph.devices.find((candidate) => candidate.id === endpoint.slice(0, separator));
+    return device?.conductors.find((candidate) => candidate.id === endpoint.slice(separator + 1));
+  };
+  const device = (endpoint: string) => {
+    const separator = endpoint.lastIndexOf(".");
+    let resolved = graph.devices.find((candidate) => candidate.id === endpoint.slice(0, separator));
+    const visited = new Set<string>();
+    while (resolved?.attachment && !visited.has(resolved.id)) {
+      visited.add(resolved.id);
+      const ownerId = resolved.attachment.endpoint.slice(0, resolved.attachment.endpoint.lastIndexOf("."));
+      resolved = graph.devices.find((candidate) => candidate.id === ownerId);
+    }
+    return resolved;
+  };
+  const expectedKind = connection.kind === "multicore" ? "multicore" : channel;
+  const fromKind = port(connection.from)?.kind;
+  const toKind = port(connection.to)?.kind;
+  if (fromKind === expectedKind && toKind === expectedKind) return true;
+  return channel === "positive" && connection.seriesLink === true
+    && fromKind === "positive" && toKind === "negative"
+    && ["battery", "panel"].includes(device(connection.from)?.kind ?? "")
+    && device(connection.from)?.kind === device(connection.to)?.kind;
+}
+
+function r28IsIntrinsicTerminalJoin(
+  graph: SystemGraph,
+  connection: SystemGraph["connections"][number],
+) {
+  if (connection.topologyRole !== "terminal-join") return false;
+  return ([
+    [connection.from, connection.to],
+    [connection.to, connection.from],
+  ] as const).some(([physicalEndpoint, joinEndpoint]) => {
+    const separator = joinEndpoint.lastIndexOf(".");
+    const owner = graph.devices.find((candidate) => candidate.id === joinEndpoint.slice(0, separator));
+    return owner?.presentation === "wire-join"
+      && owner.attachment?.endpoint === physicalEndpoint
+      && joinEndpoint.slice(separator + 1) === "device";
+  });
+}
+
+function buildR28CurrentNetwork(
+  graph: SystemGraph,
+  channel: R28ActiveChannel,
+  protectionCreditById: ReadonlyMap<string, R28ProtectionCredit>,
+  validSourceAssemblyPathKeys: ReadonlySet<string>,
+) {
+  const edges: R28NetworkEdge[] = [];
+  const protections = new Map<string, R28CreditedProtection>();
+  const supportedEndpoints = new Set<string>();
+  graph.connections.filter((connection) => r28ConnectionSupportsChannel(graph, connection, channel)).forEach((connection) => {
+    supportedEndpoints.add(connection.from);
+    supportedEndpoints.add(connection.to);
+  });
+  graph.currentSources.filter((source) => source.channel === channel).forEach((source) => {
+    supportedEndpoints.add(source.endpoint);
+  });
+  graph.devices.forEach((device) => device.currentSourceAssemblyPaths?.forEach((path, index) => {
+    if (path.activeChannel !== channel || !validSourceAssemblyPathKeys.has(r28SourceAssemblyPathKey(device.id, index))) return;
+    path.terminalPair.forEach((terminalId) => supportedEndpoints.add(`${device.id}.${terminalId}`));
+  }));
+  const addEdge = (first: string, second: string, protectionId?: string) => {
+    if (first !== second) edges.push({ first, second, protectionId });
+  };
+
+  graph.connections.forEach((connection) => {
+    if (!r28ConnectionSupportsChannel(graph, connection, channel)) return;
+    const middle = currentConnectionVertex(connection.id, channel);
+    const authoredProtectionId = connection.currentProtection ? `connection:${connection.id}` : undefined;
+    const protectionId = authoredProtectionId && protectionCreditById.get(authoredProtectionId) !== "none"
+      ? authoredProtectionId
+      : undefined;
+    if (protectionId) protections.set(protectionId, {
+      protection: connection.currentProtection!,
+      credit: protectionCreditById.get(protectionId) ?? "none",
+    });
+    // Integrated lead protection is directional: canonical connections run
+    // source -> load, and the connection midpoint represents its protected
+    // conductor body. A reverse-fed path is intentionally not credited.
+    addEdge(currentVertex(connection.from, channel), middle, protectionId);
+    addEdge(middle, currentVertex(connection.to, channel));
+  });
+
+  graph.devices.forEach((device) => {
+    const endpoints = device.conductors
+      .map((port) => `${device.id}.${port.id}`)
+      .filter((endpoint) => supportedEndpoints.has(endpoint));
+    const endpointSet = new Set(endpoints);
+    const paired = new Set<string>();
+    const addPair = (first: string, second: string, protectionId?: string) => {
+      const key = [first, second].toSorted().join("|");
+      if (paired.has(key)) return;
+      paired.add(key);
+      addEdge(currentVertex(first, channel), currentVertex(second, channel), protectionId);
+    };
+    device.conductors.forEach((port) => {
+      const first = `${device.id}.${port.id}`;
+      if (!endpointSet.has(first)) return;
+      (port.internalMates ?? []).forEach((mateId) => {
+        const second = `${device.id}.${mateId}`;
+        if (endpointSet.has(second)) addPair(first, second);
+      });
+    });
+    device.currentSourceAssemblyPaths?.forEach((path, index) => {
+      if (path.activeChannel !== channel || !validSourceAssemblyPathKeys.has(r28SourceAssemblyPathKey(device.id, index))) return;
+      const [firstId, secondId] = path.terminalPair;
+      const first = `${device.id}.${firstId}`;
+      const second = `${device.id}.${secondId}`;
+      if (endpointSet.has(first) && endpointSet.has(second)) addPair(first, second);
+    });
+    const passivelyCommon = device.kind === "busbar"
+      || device.kind === "switch"
+      || device.presentation === "service-splice"
+      || ((device.kind === "breaker" || device.kind === "protection") && !device.currentProtection);
+    if (passivelyCommon) endpoints.forEach((first, index) => {
+      endpoints.slice(index + 1).forEach((second) => addPair(first, second));
+    });
+    if (device.currentProtection?.terminalPairs) {
+      const authoredProtectionId = `device:${device.id}`;
+      const protectionId = protectionCreditById.get(authoredProtectionId) !== "none"
+        ? authoredProtectionId
+        : undefined;
+      if (protectionId) protections.set(protectionId, {
+        protection: device.currentProtection,
+        credit: protectionCreditById.get(protectionId) ?? "none",
+      });
+      device.currentProtection.terminalPairs.forEach(([firstId, secondId]) => {
+        const first = `${device.id}.${firstId}`;
+        const second = `${device.id}.${secondId}`;
+        const firstPort = device.conductors.find((port) => port.id === firstId);
+        const secondPort = device.conductors.find((port) => port.id === secondId);
+        if (endpointSet.has(first) && endpointSet.has(second)
+          && firstPort?.kind === channel && secondPort?.kind === channel) {
+          addPair(first, second, protectionId);
+        }
+      });
+    }
+  });
+  return {
+    edges,
+    protections,
+    sources: graph.currentSources.filter((source) => source.channel === channel),
+  };
+}
+
+function r28Reachable(
+  start: string,
+  targets: ReadonlySet<string>,
+  edges: readonly R28NetworkEdge[],
+  excludedProtectionId?: string,
+) {
+  const adjacency = new Map<string, string[]>();
+  edges.forEach((edge) => {
+    if (excludedProtectionId !== undefined && edge.protectionId === excludedProtectionId) return;
+    adjacency.set(edge.first, [...(adjacency.get(edge.first) ?? []), edge.second]);
+    adjacency.set(edge.second, [...(adjacency.get(edge.second) ?? []), edge.first]);
+  });
+  const queue = [start];
+  const visited = new Set<string>();
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (visited.has(current)) continue;
+    if (targets.has(current)) return true;
+    visited.add(current);
+    (adjacency.get(current) ?? []).forEach((next) => queue.push(next));
+  }
+  return false;
+}
+
+function r28ProtectionEnvelope(
+  network: ReturnType<typeof buildR28CurrentNetwork>,
+  sources: readonly R28Source[],
+  targets: ReadonlySet<string>,
+  verifiedOnly: boolean,
+): { currentA: number | "unbounded"; protectedBy: readonly string[] } {
+  const edges: CurrentNetworkEdge[] = network.edges.map((edge) => {
+    const credited = edge.protectionId ? network.protections.get(edge.protectionId) : undefined;
+    const receivesCredit = credited && (credited.credit === "verified"
+      || (!verifiedOnly && credited.credit === "provisional"));
+    return {
+      ...edge,
+      capacityA: receivesCredit
+        ? credited.protection.ratedCurrentA
+        : UNBOUNDED_CURRENT_A,
+    };
+  });
+  const flowSources = sources.map((source) => ({
+    id: source.id,
+    vertex: currentVertex(source.endpoint, source.channel),
+    capacityA: source.inherentCurrentLimit && (!verifiedOnly || source.inherentCurrentLimit.verified)
+      ? source.inherentCurrentLimit.currentLimitA
+      : UNBOUNDED_CURRENT_A,
+  }));
+  const result = maximumCurrentFlow(edges, flowSources, targets);
+  return {
+    currentA: result.currentA >= UNBOUNDED_CURRENT_A - 1
+      ? "unbounded"
+      : Number(result.currentA.toFixed(3)),
+    protectedBy: [
+      ...result.cutProtectionIds,
+      ...result.cutSourceIds.map((sourceId) => `source:${sourceId}`),
+    ].toSorted(),
+  };
+}
+
+function r28ProspectiveFaultEnvelope(
+  network: ReturnType<typeof buildR28CurrentNetwork>,
+  sources: readonly R28Source[],
+  targets: ReadonlySet<string>,
+  excludedProtectionId?: string,
+): number | "unbounded" {
+  const edges: CurrentNetworkEdge[] = network.edges
+    .filter((edge) => excludedProtectionId === undefined || edge.protectionId !== excludedProtectionId)
+    .map((edge) => {
+      const credited = edge.protectionId ? network.protections.get(edge.protectionId) : undefined;
+      return {
+        ...edge,
+        // A breaker/fuse trip rating never limits prospective fault current.
+        // Only a verified hard-current-limit is a physical source bound.
+        capacityA: credited?.protection.kind === "hard-current-limit" && credited.credit === "verified"
+          ? credited.protection.ratedCurrentA
+          : UNBOUNDED_CURRENT_A,
+      };
+    });
+  const result = maximumCurrentFlow(edges, sources.map((source) => {
+    const publishedFault = source.shortCircuitCurrentA === "unbounded"
+      ? UNBOUNDED_CURRENT_A
+      : source.shortCircuitCurrentA;
+    const inherent = source.inherentCurrentLimit?.verified
+      ? source.inherentCurrentLimit.currentLimitA
+      : UNBOUNDED_CURRENT_A;
+    return {
+      id: source.id,
+      vertex: currentVertex(source.endpoint, source.channel),
+      capacityA: Math.min(publishedFault, inherent),
+    };
+  }), targets);
+  return result.currentA >= UNBOUNDED_CURRENT_A - 1
+    ? "unbounded"
+    : Number(result.currentA.toFixed(3));
+}
+
+/**
+ * Fail-closed graph audit for current-path/OCP coordination.
+ *
+ * This deliberately does not infer load current from source capacity. A
+ * breaker/fuse rating is per-source cut-set evidence against conductor
+ * ampacity, never a cap on prospective fault current. Only an explicit,
+ * verified inherent or series hard-current-limit can cap a contribution.
+ */
+export function verifyCurrentProtection(graph: SystemGraph): CurrentSafetyReport {
+  const issues: CurrentSafetyIssue[] = [];
+  const connectionChecks: CurrentSafetyConnectionCheck[] = [];
+  const deviceChecks: CurrentSafetyDeviceCheck[] = [];
+  const deviceById = new Map(graph.devices.map((device) => [device.id, device]));
+  const cableById = new Map(graph.cables.map((cable) => [cable.id, cable]));
+  const endpointById = new Map<string, Device["conductors"][number]>(graph.devices.flatMap((device) => (
+    device.conductors.map((port) => [`${device.id}.${port.id}`, port] as const)
+  )));
+  const endpointSet = new Set(endpointById.keys());
+  const issue = (finding: CurrentSafetyIssue) => issues.push(finding);
+
+  const sourceSignature = (source: R28Source) => JSON.stringify([
+    source.id,
+    source.label,
+    source.endpoint,
+    source.channel,
+    source.continuousCapacityA,
+    source.peakCapacity?.currentA,
+    source.peakCapacity?.durationSeconds,
+    source.shortCircuitCurrentA,
+    source.inherentCurrentLimit?.currentLimitA,
+    source.inherentCurrentLimit?.verified,
+    source.inherentCurrentLimit?.note,
+    source.verified,
+    source.basis,
+    source.note,
+  ]);
+  const terminalSources = currentSourcesFromDevices(graph.devices);
+  const terminalSourcesById = new Map<string, R28Source[]>();
+  terminalSources.forEach((source) => terminalSourcesById.set(
+    source.id,
+    [...(terminalSourcesById.get(source.id) ?? []), source],
+  ));
+  terminalSources.forEach((terminalSource) => {
+    const authoredMatches = graph.currentSources.filter((source) => (
+      sourceSignature(source) === sourceSignature(terminalSource)
+    ));
+    if (authoredMatches.length === 1) return;
+    issue({
+      severity: "error",
+      code: "invalid-current-metadata",
+      sourceIds: [terminalSource.id],
+      endpoint: terminalSource.endpoint,
+      channel: terminalSource.channel,
+      message: `${terminalSource.endpoint}: terminal-declared supply ${terminalSource.id} is missing or differs from the graph source inventory`,
+    });
+  });
+
+  const endpointUseCount = new Map<string, number>();
+  graph.connections.forEach((connection) => [connection.from, connection.to].forEach((endpoint) => {
+    endpointUseCount.set(endpoint, (endpointUseCount.get(endpoint) ?? 0) + 1);
+  }));
+  graph.devices.forEach((device) => {
+    const required = device.conductors.reduce((sum, port) => (
+      sum + (endpointUseCount.get(`${device.id}.${port.id}`) ?? 0)
+    ), 0);
+    device.conductors.forEach((port) => {
+      const endpoint = `${device.id}.${port.id}`;
+      const landingUses = endpointUseCount.get(endpoint) ?? 0;
+      if (port.sharedConnectionPolicy !== "warning" || landingUses <= 1) return;
+      issue({
+        severity: "warning", code: "terminal-over-capacity", deviceId: device.id, endpoint,
+        message: `${endpoint}: ${landingUses} field connections share one warning-policy landing; ${device.id}: terminal capacity exceeded: ${required} required / ${device.conductors.length} available`,
+      });
+    });
+  });
+
+  graph.connections.forEach((connection) => {
+    const cable = cableById.get(connection.cableId);
+    if (connection.topologyRole === "terminal-join" && !r28IsIntrinsicTerminalJoin(graph, connection)) {
+      issue({
+        severity: "error", code: "invalid-current-metadata", connectionId: connection.id,
+        message: `${connection.id}: terminal-join topology role does not connect a host landing to its attached wire-join device arm`,
+      });
+    }
+    if (connection.kind === "multicore" && (!cable?.carriedChannels || cable.carriedChannels.length === 0)
+      && !connection.deenergizedReason) {
+      issue({
+        severity: "error", code: "invalid-current-metadata", connectionId: connection.id,
+        message: `${connection.id}: multicore power channels are not declared; add Cable.carriedChannels or an explicit de-energized reason`,
+      });
+    }
+    const channels = connection.kind === "multicore"
+      ? (cable?.carriedChannels ?? []).filter((kind): kind is CurrentSafetyChannel => (
+        [...R28_ACTIVE_CHANNELS, ...R28_RETURN_CHANNELS].includes(kind as CurrentSafetyChannel)
+      ))
+      : [...R28_ACTIVE_CHANNELS, ...R28_RETURN_CHANNELS].includes(connection.kind as CurrentSafetyChannel)
+        ? [connection.kind as CurrentSafetyChannel]
+        : [];
+    channels.filter((channel) => !r28ConnectionSupportsChannel(graph, connection, channel)).forEach((channel) => issue({
+      severity: "error", code: "invalid-current-metadata", connectionId: connection.id, channel,
+      message: `${connection.id}: connection endpoints do not both support the declared ${channel} power channel`,
+    }));
+  });
+
+  const sourceIdCounts = new Map<string, number>();
+  graph.currentSources.forEach((source) => sourceIdCounts.set(source.id, (sourceIdCounts.get(source.id) ?? 0) + 1));
+  const validSourceIds = new Set<string>();
+  graph.currentSources.forEach((source) => {
+    const duplicate = (sourceIdCounts.get(source.id) ?? 0) > 1;
+    const finiteContinuous = Number.isFinite(source.continuousCapacityA) && source.continuousCapacityA > 0;
+    const peakCurrentA = source.peakCapacity?.currentA ?? source.continuousCapacityA;
+    const validFault = source.shortCircuitCurrentA === "unbounded"
+      || (Number.isFinite(source.shortCircuitCurrentA) && source.shortCircuitCurrentA > 0
+        && source.shortCircuitCurrentA + 1e-9 >= peakCurrentA);
+    const validPeak = !source.peakCapacity
+      || (Number.isFinite(source.peakCapacity.currentA)
+        && source.peakCapacity.currentA + 1e-9 >= source.continuousCapacityA
+        && Number.isFinite(source.peakCapacity.durationSeconds) && source.peakCapacity.durationSeconds > 0);
+    const validLimit = !source.inherentCurrentLimit
+      || (Number.isFinite(source.inherentCurrentLimit.currentLimitA)
+        && source.inherentCurrentLimit.currentLimitA + 1e-9 >= peakCurrentA
+        && (source.shortCircuitCurrentA === "unbounded"
+          || source.inherentCurrentLimit.currentLimitA <= source.shortCircuitCurrentA + 1e-9));
+    const sourcePort = endpointById.get(source.endpoint);
+    const validChannel = sourcePort?.kind === source.channel
+      || (sourcePort?.kind === "multicore" && graph.connections.some((connection) => (
+        (connection.from === source.endpoint || connection.to === source.endpoint)
+        && r28ConnectionSupportsChannel(graph, connection, source.channel)
+      )));
+    const terminalDefinitions = terminalSourcesById.get(source.id) ?? [];
+    const validTerminalInventory = terminalDefinitions.length === 1
+      && sourceSignature(terminalDefinitions[0]) === sourceSignature(source);
+    if (duplicate || !endpointSet.has(source.endpoint) || !validChannel || !finiteContinuous || !validFault || !validPeak || !validLimit
+      || !validTerminalInventory) {
+      issue({
+        severity: "error", code: "invalid-current-metadata", sourceIds: [source.id], endpoint: source.endpoint, channel: source.channel,
+        message: `${source.id}: invalid${duplicate ? " duplicate" : ""} source ratings, endpoint, or terminal-owned inventory`,
+      });
+    } else validSourceIds.add(source.id);
+    if (!source.verified) issue({
+      severity: "warning", code: "unverified-current-source", sourceIds: [source.id], endpoint: source.endpoint, channel: source.channel,
+      prospectiveFaultCurrentA: source.shortCircuitCurrentA,
+      message: `${source.id}: ${source.label} source envelope is not verified`,
+    });
+  });
+
+  const returnChannelForActive = { positive: "negative", "ac-line": "ac-neutral" } as const;
+  const sourceAssemblyRecords = graph.devices.flatMap((device) => (
+    (device.currentSourceAssemblyPaths ?? []).map((path, index) => ({ device, path, index }))
+  ));
+  const assemblyMembersById = new Map<string, Set<string>>();
+  sourceAssemblyRecords.forEach(({ device, path }) => {
+    const members = assemblyMembersById.get(path.assemblyId) ?? new Set<string>();
+    members.add(device.id);
+    assemblyMembersById.set(path.assemblyId, members);
+  });
+  const sourceAssemblyMemberCounts = new Map<string, number>();
+  sourceAssemblyRecords.forEach(({ device, path }) => {
+    const memberKey = `${device.id}|${path.assemblyId}`;
+    sourceAssemblyMemberCounts.set(memberKey, (sourceAssemblyMemberCounts.get(memberKey) ?? 0) + 1);
+  });
+  const validSourceAssemblyPathKeys = new Set<string>();
+  sourceAssemblyRecords.forEach(({ device, path, index }) => {
+    const [firstId, secondId] = path.terminalPair;
+    const first = device.conductors.find((port) => port.id === firstId);
+    const second = device.conductors.find((port) => port.id === secondId);
+    const expectedReturn = returnChannelForActive[path.activeChannel];
+    const validChannelPair = Boolean(expectedReturn) && Boolean(first) && Boolean(second)
+      && firstId !== secondId
+      && ((first!.kind === path.activeChannel && second!.kind === expectedReturn)
+        || (second!.kind === path.activeChannel && first!.kind === expectedReturn));
+    const members = assemblyMembersById.get(path.assemblyId) ?? new Set<string>();
+    const hasValidAssemblySource = graph.currentSources.some((source) => (
+      validSourceIds.has(source.id)
+      && source.channel === path.activeChannel
+      && members.has(source.endpoint.slice(0, source.endpoint.lastIndexOf(".")))
+    ));
+    const memberKey = `${device.id}|${path.assemblyId}`;
+    const valid = path.assemblyId.trim().length > 0
+      && (sourceAssemblyMemberCounts.get(memberKey) ?? 0) === 1
+      && validChannelPair
+      && hasValidAssemblySource;
+    if (valid) {
+      validSourceAssemblyPathKeys.add(r28SourceAssemblyPathKey(device.id, index));
+      return;
+    }
+    issue({
+      severity: "error", code: "invalid-current-metadata", deviceId: device.id,
+      endpoint: first ? `${device.id}.${first.id}` : undefined,
+      channel: path.activeChannel,
+      message: `${device.id}: invalid or source-less ${path.assemblyId || "unnamed"} source-assembly path ${firstId}/${secondId}`,
+    });
+  });
+
+  const currentDomainRecords = graph.devices.flatMap((device) => device.conductors.flatMap((port) => (
+    port.currentDomain ? [{ device, port, endpoint: `${device.id}.${port.id}`, domain: port.currentDomain }] : []
+  )));
+  const currentDomainRecordsById = new Map<string, typeof currentDomainRecords>();
+  currentDomainRecords.forEach((record) => currentDomainRecordsById.set(
+    record.domain.id,
+    [...(currentDomainRecordsById.get(record.domain.id) ?? []), record],
+  ));
+  const validCurrentDomains = new Map<string, {
+    activeChannel: R28ActiveChannel;
+    activeEndpoints: readonly string[];
+    returnEndpoints: ReadonlySet<string>;
+  }>();
+  currentDomainRecordsById.forEach((records, domainId) => {
+    const active = records.filter((record) => record.domain.role === "active");
+    const returns = records.filter((record) => record.domain.role === "return");
+    const activeChannels = new Set(active.map((record) => record.port.kind).filter((kind): kind is R28ActiveChannel => (
+      R28_ACTIVE_CHANNELS.includes(kind as R28ActiveChannel)
+    )));
+    const activeChannel = activeChannels.size === 1 ? [...activeChannels][0] : undefined;
+    const expectedReturn = activeChannel ? returnChannelForActive[activeChannel] : undefined;
+    const valid = domainId.trim().length > 0
+      && active.length > 0
+      && returns.length > 0
+      && records.length === active.length + returns.length
+      && activeChannels.size === 1
+      && active.every((record) => record.port.kind === activeChannel)
+      && returns.every((record) => record.port.kind === expectedReturn);
+    if (valid && activeChannel) {
+      validCurrentDomains.set(domainId, {
+        activeChannel,
+        activeEndpoints: active.map((record) => record.endpoint).toSorted(),
+        returnEndpoints: new Set(returns.map((record) => record.endpoint)),
+      });
+      return;
+    }
+    issue({
+      severity: "error", code: "invalid-current-metadata",
+      deviceId: records[0]?.device.id, endpoint: records[0]?.endpoint,
+      message: `${domainId || "unnamed current domain"}: current domain requires matching active and return anchors in one DC or AC channel family`,
+    });
+  });
+
+  const attachmentRootEndpoint = (initialEndpoint: string) => {
+    let endpoint = initialEndpoint;
+    const visited = new Set<string>();
+    while (!visited.has(endpoint)) {
+      visited.add(endpoint);
+      const separator = endpoint.lastIndexOf(".");
+      const device = deviceById.get(endpoint.slice(0, separator));
+      if (!device?.attachment) break;
+      endpoint = device.attachment.endpoint;
+    }
+    return endpoint;
+  };
+  const validAssemblyIdsAtEndpoint = (initialEndpoint: string, channel: CurrentSafetyChannel) => {
+    const endpoint = attachmentRootEndpoint(initialEndpoint);
+    const separator = endpoint.lastIndexOf(".");
+    const device = deviceById.get(endpoint.slice(0, separator));
+    const terminalId = endpoint.slice(separator + 1);
+    if (!device || endpointById.get(endpoint)?.kind !== channel) return new Set<string>();
+    return new Set((device.currentSourceAssemblyPaths ?? []).flatMap((path, index) => (
+      validSourceAssemblyPathKeys.has(r28SourceAssemblyPathKey(device.id, index))
+        && path.terminalPair.includes(terminalId)
+        && (path.activeChannel === channel || returnChannelForActive[path.activeChannel] === channel)
+        ? [path.assemblyId]
+        : []
+    )));
+  };
+  const validDomainIdsAtEndpoint = (
+    initialEndpoint: string,
+    role: "active" | "return",
+    activeChannel: R28ActiveChannel,
+  ) => {
+    const endpoint = attachmentRootEndpoint(initialEndpoint);
+    const terminal = endpointById.get(endpoint)?.currentDomain;
+    if (!terminal || terminal.role !== role) return new Set<string>();
+    const domain = validCurrentDomains.get(terminal.id);
+    if (!domain || domain.activeChannel !== activeChannel) return new Set<string>();
+    const declaredEndpoints = role === "active" ? new Set(domain.activeEndpoints) : domain.returnEndpoints;
+    return declaredEndpoints.has(endpoint) ? new Set([terminal.id]) : new Set<string>();
+  };
+  const transparentPresentations = new Set([
+    "cable-breakout",
+    "wire-join",
+    "service-splice",
+    "rigid-rail",
+    "wall-passthrough",
+  ]);
+  const connectionsByEndpoint = new Map<string, SystemGraph["connections"]>();
+  graph.connections.forEach((connection) => [connection.from, connection.to].forEach((endpoint) => {
+    connectionsByEndpoint.set(endpoint, [...(connectionsByEndpoint.get(endpoint) ?? []), connection]);
+  }));
+  const electricalOwnerIdsAtEndpoint = (
+    initialEndpoint: string,
+    channel: CurrentSafetyChannel,
+    excludedConnectionIds: ReadonlySet<string>,
+  ) => {
+    const owners = new Set<string>();
+    const queue = [initialEndpoint];
+    const visited = new Set<string>();
+    while (queue.length > 0) {
+      const endpoint = queue.shift()!;
+      if (visited.has(endpoint)) continue;
+      visited.add(endpoint);
+      const separator = endpoint.lastIndexOf(".");
+      const device = deviceById.get(endpoint.slice(0, separator));
+      const terminalId = endpoint.slice(separator + 1);
+      const terminal = device?.conductors.find((candidate) => candidate.id === terminalId);
+      if (!device || !terminal) continue;
+      const transparent = Boolean(device.attachment)
+        || transparentPresentations.has(device.presentation ?? "");
+      if (!transparent) {
+        owners.add(device.id);
+        continue;
+      }
+      if (device.attachment) queue.push(device.attachment.endpoint);
+      const internalPeers = terminal.internalMates?.length
+        ? terminal.internalMates
+        : device.presentation === "service-splice"
+          ? device.conductors.filter((candidate) => candidate.kind === terminal.kind).map((candidate) => candidate.id)
+          : [];
+      internalPeers.forEach((peerId) => {
+        const peer = device.conductors.find((candidate) => candidate.id === peerId);
+        if (!peer) return;
+        const supportsChannel = (terminal.kind === channel || terminal.kind === "multicore")
+          && (peer.kind === channel || peer.kind === "multicore");
+        if (supportsChannel) queue.push(`${device.id}.${peer.id}`);
+      });
+      (connectionsByEndpoint.get(endpoint) ?? []).forEach((connection) => {
+        if (excludedConnectionIds.has(connection.id)
+          || !r28ConnectionSupportsChannel(graph, connection, channel)) return;
+        queue.push(connection.from === endpoint ? connection.to : connection.from);
+      });
+    }
+    return owners;
+  };
+  const setsIntersect = (first: ReadonlySet<string>, second: ReadonlySet<string>) => (
+    [...first].some((entry) => second.has(entry))
+  );
+  const structurallyPairsReturn = (
+    active: SystemGraph["connections"][number],
+    returned: SystemGraph["connections"][number],
+    activeChannel: R28ActiveChannel,
+    returnChannel: (typeof R28_RETURN_CHANNELS)[number],
+  ) => {
+    const excluded = new Set([active.id, returned.id]);
+    const endpointPair = (activeEndpoint: string, returnEndpoint: string) => (
+      setsIntersect(
+        electricalOwnerIdsAtEndpoint(activeEndpoint, activeChannel, excluded),
+        electricalOwnerIdsAtEndpoint(returnEndpoint, returnChannel, excluded),
+      )
+      || setsIntersect(
+        validAssemblyIdsAtEndpoint(activeEndpoint, activeChannel),
+        validAssemblyIdsAtEndpoint(returnEndpoint, returnChannel),
+      )
+    );
+    if (endpointPair(active.from, returned.from) || endpointPair(active.to, returned.to)) return true;
+    const sameDomain = (activeEndpoint: string, returnEndpoint: string) => setsIntersect(
+      validDomainIdsAtEndpoint(activeEndpoint, "active", activeChannel),
+      validDomainIdsAtEndpoint(returnEndpoint, "return", activeChannel),
+    );
+    return sameDomain(active.from, returned.from) && sameDomain(active.to, returned.to);
+  };
+
+  const protectors: Array<{
+    id: string;
+    protection: R28Protection;
+    deviceId?: string;
+    connectionId?: string;
+  }> = [
+    ...graph.devices.flatMap((device) => device.currentProtection ? [{
+      id: `device:${device.id}`, protection: device.currentProtection, deviceId: device.id,
+    }] : []),
+    ...graph.connections.flatMap((connection) => connection.currentProtection ? [{
+      id: `connection:${connection.id}`, protection: connection.currentProtection, connectionId: connection.id,
+    }] : []),
+  ];
+  const protectionCreditById = new Map<string, R28ProtectionCredit>();
+  protectors.forEach(({ id, protection, deviceId, connectionId }) => {
+    const validRating = Number.isFinite(protection.ratedCurrentA) && protection.ratedCurrentA > 0;
+    const validInterrupt = protection.interruptRatingA === undefined
+      || (Number.isFinite(protection.interruptRatingA) && protection.interruptRatingA > 0);
+    const device = deviceId ? graph.devices.find((candidate) => candidate.id === deviceId) : undefined;
+    const validPairs = !device || Boolean(protection.terminalPairs?.length)
+      && protection.terminalPairs!.every(([first, second]) => {
+        const firstPort = device.conductors.find((port) => port.id === first);
+        const secondPort = device.conductors.find((port) => port.id === second);
+        return first !== second && Boolean(firstPort) && Boolean(secondPort)
+          && firstPort!.kind === secondPort!.kind
+          && R28_ACTIVE_CHANNELS.includes(firstPort!.kind as R28ActiveChannel);
+      });
+    const metadataValid = validRating && validInterrupt && validPairs;
+    const hasRequiredInterruptEvidence = protection.kind === "hard-current-limit"
+      || protection.interruptRatingA !== undefined;
+    protectionCreditById.set(id, !metadataValid
+      ? "none"
+      : protection.verified && hasRequiredInterruptEvidence ? "verified" : "provisional");
+    if (!metadataValid) issue({
+      severity: "error", code: "invalid-current-metadata", deviceId, connectionId, ratingA: protection.ratedCurrentA,
+      message: `${id}: invalid protective rating, interrupt rating, or explicit terminal-pair metadata`,
+    });
+    if (!protection.verified) issue({
+      severity: "warning", code: "unverified-protective-element", deviceId, connectionId, ratingA: protection.ratedCurrentA,
+      message: `${id}: modeled ${protection.ratedCurrentA} A ${protection.kind} remains unverified`,
+    });
+    if (protection.kind !== "hard-current-limit" && protection.interruptRatingA === undefined) issue({
+      severity: "warning", code: "missing-interrupt-rating", deviceId, connectionId, ratingA: protection.ratedCurrentA,
+      message: `${id}: interrupt rating is not declared; fault-clearing capability remains outside this proof`,
+    });
+  });
+
+  protectors.forEach(({ id, protection, deviceId, connectionId }) => {
+    if (protection.kind === "hard-current-limit" || protection.interruptRatingA === undefined) return;
+    R28_ACTIVE_CHANNELS.forEach((channel) => {
+      const network = buildR28CurrentNetwork(graph, channel, protectionCreditById, validSourceAssemblyPathKeys);
+      const protectedEdges = network.edges.filter((edge) => edge.protectionId === id);
+      if (protectedEdges.length === 0) return;
+      const prospectiveFaultCurrentA = r28ProspectiveFaultEnvelope(
+        network,
+        network.sources.filter((source) => validSourceIds.has(source.id)),
+        new Set(protectedEdges.flatMap((edge) => [edge.first, edge.second])),
+        id,
+      );
+      if (prospectiveFaultCurrentA === "unbounded"
+        || prospectiveFaultCurrentA > protection.interruptRatingA! + 1e-9) {
+        if (protectionCreditById.get(id) === "verified") protectionCreditById.set(id, "provisional");
+        issue({
+          severity: "error", code: "interrupt-rating-insufficient", deviceId, connectionId, channel,
+          prospectiveFaultCurrentA, ratingA: protection.interruptRatingA,
+          message: `${id}: ${protection.interruptRatingA} A interrupt rating is below the ${prospectiveFaultCurrentA === "unbounded" ? "unbounded" : `${prospectiveFaultCurrentA} A`} prospective ${channel} contribution`,
+        });
+      }
+    });
+  });
+
+  type ActiveTrace = {
+    reachableSources: readonly R28Source[];
+    evidence: readonly {
+      source: R28Source;
+      contribution: number | "unbounded";
+      verifiedEnvelope: ReturnType<typeof r28ProtectionEnvelope>;
+      provisionalEnvelope: ReturnType<typeof r28ProtectionEnvelope>;
+    }[];
+    verifiedProtectionEnvelopeA: number | "unbounded";
+    provisionalProtectionEnvelopeA: number | "unbounded";
+    prospectiveFaultCurrentA: number | "unbounded";
+  };
+  const activeTraces = new Map<string, ActiveTrace>();
+  const traceTargets = (
+    targets: ReadonlySet<string>,
+    channel: R28ActiveChannel,
+    network: ReturnType<typeof buildR28CurrentNetwork>,
+  ): ActiveTrace => {
+    const reachableSources = network.sources.filter((source) => (
+      validSourceIds.has(source.id)
+      && r28Reachable(currentVertex(source.endpoint, channel), targets, network.edges)
+    ));
+    const evidence = reachableSources.map((source) => ({
+      source,
+      contribution: r28ProspectiveFaultEnvelope(network, [source], targets),
+      verifiedEnvelope: r28ProtectionEnvelope(network, [source], targets, true),
+      provisionalEnvelope: r28ProtectionEnvelope(network, [source], targets, false),
+    }));
+    const verifiedEnvelope = r28ProtectionEnvelope(network, reachableSources, targets, true);
+    const provisionalEnvelope = r28ProtectionEnvelope(network, reachableSources, targets, false);
+    return {
+      reachableSources,
+      evidence,
+      verifiedProtectionEnvelopeA: verifiedEnvelope.currentA,
+      provisionalProtectionEnvelopeA: provisionalEnvelope.currentA,
+      prospectiveFaultCurrentA: r28ProspectiveFaultEnvelope(network, reachableSources, targets),
+    };
+  };
+  const traceActive = (
+    connection: SystemGraph["connections"][number],
+    channel: R28ActiveChannel,
+    network: ReturnType<typeof buildR28CurrentNetwork>,
+  ) => traceTargets(new Set([currentConnectionVertex(connection.id, channel)]), channel, network);
+
+  const evaluate = (
+    connection: SystemGraph["connections"][number],
+    channel: CurrentSafetyChannel,
+    trace: ActiveTrace,
+    pairedActiveConnectionId?: string,
+    pairedActiveEndpointIds?: readonly string[],
+  ): CurrentSafetyConnectionCheck => {
+    const ampacityA = cableById.get(connection.cableId)?.ampacityA;
+    const protectionBySource = trace.evidence.map(({ source, contribution, verifiedEnvelope, provisionalEnvelope }) => {
+      const verifiedBy = ampacityA !== undefined && verifiedEnvelope.currentA !== "unbounded"
+        && verifiedEnvelope.currentA <= ampacityA + 1e-9 ? verifiedEnvelope.protectedBy : [];
+      const provisionalBy = ampacityA !== undefined && provisionalEnvelope.currentA !== "unbounded"
+        && provisionalEnvelope.currentA <= ampacityA + 1e-9 ? provisionalEnvelope.protectedBy : [];
+      return { sourceId: source.id, prospectiveFaultCurrentA: contribution, verifiedBy, provisionalBy };
+    });
+    const verifiedEnvelopeFits = ampacityA !== undefined && trace.verifiedProtectionEnvelopeA !== "unbounded"
+      && trace.verifiedProtectionEnvelopeA <= ampacityA + 1e-9;
+    const provisionalEnvelopeFits = ampacityA !== undefined && trace.provisionalProtectionEnvelopeA !== "unbounded"
+      && trace.provisionalProtectionEnvelopeA <= ampacityA + 1e-9;
+    const status = ampacityA === undefined || !provisionalEnvelopeFits
+      || protectionBySource.some((entry) => entry.verifiedBy.length === 0 && entry.provisionalBy.length === 0)
+      ? "incomplete" as const
+      : !verifiedEnvelopeFits || protectionBySource.some((entry) => entry.verifiedBy.length === 0)
+        ? "provisional" as const
+        : "verified" as const;
+    return {
+      connectionId: connection.id,
+      channel,
+      sourceIds: trace.reachableSources.map((source) => source.id).toSorted(),
+      pairedActiveConnectionId,
+      pairedActiveEndpointIds,
+      prospectiveFaultCurrentA: trace.prospectiveFaultCurrentA,
+      verifiedProtectionEnvelopeA: trace.verifiedProtectionEnvelopeA,
+      provisionalProtectionEnvelopeA: trace.provisionalProtectionEnvelopeA,
+      ampacityA,
+      status,
+      protectionBySource,
+    };
+  };
+
+  const reportCheck = (check: CurrentSafetyConnectionCheck, connection: SystemGraph["connections"][number]) => {
+    const cable = cableById.get(connection.cableId);
+    if (connection.sourceLeadReason) issue({
+      severity: "warning", code: "unprotected-source-lead", connectionId: connection.id, channel: check.channel,
+      sourceIds: check.sourceIds, prospectiveFaultCurrentA: check.prospectiveFaultCurrentA, ratingA: check.ampacityA,
+      message: `${connection.id} (${check.channel}): deliberately short source-side lead · ${connection.sourceLeadReason}`,
+    });
+    if (check.ampacityA === undefined) issue({
+      severity: "error", code: "invalid-current-metadata", connectionId: connection.id, channel: check.channel,
+      sourceIds: check.sourceIds, prospectiveFaultCurrentA: check.prospectiveFaultCurrentA,
+      message: `${connection.id} (${check.channel}): ${cable?.label ?? connection.cableId} has no numeric ampacity`,
+    });
+    else if (check.status === "incomplete") issue({
+      severity: "error", code: "conductor-protection-incomplete", connectionId: connection.id, channel: check.channel,
+      sourceIds: check.sourceIds, prospectiveFaultCurrentA: check.prospectiveFaultCurrentA, ratingA: check.ampacityA,
+      message: `${connection.id} (${check.channel}): no per-source OCP/current-limit cut set coordinates every source with the ${check.ampacityA} A conductor`,
+    });
+    else if (check.status === "provisional") issue({
+      severity: "warning", code: "conductor-protection-provisional", connectionId: connection.id, channel: check.channel,
+      sourceIds: check.sourceIds, prospectiveFaultCurrentA: check.prospectiveFaultCurrentA, ratingA: check.ampacityA,
+      message: `${connection.id} (${check.channel}): conductor coordination relies on at least one unverified or interrupt-unproved protective element`,
+    });
+  };
+
+  const reportDevice = (
+    device: Device,
+    channel: CurrentSafetyChannel,
+    trace: ActiveTrace,
+  ) => {
+    // Breaker/fuse trip values coordinate downstream conductors and are not
+    // body ratings. Protective devices without an explicit body/input rating
+    // are already covered by their terminal-pair and interrupt audit.
+    const ratingA = device.currentRatingA;
+    if (ratingA === undefined && (device.kind === "breaker" || device.kind === "protection")) return;
+    const protectionBySource = trace.evidence.map(({ source, contribution, verifiedEnvelope, provisionalEnvelope }) => ({
+      sourceId: source.id,
+      prospectiveFaultCurrentA: contribution,
+      verifiedBy: ratingA !== undefined && verifiedEnvelope.currentA !== "unbounded"
+        && verifiedEnvelope.currentA <= ratingA + 1e-9 ? verifiedEnvelope.protectedBy : [],
+      provisionalBy: ratingA !== undefined && provisionalEnvelope.currentA !== "unbounded"
+        && provisionalEnvelope.currentA <= ratingA + 1e-9 ? provisionalEnvelope.protectedBy : [],
+    }));
+    const provisionalFits = ratingA !== undefined && trace.provisionalProtectionEnvelopeA !== "unbounded"
+      && trace.provisionalProtectionEnvelopeA <= ratingA + 1e-9;
+    const verifiedFits = ratingA !== undefined && trace.verifiedProtectionEnvelopeA !== "unbounded"
+      && trace.verifiedProtectionEnvelopeA <= ratingA + 1e-9;
+    const status = ratingA === undefined || !provisionalFits
+      || protectionBySource.some((entry) => entry.verifiedBy.length === 0 && entry.provisionalBy.length === 0)
+      ? "incomplete" as const
+      : !verifiedFits || protectionBySource.some((entry) => entry.verifiedBy.length === 0)
+        ? "provisional" as const
+        : "verified" as const;
+    deviceChecks.push({
+      deviceId: device.id, channel,
+      sourceIds: trace.reachableSources.map((source) => source.id).toSorted(), ratingA, status,
+      verifiedProtectionEnvelopeA: trace.verifiedProtectionEnvelopeA,
+      provisionalProtectionEnvelopeA: trace.provisionalProtectionEnvelopeA,
+      protectionBySource,
+    });
+    if (ratingA === undefined && !["connector", "junction", "breaker", "protection"].includes(device.kind)) issue({
+      severity: "warning", code: "missing-device-rating", deviceId: device.id, channel,
+      sourceIds: trace.reachableSources.map((source) => source.id).toSorted(),
+      message: `${device.id}: energized ${channel} input/device rating is not declared`,
+    }); else if (ratingA !== undefined && status === "incomplete") issue({
+      severity: "error", code: "device-protection-incomplete", deviceId: device.id, channel, ratingA,
+      sourceIds: trace.reachableSources.map((source) => source.id).toSorted(),
+      message: `${device.id}: aggregate upstream protection envelope is not coordinated with the ${ratingA} A device/input rating`,
+    }); else if (ratingA !== undefined && status === "provisional") issue({
+      severity: "warning", code: "device-protection-provisional", deviceId: device.id, channel, ratingA,
+      sourceIds: trace.reachableSources.map((source) => source.id).toSorted(),
+      message: `${device.id}: device/input coordination relies on unverified protection metadata`,
+    });
+  };
+
+  R28_ACTIVE_CHANNELS.forEach((channel) => {
+    const network = buildR28CurrentNetwork(graph, channel, protectionCreditById, validSourceAssemblyPathKeys);
+    graph.connections.forEach((connection) => {
+      if (r28IsIntrinsicTerminalJoin(graph, connection)) return;
+      if (!r28ConnectionCarries(graph, connection, channel)) return;
+      const trace = traceActive(connection, channel, network);
+      activeTraces.set(`${connection.id}:${channel}`, trace);
+      if (trace.reachableSources.length === 0) {
+        if (!connection.deenergizedReason) issue({
+          severity: "error", code: "untraced-active-conductor", connectionId: connection.id, channel,
+          message: `${connection.id}: energized ${channel} conductor is unreachable from every declared source`,
+        });
+        return;
+      }
+      const check = evaluate(connection, channel, trace);
+      connectionChecks.push(check);
+      reportCheck(check, connection);
+    });
+
+    graph.devices.forEach((device) => {
+      const targets = new Set(graph.connections.filter((connection) => (
+        r28ConnectionSupportsChannel(graph, connection, channel)
+        && (connection.from.startsWith(`${device.id}.`) || connection.to.startsWith(`${device.id}.`))
+      )).map((connection) => currentVertex(
+        connection.from.startsWith(`${device.id}.`) ? connection.from : connection.to,
+        channel,
+      )));
+      if (targets.size === 0) return;
+      const trace = traceTargets(targets, channel, network);
+      if (trace.reachableSources.length === 0) return;
+      reportDevice(device, channel, trace);
+    });
+  });
+
+  const activeForReturn = { negative: "positive", "ac-neutral": "ac-line" } as const;
+  const connectionById = new Map(graph.connections.map((connection) => [connection.id, connection]));
+  R28_RETURN_CHANNELS.forEach((channel) => {
+    const activeChannel = activeForReturn[channel];
+    const network = buildR28CurrentNetwork(graph, activeChannel, protectionCreditById, validSourceAssemblyPathKeys);
+    const ratedReturnDeviceTargets = new Map<string, Set<string>>();
+    graph.connections.forEach((connection) => {
+      if (r28IsIntrinsicTerminalJoin(graph, connection)) return;
+      if (!r28ConnectionCarries(graph, connection, channel)) return;
+      const cable = cableById.get(connection.cableId);
+      const selfPairedMulticore = connection.kind === "multicore"
+        && cable?.carriedChannels?.includes(activeChannel)
+        && r28ConnectionSupportsChannel(graph, connection, channel)
+        && r28ConnectionSupportsChannel(graph, connection, activeChannel);
+      const pairedActiveConnectionId = selfPairedMulticore ? connection.id : connection.returnFor;
+      const pairedActive = pairedActiveConnectionId ? connectionById.get(pairedActiveConnectionId) : undefined;
+      const validCircuitPair = selfPairedMulticore || Boolean(
+        pairedActive
+        && r28ConnectionSupportsChannel(graph, pairedActive, activeChannel)
+        && connection.circuitId
+        && connection.circuitId === pairedActive.circuitId
+        && structurallyPairsReturn(pairedActive, connection, activeChannel, channel),
+      );
+      const domainMatches = new Map<string, (typeof validCurrentDomains extends Map<string, infer Value> ? Value : never)>();
+      [connection.from, connection.to].forEach((endpoint) => {
+        const domainTerminal = endpointById.get(endpoint)?.currentDomain;
+        if (!domainTerminal || domainTerminal.role !== "return") return;
+        const domain = validCurrentDomains.get(domainTerminal.id);
+        if (domain?.activeChannel === activeChannel && domain.returnEndpoints.has(endpoint)) {
+          domainMatches.set(domainTerminal.id, domain);
+        }
+      });
+      const domain = domainMatches.size === 1 ? [...domainMatches.values()][0] : undefined;
+      const validDomainPair = !pairedActiveConnectionId && domainMatches.size === 1;
+      const activeTargets = validDomainPair && domain
+        ? new Set(domain.activeEndpoints.map((endpoint) => currentVertex(endpoint, activeChannel)))
+        : pairedActiveConnectionId && validCircuitPair
+          ? new Set([currentConnectionVertex(pairedActiveConnectionId, activeChannel)])
+          : new Set<string>();
+      const trace = activeTargets.size > 0
+        ? traceTargets(activeTargets, activeChannel, network)
+        : undefined;
+      if ((!validCircuitPair && !validDomainPair) || !trace || trace.reachableSources.length === 0) {
+        if (!connection.deenergizedReason) issue({
+          severity: "error", code: "unpaired-return-conductor", connectionId: connection.id, channel,
+          message: `${connection.id}: ${channel} conductor has no traced ${activeChannel} pairing with matching circuit identity and structural endpoint ownership, source assembly, or current-domain evidence`,
+        });
+        return;
+      }
+      const pairedActiveEndpointIds = validDomainPair ? domain?.activeEndpoints : undefined;
+      const check = evaluate(connection, channel, trace, pairedActiveConnectionId, pairedActiveEndpointIds);
+      connectionChecks.push(check);
+      reportCheck(check, connection);
+      [connection.from, connection.to].forEach((endpoint) => {
+        const separator = endpoint.lastIndexOf(".");
+        const deviceId = endpoint.slice(0, separator);
+        if (graph.devices.find((device) => device.id === deviceId)?.currentRatingA === undefined) return;
+        const key = `${deviceId}|${channel}`;
+        const targets = ratedReturnDeviceTargets.get(key) ?? new Set<string>();
+        activeTargets.forEach((target) => targets.add(target));
+        ratedReturnDeviceTargets.set(key, targets);
+      });
+    });
+    ratedReturnDeviceTargets.forEach((targets, key) => {
+      const [deviceId] = key.split("|");
+      const device = graph.devices.find((candidate) => candidate.id === deviceId);
+      if (!device) return;
+      const trace = traceTargets(targets, activeChannel, network);
+      if (trace.reachableSources.length > 0) reportDevice(device, channel, trace);
+    });
+  });
+
+  const issueOrder = (first: CurrentSafetyIssue, second: CurrentSafetyIssue) => (
+    first.code.localeCompare(second.code)
+    || (first.connectionId ?? "").localeCompare(second.connectionId ?? "")
+    || (first.deviceId ?? "").localeCompare(second.deviceId ?? "")
+    || (first.endpoint ?? "").localeCompare(second.endpoint ?? "")
+    || (first.channel ?? "").localeCompare(second.channel ?? "")
+    || first.message.localeCompare(second.message)
+  );
+  const warnings = issues.filter((finding) => finding.severity === "warning").toSorted(issueOrder);
+  const errors = issues.filter((finding) => finding.severity === "error").toSorted(issueOrder);
+  const hasIncompleteEvidence = connectionChecks.some((check) => check.status === "incomplete")
+    || deviceChecks.some((check) => check.status === "incomplete");
+  return {
+    scope: "supply-active-and-explicitly-paired-returns",
+    status: errors.length > 0 || hasIncompleteEvidence
+      ? "incomplete"
+      : warnings.length > 0 ? "provisional" : "verified",
+    excludedConductorKinds: ["earth", "data", "control", "multicore"],
+    limitations: [
+      "Normal load current is not inferred from source capacity; this report proves only per-source OCP/current-limit path coordination against declared conductor ampacity.",
+      "Prospective fault contribution is separate and is never capped by a breaker/fuse trip rating. Interrupt capacity, time-current curves, selectivity and let-through energy remain engineering inputs unless explicitly declared.",
+      "A breaker/fuse can receive verified coordination credit only with valid, verified trip metadata and a declared adequate interrupt rating; otherwise it remains provisional or receives no credit.",
+      "Negative and neutral conductors are checked only when returnFor has matching circuit identity plus structural endpoint/source-assembly evidence, when both route sides share validated typed current domains, when one typed domain anchors the return directly, or when a multicore explicitly carries both active and return channels.",
+      "Multicore channels come only from Cable.carriedChannels; a sheath never implicitly merges DC, AC, return or neutral networks.",
+      "Device checks use currentRatingA only for a single electrical domain. Multi-domain converters and inverters remain unrated until terminal-group ratings are explicitly modeled.",
+    ],
+    sources: [...graph.currentSources],
+    connections: connectionChecks.toSorted((first, second) => (
+      first.connectionId.localeCompare(second.connectionId) || first.channel.localeCompare(second.channel)
+    )),
+    devices: deviceChecks.toSorted((first, second) => (
+      first.deviceId.localeCompare(second.deviceId) || first.channel.localeCompare(second.channel)
+    )),
+    warnings,
+    errors,
   };
 }
 
@@ -2789,6 +4223,7 @@ function validateGraph(graph: SystemGraph) {
     ));
   });
   [...endpointUseCount].filter(([, count]) => count > 1).forEach(([endpoint, count]) => {
+    if (["warning", "approved-stack"].includes(conductorDefinitionByEndpoint.get(endpoint)?.sharedConnectionPolicy ?? "expand")) return;
     problems.push(`${endpoint}: one physical conductor has ${count} external wires; add an explicit wire join`);
   });
   graph.devices.forEach((device) => {
@@ -3148,13 +4583,33 @@ function routePairHasSweptConflict(
   clearanceM = 0,
 ) {
   const required = firstRoute.diameterMm / 2000 + secondRoute.diameterMm / 2000 + clearanceM;
+  const sharedEndpoint = [firstRoute.from, firstRoute.to].find((endpoint) => (
+    endpoint === secondRoute.from || endpoint === secondRoute.to
+  ));
+  const sharedDefinition = sharedEndpoint
+    ? graph.devices.flatMap((device) => device.conductors.map((port) => ({ device, port })))
+      .find(({ device, port }) => `${device.id}.${port.id}` === sharedEndpoint)?.port
+    : undefined;
+  const sharedContact = sharedEndpoint && sharedDefinition
+    && ["warning", "approved-stack"].includes(sharedDefinition.sharedConnectionPolicy ?? "expand")
+    ? (firstRoute.from === sharedEndpoint ? firstRoute.points[0] : firstRoute.points.at(-1)!)
+    : undefined;
+  // Both cable cylinders necessarily occupy the stacked stud/clamp throat.
+  // Permit only the connected local fusion envelope needed to fan out one
+  // route cell beyond that contact; every later crossing remains audited.
+  const sharedContactReach = geometryMetres(ROUTING_STEP_UNITS) + required * 2 + MAX_SEMANTIC_SECTION_M;
   for (let firstSegment = 1; firstSegment < firstRoute.points.length; firstSegment += 1) {
     for (let secondSegment = 1; secondSegment < secondRoute.points.length; secondSegment += 1) {
       const closest = closestSegmentPoints(
         firstRoute.points[firstSegment - 1], firstRoute.points[firstSegment],
         secondRoute.points[secondSegment - 1], secondRoute.points[secondSegment],
       );
-      if (closest.distance + 1e-9 < required) return true;
+      if (closest.distance + 1e-9 < required) {
+        if (sharedContact
+          && distance(closest.first, sharedContact) <= sharedContactReach + 1e-9
+          && distance(closest.second, sharedContact) <= sharedContactReach + 1e-9) continue;
+        return true;
+      }
     }
   }
   return false;
@@ -3423,6 +4878,7 @@ export function sampledRenderedGeometryConflicts(
     points: sampleCableCurve(cable.pieces),
   }));
   const conductorByKey = new Map(conductors.map((port) => [port.key, port]));
+  const deviceById = new Map(devices.map((device) => [device.id, device]));
   const pairConflicts = (
     firstPoints: readonly Vec3[],
     firstRadius: number,
@@ -3524,19 +4980,49 @@ export function sampledRenderedGeometryConflicts(
   semantic.forEach((cable) => {
     if (hasNonlocalSelfConflict([...cable.pieces], cable.radiusM)) conflicts.add(`semantic-self · ${cable.id}`);
     const owner = devices.find((device) => device.id === cable.deviceId)!;
-    // Port centres intentionally lie on the declared symbol face. The swept
-    // semantic envelope is therefore the centreline OBB Minkowski-expanded by
-    // the largest arm radius belonging to that symbol.
-    const envelopePadding = Math.max(...semantic
-      .filter((peer) => peer.deviceId === cable.deviceId)
-      .map((peer) => peer.radiusM));
-    const leavesDeclaredEnvelope = cable.points.some((point) => {
-      const local = deviceLocalPoint(owner, point);
-      return local.some((value, axis) => (
-        Math.abs(value) + cable.radiusM > owner.size[axis] / 2 + envelopePadding + 1e-7
+    if (owner.presentation === "integrated-cable-breakout") {
+      // Integrated breakouts deliberately leave the body envelope: their
+      // coloured cores begin at real device contacts and fuse into the routed
+      // multicore cable in free space. Audit that physical contract directly
+      // instead of applying the bodyless-symbol OBB rule to outside geometry.
+      const semanticPort = conductorByKey.get(cable.conductorKey)!;
+      const multicorePort = owner.conductors.find((port) => (
+        port.kind === "multicore"
+        && port.internalMates?.includes(semanticPort.id)
+        && semanticPort.internalMates?.includes(port.id)
       ));
-    });
-    if (leavesDeclaredEnvelope) conflicts.add(`semantic-envelope · ${cable.id}`);
+      const resolvedMulticore = multicorePort
+        ? conductorByKey.get(`${owner.id}.${multicorePort.id}`)
+        : undefined;
+      const outwardLength = resolvedMulticore ? Math.hypot(...resolvedMulticore.direction) : 0;
+      const outward = resolvedMulticore && outwardLength > 1e-12
+        ? scale(resolvedMulticore.direction, 1 / outwardLength)
+        : undefined;
+      const beginsAtDeclaredContact = distance(cable.points[0], semanticPort.position) <= 1e-7;
+      const endsAtDeclaredSplit = distance(cable.points.at(-1)!, cable.splitPoint) <= 1e-7;
+      const splitIsOutside = Boolean(resolvedMulticore && outward
+        && dot(subtract(cable.splitPoint, resolvedMulticore.position), outward)
+          > cable.radiusM + ROUTING_CABLE_CLEARANCE_M);
+      const staysOutsideFace = Boolean(outward && cable.points.every((point) => (
+        dot(subtract(point, semanticPort.position), outward) >= -1e-7
+      )));
+      if (!beginsAtDeclaredContact || !endsAtDeclaredSplit || !splitIsOutside || !staysOutsideFace) {
+        conflicts.add(`semantic-integrated-face · ${cable.id}`);
+      }
+    } else {
+      // Bodyless semantic symbols must remain in their declared envelope. Port
+      // centres lie on the symbol face, so expand the OBB by its largest arm.
+      const envelopePadding = Math.max(...semantic
+        .filter((peer) => peer.deviceId === cable.deviceId)
+        .map((peer) => peer.radiusM));
+      const leavesDeclaredEnvelope = cable.points.some((point) => {
+        const local = deviceLocalPoint(owner, point);
+        return local.some((value, axis) => (
+          Math.abs(value) + cable.radiusM > owner.size[axis] / 2 + envelopePadding + 1e-7
+        ));
+      });
+      if (leavesDeclaredEnvelope) conflicts.add(`semantic-envelope · ${cable.id}`);
+    }
     const pseudo: RoutedConnection = {
       id: `semantic:${cable.id}`,
       from: cable.conductorKey,
@@ -3561,7 +5047,10 @@ export function sampledRenderedGeometryConflicts(
           && routePort.internalMates?.includes(semanticPort.id);
       });
       const contactPort = conductorByKey.get(directSharedEndpoint ?? internallySharedEndpoint ?? "");
-      const contact = contactPort?.position;
+      const semanticOwner = deviceById.get(cable.deviceId);
+      const contact = internallySharedEndpoint && semanticOwner?.presentation === "integrated-cable-breakout"
+        ? cable.splitPoint
+        : contactPort?.position;
       const routeRadius = Math.max(0.0012, route.diameterMm / 2000);
       const jointEnvelope = contact
         ? sharedJointEnvelope(cable.points, cable.radiusM, route.points, routeRadius, contact)
@@ -3688,6 +5177,7 @@ export function buildSystemRuntime(graph: SystemGraph): GraphRuntime {
     conductors,
     graph,
   );
+  const currentSafety = verifyCurrentProtection(graph);
   const finished = typeof performance === "undefined" ? Date.now() : performance.now();
   cached = {
     graph,
@@ -3718,6 +5208,7 @@ export function buildSystemRuntime(graph: SystemGraph): GraphRuntime {
       routingOrder: [...resolvedRoutes]
         .toSorted((first, second) => first.routingRank - second.routingRank)
         .map((route) => route.id),
+      currentSafety,
     },
   };
   return cached;

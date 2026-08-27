@@ -10,8 +10,8 @@ import {
 } from "../app/systemGraphRuntime";
 import type { GraphRuntimeArtifact } from "../app/systemGraph";
 
-const SCHEMA_VERSION = 1 as const;
-const GENERATOR_VERSION = "dse-runtime-v2-integer-grid";
+const SCHEMA_VERSION = 2 as const;
+const GENERATOR_VERSION = "dse-runtime-v3-current-safety";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const outputPath = path.join(root, "data", "generated", "dse-runtime.json");
@@ -89,6 +89,7 @@ const artifact: GraphRuntimeArtifact = {
     totalLengthM: runtime.diagnostics.totalLengthM,
     totalTurns: runtime.diagnostics.totalTurns,
     routingOrder: runtime.diagnostics.routingOrder,
+    currentSafety: runtime.diagnostics.currentSafety,
   },
 };
 const encoded = `${JSON.stringify(artifact)}\n`;

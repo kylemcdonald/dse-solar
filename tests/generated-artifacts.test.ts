@@ -34,7 +34,7 @@ test("precomputed 3D runtime artifact is current and conflict-free", async () =>
   const artifact = await readJson<GeneratedArtifact & {
     devices: Array<{ id: string; size: [number, number, number] }>;
     conductors: unknown[];
-    glands: Array<{ junctionId: string }>;
+    glands: Array<{ id: string; junctionId: string; label: string; connectionIds: string[] }>;
     routes: unknown[];
     diagnostics: {
       fallbacks: number;
@@ -43,6 +43,20 @@ test("precomputed 3D runtime artifact is current and conflict-free", async () =>
       selfIntersections: number;
       deviceConflicts: number;
       renderedGeometryConflicts: number;
+      currentSafety: {
+        scope: string;
+        status: "verified" | "provisional" | "incomplete";
+        sources: Array<{ id: string }>;
+        connections: Array<{
+          connectionId: string;
+          prospectiveFaultCurrentA: number | "unbounded";
+          verifiedProtectionEnvelopeA: number | "unbounded";
+          ampacityA?: number;
+          status: "verified" | "provisional" | "incomplete";
+        }>;
+        errors: Array<{ code: string; connectionId?: string; deviceId?: string }>;
+        warnings: Array<{ code: string; connectionId?: string; deviceId?: string }>;
+      };
     };
   }>("data/generated/dse-runtime.json");
   assert.equal(artifact.sourceHash, await sourceHash(artifact, [
@@ -60,9 +74,9 @@ test("precomputed 3D runtime artifact is current and conflict-free", async () =>
     devices: artifact.diagnostics.deviceConflicts,
     rendered: artifact.diagnostics.renderedGeometryConflicts,
   }, { fallbacks: 0, centerline: 0, swept: 0, self: 0, devices: 0, rendered: 0 });
-  assert.equal(artifact.devices.length, 92);
-  assert.equal(artifact.conductors.length, 322);
-  assert.equal(artifact.routes.length, 148);
+  assert.equal(artifact.devices.length, 87);
+  assert.equal(artifact.conductors.length, 307);
+  assert.equal(artifact.routes.length, 143);
   const expectedEnclosures = new Map([
     ["batteryCutoffJunction", { size: [0.20, 0.16, 0.10], physicalSize: [0.200, 0.155, 0.092], glands: 6 }],
     ["secondaryJunction", { size: [0.30, 0.30, 0.18], physicalSize: [0.302, 0.302, 0.178], glands: 15 }],
@@ -78,6 +92,26 @@ test("precomputed 3D runtime artifact is current and conflict-free", async () =>
     );
     assert.equal(artifact.glands.filter((gland) => gland.junctionId === id).length, expected.glands, `${id} glands`);
   }
+  const safety = artifact.diagnostics.currentSafety;
+  assert.equal(safety.scope, "supply-active-and-explicitly-paired-returns");
+  assert.equal(safety.status, "incomplete", "unresolved design evidence must remain fail-closed");
+  assert.equal(safety.sources.length, 10);
+  assert.ok(safety.errors.length > 0);
+  assert.ok(safety.warnings.length > 0);
+  const orionOutput = safety.connections.find((check) => check.connectionId === "orion-output-socket-a")!;
+  assert.deepEqual({
+    prospectiveFaultCurrentA: orionOutput.prospectiveFaultCurrentA,
+    envelopeA: orionOutput.verifiedProtectionEnvelopeA,
+    ampacityA: orionOutput.ampacityA,
+    status: orionOutput.status,
+  }, { prospectiveFaultCurrentA: 60, envelopeA: 60, ampacityA: 30, status: "incomplete" });
+  assert.ok(safety.warnings.some((issue) => (
+    issue.code === "terminal-over-capacity" && issue.deviceId === "secondaryNegativeBus"
+  )), "the seven-position negative bus retains its direct-return capacity warning");
+  const ekranoGland = artifact.glands.find((gland) => gland.connectionIds.includes("ekrano-positive"));
+  assert.equal(ekranoGland?.label, "Victron Ekrano GX");
+  assert.ok(artifact.glands.every((gland) => gland.label && !gland.label.includes("gland-")),
+    "gland labels are derived from meaningful graph owners");
 });
 
 test("precomputed diagram artifact is current and has audited visible geometry", async () => {

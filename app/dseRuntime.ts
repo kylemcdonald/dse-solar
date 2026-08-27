@@ -5,7 +5,7 @@ import type { GraphRuntime, GraphRuntimeArtifact } from "./systemGraph";
 const artifact = artifactJson as unknown as GraphRuntimeArtifact;
 const started = typeof performance === "undefined" ? Date.now() : performance.now();
 
-if (artifact.schemaVersion !== 1) {
+if (artifact.schemaVersion !== 2) {
   throw new Error(`Unsupported precomputed runtime schema ${artifact.schemaVersion}`);
 }
 if (artifact.graphId !== dseTopology.id || artifact.graphRevision !== dseTopology.revision) {
