@@ -132,6 +132,101 @@ test("secondary services has exactly the three requested branch breakers and no 
   assert.equal(dseTopology.connections.some((connection) => connection.id === "secondary-feeder-positive-protected"), false);
 });
 
+test("R29 records ownership, device power and circuit-level capacity separately from fault holds", async () => {
+  const activeKinds = new Set(["panel", "battery", "controller", "monitor", "converter", "inverter", "generator", "outlet", "display", "router", "load"]);
+  const activeDevices = dseTopology.devices.filter((device) => (
+    activeKinds.has(device.kind) || ["switchPanel", "roomSwitch"].includes(device.id)
+  ));
+  assert.equal(activeDevices.length, 30);
+  assert.deepEqual(activeDevices.filter((device) => !device.power).map((device) => device.id), []);
+  assert.equal(dseTopology.powerCircuits?.length, 13);
+
+  const shared = (dseTopology.powerCircuits ?? []).find((circuit) => circuit.id === "shared-services");
+  assert.ok(shared);
+  assert.deepEqual({
+    typicalWatts: shared.typicalWatts,
+    maximumWatts: shared.maximumWatts,
+    maximumCurrentA: shared.maximumCurrentA,
+    conductorAmpacityA: shared.conductorAmpacityA,
+    normalStatus: shared.normalStatus,
+  }, {
+    typicalWatts: 60,
+    maximumWatts: 100,
+    maximumCurrentA: 5,
+    conductorAmpacityA: 10,
+    normalStatus: "within-capacity",
+  });
+  const multiplus = (dseTopology.powerCircuits ?? []).find((circuit) => circuit.id === "multiplus-dc");
+  assert.ok(multiplus);
+  assert.equal(multiplus.normalStatus, "within-capacity");
+  assert.equal(multiplus.faultStatus, "incomplete");
+  assert.deepEqual([multiplus.maximumWatts, multiplus.maximumCurrentA, multiplus.conductorAmpacityA], [1800, 100.8, 120]);
+  assert.ok((multiplus.maximumCurrentA ?? Infinity) < (multiplus.conductorAmpacityA ?? 0));
+  const negativeTrunk = (dseTopology.powerCircuits ?? []).find((circuit) => circuit.id === "main-negative-trunk");
+  assert.ok(negativeTrunk);
+  assert.deepEqual({
+    maximumCurrentA: negativeTrunk.maximumCurrentA,
+    conductorAmpacityA: negativeTrunk.conductorAmpacityA,
+    normalStatus: negativeTrunk.normalStatus,
+    faultStatus: negativeTrunk.faultStatus,
+  }, {
+    maximumCurrentA: 106.5,
+    conductorAmpacityA: 120,
+    normalStatus: "conditional",
+    faultStatus: "incomplete",
+  });
+
+  const tool = (dseTopology.powerCircuits ?? []).find((circuit) => circuit.id === "tool-ac");
+  assert.ok(tool);
+  assert.deepEqual({
+    maximumWatts: tool.maximumWatts,
+    maximumCurrentA: tool.maximumCurrentA,
+    conductorAmpacityA: tool.conductorAmpacityA,
+    normalStatus: tool.normalStatus,
+  }, {
+    maximumWatts: 1800,
+    maximumCurrentA: 7.83,
+    conductorAmpacityA: 10,
+    normalStatus: "within-capacity",
+  });
+
+  assert.deepEqual(dseTopology.connections.filter((connection) => connection.cableId === "dc6")
+    .map((connection) => connection.id).toSorted(), ["pv-output-negative", "pv-output-positive"]);
+  assert.equal(dseTopology.cables.find((cable) => cable.id === "dc6")?.ampacityA, 32);
+
+  const starlink = topologyDeviceById("starlink");
+  assert.deepEqual([starlink.status, starlink.procurementStatus, starlink.bomIds], ["purchased", "purchased", ["dse-ex-starlink"]]);
+  const generator = topologyDeviceById("generator");
+  assert.deepEqual([generator.status, generator.procurementStatus, generator.bomIds], ["purchased", "existing", ["dse-existing-generator"]]);
+  const rails = topologyDeviceById("pvCombRails");
+  assert.equal(rails.status, "existing");
+  assert.equal(rails.procurementStatus, "existing");
+  assert.ok(rails.bomIds?.includes("dse-existing-pv-comb-rails"));
+
+  const system = JSON.parse(await readFile(new URL("../data/dse-system.json", import.meta.url), "utf8")) as {
+    powerModel: Record<string, number | string>;
+    operatingRules: string[];
+  };
+  assert.deepEqual({
+    toolOperatingLimitWatts: system.powerModel.toolOperatingLimitWatts,
+    toolDcCurrentAt19VAnd94PercentA: system.powerModel.toolDcCurrentAt19VAnd94PercentA,
+    mainNegativeTrunkControlledDischargeA: system.powerModel.mainNegativeTrunkControlledDischargeA,
+    mainNegativeTrunkChargeLimitA: system.powerModel.mainNegativeTrunkChargeLimitA,
+    mainNegativeTrunkUnmanagedAllLoadsA: system.powerModel.mainNegativeTrunkUnmanagedAllLoadsA,
+    mainNegativeTrunkModeledAmpacityA: system.powerModel.mainNegativeTrunkModeledAmpacityA,
+  }, {
+    toolOperatingLimitWatts: 1800,
+    toolDcCurrentAt19VAnd94PercentA: 100.8,
+    mainNegativeTrunkControlledDischargeA: 106.5,
+    mainNegativeTrunkChargeLimitA: 100,
+    mainNegativeTrunkUnmanagedAllLoadsA: 148.6,
+    mainNegativeTrunkModeledAmpacityA: 120,
+  });
+  assert.ok(system.operatingRules.some((rule) => (
+    /high-load corded tool/i.test(rule) && /ORION REMOTE H off/.test(rule) && /ChargeIT 32 A branch breaker/.test(rule)
+  )));
+});
+
 test("Orion and ChargeIT inputs use their dedicated 32 A breakers without output-side breaker devices", () => {
   const orion = runtime.deviceById.get("usbOrion")!;
   assert.deepEqual(orion.conductors.map((port) => port.id), ["remoteH", "positiveIn", "ground", "positiveOut"]);

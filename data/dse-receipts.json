@@ -254,6 +254,12 @@
       "date": "2026-08-26",
       "filename": "amazon-2026-08-26-order-111-8727607-1295455-glands-and-din-enclosure.pdf",
       "supplier": "Amazon"
+    },
+    {
+      "number": 43,
+      "date": "2026-08-26",
+      "filename": "amazon-2026-08-26-order-111-8797353-2770618-chtaixi-10a-shared-services-breaker.pdf",
+      "supplier": "Amazon"
     }
   ],
   "itemInvoices": {
@@ -329,6 +335,9 @@
     ],
     "dse-chargeit-branch-breaker": [
       37
+    ],
+    "dse-switched-load-breaker": [
+      43
     ],
     "dse-airic-npt-cable-glands": [
       41
@@ -595,6 +604,9 @@
     ],
     "dse-chargeit-branch-breaker": [
       "B09H4X8K1C"
+    ],
+    "dse-switched-load-breaker": [
+      "B09H4W5HSW"
     ],
     "dse-b125-chtaixi-unused": [
       "B0B1WC651R"

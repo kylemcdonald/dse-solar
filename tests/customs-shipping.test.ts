@@ -55,7 +55,7 @@ test("radio permit items sort first and item values are conserved by optional gr
 });
 
 test("public invoice references are numeric, canonical and separate from ASIN descriptions", () => {
-  assert.equal(receipts.invoices.length, 42);
+  assert.equal(receipts.invoices.length, 43);
   assert.ok(receipts.invoices.every((invoice, index) => invoice.number === index + 1));
   assert.ok(receipts.invoices.every((invoice) => /^[A-Za-z0-9][A-Za-z0-9._-]*\.pdf$/.test(invoice.filename)));
   const validInvoiceNumbers = new Set(receipts.invoices.map((invoice) => invoice.number));
@@ -82,6 +82,7 @@ test("public invoice references are numeric, canonical and separate from ASIN de
   assert.deepEqual(itemInvoices["dse-ventilated-ip65-enclosure"], [41]);
   assert.deepEqual(itemInvoices["dse-pg11-cable-glands"], [42]);
   assert.deepEqual(itemInvoices["dse-mollom-8-way-enclosure-second"], [42]);
+  assert.deepEqual(itemInvoices["dse-switched-load-breaker"], [43]);
   assert.equal(stripAsinFromDescription("Breaker · ASIN B0B1WC651R"), "Breaker");
   assert.equal(stripAsinFromDescription("Victron Ekrano GX BPP900480100"), "Victron Ekrano GX BPP900480100");
   assert.equal(hasDistinctModel("Same title", "same title"), false);
@@ -127,7 +128,7 @@ test("new purchases retain receipt status while the user-selected enclosures ent
   assert.ok(!imports.some((item) => item.id === removedBusbars.id));
   assert.ok(!topology.includes(removedBusbars.id));
   const tax = system.bom.find((item) => item.id === "dse-us-sales-tax")!;
-  assert.equal(tax.totalUsd, 371.63);
+  assert.equal(tax.totalUsd, 372.51);
 });
 
 test("customs descriptions are structured once and CSV mirrors the filing table", () => {
@@ -179,7 +180,7 @@ test("origin data is researched, blank when unresolved, and never stores the US 
   const importedMeta = imports.map((item) => itemMeta[item.id]);
   assert.ok(importedMeta.every((meta) => ["2026-08-25", "2026-08-26"].includes(meta.originReviewedOn ?? "")));
   assert.ok(importedMeta.every((meta) => meta.origin === "" || /^[A-Z]{2}$/.test(meta.origin)));
-  assert.equal(importedMeta.filter((meta) => Boolean(meta.origin)).length, 15);
+  assert.equal(importedMeta.filter((meta) => Boolean(meta.origin)).length, 16);
   assert.equal(importedMeta.filter((meta) => !meta.origin).length, 67);
   assert.equal("originDisplayDefault" in customs, false);
   assert.equal(customs.itemMeta["dse-multiplus"].origin, "");
@@ -192,7 +193,11 @@ test("known equipment serials are prefilled and unknown serials stay blank", () 
   assert.equal(itemMeta["dse-ekrano-gx"].defaultSerials, "HQ2509RURDF");
   assert.equal(itemMeta["dse-orion-usb-converter"].defaultSerials, "HQ2524CKDAW");
   assert.equal(itemMeta["dse-smartsolar"].defaultSerials, "HQ2522V4MVF");
-  assert.equal(itemMeta["dse-shunt"].defaultSerials, "");
+  assert.equal(itemMeta["dse-unused-galaxy-s24-pair"].defaultSerials,
+    "RFCWC04EX2V (IMEI 1: 353690625019873; IMEI 2: 354376945019871); RFCWCOXMNKK (IMEI 1: 353690625388534; IMEI 2: 354376945388532)");
+  assert.equal(itemMeta["dse-unused-macbook-air-15-m4"].defaultSerials,
+    "LKQVK4R7LF; Wi-Fi MAC: 1c:f6:4c:a8:14:70");
+  assert.equal(itemMeta["dse-shunt"].defaultSerials, "HQ2301TYFRT");
   assert.equal(itemMeta["dse-ex-starlink"].defaultSerials, "");
 });
 

@@ -167,6 +167,28 @@ test("aggregate envelope sums independent sources but honors a common downstream
   assert.equal(coordinated.status, "verified", JSON.stringify(coordinated));
 });
 
+test("sources on opposite conductor sides are compared, not incorrectly summed", () => {
+  const report = verifyCurrentProtection(graph([
+    device("leftSource", "converter", 0.10, [port("out", "positive")]),
+    device("rightSource", "converter", 0.60, [port("out", "positive", "left")]),
+  ], [connection("target", "leftSource.out", "rightSource.out", "positive", "target")], [
+    source("left", "leftSource.out", {
+      continuousCapacityA: 8,
+      shortCircuitCurrentA: 8,
+      inherentCurrentLimit: { currentLimitA: 8, verified: true },
+    }),
+    source("right", "rightSource.out", {
+      continuousCapacityA: 8,
+      shortCircuitCurrentA: 8,
+      inherentCurrentLimit: { currentLimitA: 8, verified: true },
+    }),
+  ]));
+  const check = report.connections.find((candidate) => candidate.connectionId === "target")!;
+  assert.equal(check.prospectiveFaultCurrentA, 8);
+  assert.equal(check.verifiedProtectionEnvelopeA, 8);
+  assert.equal(check.status, "verified");
+});
+
 test("a collective parallel min-cut is valid per-source protection evidence", () => {
   const system = graph([
     device("source", "converter", 0.10, [port("out", "positive")]),
@@ -304,7 +326,7 @@ test("returnFor cannot borrow protection from an unrelated load topology", () =>
   assert.ok(joined.connections.some((check) => check.connectionId === "return"));
 });
 
-test("incomplete device evidence forces the overall verifier status incomplete", () => {
+test("ordinary load wattage is not misclassified as a missing pass-through rating", () => {
   const system = graph([
     device("source", "converter", 0.10, [port("out", "positive")], { currentRatingA: 10 }),
     device("unratedLoad", "load", 0.60, [port("positive", "positive", "left")]),
@@ -319,8 +341,11 @@ test("incomplete device evidence forces the overall verifier status incomplete",
   )]);
   const report = verifyCurrentProtection(system);
   assert.equal(report.errors.length, 0, JSON.stringify(report.errors));
-  assert.ok(report.devices.some((check) => check.deviceId === "unratedLoad" && check.status === "incomplete"));
-  assert.equal(report.status, "incomplete");
+  assert.equal(report.devices.some((check) => check.deviceId === "unratedLoad"), false);
+  assert.equal(report.warnings.some((issue) => (
+    issue.code === "missing-device-rating" && issue.deviceId === "unratedLoad"
+  )), false);
+  assert.equal(report.status, "verified");
 });
 
 test("metadata validation is fail-closed for sources, endpoints, pairs and multicore channels", () => {
@@ -409,8 +434,8 @@ test("topology-generated terminal-join continuity is traversed but not misreport
   assert.equal([...report.errors, ...report.warnings].some((issue) => (
     issue.connectionId !== undefined && topologyLinks.has(issue.connectionId)
   )), false);
-  const generatorIssues = report.errors.filter((issue) => (
-    issue.code === "conductor-protection-incomplete" && issue.connectionId === "generator-white-cable"
+  const generatorIssues = report.warnings.filter((issue) => (
+    issue.code === "unprotected-source-lead" && issue.connectionId === "generator-white-cable"
   ));
   assert.deepEqual(generatorIssues.map((issue) => issue.channel).toSorted(), ["ac-line", "ac-neutral"]);
 
@@ -572,6 +597,22 @@ test("invalid, unverified and interrupt-unproved protectors never receive verifi
   assert.ok(insufficientInterruptReport.errors.some((issue) => (
     issue.code === "interrupt-rating-insufficient" && issue.connectionId === "target"
   )));
+
+  const unresolvedFaultReport = verifyCurrentProtection(graph([
+    device("source", "converter", 0.10, [port("out", "positive")]),
+    device("load", "load", 0.60, [port("positive", "positive", "left")]),
+  ], [connection("target", "source.out", "load.positive", "positive", "target", {
+    currentProtection: { kind: "fuse", ratedCurrentA: 5, interruptRatingA: 6_000, verified: true },
+  })], [source("source", "source.out", {
+    continuousCapacityA: 5,
+    shortCircuitCurrentA: "unbounded",
+  })], [cable("target", 10)]));
+  assert.ok(unresolvedFaultReport.warnings.some((issue) => (
+    issue.code === "fault-current-unresolved" && issue.connectionId === "target"
+  )));
+  assert.equal(unresolvedFaultReport.errors.some((issue) => (
+    issue.code === "interrupt-rating-insufficient" && issue.connectionId === "target"
+  )), false);
 });
 
 test("interrupt ratings and explicit device body ratings are independently enforced", () => {

@@ -432,12 +432,14 @@ Object.assign(customs.itemMeta, {
   },
   "dse-unused-galaxy-s24-pair": {
     make: "Samsung", model: "Galaxy S24", additionalInfo: "SM-S921U1 · 256 GB · black · unlocked",
-    serialRequired: true, tafPermitRequired: true, defaultCondition: "Used · good", defaultSerials: "",
+    serialRequired: true, tafPermitRequired: true, defaultCondition: "Used · good",
+    defaultSerials: "RFCWC04EX2V (IMEI 1: 353690625019873; IMEI 2: 354376945019871); RFCWCOXMNKK (IMEI 1: 353690625388534; IMEI 2: 354376945388532)",
     ...unresolvedOrigin("https://www.samsung.com/ph/smartphones/galaxy-s24/specs/"),
   },
   "dse-unused-macbook-air-15-m4": {
     make: "Apple", model: "15-inch MacBook Air (M4, 2025)", additionalInfo: "512 GB · Midnight",
-    serialRequired: true, tafPermitRequired: true, defaultCondition: "Used · good", defaultSerials: "",
+    serialRequired: true, tafPermitRequired: true, defaultCondition: "Used · good",
+    defaultSerials: "LKQVK4R7LF; Wi-Fi MAC: 1c:f6:4c:a8:14:70",
     ...unresolvedOrigin("https://support.apple.com/en-us/122210"),
   },
 });

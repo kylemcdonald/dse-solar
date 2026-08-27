@@ -1,5 +1,5 @@
 import { conductor as p, connection as w, currentSourcesFromDevices, endpoint as ep } from "./systemGraph";
-import type { Cable, Connection, Device, Junction, SystemGraph, TerminalCurrentSource } from "./systemGraph";
+import type { Cable, CircuitPowerBudget, Connection, Device, Junction, SystemGraph, TerminalCurrentSource } from "./systemGraph";
 
 const wall = (position: readonly [number, number, number]) => ({
   space: "world" as const,
@@ -45,6 +45,16 @@ const DIHOOL_120 = "https://www.amazon.com/dp/B0BFF7F46Y";
 const CHTAIXI_32 = "https://www.amazon.com/dp/B09H4X8K1C";
 const CHARGEIT_75 = "https://www.coolgear.com/product/chargeit-mini-75w-dual-port-usb-type-c-pd-charger";
 const COOLGEAR_145 = "https://www.coolgear.com/product/145w-dual-usb-c-pd-3-1-vehicle-charger-with-mountable-flanges";
+const SUNTECH_565 = "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf";
+const SMARTSOLAR_SPEC = "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html";
+const MULTIPLUS_SPEC = "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/technical-specifications-mp-ii-230v.html";
+const EKRANO_SPEC = "https://www.victronenergy.com/media/pg/Ekrano_GX/en/technical-specifications.html";
+const SMARTSHUNT_SPEC = "https://www.victronenergy.com/upload/documents/Datasheet-SmartShunt-IP65-EN.pdf";
+const BALANCER_SPEC = "https://www.victronenergy.com/upload/documents/Datasheet-Battery-Balancer-EN.pdf";
+const ORION_SPEC = "https://www.victronenergy.com/media/pg/Orion-Tr_Smart_DC-DC_Charger_-_Non-Isolated/en/specifications.html";
+const STARLINK_SPEC = "https://www.starlink.com/public-files/specification_sheet_mini.pdf";
+const UNIFI_SPEC = "https://techspecs.ui.com/unifi/cloud-gateways/ux";
+const HUSQVARNA_G3200P = "https://www.husqvarna.com/my/generators/g3200p/";
 
 const breaker = (
   id: string,
@@ -61,16 +71,16 @@ const breaker = (
   placement: inside(junctionId, "din", order),
   conductors: id === "sharedServicesBreaker" ? [
     p("line", "Supply", "positive", "bottom", {
-      order: 0, gauge: "1.5–2.5 mm² · coordinate with selected 10 A device",
-      terminal: "Selected 10 A DC breaker line clamp", terminalSize: "Select for 1.5–2.5 mm² fine-stranded copper",
+      order: 0, gauge: "1.5–2.5 mm² · 10 A branch",
+      terminal: "CHTAIXI B10 miniature-breaker screw clamp", terminalSize: "M5 screw clamp per listing · verify received range",
       termination: "Bare fine-stranded copper or maker-approved ferrule", terminalDiameterMm: 5,
-      terminalNote: "No breaker is selected yet. Verify DC voltage and interrupt ratings, polarity, conductor range, derating and torque before commissioning.",
+      terminalNote: "Purchased B09H4W5HSW listing claims 12–110 VDC, B curve, 6 kA and 2.5 N·m. Verify every marking, polarity diagram and conductor range on the received breaker.",
     }),
     p("load", "Load", "positive", "top", {
-      order: 0, gauge: "1.5–2.5 mm² · coordinate with selected 10 A device",
-      terminal: "Selected 10 A DC breaker load clamp", terminalSize: "Select for 1.5–2.5 mm² fine-stranded copper",
+      order: 0, gauge: "1.5–2.5 mm² · 10 A branch",
+      terminal: "CHTAIXI B10 miniature-breaker screw clamp", terminalSize: "M5 screw clamp per listing · verify received range",
       termination: "Bare fine-stranded copper or maker-approved ferrule", terminalDiameterMm: 5,
-      terminalNote: "No breaker is selected yet. Verify DC voltage and interrupt ratings, polarity, conductor range, derating and torque before commissioning.",
+      terminalNote: "Purchased B09H4W5HSW listing claims 12–110 VDC, B curve, 6 kA and 2.5 N·m. Verify every marking, polarity diagram and conductor range on the received breaker.",
     }),
   ] : id === "orionBreaker32" || id === "chargeItBreaker32" ? [
     p("line", "24 V bus supply", "positive", "bottom", {
@@ -185,6 +195,16 @@ const usbMini = (id: string, label: string, x: number, layoutOrder: number): Dev
   bomIds: ["dse-chargeit-mini-75"],
   purchaseUrl: CHARGEIT_75,
   status: "purchased",
+  power: {
+    role: "load", basis: "manufacturer", verified: true, sourceUrl: CHARGEIT_75,
+    readings: [
+      { label: "Maximum input draw", watts: 78, voltage: "9–28 VDC" },
+      { label: "Idle input", watts: 0.06, voltage: "12 V", note: "5 mA published idle current." },
+      { label: "Named USB output capacity", watts: 75 },
+    ],
+    note: "Coolgear publishes 78 W maximum input draw for each 75 W module. No device-level electrical protection is documented in its data sheet, so the 32 A branch breaker remains necessary.",
+    internalProtection: { verified: true, features: [], note: "Manufacturer data sheet lists electrical protections as N/A." },
+  },
   conductors: [
     p("positive", "24 V input +", "positive", "bottom", {
       order: 0, gauge: "2.5 mm² daisy-chain conductor",
@@ -224,8 +244,10 @@ const rigidRail = (
     size: [0.200, 0.040, 0.020],
     placement: inside("pvJunction", "backplate", 0),
     componentId: "pvSafety",
-    bomIds: ["dse-pv-protection"],
-    status: "planned",
+    bomIds: ["dse-existing-pv-comb-rails", "dse-pv-protection"],
+    status: "existing",
+    procurementStatus: "existing",
+    holdReason: "The insulated positive and negative comb rails are pre-existing hardware. Before energizing, verify at least 32 A continuous current capacity, insulation, tooth pitch, terminal compatibility, creepage/clearance and enclosure retention against the received devices.",
     conductors: taps.map((tap, order) => p(tap.id, tap.label, tap.kind, "bottom", {
       order,
       gauge: "Received comb busbar · verify",
@@ -286,6 +308,14 @@ const panel = (
   layoutGroup: { id: "pv-panels", label: "PV array", columns: 2, order: layoutOrder },
   bomIds: ["dse-panels"],
   status: "purchased",
+  power: {
+    role: "source", basis: "manufacturer", verified: false, sourceUrl: SUNTECH_565,
+    readings: [
+      { label: "Maximum output at STC", watts: 565, voltage: "42.56 Vmp", currentA: 13.28 },
+      { label: "Short-circuit current", currentA: 14.2, voltage: "50.39 Voc" },
+    ],
+    note: "The STP565S-C72/Vmh data sheet is the design basis; confirm every received module nameplate. Suntech's maximum series-fuse rating is 25 A.",
+  },
   currentSourceAssemblyPaths: [{
     assemblyId: sourceAssemblyId,
     activeChannel: "positive",
@@ -336,6 +366,12 @@ const battery = (
   layoutGroup: { id: "battery-bank", label: "24 V battery bank", columns: 2, order: layoutOrder },
   bomIds: ["dse-batteries"],
   status: "purchased",
+  power: {
+    role: "storage", basis: "manufacturer", verified: false,
+    sourceUrl: "https://www.everexceed.com/es200-12g-gel-battery_p363.html",
+    readings: [{ label: "Nominal stored energy", wattHours: 2400, voltage: "12 V nominal", currentA: 200 }],
+    note: "Each ES200-12G is a nominal 12 V, 200 Ah GEL battery. This is energy capacity, not a safe fault-current bound; confirm the received labels and obtain battery short-circuit/internal-resistance data for breaker-AIC verification.",
+  },
   currentSourceAssemblyPaths: [{
     assemblyId: sourceAssemblyId,
     activeChannel: "positive",
@@ -360,9 +396,10 @@ const battery = (
 
 export const dseCables: readonly Cable[] = [
   { id: "battery53", label: "1/0 AWG battery cable", cores: 1, outsideDiameterMm: 14.5, conductorSize: "53.5 mm²", sheath: "single", ampacityA: 120 },
-  { id: "dc35", label: "35 mm² DC cable", cores: 1, outsideDiameterMm: 11.8, conductorSize: "35 mm²", sheath: "single", ampacityA: 100 },
+  { id: "dc35", label: "35 mm² SmartSolar battery cable", cores: 1, outsideDiameterMm: 11.8, conductorSize: "35 mm²", sheath: "single", ampacityA: 120, notes: "Victron's exact SmartSolar 150/85 installation table pairs 35 mm² battery cable with 100–120 A protection. This 120 A coordination envelope remains conditional on received cable insulation, route length, bundling and temperature correction." },
   { id: "dc16", label: "16 mm² DC cable", cores: 1, outsideDiameterMm: 8.6, conductorSize: "16 mm²", sheath: "single", ampacityA: 75 },
   { id: "dc10", label: "10 mm² DC cable", cores: 1, outsideDiameterMm: 7.2, conductorSize: "10 mm²", sheath: "single", ampacityA: 50 },
+  { id: "dc6", label: "6 mm² combined-PV DC cable", cores: 1, outsideDiameterMm: 6.8, conductorSize: "6 mm²", sheath: "single", ampacityA: 32, notes: "Carries both 13.28 A PV strings after the combiner; final installation ampacity and temperature correction must be verified." },
   { id: "pv4", label: "4 mm² PV cable", cores: 1, outsideDiameterMm: 6.1, conductorSize: "4 mm²", sheath: "single", ampacityA: 20 },
   { id: "service2.5", label: "2.5 mm² service conductor", cores: 1, outsideDiameterMm: 4.2, conductorSize: "2.5 mm²", sheath: "single", ampacityA: 20 },
   { id: "branch5.26", label: "10 AWG protected branch conductor", cores: 1, outsideDiameterMm: 5.6, conductorSize: "10 AWG · 5.26 mm²", sheath: "single", ampacityA: 32 },
@@ -445,8 +482,8 @@ const dseBaseDevices: readonly Device[] = [
     placement: inside("pvJunction", "din", 3), componentId: "pvSafety", status: "purchased", conductors: [
       p("positiveIn", "+ comb tooth", "positive", "top", { order: 0, gauge: "Comb link", terminal: "Disconnect screw clamp", terminalSize: "Verify received device", termination: "Approved comb/link", terminalDiameterMm: 5.5 }),
       p("negativeIn", "− comb tooth", "negative", "top", { order: 1, gauge: "Comb link", terminal: "Disconnect screw clamp", terminalSize: "Verify received device", termination: "Approved comb/link", terminalDiameterMm: 5.5 }),
-      p("positiveOut", "+ out", "positive", "bottom", { order: 0, gauge: "4 mm²", terminal: "Disconnect screw clamp", terminalSize: "Verify received device", termination: "Maker-approved conductor/ferrule", terminalDiameterMm: 5.5 }),
-      p("negativeOut", "− out", "negative", "bottom", { order: 1, gauge: "4 mm²", terminal: "Disconnect screw clamp", terminalSize: "Verify received device", termination: "Maker-approved conductor/ferrule", terminalDiameterMm: 5.5 }),
+      p("positiveOut", "+ out", "positive", "bottom", { order: 0, gauge: "6 mm²", terminal: "Disconnect screw clamp", terminalSize: "Verify received device accepts 6 mm²", termination: "Maker-approved conductor/ferrule", terminalDiameterMm: 6.8 }),
+      p("negativeOut", "− out", "negative", "bottom", { order: 1, gauge: "6 mm²", terminal: "Disconnect screw clamp", terminalSize: "Verify received device accepts 6 mm²", termination: "Maker-approved conductor/ferrule", terminalDiameterMm: 6.8 }),
     ],
   },
   rigidRail("pvCombRails", "Insulated positive / negative PV comb rails", [
@@ -462,14 +499,28 @@ const dseBaseDevices: readonly Device[] = [
   {
     id: "smartSolar", label: "Victron SmartSolar MPPT 150/85-Tr", kind: "converter", size: [0.295, 0.257, 0.103],
     placement: wall([1.28, 1.12, 0.052]), componentId: "solarController", bomIds: ["dse-smartsolar", "dse-mppt-wirebox-tr"],
-    status: "purchased", technicalUrl: "https://www.victronenergy.com/solar-charge-controllers/smartsolar-mppt-ve.can", conductors: [
-      p("pvPositive", "PV +", "positive", "bottom", { order: 0, diagramSide: "input", gauge: "4 mm²", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded copper; ferrule only if Victron accepts the selected size", terminalDiameterMm: 8 }),
-      p("pvNegative", "PV −", "negative", "bottom", { order: 1, diagramSide: "input", gauge: "4 mm²", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded copper; ferrule only if Victron accepts the selected size", terminalDiameterMm: 8 }),
+    status: "purchased", technicalUrl: SMARTSOLAR_SPEC,
+    power: {
+      role: "converter", basis: "manufacturer", verified: true, sourceUrl: SMARTSOLAR_SPEC,
+      readings: [
+        { label: "Maximum PV capacity at 24 V", watts: 2400 },
+        { label: "Maximum battery output", currentA: 85, voltage: "24 V nominal" },
+        { label: "Peak conversion efficiency", percent: 98 },
+        { label: "Self-consumption ceiling", watts: 0.84, voltage: "24 V", note: "Conservative conversion of the published <35 mA 12 V value." },
+      ],
+      note: "The 2.26 kW array is within the controller's published 2.4 kW nominal-PV limit at 24 V.",
+      internalProtection: { verified: true, features: ["PV reverse-polarity", "output short-circuit", "over-temperature"] },
+    },
+    conductors: [
+      p("pvPositive", "PV +", "positive", "bottom", { order: 0, diagramSide: "input", gauge: "6 mm² combined-array lead", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded copper; ferrule only if Victron accepts the selected size", terminalDiameterMm: 8 }),
+      p("pvNegative", "PV −", "negative", "bottom", { order: 1, diagramSide: "input", gauge: "6 mm² combined-array lead", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded copper; ferrule only if Victron accepts the selected size", terminalDiameterMm: 8 }),
       p("batteryPositive", "Battery +", "positive", "bottom", {
         order: 2, diagramSide: "output", gauge: "35 mm²", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded 35 mm² copper", terminalDiameterMm: 9,
         currentSource: {
           id: "smartsolar-output-source", label: "SmartSolar 150/85 battery output", channel: "positive",
-          continuousCapacityA: 85, shortCircuitCurrentA: 85, verified: true, basis: "regulated-output",
+          continuousCapacityA: 85, shortCircuitCurrentA: 85,
+          inherentCurrentLimit: { currentLimitA: 85, verified: true, note: "Published 85 A maximum regulated battery current and output short-circuit protection." },
+          verified: true, basis: "regulated-output",
         },
       }),
       p("batteryNegative", "Battery −", "negative", "bottom", { order: 3, diagramSide: "output", gauge: "35 mm²", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded 35 mm² copper", terminalDiameterMm: 9 }),
@@ -512,7 +563,14 @@ const dseBaseDevices: readonly Device[] = [
   },
   {
     id: "smartShunt", label: "Victron SmartShunt IP65 500 A", kind: "monitor", size: [0.12, 0.055, 0.045],
-    placement: wall([0.98, 0.43, 0.025]), componentId: "mainDistribution", bomIds: ["dse-shunt"], status: "purchased", conductors: [
+    placement: wall([0.98, 0.43, 0.025]), componentId: "mainDistribution", bomIds: ["dse-shunt"], status: "purchased",
+    power: {
+      role: "monitor", basis: "manufacturer", verified: true, sourceUrl: SMARTSHUNT_SPEC,
+      readings: [{ label: "Current draw", watts: 0.024, voltage: "24 V", note: "Upper bound from the published <1 mA draw." }],
+      note: "The 500 A shunt rating is measurement-path capacity, not standing consumption. The supplied positive sense lead uses a 1 A fuse.",
+      internalProtection: { verified: true, features: ["Factory 1 A fused positive sense lead"] },
+    },
+    conductors: [
       p("batteryMinus", "Battery minus", "negative", "left", { gauge: "1/0 AWG · 53.5 mm²", terminal: "SmartShunt battery bolt", terminalSize: "M10", termination: "1/0 AWG tinned-copper M10 closed lug", terminalDiameterMm: 10 }),
       p("systemMinus", "System minus", "negative", "right", {
         gauge: "1/0 AWG · 53.5 mm²", terminal: "SmartShunt system bolt", terminalSize: "M10",
@@ -545,8 +603,15 @@ const dseBaseDevices: readonly Device[] = [
     bomIds: ["dse-ventilated-ip65-enclosure", "dse-pg11-cable-glands", "dse-din-rail-pack"], status: "purchased", conductors: [],
   },
   breaker("sharedServicesBreaker", "Shared switched services · 10 A · 240 W", "secondaryJunction", 0, 10, {
-    componentId: "secondaryDistribution", bomIds: ["dse-switched-load-breaker"], status: "hold",
-    holdReason: "The previous B10 geometry had no current selected BOM part. Select a correctly rated DC breaker and verify polarity, interrupt capacity, terminal range and torque before commissioning.",
+    subtitle: "CHTAIXI B10 · purchased 26 Aug",
+    componentId: "secondaryDistribution", bomIds: ["dse-switched-load-breaker"], purchaseUrl: "https://www.amazon.com/dp/B09H4W5HSW",
+    status: "hold", procurementStatus: "purchased",
+    currentProtection: {
+      kind: "breaker", ratedCurrentA: 10, interruptRatingA: 6000, verified: false,
+      terminalPairs: [["line", "load"]],
+      note: "Retail listing claims 12–110 VDC, thermal-magnetic B curve and 6 kA breaking capacity; received markings and installation conditions still govern.",
+    },
+    holdReason: "The 10 A rating is appropriate for the 60 W expected load and 100 W conservative device-limit load. Keep the purchased breaker de-energized until its received DC voltage/polarity, 10 A curve, 6 kA claim, terminal range, torque, ambient derating and local acceptance are verified, and until the battery-bank prospective fault current is bounded below its interrupt rating.",
   }),
   breaker("orionBreaker32", "Orion input · 32 A", "secondaryJunction", 1, 32, {
     componentId: "secondaryDistribution", bomIds: ["dse-orion-input-breaker"], purchaseUrl: CHTAIXI_32, status: "purchased",
@@ -608,13 +673,22 @@ const dseBaseDevices: readonly Device[] = [
   },
   {
     id: "unifiPower", label: "UniFi 24 V to 5 V USB-A converter", kind: "converter", size: [0.075, 0.040, 0.025],
-    placement: inside("secondaryJunction", "backplate", 5), componentId: "unifiPower", bomIds: ["dse-unifi-converter", "dse-unifi-usb-cable"], status: "purchased", conductors: [
+    placement: inside("secondaryJunction", "backplate", 5), componentId: "unifiPower", bomIds: ["dse-unifi-converter", "dse-unifi-usb-cable"], status: "purchased",
+    power: {
+      role: "converter", basis: "retailer", verified: false, sourceUrl: "https://www.amazon.com/dp/B0G1W6JTX8",
+      readings: [{ label: "Claimed maximum 5 V output", watts: 25, voltage: "5 V", currentA: 5 }],
+      note: "The UniFi Express itself is limited to 10 W. Bench-test converter temperature, efficiency and repeated cold starts; no reliable maker data sheet was found.",
+      internalProtection: { verified: false, features: ["Over-current", "short-circuit", "over-temperature", "over/under-voltage"], note: "Retail-listing claims only; not credited as verified field-wire protection." },
+    },
+    conductors: [
       p("positiveIn", "24 V + in", "positive", "bottom", { order: 0 }), p("negativeIn", "24 V − in", "negative", "bottom", { order: 1 }),
       p("usbA", "USB-A power out", "multicore", "top", {
         terminal: "USB-A receptacle", terminalSize: "USB Type-A", termination: "Factory USB-A-to-USB-C cable", terminalDiameterMm: 9,
         currentSource: {
           id: "unifi-converter-output-source", label: "YRDZXG 5 V converter output", channel: "positive",
-          continuousCapacityA: 5, shortCircuitCurrentA: "unbounded", verified: false, basis: "regulated-output",
+          continuousCapacityA: 5, shortCircuitCurrentA: "unbounded",
+          inherentCurrentLimit: { currentLimitA: 5, verified: false, note: "Retail listing claims a 5 A regulated output and over-current/short-circuit protection." },
+          verified: false, basis: "regulated-output",
           note: "The purchased converter claims 5 A output and protection features; verify the received output connector and short-circuit envelope.",
         },
       }),
@@ -631,7 +705,13 @@ const dseBaseDevices: readonly Device[] = [
   twoCoreBreakout("outdoorLightBreakout", "Outdoor-light two-core breakout", inside("secondaryJunction", "backplate", 4)),
   {
     id: "switchPanel", label: "Six-gang service switch panel", subtitle: "1 Internet · 2 outdoor light · 3 Orion H · 4–6 spare", kind: "switch",
-    size: [0.19, 0.085, 0.045], placement: inside("secondaryJunction", "backplate", 8), componentId: "loadSwitches", bomIds: ["dse-switch-array"], status: "purchased", conductors: [
+    size: [0.19, 0.085, 0.045], placement: inside("secondaryJunction", "backplate", 8), componentId: "loadSwitches", bomIds: ["dse-switch-array"], status: "purchased",
+    power: {
+      role: "control-load", basis: "retailer", verified: false, sourceUrl: "https://www.amazon.com/dp/B0DM87L1Q3",
+      readings: [{ label: "Rocker indicator LEDs", note: "Standing draw is not published; measure the received prewired panel." }],
+      note: "The service devices dominate this branch; reserve 5 W in the circuit budget for switch/indicator and converter uncertainty.",
+    },
+    conductors: [
       p("common", "Common 24 V feed", "positive", "back", { order: 0 }),
       p("internet", "Switch 1 · Starlink + UniFi", "positive", "back", { order: 1 }), p("outdoor", "Switch 2 · outdoor light", "positive", "back", { order: 2 }),
       p("orionH", "Switch 3 · Orion H remote", "control", "back", { order: 5 }), p("spare4", "Switch 4 · spare", "positive", "back", { order: 3, optional: true }),
@@ -651,26 +731,66 @@ const dseBaseDevices: readonly Device[] = [
     batteryStringSource("battery-string-b-source", "24 V battery string B")),
   {
     id: "balancerA", label: "Victron battery balancer A", kind: "converter", size: [0.113, 0.100, 0.047], placement: wall([0.83, 0.82, 0.024]),
-    componentId: "balancers", bomIds: ["dse-balancers"], status: "purchased", conductors: [
+    componentId: "balancers", bomIds: ["dse-balancers"], status: "purchased",
+    power: {
+      role: "converter", basis: "manufacturer", verified: true, sourceUrl: BALANCER_SPEC,
+      readings: [
+        { label: "Maximum balance current", currentA: 0.7, voltage: "24 V bank" },
+        { label: "Off-state draw", watts: 0.017, voltage: "24 V", note: "0.7 mA published off current." },
+      ],
+      note: "Balancing current is transferred between series batteries, not an additional 16.8 W continuous house load.",
+      internalProtection: { verified: true, features: ["Over-temperature protection"] },
+    },
+    conductors: [
       p("positive", "String +", "positive", "bottom", { order: 0 }), p("midpoint", "12 V midpoint", "positive", "bottom", { order: 1 }), p("negative", "String −", "negative", "bottom", { order: 2 }),
     ],
   },
   {
     id: "balancerB", label: "Victron battery balancer B", kind: "converter", size: [0.113, 0.100, 0.047], placement: wall([1.00, 0.82, 0.024]),
-    componentId: "balancers", bomIds: ["dse-balancers"], status: "purchased", conductors: [
+    componentId: "balancers", bomIds: ["dse-balancers"], status: "purchased",
+    power: {
+      role: "converter", basis: "manufacturer", verified: true, sourceUrl: BALANCER_SPEC,
+      readings: [
+        { label: "Maximum balance current", currentA: 0.7, voltage: "24 V bank" },
+        { label: "Off-state draw", watts: 0.017, voltage: "24 V", note: "0.7 mA published off current." },
+      ],
+      note: "Victron calls for at least 0.75 mm² leads; the modeled 1.5 mm² leads satisfy normal current, but their battery-adjacent fault protection remains a separate hold.",
+      internalProtection: { verified: true, features: ["Over-temperature protection"] },
+    },
+    conductors: [
       p("positive", "String +", "positive", "bottom", { order: 0 }), p("midpoint", "12 V midpoint", "positive", "bottom", { order: 1 }), p("negative", "String −", "negative", "bottom", { order: 2 }),
     ],
   },
   {
     id: "multiPlus", label: "Victron MultiPlus-II 24/3000", kind: "inverter", size: [0.268, 0.499, 0.141], placement: wall([1.70, 0.82, 0.071]),
-    componentId: "inverter", bomIds: ["dse-multiplus"], status: "purchased", conductors: [
+    componentId: "inverter", bomIds: ["dse-multiplus"], status: "purchased", technicalUrl: MULTIPLUS_SPEC,
+    power: {
+      role: "converter", basis: "manufacturer", verified: true, sourceUrl: MULTIPLUS_SPEC,
+      readings: [
+        { label: "Continuous AC output at 25 °C", watts: 2400, voltAmps: 3000, voltage: "230 VAC" },
+        { label: "Continuous AC output at 40 °C", watts: 2200, voltage: "230 VAC" },
+        { label: "Peak AC output", watts: 5500 },
+        { label: "Maximum battery-charge current", currentA: 70, voltage: "24 V nominal" },
+        { label: "Idle draw", watts: 13 },
+        { label: "AES / search draw", wattsRange: [3, 9] },
+      ],
+      note: "The exact 24/3000/70-32 manual requires a dedicated 300 A external DC protective device and 50 mm² copper for a 0–5 m run. The current direct bus connection lacks that protector and remains a genuine design hold.",
+      internalProtection: {
+        verified: true,
+        features: ["AC-output short-circuit", "overload", "battery high/low voltage", "over-temperature", "input-ripple"],
+        note: "Internal equipment protection does not replace the required external DC protection or downstream AC RCBO.",
+      },
+    },
+    conductors: [
       p("dcPositive", "Battery +", "positive", "bottom", {
         order: 0, gauge: "1/0 AWG · 53.5 mm²", terminal: "Victron DC bolt", terminalSize: "M8", termination: "1/0 AWG tinned-copper M8 closed lug", terminalDiameterMm: 8,
         terminalNote: "Victron specifies 12 N·m for the M8 DC connection. This bidirectional terminal is also the 70 A charger output.",
         currentSource: {
           id: "multiplus-dc-charger-source", label: "MultiPlus 70 A DC charger output", channel: "positive",
-          continuousCapacityA: 70, shortCircuitCurrentA: "unbounded", verified: false, basis: "regulated-output",
-          note: "The charger is rated 70 A; its DC fault-current envelope and reverse-feed protection are not yet verified.",
+          continuousCapacityA: 70, shortCircuitCurrentA: "unbounded",
+          inherentCurrentLimit: { currentLimitA: 70, verified: true, note: "Published maximum regulated battery-charge current." },
+          verified: true, basis: "regulated-output",
+          note: "The regulated charger contribution is bounded at 70 A. This does not limit reverse battery current into the bidirectional DC terminal.",
         },
       }),
       p("dcNegative", "Battery −", "negative", "bottom", { order: 1, gauge: "1/0 AWG · 53.5 mm²", terminal: "Victron DC bolt", terminalSize: "M8", termination: "1/0 AWG tinned-copper M8 closed lug", terminalDiameterMm: 8, terminalNote: "Victron specifies 12 N·m for the M8 DC connection." }),
@@ -775,7 +895,17 @@ const dseBaseDevices: readonly Device[] = [
     id: "generator", label: "Existing Husqvarna G3200P", kind: "generator", presentation: "integrated-cable-breakout",
     size: [0.60, 0.56, 0.48], placement: outside([0.58, 0.30, -0.72]),
     terminalPitchByFaceM: { right: 0.040 },
-    componentId: "generator", status: "existing", conductors: [
+    componentId: "generator", bomIds: ["dse-existing-generator"], status: "purchased", procurementStatus: "existing", technicalUrl: HUSQVARNA_G3200P,
+    power: {
+      role: "source", basis: "manufacturer", verified: false, sourceUrl: HUSQVARNA_G3200P,
+      readings: [
+        { label: "Rated 50 Hz AC output", watts: 2800, voltage: "230 VAC" },
+        { label: "Model-family maximum output", wattsRange: [3000, 3200], note: "Published manuals/product variants differ; received nameplate governs." },
+      ],
+      note: "Pre-existing/purchased equipment. The planned 10 A input circuit intentionally limits usable transfer to 2.3 kW; confirm the exact Fiji receptacle, outlet breaker and neutral-earth arrangement on the actual unit.",
+      internalProtection: { verified: false, features: ["Resettable outlet circuit breaker"], note: "The model-family manual documents a circuit breaker, but its exact received rating and fault capability are not yet recorded." },
+    },
+    conductors: [
       p("line", "Internal active core", "ac-line", "right", {
         order: 0, optional: true, terminal: "Generator active contact", terminalSize: "AS/NZS 3112 / Type I outlet core", termination: "Internal/factory contact", terminalDiameterMm: 5, internalMates: ["cable"],
         currentSource: {
@@ -794,7 +924,16 @@ const dseBaseDevices: readonly Device[] = [
   {
     id: "toolOutlet", label: "Type I trailing tool outlet", kind: "load", presentation: "integrated-cable-breakout",
     size: [0.085, 0.060, 0.040], placement: wall([0.38, 1.42, 0.025]),
-    componentId: "toolOutlet", bomIds: ["dse-tool-lead"], status: "planned", conductors: [
+    componentId: "toolOutlet", bomIds: ["dse-tool-lead"], status: "planned",
+    power: {
+      role: "variable-load", basis: "calculated", verified: true,
+      readings: [
+        { label: "Posted one-tool operating limit", watts: 1800, voltage: "230 VAC", currentA: 7.83 },
+        { label: "10 A outlet hardware ceiling", watts: 2300, voltage: "230 VAC", currentA: 10 },
+      ],
+      note: "The 2.3 kW figure is only the outlet/nameplate ceiling. Normal operation is one corded tool at a time with a nameplate at or below 1.8 kW; motor starting current is transient and must pass the warm-condition commissioning test without nuisance trips or excessive voltage sag.",
+    },
+    conductors: [
       p("line", "Internal active / L", "ac-line", "bottom", { order: 0, optional: true, terminal: "Type I active contact", terminalSize: "AS/NZS 3112", termination: "Internal/factory contact", terminalDiameterMm: 5, internalMates: ["cable"] }),
       p("cable", "White three-core trailing lead", "multicore", "bottom", { order: 1, gauge: "3 × 1.5 mm²", terminal: "Moulded/approved flexible cord", terminalSize: "10 A Type I assembly", termination: "Complete strain-relieved cable", terminalDiameterMm: 9.8, internalMates: ["line", "neutral", "earth"] }),
       p("neutral", "Internal neutral / N", "ac-neutral", "bottom", { order: 2, optional: true, terminal: "Type I neutral contact", terminalSize: "AS/NZS 3112", termination: "Internal/factory contact", terminalDiameterMm: 5, internalMates: ["cable"] }),
@@ -821,7 +960,17 @@ const dseBaseDevices: readonly Device[] = [
   {
     id: "ekrano", label: "Victron Ekrano GX", kind: "monitor", size: [0.187, 0.124, 0.030], placement: wall([1.88, 2.02, 0.015]),
     terminalPitchByFaceM: { bottom: 0.040 },
-    componentId: "systemMonitor", bomIds: ["dse-ekrano-gx", "dse-vedirect-cables", "dse-vebus-cable", "dse-ekrano-ethernet"], status: "purchased", conductors: [
+    componentId: "systemMonitor", bomIds: ["dse-ekrano-gx", "dse-vedirect-cables", "dse-vebus-cable", "dse-ekrano-ethernet"], status: "purchased", technicalUrl: EKRANO_SPEC,
+    power: {
+      role: "monitor", basis: "manufacturer", verified: true, sourceUrl: EKRANO_SPEC,
+      readings: [
+        { label: "Display off", watts: 3, voltage: "24 V" },
+        { label: "Display on", watts: 6.6, voltage: "24 V" },
+      ],
+      note: "Two unused USB host ports could add up to 7.5 W combined; no USB loads are modeled on the Ekrano. The supplied power lead is fused at 3.15 A.",
+      internalProtection: { verified: true, features: ["Factory 3.15 A fused positive supply lead"] },
+    },
+    conductors: [
       p("positive", "Power +", "positive", "bottom", { order: 0, gauge: "Factory fused lead", terminal: "Ekrano power connector", terminalSize: "Factory mating plug with M8 battery ring", termination: "Supplied 3.15 A fused power lead", terminalDiameterMm: 5 }),
       p("veDirectSolar", "VE.Direct · SmartSolar", "data", "bottom", { order: 1, terminal: "VE.Direct receptacle", terminalSize: "Victron VE.Direct", termination: "Factory VE.Direct cable", terminalDiameterMm: 7 }),
       p("veDirectShunt", "VE.Direct · SmartShunt", "data", "bottom", { order: 2, terminal: "VE.Direct receptacle", terminalSize: "Victron VE.Direct", termination: "Factory VE.Direct cable", terminalDiameterMm: 7 }),
@@ -832,14 +981,29 @@ const dseBaseDevices: readonly Device[] = [
   },
   {
     id: "starlink", label: "Starlink Mini", kind: "load", size: [0.299, 0.039, 0.259], placement: outside([3.55, 3.35, 0.10]),
-    componentId: "starlink", status: "existing", conductors: [
+    componentId: "starlink", bomIds: ["dse-ex-starlink"], status: "purchased", procurementStatus: "purchased", technicalUrl: STARLINK_SPEC,
+    power: {
+      role: "load", basis: "manufacturer", verified: true, sourceUrl: STARLINK_SPEC,
+      readings: [
+        { label: "Average input", wattsRange: [25, 40], voltage: "12–48 VDC" },
+        { label: "Rated input ceiling", watts: 60, voltage: "12–48 VDC" },
+      ],
+      note: "The 40 W planning value is the top of Starlink's published average range; 60 W is used for conservative branch capacity.",
+    },
+    conductors: [
       p("power", "Factory DC power lead", "multicore", "bottom", { order: 0, terminal: "Starlink Mini DC power connector", terminalSize: "Factory two-core lead", termination: "Complete Starlink power cable", terminalDiameterMm: 6, internalMates: ["positive", "negative"] }),
       p("ethernet", "Ethernet", "data", "bottom", { order: 1, terminal: "RJ45 Ethernet receptacle", terminalSize: "8P8C / RJ45", termination: "Outdoor-rated Ethernet lead", terminalDiameterMm: 9 }),
     ],
   },
   {
     id: "unifi", label: "UniFi Express", kind: "load", size: [0.098, 0.098, 0.030], placement: wall([2.48, 1.42, 0.015]),
-    componentId: "router", bomIds: ["dse-router"], status: "purchased", conductors: [
+    componentId: "router", bomIds: ["dse-router"], status: "purchased", technicalUrl: UNIFI_SPEC,
+    power: {
+      role: "load", basis: "manufacturer", verified: true, sourceUrl: UNIFI_SPEC,
+      readings: [{ label: "Maximum input", watts: 10, voltage: "USB-C 5 V / 3 A supply" }],
+      note: "The 10 W manufacturer maximum, rather than the converter's 25 W capability, is the expected UniFi load.",
+    },
+    conductors: [
       p("usbC", "USB-C power", "multicore", "bottom", { order: 0, terminal: "USB-C power receptacle", terminalSize: "USB Type-C", termination: "Factory USB-C cable", terminalDiameterMm: 8 }),
       p("ethernetStarlink", "WAN / Starlink", "data", "bottom", { order: 1, terminal: "RJ45 WAN receptacle", terminalSize: "8P8C / RJ45", termination: "Factory Ethernet patch cable", terminalDiameterMm: 9 }),
       p("ethernetEkrano", "LAN / Ekrano", "data", "bottom", { order: 2, terminal: "RJ45 LAN receptacle", terminalSize: "8P8C / RJ45", termination: "Factory Ethernet patch cable", terminalDiameterMm: 9 }),
@@ -847,7 +1011,21 @@ const dseBaseDevices: readonly Device[] = [
   },
   {
     id: "usbOrion", label: "Victron Orion-Tr Smart 24/12-30", kind: "converter", size: [0.130, 0.186, 0.055], placement: wall([2.92, 0.96, 0.028]),
-    componentId: "orionUsb", bomIds: ["dse-orion-usb-converter"], status: "purchased", technicalUrl: "https://www.victronenergy.com/dc-dc-converters/orion-tr-smart", conductors: [
+    componentId: "orionUsb", bomIds: ["dse-orion-usb-converter"], status: "purchased", technicalUrl: ORION_SPEC,
+    power: {
+      role: "converter", basis: "manufacturer", verified: true, sourceUrl: ORION_SPEC,
+      readings: [
+        { label: "Continuous output at 40 °C", watts: 360, currentA: 30, voltage: "12 V nominal" },
+        { label: "Output at 25 °C", watts: 430 },
+        { label: "Ten-second output", currentA: 45, durationSeconds: 10 },
+        { label: "Short-circuit output", currentA: 60 },
+        { label: "No-load input ceiling", watts: 2.4, voltage: "24 V", note: "Derived from <100 mA." },
+        { label: "Remote-off ceiling", watts: 0.024, voltage: "24 V", note: "Derived from <1 mA." },
+      ],
+      note: "Efficiency is 88%. Victron's installation table recommends a 30 A external protective device and 6 mm² cable for a 24 V, 1–2 m run; the purchased 32 A breaker is close and may need ambient/curve review.",
+      internalProtection: { verified: true, features: ["60 A hard short-circuit output limit", "over-temperature derating"] },
+    },
+    conductors: [
       p("remoteH", "Remote H", "control", "bottom", { order: 0, gauge: "0.75 mm²", terminal: "Orion remote H screw clamp", terminalSize: "Verify received remote connector", termination: "0.75 mm² bootlace ferrule if accepted", terminalDiameterMm: 4, terminalNote: "The six-gang switch applies positive to H; L remains unused." }),
       p("positiveIn", "+ input · 24 V", "positive", "bottom", { order: 1, gauge: "6 mm²", terminal: "Orion power screw clamp", terminalSize: "Fine-stranded copper terminal", termination: "Bare fine-stranded copper; ferrule is not required by Victron", terminalDiameterMm: 7, terminalNote: "Victron's 24 V table recommends 6 mm² for a 1–2 m run; terminal torque is 1.6 N·m." }),
       p("ground", "Common ground / −", "negative", "bottom", { order: 2, gauge: "10 mm²", terminal: "Orion common-negative screw clamp", terminalSize: "Fine-stranded copper terminal", termination: "Bare fine-stranded copper; ferrule is not required by Victron", terminalDiameterMm: 8, terminalNote: "This single common negative is shared by input and output in the non-isolated model; terminal torque is 1.6 N·m." }),
@@ -875,7 +1053,17 @@ const dseBaseDevices: readonly Device[] = [
   {
     id: "usb145A", label: "Coolgear 145 W charger A", kind: "load", size: [0.052, 0.040, 0.092], placement: wall([3.08, 0.82, 0.100]),
     componentId: "usb", layoutGroup: { id: "coolgear-145", label: "Coolgear 145 W chargers", columns: 2, order: 0 },
-    bomIds: ["dse-usb"], purchaseUrl: COOLGEAR_145, status: "purchased", conductors: [
+    bomIds: ["dse-usb"], purchaseUrl: COOLGEAR_145, status: "purchased",
+    power: {
+      role: "load", basis: "manufacturer", verified: true, sourceUrl: COOLGEAR_145,
+      readings: [
+        { label: "Maximum USB output", watts: 145 },
+        { label: "Rated input current", currentA: 15, voltage: "12–24 V nominal / 9–32 V extended" },
+      ],
+      note: "Coolgear does not publish idle draw; measure the received charger. Two units can use the Orion's complete 30 A continuous output allowance.",
+      internalProtection: { verified: true, features: ["Output over-current", "short-circuit", "over-temperature"], note: "These protect charger/output behavior; they do not prove protection of the upstream 12 AWG socket daisy chain." },
+    },
+    conductors: [
       p("plug", "Factory cigarette-lighter plug", "multicore", "back", { terminal: "Cigarette-lighter plug", terminalSize: "Centre positive / shell negative", termination: "Mates directly with wall socket", terminalDiameterMm: 20, terminalLengthMm: 14, internalMates: ["positive", "negative"] }),
       p("usbC1", "USB-C 1", "multicore", "front", { order: 0, optional: true, terminal: "USB-C receptacle", terminalSize: "USB Type-C", termination: "Factory USB-C plug", terminalDiameterMm: 8 }),
       p("usbC2", "USB-C 2", "multicore", "front", { order: 1, optional: true, terminal: "USB-C receptacle", terminalSize: "USB Type-C", termination: "Factory USB-C plug", terminalDiameterMm: 8 }),
@@ -892,7 +1080,17 @@ const dseBaseDevices: readonly Device[] = [
   {
     id: "usb145B", label: "Coolgear 145 W charger B", kind: "load", size: [0.052, 0.040, 0.092], placement: wall([3.38, 0.82, 0.100]),
     componentId: "usb", layoutGroup: { id: "coolgear-145", label: "Coolgear 145 W chargers", columns: 2, order: 1 },
-    bomIds: ["dse-usb"], purchaseUrl: COOLGEAR_145, status: "purchased", conductors: [
+    bomIds: ["dse-usb"], purchaseUrl: COOLGEAR_145, status: "purchased",
+    power: {
+      role: "load", basis: "manufacturer", verified: true, sourceUrl: COOLGEAR_145,
+      readings: [
+        { label: "Maximum USB output", watts: 145 },
+        { label: "Rated input current", currentA: 15, voltage: "12–24 V nominal / 9–32 V extended" },
+      ],
+      note: "Coolgear does not publish idle draw; measure the received charger. Two units can use the Orion's complete 30 A continuous output allowance.",
+      internalProtection: { verified: true, features: ["Output over-current", "short-circuit", "over-temperature"], note: "These protect charger/output behavior; they do not prove protection of the upstream 12 AWG socket daisy chain." },
+    },
+    conductors: [
       p("plug", "Factory cigarette-lighter plug", "multicore", "back", { terminal: "Cigarette-lighter plug", terminalSize: "Centre positive / shell negative", termination: "Mates directly with wall socket", terminalDiameterMm: 20, terminalLengthMm: 14, internalMates: ["positive", "negative"] }),
       p("usbC1", "USB-C 1", "multicore", "front", { order: 0, optional: true, terminal: "USB-C receptacle", terminalSize: "USB Type-C", termination: "Factory USB-C plug", terminalDiameterMm: 8 }),
       p("usbC2", "USB-C 2", "multicore", "front", { order: 1, optional: true, terminal: "USB-C receptacle", terminalSize: "USB Type-C", termination: "Factory USB-C plug", terminalDiameterMm: 8 }),
@@ -905,15 +1103,24 @@ const dseBaseDevices: readonly Device[] = [
   twoCoreBreakout("indoorLightBreakout", "Indoor-light two-core breakout", wall([4.88, 0.52, 0.018])),
   {
     id: "roomSwitch", label: "Indoor-light wall switch", kind: "switch", size: [0.090, 0.090, 0.035], placement: wall([4.58, 0.82, 0.018]),
-    componentId: "roomSwitch", bomIds: ["dse-room-switch"], status: "purchased", conductors: [p("in", "24 V feed", "positive", "bottom"), p("out", "Switched light +", "positive", "top")],
+    componentId: "roomSwitch", bomIds: ["dse-room-switch"], status: "purchased",
+    power: {
+      role: "control-load", basis: "retailer", verified: false, sourceUrl: "https://www.amazon.com/dp/B0FCYKC4R7",
+      readings: [{ label: "Red indicator", note: "Standing draw is not published; measure it energized at the commissioned bank voltage." }],
+    },
+    conductors: [p("in", "24 V feed", "positive", "bottom"), p("out", "Switched light +", "positive", "top")],
   },
   {
     id: "indoorLight", label: "Indoor utility light", kind: "load", size: [0.127, 0.055, 0.055], placement: ceiling([3.05, 3.42, 1.05]),
-    componentId: "indoorLight", bomIds: ["dse-indoor-light"], status: "purchased", conductors: [p("power", "Factory two-core light lead", "multicore", "left", { terminal: "Factory light pigtail", terminalSize: "Two-core 24 V lead", termination: "Sealed two-core cable splice", terminalDiameterMm: 6.4, internalMates: ["positive", "negative"] })],
+    componentId: "indoorLight", bomIds: ["dse-indoor-light"], status: "purchased",
+    power: { role: "load", basis: "user-confirmed", verified: true, readings: [{ label: "Input", watts: 5, voltage: "12–28 VDC" }], note: "5 W value confirmed by the system owner; verify received label/current during bench commissioning." },
+    conductors: [p("power", "Factory two-core light lead", "multicore", "left", { terminal: "Factory light pigtail", terminalSize: "Two-core 24 V lead", termination: "Sealed two-core cable splice", terminalDiameterMm: 6.4, internalMates: ["positive", "negative"] })],
   },
   {
     id: "outdoorLight", label: "Outdoor utility light", kind: "load", size: [0.127, 0.055, 0.055], placement: outsideWall([5.82, 2.30, -0.08]),
-    componentId: "outdoorLight", bomIds: ["dse-outdoor-light"], status: "purchased", conductors: [p("power", "Factory two-core light lead", "multicore", "front", { terminal: "Factory light pigtail", terminalSize: "Two-core 24 V lead", termination: "Sealed two-core cable splice", terminalDiameterMm: 6.4, internalMates: ["positive", "negative"] })],
+    componentId: "outdoorLight", bomIds: ["dse-outdoor-light"], status: "purchased",
+    power: { role: "load", basis: "user-confirmed", verified: true, readings: [{ label: "Input", watts: 5, voltage: "12–28 VDC" }], note: "5 W value confirmed by the system owner; verify received label/current during bench commissioning." },
+    conductors: [p("power", "Factory two-core light lead", "multicore", "front", { terminal: "Factory light pigtail", terminalSize: "Two-core 24 V lead", termination: "Sealed two-core cable splice", terminalDiameterMm: 6.4, internalMates: ["positive", "negative"] })],
   },
 ];
 
@@ -943,8 +1150,8 @@ const dseBaseConnections: readonly Connection[] = [
   w("pv-comb-b-tap-negative", ep("pvBreakerB", "pvNegOut"), ep("pvCombRails", "negativeBreakerB"), "negative", "pvComb", { returnFor: "pv-comb-b-tap-positive", circuitId: "pv-comb-b" }),
   w("pv-comb-b-spd-negative", ep("pvSpd", "negative"), ep("pvCombRails", "negativeSpd"), "negative", "pvComb", { returnFor: "pv-comb-b-spd-positive", circuitId: "pv-comb-spd" }),
   w("pv-comb-spd-disconnect-negative", ep("pvDisconnect", "negativeIn"), ep("pvCombRails", "negativeDisconnect"), "negative", "pvComb", { returnFor: "pv-comb-spd-disconnect-positive", circuitId: "pv-comb-disconnect" }),
-  w("pv-output-positive", ep("pvDisconnect", "positiveOut"), ep("smartSolar", "pvPositive"), "positive", "pv4", { bundleId: "pv-mppt", circuitId: "pv-output" }),
-  w("pv-output-negative", ep("pvDisconnect", "negativeOut"), ep("smartSolar", "pvNegative"), "negative", "pv4", { bundleId: "pv-mppt", returnFor: "pv-output-positive", circuitId: "pv-output" }),
+  w("pv-output-positive", ep("pvDisconnect", "positiveOut"), ep("smartSolar", "pvPositive"), "positive", "dc6", { bundleId: "pv-mppt", circuitId: "pv-output" }),
+  w("pv-output-negative", ep("pvDisconnect", "negativeOut"), ep("smartSolar", "pvNegative"), "negative", "dc6", { bundleId: "pv-mppt", returnFor: "pv-output-positive", circuitId: "pv-output" }),
   w("pv-spd-earth", ep("pvSpd", "earth"), ep("earthBar", "post3"), "earth", "dc10"),
   w("pv-frame-a-daisy", ep("panel1", "frame"), ep("panel2", "frame"), "earth", "pv4"),
   w("pv-frame-a-outside", ep("panel2", "frame"), ep("servicePenetration", "frameAOutside"), "earth", "earth4"),
@@ -953,21 +1160,38 @@ const dseBaseConnections: readonly Connection[] = [
   w("pv-frame-b-outside", ep("panel4", "frame"), ep("servicePenetration", "frameBOutside"), "earth", "earth4"),
   w("pv-frame-b-inside", ep("servicePenetration", "frameBInside"), ep("earthBar", "post6"), "earth", "earth4"),
 
-  w("battery-a-series", ep("battery1", "positive"), ep("battery2", "negative"), "positive", "battery53", { seriesLink: true }),
-  w("battery-b-series", ep("battery3", "positive"), ep("battery4", "negative"), "positive", "battery53", { seriesLink: true }),
+  w("battery-a-series", ep("battery1", "positive"), ep("battery2", "negative"), "positive", "battery53", {
+    seriesLink: true, sourceLeadReason: "Unfused battery-string series jumper; keep it shortest-practical, supported, guarded and separated from grounded metal throughout its route.",
+  }),
+  w("battery-b-series", ep("battery3", "positive"), ep("battery4", "negative"), "positive", "battery53", {
+    seriesLink: true, sourceLeadReason: "Unfused battery-string series jumper; keep it shortest-practical, supported, guarded and separated from grounded metal throughout its route.",
+  }),
   w("battery-a-positive-breaker", ep("battery2", "positive"), ep("batteryBreakerA", "line"), "positive", "battery53", {
     bundleId: "battery-a", circuitId: "battery-a", sourceLeadReason: "Battery-adjacent lead to the first string overcurrent device; keep it mechanically protected and as short as practicable.",
   }),
-  w("battery-a-breaker-bus", ep("batteryBreakerA", "load"), ep("mainPositiveBus", "post1"), "positive", "battery53"),
+  w("battery-a-breaker-bus", ep("batteryBreakerA", "load"), ep("mainPositiveBus", "post1"), "positive", "battery53", {
+    sourceLeadReason: "Short guarded common-bus-to-string-breaker link; every other bus source can feed a cable fault, so minimize and protect this segment physically.",
+  }),
   w("battery-b-positive-breaker", ep("battery4", "positive"), ep("batteryBreakerB", "line"), "positive", "battery53", {
     bundleId: "battery-b", circuitId: "battery-b", sourceLeadReason: "Battery-adjacent lead to the first string overcurrent device; keep it mechanically protected and as short as practicable.",
   }),
-  w("battery-b-breaker-bus", ep("batteryBreakerB", "load"), ep("mainPositiveBus", "post2"), "positive", "battery53"),
-  w("battery-a-negative-shunt", ep("battery1", "negative"), ep("smartShunt", "batteryMinus"), "negative", "battery53", { bundleId: "battery-a", returnFor: "battery-a-positive-breaker", circuitId: "battery-a" }),
-  w("battery-b-negative-shunt", ep("battery3", "negative"), ep("smartShunt", "batteryMinus"), "negative", "battery53", { bundleId: "battery-b", returnFor: "battery-b-positive-breaker", circuitId: "battery-b" }),
-  w("shunt-negative-bus", ep("smartShunt", "systemMinus"), ep("mainNegativeBus", "post1"), "negative", "battery53"),
+  w("battery-b-breaker-bus", ep("batteryBreakerB", "load"), ep("mainPositiveBus", "post2"), "positive", "battery53", {
+    sourceLeadReason: "Short guarded common-bus-to-string-breaker link; every other bus source can feed a cable fault, so minimize and protect this segment physically.",
+  }),
+  w("battery-a-negative-shunt", ep("battery1", "negative"), ep("smartShunt", "batteryMinus"), "negative", "battery53", {
+    bundleId: "battery-a", returnFor: "battery-a-positive-breaker", circuitId: "battery-a",
+    sourceLeadReason: "Battery-adjacent unfused return to SmartShunt BATTERY MINUS; route beside the protected positive lead and keep it shortest-practical, guarded and supported.",
+  }),
+  w("battery-b-negative-shunt", ep("battery3", "negative"), ep("smartShunt", "batteryMinus"), "negative", "battery53", {
+    bundleId: "battery-b", returnFor: "battery-b-positive-breaker", circuitId: "battery-b",
+    sourceLeadReason: "Battery-adjacent unfused return to SmartShunt BATTERY MINUS; route beside the protected positive lead and keep it shortest-practical, guarded and supported.",
+  }),
+  w("shunt-negative-bus", ep("smartShunt", "systemMinus"), ep("mainNegativeBus", "post1"), "negative", "battery53", {
+    status: "hold",
+    holdReason: "Controlled normal demand fits the modeled 120 A envelope: one tool at or below 1,800 W, both high-power USB branches off during tool use, and the Ekrano DVCC charge-current limit at 100 A. The hold remains for fault/OCP coordination and received conductor, lug and termination evidence; do not treat the SmartShunt's 500 A body rating as cable ampacity.",
+  }),
   w("shunt-sense", ep("mainPositiveBus", "post4"), ep("smartShunt", "vBattPlus"), "positive", "factory", {
-    currentProtection: { kind: "fuse", ratedCurrentA: 5, verified: false, note: "Confirm the supplied SmartShunt sense-lead fuse marking." },
+    currentProtection: { kind: "fuse", ratedCurrentA: 1, verified: true, note: "Victron supplies a 1 A fused positive sense lead; carry the exact maker-specified spare." },
   }),
   w("balancer-a-positive", ep("battery2", "positive"), ep("balancerA", "positive"), "positive", "branch1.5", { circuitId: "balancer-a" }),
   w("balancer-a-mid", ep("battery1", "positive"), ep("balancerA", "midpoint"), "positive", "branch1.5"),
@@ -979,10 +1203,18 @@ const dseBaseConnections: readonly Connection[] = [
   w("mppt-positive-breaker", ep("smartSolar", "batteryPositive"), ep("mpptBreaker", "load"), "positive", "dc35", {
     bundleId: "mppt-dc", circuitId: "mppt-output", sourceLeadReason: "Short controller-output lead to the battery-side SmartSolar cutoff.",
   }),
-  w("mppt-breaker-bus", ep("mpptBreaker", "line"), ep("mainPositiveBus", "post4"), "positive", "dc35"),
+  w("mppt-breaker-bus", ep("mpptBreaker", "line"), ep("mainPositiveBus", "post4"), "positive", "dc35", {
+    sourceLeadReason: "Short guarded common-bus-to-SmartSolar-breaker link; keep the first-protector segment mechanically protected and as short as practicable.",
+  }),
   w("mppt-negative-bus", ep("smartSolar", "batteryNegative"), ep("mainNegativeBus", "post2"), "negative", "dc35", { bundleId: "mppt-dc", returnFor: "mppt-positive-breaker", circuitId: "mppt-output" }),
-  w("multiplus-positive", ep("mainPositiveBus", "post3"), ep("multiPlus", "dcPositive"), "positive", "battery53", { bundleId: "multiplus-dc", circuitId: "multiplus-dc" }),
-  w("multiplus-negative", ep("mainNegativeBus", "post3"), ep("multiPlus", "dcNegative"), "negative", "battery53", { bundleId: "multiplus-dc", returnFor: "multiplus-positive", circuitId: "multiplus-dc" }),
+  w("multiplus-positive", ep("mainPositiveBus", "post3"), ep("multiPlus", "dcPositive"), "positive", "battery53", {
+    bundleId: "multiplus-dc", circuitId: "multiplus-dc", status: "hold",
+    holdReason: "Genuine design hold: the exact MultiPlus-II 24/3000/70 manual calls for a dedicated 300 A external DC protective device and at least 50 mm² copper for a 0–5 m run. Select a resettable DC breaker with adequate interrupt capacity, coordinate it with the final cable and 250 A bus architecture, and obtain installer approval before energizing.",
+  }),
+  w("multiplus-negative", ep("mainNegativeBus", "post3"), ep("multiPlus", "dcNegative"), "negative", "battery53", {
+    bundleId: "multiplus-dc", returnFor: "multiplus-positive", circuitId: "multiplus-dc", status: "hold",
+    holdReason: "Match the final MultiPlus negative conductor to the accepted protected positive branch, manufacturer cable table, supported routing and M8 termination.",
+  }),
 
   w("secondary-feeder-positive", ep("mainPositiveBus", "post4"), ep("secondaryPositiveBus", "post1"), "positive", "battery53", {
     circuitId: "secondary-feeder",
@@ -1232,13 +1464,95 @@ export const dseDevices: readonly Device[] = expandedTopology.devices;
 export const dseConnections: readonly Connection[] = expandedTopology.connections;
 export const dseCurrentSources = currentSourcesFromDevices(dseDevices);
 
+export const dsePowerCircuits: readonly CircuitPowerBudget[] = [
+  {
+    id: "pv-strings", label: "Two independent 2-panel PV strings", deviceIds: ["panel1", "panel2", "panel3", "panel4", "pvBreakerA", "pvBreakerB"],
+    nominalVoltageV: 85.12, maximumWatts: 2260, maximumCurrentA: 13.28, protectionDeviceId: "pvBreakerA", conductorAmpacityA: 20,
+    normalStatus: "within-capacity", faultStatus: "provisional",
+    note: "Each home run carries one 13.28 A operating string (14.20 A Isc) on a 20 A-rated 4 mm² path. Each 20 A breaker is below Suntech's 25 A maximum series-fuse rating, but received voltage, polarity and interrupt markings remain unverified.",
+  },
+  {
+    id: "pv-combined", label: "Combined PV comb rails to SmartSolar", deviceIds: ["pvCombRails", "pvSpd", "pvDisconnect", "smartSolar"],
+    nominalVoltageV: 85.12, maximumWatts: 2260, maximumCurrentA: 26.56, conductorAmpacityA: 32,
+    normalStatus: "within-capacity", faultStatus: "provisional",
+    note: "The prior 20 A/4 mm² combined lead was too small for both strings. The canonical plan now uses a 32 A-rated 6 mm² positive/negative pair; verify the pre-existing rails, disconnect and terminals accept that current and conductor.",
+  },
+  {
+    id: "mppt-battery", label: "SmartSolar battery output", deviceIds: ["smartSolar", "mpptBreaker"],
+    nominalVoltageV: 24, maximumWatts: 2448, maximumCurrentA: 85, protectionDeviceId: "mpptBreaker", conductorAmpacityA: 120,
+    normalStatus: "within-capacity", faultStatus: "provisional",
+    note: "Victron's exact table pairs 35 mm² battery cable with 100–120 A protection, so the 85 A regulated output and purchased 120 A breaker fit the manufacturer envelope. Confirm the final cable installation/temperature rating and received breaker AIC, terminal and torque evidence; keep the common-bus-to-breaker segment shortest-practical and guarded.",
+  },
+  {
+    id: "multiplus-dc", label: "MultiPlus 24 V DC input/charger branch", deviceIds: ["multiPlus"],
+    nominalVoltageV: 24, minimumVoltageV: 19, maximumWatts: 1800, maximumCurrentA: 100.8, conductorAmpacityA: 120,
+    normalStatus: "within-capacity", faultStatus: "incomplete",
+    note: "The posted one-tool rule caps normal AC load at 1.8 kW. At the conservative 19 V input floor and 94% efficiency, that is about 100.8 A DC (about 79.8 A at 24 V), within the modeled 120 A cable envelope. Tool starting surge is transient, not a continuous 2.4 kW load. The genuine hold remains: Victron requires a dedicated 300 A external DC protector and at least 50 mm² cable, coordinated with the final conductor and buses.",
+  },
+  {
+    id: "secondary-feeder", label: "Main bus to secondary-services enclosure", deviceIds: ["secondaryPositiveBus", "secondaryNegativeBus", "smartSolar", "multiPlus", "usbOrion", "ekrano"],
+    nominalVoltageV: 24, minimumVoltageV: 19, maximumWatts: 907, maximumCurrentA: 47.8, conductorAmpacityA: 100,
+    normalStatus: "within-capacity", faultStatus: "incomplete",
+    note: "Even a conservative simultaneous device-limit budget remains below the 100 A secondary-bus rating. The feeder is still unsafe to commission because it has no source-side OCP and the proposed 1/0-to-#10 terminal transition is unselected.",
+  },
+  {
+    id: "main-negative-trunk", label: "SmartShunt SYSTEM MINUS to main negative bus", deviceIds: ["smartShunt", "mainNegativeBus", "multiPlus", "secondaryNegativeBus", "smartSolar"],
+    nominalVoltageV: 24, minimumVoltageV: 19, maximumWatts: 2024, maximumCurrentA: 106.5, conductorAmpacityA: 120,
+    normalStatus: "conditional", faultStatus: "incomplete",
+    note: "Under the posted operating controls, the 1.8 kW tool draws about 100.8 A at 19 V / 94% efficiency and essential shared services plus Ekrano add about 5.7 A, for a controlled 106.5 A maximum below the modeled 120 A envelope. Available solar reduces net battery discharge but is deliberately not credited, so the tool budget remains valid under cloud; the array's 2,260 W rating is not an added load. This is conditional on ORION REMOTE H being off and the ChargeIT branch breaker being open during heavy tool use; otherwise all installed DC branches at their published maxima could reach about 148.6 A. Ekrano DVCC limits net battery charging through this shunt trunk to 100 A. Fault/OCP coordination and received conductor/termination evidence remain genuine holds.",
+  },
+  {
+    id: "shared-services", label: "Shared lights + Starlink + UniFi services", deviceIds: ["indoorLight", "outdoorLight", "starlink", "unifi", "unifiPower", "switchPanel", "roomSwitch"],
+    nominalVoltageV: 24, minimumVoltageV: 20, typicalWatts: 60, maximumWatts: 100, maximumCurrentA: 5, protectionDeviceId: "sharedServicesBreaker", conductorAmpacityA: 10,
+    normalStatus: "within-capacity", faultStatus: "provisional",
+    note: "Typical worst case is 60 W (two 5 W lights, 10 W UniFi, 40 W Starlink). The 100 W conservative ceiling uses Starlink's 60 W input rating, the converter's 25 W output claim, both lights and 5 W reserve. A 10 A breaker is appropriate; do not plan on 240 W continuous expansion because low battery voltage, ambient derating and breaker curve reduce usable headroom.",
+  },
+  {
+    id: "orion-input", label: "Orion 24 V input", deviceIds: ["usbOrion", "orionBreaker32"],
+    nominalVoltageV: 24, minimumVoltageV: 16, maximumWatts: 489, maximumCurrentA: 30.6, protectionDeviceId: "orionBreaker32", conductorAmpacityA: 50,
+    normalStatus: "conditional", faultStatus: "provisional",
+    note: "The 32 A breaker and 6–10 mm² route fit the calculated worst published 25 °C output/88% efficiency/16 V input case, but with little trip margin. Victron recommends 30 A protection at 24 V; review the exact breaker curve, hot-enclosure derating and operating setpoint.",
+  },
+  {
+    id: "orion-output", label: "Orion 12 V socket / 145 W charger chain", deviceIds: ["usbOrion", "usbSocketA", "usbSocketB", "usb145A", "usb145B"],
+    nominalVoltageV: 12.2, maximumWatts: 360, maximumCurrentA: 30, conductorAmpacityA: 30,
+    normalStatus: "conditional", faultStatus: "incomplete",
+    note: "Two chargers can consume the Orion's complete 30 A continuous allowance, leaving no conductor headroom. The Orion permits 45 A for 10 seconds and 60 A into a short, so its regulator and charger output protections do not prove the 30 A socket harness can clear a fault; add suitable resettable output protection or replace the harness architecture.",
+  },
+  {
+    id: "chargeit", label: "Four ChargeIT! Mini modules", deviceIds: ["usbMiniA", "usbMiniB", "usbMiniC", "usbMiniD", "chargeItBreaker32"],
+    nominalVoltageV: 24, minimumVoltageV: 19, maximumWatts: 312, maximumCurrentA: 16.5, protectionDeviceId: "chargeItBreaker32", conductorAmpacityA: 32,
+    normalStatus: "within-capacity", faultStatus: "provisional",
+    note: "Four manufacturer-published 78 W maximum input draws total 312 W, well below the 32 A trunk capacity at the battery's operating voltage. Coolgear documents no internal electrical protection for these modules, so the received branch breaker and every three-way join remain essential.",
+  },
+  {
+    id: "balancers", label: "Battery-balancer leads", deviceIds: ["balancerA", "balancerB"],
+    nominalVoltageV: 24, maximumCurrentA: 0.7, conductorAmpacityA: 10,
+    normalStatus: "within-capacity", faultStatus: "incomplete",
+    note: "Normal balance current is only 0.7 A and 1.5 mm² conductors exceed Victron's 0.75 mm² minimum. The leads still connect directly to high-energy battery points; Victron specifies 10 A near-battery fuses for UL installations, so choose locally accepted resettable protection or obtain installer approval for an alternative.",
+  },
+  {
+    id: "generator-ac", label: "Generator to MultiPlus AC input", deviceIds: ["generator", "acInputProtection", "multiPlus"],
+    nominalVoltageV: 230, maximumWatts: 2300, maximumCurrentA: 10, protectionDeviceId: "acInputProtection", conductorAmpacityA: 10,
+    normalStatus: "conditional", faultStatus: "provisional",
+    note: "The G3200P can supply more than this circuit, so configure the MultiPlus input limit at or below 10 A. The source lead and purchased AC protector remain held until the actual generator outlet breaker, neutral-earth arrangement, RCBO markings, enclosure and local installation are verified.",
+  },
+  {
+    id: "tool-ac", label: "MultiPlus AC output / tool outlet", deviceIds: ["multiPlus", "acOutputProtection", "toolOutlet"],
+    nominalVoltageV: 230, maximumWatts: 1800, maximumCurrentA: 7.83, protectionDeviceId: "acOutputProtection", conductorAmpacityA: 10,
+    normalStatus: "within-capacity", faultStatus: "provisional",
+    note: "The posted one-tool operating rule limits the connected nameplate to 1.8 kW, or about 7.83 A at 230 V, below the 10 A outlet/lead/RCBO envelope and the inverter's 2.2 kW continuous rating at 40 °C. Motor starting current is a short transient; verify it with the specified 30-minute warm-condition saw test and reject any excessive sag, heating or nuisance trip.",
+  },
+];
+
 export const dseTopology: SystemGraph = {
   id: "dse-fiji",
   label: "DSE Solar System · Fiji",
-  revision: "R28 · graph-verified current safety and direct service returns",
+  revision: "R29 · researched device power and circuit-level fault classification",
   devices: dseDevices,
   cables: dseCables,
   connections: dseConnections,
   junctions: dseJunctions,
   currentSources: dseCurrentSources,
+  powerCircuits: dsePowerCircuits,
 };

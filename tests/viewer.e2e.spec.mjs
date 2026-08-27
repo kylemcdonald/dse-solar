@@ -48,7 +48,12 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   await expect(diagram).toHaveAttribute("data-current-safety-status", "incomplete");
   await expect(diagram).toHaveAttribute("data-current-safety-errors", /[1-9]\d*/);
   await expect(diagram).toHaveAttribute("data-current-safety-warnings", /[1-9]\d*/);
-  await expect(page.getByRole("status", { name: /Current protection audit incomplete/i })).toBeVisible();
+  const powerStatus = page.getByRole("status", { name: /Normal power audit.*Circuit-level fault audit/i });
+  await expect(powerStatus).toBeVisible();
+  await expect(powerStatus).toHaveAttribute("data-power-circuits", "13");
+  await expect(powerStatus).toHaveAttribute("data-power-within-capacity", "9");
+  await expect(powerStatus).toHaveAttribute("data-power-conditional-capacity", "4");
+  await expect(powerStatus).toHaveAttribute("data-power-over-capacity", "0");
   await expect(page.locator(".diagram-wire-layer[mask]")).toHaveCount(0);
   const viewport = page.locator(".unified-diagram-viewport");
   await expect(viewport).toHaveCSS("background-color", "rgb(133, 139, 144)");
@@ -393,8 +398,8 @@ test("BOM reflects purchased protection and cables, selected busbars and current
   await expect(page.getByText(/Ordinary services · 20 A/, { exact: true })).toHaveCount(0);
   const sharedServicesBreaker = page.locator('[data-bom-id="dse-switched-load-breaker"]');
   await expect(sharedServicesBreaker).toBeVisible();
-  await expect(sharedServicesBreaker).toContainText("Unselected generic 10 A DC shared switched-services breaker");
-  await expect(sharedServicesBreaker).toContainText("Select and buy");
+  await expect(sharedServicesBreaker).toContainText("CHTAIXI 10 A single-pole DC shared switched-services breaker");
+  await expect(sharedServicesBreaker).toContainText("Purchased · commissioning verification hold");
   for (const id of ["dse-junction-box", "dse-ac-install-enclosure", "dse-service-spares", "dse-switch-accessories", "dse-earth-bus-cover"]) {
     await expect(page.locator(`[data-bom-id="${id}"]`)).toHaveCount(0);
   }
@@ -674,7 +679,7 @@ test("3D model uses canonical router and has no removed controls", async ({ page
 
 test("BOM can show only items to purchase and sort by status, weight and cost", async ({ page }) => {
   await page.getByRole("button", { name: /Bill of materials/ }).click();
-  await expect(page.locator('[data-bom-total="design"]')).toContainText("$9,943.15");
+  await expect(page.locator('[data-bom-total="design"]')).toContainText("$9,953.02");
   await expect(page.locator('[data-bom-total="design"]')).toContainText("Solar + internet only");
   await expect(page.locator('[data-bom-total="additional"]')).toContainText("$3,338.52");
   await expect(page.locator('[data-bom-total="additional"]')).toContainText("11 rows");
@@ -685,7 +690,7 @@ test("BOM can show only items to purchase and sort by status, weight and cost", 
   await expect(page.locator('[data-bom-id="dse-ex-mount"]')).toHaveCount(0);
   await expect(page.locator('[data-bom-id="dse-multiplus"]')).toHaveCount(0);
   await expect(page.locator('[data-bom-id="dse-pv-string-breakers"]')).toHaveCount(0);
-  await expect(page.locator('[data-bom-id="dse-switched-load-breaker"]')).toBeVisible();
+  await expect(page.locator('[data-bom-id="dse-switched-load-breaker"]')).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Show All" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: /^Weight/ }).click();
   await expect(page.getByRole("columnheader", { name: /^Weight/ })).toHaveAttribute("aria-sort", "descending");
@@ -698,8 +703,8 @@ test("BOM can show only items to purchase and sort by status, weight and cost", 
 test("Shipping treemap includes every imported physical BOM line", async ({ page }) => {
   await page.getByRole("button", { name: "Shipping" }).click();
   await expect(page.getByRole("heading", { name: "Shipping by weight" })).toBeVisible();
-  await expect(page.locator(".shipping-tile")).toHaveCount(82);
-  await expect(page.getByText("50.5 kg", { exact: true })).toBeVisible();
+  await expect(page.locator(".shipping-tile")).toHaveCount(83);
+  await expect(page.getByText("50.6 kg", { exact: true })).toBeVisible();
   await expect(page.locator(".shipping-legend")).toContainText("Power & control");
 });
 
@@ -712,7 +717,7 @@ test("Customs uses concise columns, invoice footnotes, grouping and conditional 
   await expect(manifest.getByRole("columnheader", { name: "Ref" })).toBeVisible();
   await expect(manifest.locator("th.customs-fjd-column")).toBeHidden();
   await expect(manifest.getByRole("columnheader", { name: /Weight|Condition|Bag|Case/i })).toHaveCount(0);
-  await expect(page.getByLabel("Business name / Fiji consignee")).toHaveValue("Drua Saing Experiences Pte Limited");
+  await expect(page.getByLabel("Business name / Fiji consignee")).toHaveValue("Drua Sailing Experiences Pte Limited");
   await expect(page.getByLabel("Business registration number")).toHaveValue("2020RC000914");
   await expect(page.getByLabel("TIN", { exact: true })).toHaveValue("2900306318");
   await expect(page.getByLabel("Traveler / importer")).toHaveValue("Kyle McDonald");
@@ -727,7 +732,7 @@ test("Customs uses concise columns, invoice footnotes, grouping and conditional 
   const firstEight = manifest.locator("tbody tr").first().locator("xpath=..//tr[position() <= 8]");
   await expect(firstEight).toHaveCount(8);
   for (let index = 0; index < 8; index += 1) await expect(manifest.locator("tbody tr").nth(index)).toHaveAttribute("data-taf", "true");
-  await expect(page.locator(".customs-invoice-index tbody tr")).toHaveCount(36);
+  await expect(page.locator(".customs-invoice-index tbody tr")).toHaveCount(37);
   await expect(page.locator('[data-customs-id="dse-router"]')).toHaveAttribute("data-receipt-missing", "false");
   await expect(page.locator('[data-customs-id="dse-router"]')).not.toContainText("PDF not provided");
   const csvDownloadPromise = page.waitForEvent("download");

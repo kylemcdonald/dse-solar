@@ -70,8 +70,10 @@ const defaultSerials = {
   "dse-ekrano-gx": "HQ2509RURDF",
   "dse-orion-usb-converter": "HQ2524CKDAW",
   "dse-smartsolar": "HQ2522V4MVF",
-  "dse-shunt": "",
+  "dse-shunt": "HQ2301TYFRT",
   "dse-ex-starlink": "",
+  "dse-unused-galaxy-s24-pair": "RFCWC04EX2V (IMEI 1: 353690625019873; IMEI 2: 354376945019871); RFCWCOXMNKK (IMEI 1: 353690625388534; IMEI 2: 354376945388532)",
+  "dse-unused-macbook-air-15-m4": "LKQVK4R7LF; Wi-Fi MAC: 1c:f6:4c:a8:14:70",
 };
 for (const [id, serials] of Object.entries(defaultSerials)) {
   if (!customs.itemMeta[id]) throw new Error(`Missing customs metadata for serialized item ${id}`);
@@ -80,7 +82,7 @@ for (const [id, serials] of Object.entries(defaultSerials)) {
 
 delete customs.originDisplayDefault;
 Object.assign(customs, {
-  defaultConsignee: "Drua Saing Experiences Pte Limited",
+  defaultConsignee: "Drua Sailing Experiences Pte Limited",
   defaultConsigneeTin: "2900306318",
   defaultBusinessRegistrationNumber: "2020RC000914",
   defaultTraveler: "Kyle McDonald",

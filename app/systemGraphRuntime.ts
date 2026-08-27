@@ -3882,13 +3882,19 @@ export function verifyCurrentProtection(graph: SystemGraph): CurrentSafetyReport
         new Set(protectedEdges.flatMap((edge) => [edge.first, edge.second])),
         id,
       );
-      if (prospectiveFaultCurrentA === "unbounded"
-        || prospectiveFaultCurrentA > protection.interruptRatingA! + 1e-9) {
+      if (prospectiveFaultCurrentA === "unbounded") {
+        if (protectionCreditById.get(id) === "verified") protectionCreditById.set(id, "provisional");
+        issue({
+          severity: "warning", code: "fault-current-unresolved", deviceId, connectionId, channel,
+          prospectiveFaultCurrentA, ratingA: protection.interruptRatingA,
+          message: `${id}: ${protection.interruptRatingA} A interrupt rating is declared, but source fault current is not yet bounded; this is an evidence hold, not proof that the rating is insufficient`,
+        });
+      } else if (prospectiveFaultCurrentA > protection.interruptRatingA! + 1e-9) {
         if (protectionCreditById.get(id) === "verified") protectionCreditById.set(id, "provisional");
         issue({
           severity: "error", code: "interrupt-rating-insufficient", deviceId, connectionId, channel,
           prospectiveFaultCurrentA, ratingA: protection.interruptRatingA,
-          message: `${id}: ${protection.interruptRatingA} A interrupt rating is below the ${prospectiveFaultCurrentA === "unbounded" ? "unbounded" : `${prospectiveFaultCurrentA} A`} prospective ${channel} contribution`,
+          message: `${id}: ${protection.interruptRatingA} A interrupt rating is below the ${prospectiveFaultCurrentA} A prospective ${channel} contribution`,
         });
       }
     });
@@ -3932,11 +3938,62 @@ export function verifyCurrentProtection(graph: SystemGraph): CurrentSafetyReport
       prospectiveFaultCurrentA: r28ProspectiveFaultEnvelope(network, reachableSources, targets),
     };
   };
+  const currentEnvelopeValue = (value: number | "unbounded") => value === "unbounded"
+    ? Number.POSITIVE_INFINITY
+    : value;
+  const worstEnvelope = (
+    envelopes: readonly ReturnType<typeof r28ProtectionEnvelope>[],
+  ): ReturnType<typeof r28ProtectionEnvelope> => {
+    const maximum = Math.max(...envelopes.map((envelope) => currentEnvelopeValue(envelope.currentA)));
+    const worst = envelopes.filter((envelope) => currentEnvelopeValue(envelope.currentA) === maximum);
+    return {
+      currentA: maximum === Number.POSITIVE_INFINITY ? "unbounded" : maximum,
+      protectedBy: [...new Set(worst.flatMap((envelope) => envelope.protectedBy))].toSorted(),
+    };
+  };
+  const combineConductorSideTraces = (traces: readonly ActiveTrace[]): ActiveTrace => {
+    const reachableSourceById = new Map(traces.flatMap((trace) => trace.reachableSources)
+      .map((source) => [source.id, source] as const));
+    const evidence = [...reachableSourceById.values()].map((source) => {
+      const paths = traces.flatMap((trace) => trace.evidence.filter((candidate) => candidate.source.id === source.id));
+      const contribution = Math.max(...paths.map((path) => currentEnvelopeValue(path.contribution)));
+      return {
+        source,
+        contribution: contribution === Number.POSITIVE_INFINITY ? "unbounded" as const : contribution,
+        verifiedEnvelope: worstEnvelope(paths.map((path) => path.verifiedEnvelope)),
+        provisionalEnvelope: worstEnvelope(paths.map((path) => path.provisionalEnvelope)),
+      };
+    });
+    const verified = Math.max(...traces.map((trace) => currentEnvelopeValue(trace.verifiedProtectionEnvelopeA)));
+    const provisional = Math.max(...traces.map((trace) => currentEnvelopeValue(trace.provisionalProtectionEnvelopeA)));
+    const prospective = Math.max(...traces.map((trace) => currentEnvelopeValue(trace.prospectiveFaultCurrentA)));
+    return {
+      reachableSources: [...reachableSourceById.values()],
+      evidence,
+      verifiedProtectionEnvelopeA: verified === Number.POSITIVE_INFINITY ? "unbounded" : verified,
+      provisionalProtectionEnvelopeA: provisional === Number.POSITIVE_INFINITY ? "unbounded" : provisional,
+      prospectiveFaultCurrentA: prospective === Number.POSITIVE_INFINITY ? "unbounded" : prospective,
+    };
+  };
   const traceActive = (
     connection: SystemGraph["connections"][number],
     channel: R28ActiveChannel,
     network: ReturnType<typeof buildR28CurrentNetwork>,
-  ) => traceTargets(new Set([currentConnectionVertex(connection.id, channel)]), channel, network);
+  ) => {
+    const middle = currentConnectionVertex(connection.id, channel);
+    const endpointVertices = [currentVertex(connection.from, channel), currentVertex(connection.to, channel)];
+    const conductorEdges = network.edges.filter((edge) => (
+      (edge.first === middle && endpointVertices.includes(edge.second))
+      || (edge.second === middle && endpointVertices.includes(edge.first))
+    ));
+    if (conductorEdges.length !== 2) return traceTargets(new Set([middle]), channel, network);
+    const otherEdges = network.edges.filter((edge) => !conductorEdges.includes(edge));
+    const sideTraces = conductorEdges.map((edge) => traceTargets(new Set([middle]), channel, {
+      ...network,
+      edges: [...otherEdges, edge],
+    }));
+    return combineConductorSideTraces(sideTraces);
+  };
 
   const evaluate = (
     connection: SystemGraph["connections"][number],
@@ -3990,6 +4047,13 @@ export function verifyCurrentProtection(graph: SystemGraph): CurrentSafetyReport
       sourceIds: check.sourceIds, prospectiveFaultCurrentA: check.prospectiveFaultCurrentA,
       message: `${connection.id} (${check.channel}): ${cable?.label ?? connection.cableId} has no numeric ampacity`,
     });
+    else if (connection.sourceLeadReason) {
+      // A deliberately identified first-protector lead has a different failure
+      // mode from an accidentally unprotected branch. Keep the explicit
+      // shortest-practical/guarded installation warning, but do not duplicate
+      // it as a generic conductor error.
+      return;
+    }
     else if (check.status === "incomplete") issue({
       severity: "error", code: "conductor-protection-incomplete", connectionId: connection.id, channel: check.channel,
       sourceIds: check.sourceIds, prospectiveFaultCurrentA: check.prospectiveFaultCurrentA, ratingA: check.ampacityA,
@@ -4011,7 +4075,14 @@ export function verifyCurrentProtection(graph: SystemGraph): CurrentSafetyReport
     // body ratings. Protective devices without an explicit body/input rating
     // are already covered by their terminal-pair and interrupt audit.
     const ratingA = device.currentRatingA;
-    if (ratingA === undefined && (device.kind === "breaker" || device.kind === "protection")) return;
+    if (ratingA === undefined) {
+      if (["busbar", "switch"].includes(device.kind)) issue({
+        severity: "warning", code: "missing-device-rating", deviceId: device.id, channel,
+        sourceIds: trace.reachableSources.map((source) => source.id).toSorted(),
+        message: `${device.id}: energized ${channel} pass-through hardware has no declared continuous-current rating`,
+      });
+      return;
+    }
     const protectionBySource = trace.evidence.map(({ source, contribution, verifiedEnvelope, provisionalEnvelope }) => ({
       sourceId: source.id,
       prospectiveFaultCurrentA: contribution,
@@ -4037,11 +4108,7 @@ export function verifyCurrentProtection(graph: SystemGraph): CurrentSafetyReport
       provisionalProtectionEnvelopeA: trace.provisionalProtectionEnvelopeA,
       protectionBySource,
     });
-    if (ratingA === undefined && !["connector", "junction", "breaker", "protection"].includes(device.kind)) issue({
-      severity: "warning", code: "missing-device-rating", deviceId: device.id, channel,
-      sourceIds: trace.reachableSources.map((source) => source.id).toSorted(),
-      message: `${device.id}: energized ${channel} input/device rating is not declared`,
-    }); else if (ratingA !== undefined && status === "incomplete") issue({
+    if (status === "incomplete") issue({
       severity: "error", code: "device-protection-incomplete", deviceId: device.id, channel, ratingA,
       sourceIds: trace.reachableSources.map((source) => source.id).toSorted(),
       message: `${device.id}: aggregate upstream protection envelope is not coordinated with the ${ratingA} A device/input rating`,
@@ -4125,9 +4192,9 @@ export function verifyCurrentProtection(graph: SystemGraph): CurrentSafetyReport
         : pairedActiveConnectionId && validCircuitPair
           ? new Set([currentConnectionVertex(pairedActiveConnectionId, activeChannel)])
           : new Set<string>();
-      const trace = activeTargets.size > 0
-        ? traceTargets(activeTargets, activeChannel, network)
-        : undefined;
+      const trace = pairedActiveConnectionId && validCircuitPair
+        ? activeTraces.get(`${pairedActiveConnectionId}:${activeChannel}`)
+        : activeTargets.size > 0 ? traceTargets(activeTargets, activeChannel, network) : undefined;
       if ((!validCircuitPair && !validDomainPair) || !trace || trace.reachableSources.length === 0) {
         if (!connection.deenergizedReason) issue({
           severity: "error", code: "unpaired-return-conductor", connectionId: connection.id, channel,
@@ -4168,21 +4235,20 @@ export function verifyCurrentProtection(graph: SystemGraph): CurrentSafetyReport
   );
   const warnings = issues.filter((finding) => finding.severity === "warning").toSorted(issueOrder);
   const errors = issues.filter((finding) => finding.severity === "error").toSorted(issueOrder);
-  const hasIncompleteEvidence = connectionChecks.some((check) => check.status === "incomplete")
-    || deviceChecks.some((check) => check.status === "incomplete");
   return {
     scope: "supply-active-and-explicitly-paired-returns",
-    status: errors.length > 0 || hasIncompleteEvidence
+    status: errors.length > 0
       ? "incomplete"
       : warnings.length > 0 ? "provisional" : "verified",
     excludedConductorKinds: ["earth", "data", "control", "multicore"],
     limitations: [
-      "Normal load current is not inferred from source capacity; this report proves only per-source OCP/current-limit path coordination against declared conductor ampacity.",
+      "Normal operating demand is reported separately in graph.powerCircuits; this report checks fault/OCP paths and never mistakes source capacity for load current.",
+      "A conductor fault is evaluated from each physical side of the conductor and compared using the worse side. Sources feeding opposite ends are not incorrectly summed through one cable cross-section; sources on the same side still aggregate.",
       "Prospective fault contribution is separate and is never capped by a breaker/fuse trip rating. Interrupt capacity, time-current curves, selectivity and let-through energy remain engineering inputs unless explicitly declared.",
       "A breaker/fuse can receive verified coordination credit only with valid, verified trip metadata and a declared adequate interrupt rating; otherwise it remains provisional or receives no credit.",
       "Negative and neutral conductors are checked only when returnFor has matching circuit identity plus structural endpoint/source-assembly evidence, when both route sides share validated typed current domains, when one typed domain anchors the return directly, or when a multicore explicitly carries both active and return channels.",
       "Multicore channels come only from Cable.carriedChannels; a sheath never implicitly merges DC, AC, return or neutral networks.",
-      "Device checks use currentRatingA only for a single electrical domain. Multi-domain converters and inverters remain unrated until terminal-group ratings are explicitly modeled.",
+      "Device/body coordination is checked only where currentRatingA is explicitly declared. An ordinary load's wattage is not treated as a protective-device rating; unrated pass-through bus/switch hardware remains an evidence warning.",
     ],
     sources: [...graph.currentSources],
     connections: connectionChecks.toSorted((first, second) => (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import customsRaw from "@/data/dse-customs.json";
 import receiptsRaw from "@/data/dse-receipts.json";
 
@@ -34,6 +34,7 @@ type HeaderFields = {
   destination: string;
   purpose: string; fjdPerUsd: string; supplierFreight: string; internationalFreight: string; insurance: string;
 };
+type PrintMode = "full" | "taf";
 export type CustomsLine = {
   id: string; make: string; model: string; additionalInfo: string; qty: number; unit: string; unitCost: number; lineTotal: number;
   origin: string; asins: string[]; invoiceRefs: number[]; serialRequired: boolean; tafPermitRequired: boolean;
@@ -134,6 +135,7 @@ export function buildCustomsCsv(lines: CustomsLine[], fjdPerUsd: number) {
 }
 
 export function CustomsView({ bom, planningFjdPerUsd }: { bom: CustomsBomItem[]; planningFjdPerUsd: number }) {
+  const viewRef = useRef<HTMLElement>(null);
   const manifestItems = useMemo(
     () => bom.filter((item) => isCustomsManifestItem(item)),
     [bom],
@@ -163,7 +165,9 @@ export function CustomsView({ bom, planningFjdPerUsd }: { bom: CustomsBomItem[];
     condition: customs.itemMeta[item.id].defaultCondition ?? "New", serials: customs.itemMeta[item.id].defaultSerials ?? "",
   }])));
   const lines = useMemo(() => buildCustomsLines(manifestItems, edits, groupMiscellaneous), [manifestItems, edits, groupMiscellaneous]);
+  const tafLines = lines.filter((line) => line.tafPermitRequired);
   const grossGoodsTotal = lines.reduce((sum, line) => sum + line.lineTotal, 0);
+  const tafGoodsTotal = tafLines.reduce((sum, line) => sum + line.lineTotal, 0);
   const orderLevelDiscount = bom.find((item) => item.id === "dse-amazon-promotion")?.totalUsd ?? 0;
   const goodsTotal = grossGoodsTotal + orderLevelDiscount;
   const planningCif = goodsTotal + valueOf(fields.supplierFreight) + valueOf(fields.internationalFreight) + valueOf(fields.insurance);
@@ -171,6 +175,7 @@ export function CustomsView({ bom, planningFjdPerUsd }: { bom: CustomsBomItem[];
   const planningVatFloor = planningCif * customs.vatRate;
   const groupedLine = lines.find((line) => line.groupedItemIds);
   const visibleInvoiceRefs = new Set(lines.flatMap((line) => line.invoiceRefs));
+  const tafInvoiceRefs = new Set(tafLines.flatMap((line) => line.invoiceRefs));
   const visibleInvoices = receipts.invoices.filter((invoice) => visibleInvoiceRefs.has(invoice.number));
   const updateField = (key: keyof HeaderFields, value: string) => setFields((current) => ({ ...current, [key]: value }));
   const updateEdit = (id: string, key: keyof ManifestEdit, value: string) => setEdits((current) => ({ ...current, [id]: { ...current[id], [key]: value } }));
@@ -182,15 +187,23 @@ export function CustomsView({ bom, planningFjdPerUsd }: { bom: CustomsBomItem[];
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
   };
+  const printManifest = (mode: PrintMode) => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dataset.printMode = mode;
+    window.addEventListener("afterprint", () => { view.dataset.printMode = "full"; }, { once: true });
+    window.print();
+  };
 
-  return <section className="customs-view" aria-label="Fiji customs planning manifest" data-private-mode={privateMode ? "true" : "false"}>
+  return <section ref={viewRef} className="customs-view" aria-label="Fiji customs planning manifest" data-private-mode={privateMode ? "true" : "false"} data-print-mode="full">
     <div className="customs-screen-only">
       <div className="customs-heading"><div><span>Fiji arrival planning · researched {customs.checkedOn}</span><h1>Customs manifest</h1><p>Pre-clear project equipment and retain every numbered invoice referenced below.</p></div>
         <div className="customs-actions">
           <button type="button" className={`customs-secondary-button ${groupMiscellaneous ? "active" : ""}`} aria-pressed={groupMiscellaneous} onClick={() => setGroupMiscellaneous((value) => !value)}>Group low-cost accessories</button>
           {privateMode && <a className="customs-secondary-button" href="/api/receipts/download" download>Download receipts (.zip)</a>}
           <button type="button" className="customs-secondary-button" onClick={downloadCsv}>Export CSV</button>
-          <button type="button" className="customs-print-button" onClick={() => window.print()}>Print / save PDF</button>
+          <button type="button" className="customs-print-button" onClick={() => printManifest("full")}>Print / save PDF</button>
+          <button type="button" className="customs-print-button" onClick={() => printManifest("taf")}>Print / save TAF PDF</button>
         </div></div>
       <div className="customs-alert-grid">
         <article className="customs-alert customs-alert-urgent"><span>Clearance route</span><strong>Licensed agent before arrival</strong><p>FRCS says goods over FJ$1,000 require formal clearance.</p></article>
@@ -208,7 +221,7 @@ export function CustomsView({ bom, planningFjdPerUsd }: { bom: CustomsBomItem[];
     </div>
 
     <section className="customs-manifest-section">
-      <div className="customs-manifest-title"><div><h2>{customs.manifestTitle}</h2><p>{groupMiscellaneous ? `${customs.miscGrouping.explanation} Optional presentation for broker review; confirm that FRCS accepts aggregation.` : "Detailed item-level declaration"}</p></div><button type="button" className="customs-print-button customs-screen-only" onClick={() => window.print()}>Print / save PDF</button></div>
+      <div className="customs-manifest-title"><div><h2 className="customs-full-print-copy">{customs.manifestTitle}</h2><h2 className="customs-taf-print-only">{customs.manifestTitle} · TAF radio permit items</h2><p className="customs-full-print-copy">{groupMiscellaneous ? `${customs.miscGrouping.explanation} Optional presentation for broker review; confirm that FRCS accepts aggregation.` : "Detailed item-level declaration"}</p><p className="customs-taf-print-only">Only equipment flagged for a TAF radio permit is included.</p></div><button type="button" className="customs-print-button customs-screen-only" onClick={() => printManifest("full")}>Print / save PDF</button></div>
       <div className="customs-form-grid">
         {([ ["consignee", "Business name / Fiji consignee"], ["businessRegistrationNumber", "Business registration number"], ["tin", "TIN"], ["traveler", "Traveler / importer"], ["flight", "Flight number"], ["arrivalDate", "Arrival date in Fiji"], ["destination", "Final destination"] ] as Array<[keyof HeaderFields, string]>).map(([key, label]) => <label key={key}><span>{label}</span><input type={key === "arrivalDate" ? "date" : "text"} value={fields[key]} onChange={(event) => updateField(key, event.target.value)} /></label>)}
         <label className="customs-field-full customs-purpose-editor"><span>Purpose / end use</span><textarea value={fields.purpose} onChange={(event) => updateField("purpose", event.target.value)} rows={2} /></label>
@@ -227,10 +240,10 @@ export function CustomsView({ bom, planningFjdPerUsd }: { bom: CustomsBomItem[];
             : line.receiptMissing ? <span className="customs-receipt-missing">PDF not provided</span> : "—"}</td>
           <td className="customs-serial-column">{line.groupedItemIds ? "N/A" : <input aria-label={`${line.make} / ${line.model} serial numbers`} value={edits[line.id].serials} onChange={(event) => updateEdit(line.id, "serials", event.target.value)} placeholder="N/A" />}</td>
         </tr>; })}</tbody>
-        <tfoot><tr><td colSpan={6}>Declared goods line items</td><td>{usd(grossGoodsTotal)}</td><td className="customs-fjd-column">{fjd(grossGoodsTotal * fxRate)}</td><td>Actual transaction values required</td><td className="customs-serial-column" /></tr>{orderLevelDiscount !== 0 && <tr><td colSpan={6}>Order-level commercial discount</td><td>{usd(orderLevelDiscount)}</td><td className="customs-fjd-column">{fjd(orderLevelDiscount * fxRate)}</td><td>Retain matching receipts</td><td className="customs-serial-column" /></tr>}<tr><td colSpan={6}>Net declared goods subtotal</td><td>{usd(goodsTotal)}</td><td className="customs-fjd-column">{fjd(goodsTotal * fxRate)}</td><td>Before freight and insurance</td><td className="customs-serial-column" /></tr></tfoot>
+        <tfoot><tr className="customs-full-print-copy"><td colSpan={6}>Declared goods line items</td><td>{usd(grossGoodsTotal)}</td><td className="customs-fjd-column">{fjd(grossGoodsTotal * fxRate)}</td><td>Actual transaction values required</td><td className="customs-serial-column" /></tr>{orderLevelDiscount !== 0 && <tr className="customs-full-print-copy"><td colSpan={6}>Order-level commercial discount</td><td>{usd(orderLevelDiscount)}</td><td className="customs-fjd-column">{fjd(orderLevelDiscount * fxRate)}</td><td>Retain matching receipts</td><td className="customs-serial-column" /></tr>}<tr className="customs-full-print-copy"><td colSpan={6}>Net declared goods subtotal</td><td>{usd(goodsTotal)}</td><td className="customs-fjd-column">{fjd(goodsTotal * fxRate)}</td><td>Before freight and insurance</td><td className="customs-serial-column" /></tr><tr className="customs-taf-print-only"><td colSpan={6}>TAF radio permit items subtotal</td><td>{usd(tafGoodsTotal)}</td><td className="customs-fjd-column">{fjd(tafGoodsTotal * fxRate)}</td><td>Displayed TAF items only</td><td className="customs-serial-column" /></tr></tfoot>
       </table></div>
       {groupedLine?.groupedItemIds && <details className="customs-group-disclosure customs-screen-only"><summary>Show {groupedLine.groupedItemIds.length} underlying lines combined for optional broker review</summary><ul>{groupedLine.groupedItemIds.map((id) => { const meta = customs.itemMeta[id]; return <li key={id}>{meta.make} / {meta.model} · {usd(valueOf(edits[id].qty) * valueOf(edits[id].unitCost))} · invoice {(receipts.itemInvoices[id] ?? []).join(", ") || "not identified"}</li>; })}</ul></details>}
-      <section className="customs-invoice-index" aria-label="Invoice reference index"><h3>Invoice / receipt references</h3><table><thead><tr><th>No.</th><th>Date</th><th>Filename</th><th>Supplier</th></tr></thead><tbody>{visibleInvoices.map((invoice) => <tr key={invoice.number}><td><strong>{invoice.number}</strong></td><td>{invoice.date}</td><td>{invoice.filename}</td><td>{invoice.supplier}</td></tr>)}</tbody></table></section>
+      <section className="customs-invoice-index" aria-label="Invoice reference index"><h3>Invoice / receipt references</h3><table><thead><tr><th>No.</th><th>Date</th><th>Filename</th><th>Supplier</th></tr></thead><tbody>{visibleInvoices.map((invoice) => <tr key={invoice.number} data-taf={tafInvoiceRefs.has(invoice.number) ? "true" : "false"}><td><strong>{invoice.number}</strong></td><td>{invoice.date}</td><td>{invoice.filename}</td><td>{invoice.supplier}</td></tr>)}</tbody></table></section>
       <div className="customs-valuation-grid customs-export-excluded"><label><span>Supplier freight to LAX · USD</span><input inputMode="decimal" value={fields.supplierFreight} onChange={(event) => updateField("supplierFreight", event.target.value)} /></label><label><span>International baggage/freight · USD</span><input inputMode="decimal" value={fields.internationalFreight} onChange={(event) => updateField("internationalFreight", event.target.value)} /></label><label><span>Insurance · USD</span><input inputMode="decimal" value={fields.insurance} onChange={(event) => updateField("insurance", event.target.value)} /></label><label><span>Planning FJD per USD</span><input inputMode="decimal" value={fields.fjdPerUsd} onChange={(event) => updateField("fjdPerUsd", event.target.value)} /></label><div><span>Planning CIF · USD</span><strong>{usd(planningCif)}</strong></div><div><span>Planning CIF · FJD</span><strong>{fjd(planningCif * fxRate)}</strong></div></div>
       <div className="customs-manifest-notes customs-export-excluded"><div><h3>Attachments</h3><p>□ Numbered invoices &nbsp; □ Proof of payment &nbsp; □ Donation letter &nbsp; □ Beneficiary acceptance &nbsp; □ TAF permit(s) &nbsp; □ SAD/Customs Entry</p></div><div><h3>Declaration</h3><p>I declare that this manifest is complete and that the values shown are the actual prices paid or payable.</p><div className="customs-signature-lines"><span>Traveler signature</span><span>Date</span><span>Customs agent / witness</span></div></div></div>
     </section>

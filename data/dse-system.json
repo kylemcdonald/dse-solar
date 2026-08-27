@@ -1,12 +1,12 @@
 {
-  "schemaVersion": "r26-split-dc-architecture",
+  "schemaVersion": "r29-power-and-fault-audit",
   "id": "dse",
   "shortName": "DSE · Fiji",
   "name": "Drua Sailing Experience",
   "subtitle": "Serviceable 24 V solar workshop with two independently breakered battery strings",
   "location": "Remote Fiji",
-  "revision": "Design R28 · graph-verified current safety and direct service returns · 26 Aug 2026",
-  "status": "R28 split DC architecture accepted · protection evidence and commissioning holds remain visible",
+  "revision": "Design R29 · researched power budgets and fault-risk classification · 26 Aug 2026",
+  "status": "Normal-load budgets checked · genuine fault/installation holds remain",
   "currency": {
     "base": "USD",
     "fjdPerUsd": 2.2,
@@ -17,9 +17,9 @@
     "targetBasis": "remaining",
     "donorFundedIncrementUsd": 607.11,
     "contingencyIncluded": false,
-    "note": "Purchased project equipment and reconciled transaction adjustments through 26 Aug 2026 are included. Thirty-four Amazon project receipts are now reconciled. The actual 1/0 AWG inventory is nine red/black pairs (18 individual cables and 27 conductor-feet) across the preserved Shirbly and iGreely receipt rows; two Shirbly 2 AWG pairs and two purchased DIHOOL 10 A AC-in/out protection units are also recorded at actual transaction value. The Joinfworld 250 A pair is the selected main-bus purchase; its supplied covers and required main-positive lug stacking are accepted. The superseded AMOMD pair remains excluded return history. R28 retains the verified HT-8 cutoff-box and 302 × 302 × 178 mm secondary-box fits, uses exactly three secondary branch-breaker positions, omits a separate 80 A incomer, and records supplemental correctly terminated 1/0 AWG cable as an onsite Fiji purchase. The generic 10 A shared-services breaker still requires selection. The purchased AC protection remains on commissioning hold pending received-device and installer verification. The MultiPlus Fiji invoice/deposit, donor-funded Ekrano increment, refunds, freight beyond Nadi, panel mounting and labor still require final reconciliation."
+    "note": "Purchased project equipment and reconciled transaction adjustments through 26 Aug 2026 are included. Thirty-five Amazon project receipts are now reconciled. The actual 1/0 AWG inventory is nine red/black pairs (18 individual cables and 27 conductor-feet) across the preserved Shirbly and iGreely receipt rows; two Shirbly 2 AWG pairs and two purchased DIHOOL 10 A AC-in/out protection units are also recorded at actual transaction value. The Joinfworld 250 A pair is the selected main-bus purchase; its supplied covers and required main-positive lug stacking are accepted. The superseded AMOMD pair remains excluded return history. The retained layout uses the verified HT-8 cutoff-box and 302 × 302 × 178 mm secondary-box fits, uses exactly three secondary branch-breaker positions, omits a separate 80 A incomer, and records supplemental correctly terminated 1/0 AWG cable as an onsite Fiji purchase. The purchased CHTAIXI 10 A shared-services breaker is linked to receipt 43 and remains on a received-marking/AIC commissioning hold. The purchased AC protection remains on commissioning hold pending received-device and installer verification. The MultiPlus Fiji invoice/deposit, donor-funded Ekrano increment, refunds, freight beyond Nadi, panel mounting and labor still require final reconciliation."
   },
-  "summary": "DSE/Fiji R28 replaces the former single main 24 V enclosure with two DC junction boxes and an external guarded main-distribution cluster. The battery-adjacent cutoff box contains only the purchased string A, string B and SmartSolar 120 A cutoffs. The covered Joinfworld 250 A main positive/negative buses remain outside; approved main-positive lug stacking is documented, and the adjacent IP65 SmartShunt remains uncovered. The secondary box contains exactly three branch breakers, the covered Blue Sea 2314 positive/negative buses, six-gang switch panel, 24 V-to-5 V USB-A converter and Starlink routing; no separate 80 A incomer is modeled, and its direct positive feeder remains held until source-side overcurrent protection and both 100 A bus envelopes are documented. Its nine negative-bus connections are direct despite seven physical positions, so terminal excess is warned without drawing fictional splitters. The MultiPlus sits between the main negative bus and battery cutoff at balancer height, with its AC breakouts below. Orion downstream wiring is enabled from its verified output limiter, while fault clearing and other incomplete protection evidence remain explicit graph-verifier limitations. Supplemental correctly terminated 1/0 AWG cable will be purchased onsite and all battery source leads remain shortest-practical.",
+  "summary": "DSE/Fiji R29 separates normal operating power from fault-clearing evidence. The 10 A shared-services breaker is now purchased and is comfortably sized for roughly 60 W expected / 100 W conservative demand; Starlink Mini is recorded as purchased, the Husqvarna generator as purchased pre-existing equipment, and the insulated PV comb rails as existing inventory. Manufacturer power limits are attached to every active/source device and thirteen circuit budgets now apply the real operating envelope: one tool at or below 1,800 W, high-power USB branches off during heavy tool use, and a 100 A Ekrano DVCC charge-current limit. No circuit is knowingly over capacity in that controlled normal mode; conditional modes are labeled separately from fault-clearing evidence. Genuine holds remain explicit: MultiPlus external DC protection/cable coordination, common SmartShunt-trunk fault and received-installation evidence, the unprotected secondary feeder, balancer taps, Orion's 60 A fault envelope versus the 30 A socket harness, received breaker/AIC evidence and the held AC enclosure/protection assembly.",
   "keyFacts": [
     {
       "label": "Solar array",
@@ -62,6 +62,16 @@
       "detail": "32 A Orion input + 32 A ChargeIT branches"
     },
     {
+      "label": "Shared services",
+      "value": "60 W expected · 100 W ceiling",
+      "detail": "Purchased 10 A B10 · 5 A calculated at 20 V"
+    },
+    {
+      "label": "Main negative trunk",
+      "value": "106.5 A controlled · 120 A modeled",
+      "detail": "Conditional: USB branches off · DVCC charge limit 100 A"
+    },
+    {
       "label": "Monitoring",
       "value": "Local + remote",
       "detail": "Ekrano GX · 7-inch · VRM"
@@ -91,7 +101,7 @@
     "usableBatteryKwh": 4.8,
     "modeledBatteryKwhDay": 4.46,
     "essentialBatteryKwhDay": 2.1,
-    "assumptions": "4.2 peak-sun-hours, 75% solar derate, 50% GEL depth of discharge, one power tool at a time, about 0.10 kWh/day for the always-on Ekrano GX with its display normally asleep, and 15 m one-way copper PV runs. PV cable loss uses 0.01724 Ω·mm²/m copper resistivity at 20°C; field temperature raises resistance, so confirm the actual route and cable before purchase. The 590 W USB figure is simultaneous output capacity, not an added daily-energy assumption. With ORION REMOTE H enabled but no devices connected, the Orion data-sheet maximum no-load draw plus four ChargeIT idle loads is below about 2.64 W / 0.064 kWh per day; remote-off draw is below about 0.0006 kWh per day, excluding the small rocker LED. Coolgear does not publish the 145 W charger's idle draw, so measure each received unit. R28 retains the purchased dedicated 32 A positive-branch breakers for the Orion input and four-module ChargeIT chain plus the selected-to-buy generic 10 A shared-services branch; it removes the separate 80 A secondary incomer. The Orion's verified 30 A continuous output limiter enables all modeled downstream socket wiring, but its 45 A ten-second maximum and 60 A short-circuit envelope do not by themselves prove fault clearing. The graph verifier therefore reports that evidence separately while checking each supply path, conductor ampacity, device rating and explicit return pair. Use ORION REMOTE H to shut down the 145 W socket branch.",
+    "assumptions": "4.2 peak-sun-hours, 75% solar derate, 50% GEL depth of discharge, one power tool at a time, about 0.10 kWh/day for the always-on Ekrano GX with its display normally asleep, and 15 m one-way copper PV runs. PV cable loss uses 0.01724 Ω·mm²/m copper resistivity at 20°C; field temperature raises resistance, so confirm the actual route and cable before purchase. The 590 W USB figure is simultaneous output capacity, not an added daily-energy assumption. With ORION REMOTE H enabled but no devices connected, the Orion data-sheet maximum no-load draw plus four ChargeIT idle loads is below about 2.64 W / 0.064 kWh per day; remote-off draw is below about 0.0006 kWh per day, excluding the small rocker LED. Coolgear does not publish the 145 W charger's idle draw, so measure each received unit. R29 power audit: normal demand is separate from fault current and uses the actual posted operating rules, not every device's theoretical maximum at once. Shared services use 60 W expected and 100 W conservative demand (Starlink 60 W rated ceiling, UniFi converter 25 W claimed ceiling, two 5 W lights and 5 W reserve), equal to 5 A at a conservative 20 V bank voltage. Keep 160 W as the project planning ceiling rather than treating 10 A × 24 V = 240 W as a continuous expansion promise; received breaker curve, enclosure temperature and minimum operating voltage govern. The two PV strings deliver 26.56 A after combining, so the combined disconnect-to-SmartSolar pair is revised from 4 mm² / 20 A to 6 mm² / 32 A. The posted one-tool limit is 1,800 W: at the MultiPlus's conservative 19 V input floor and 94% efficiency that is about 100.8 A DC, or about 79.8 A at 24 V, within the modeled 120 A branch envelope. With ORION REMOTE H off and the ChargeIT breaker open during heavy tool use, essential services bring the common SmartShunt trunk to about 106.5 A. Available solar reduces that net battery discharge, but the safety budget deliberately does not depend on sunshine; the array's 2,260 W maximum is a source rating, not an added load. Without the load-shedding rule, the tool plus every installed DC branch at its published maximum could reach about 148.6 A, so the common trunk remains conditional rather than unconditionally clear. Ekrano DVCC limits net battery charging through that trunk to 100 A. Tool starting surge is transient and must pass the warm-condition bench test. MultiPlus external DC protection/cable coordination and common-trunk fault/received-installation evidence remain genuine holds.",
     "usbNominalOutputWatts": 590,
     "usbPortCount": 12,
     "usbCPortCount": 8,
@@ -99,8 +109,23 @@
     "usbOrionBankEnabledIdleWattsMax": 2.64,
     "usbOrionBankEnabledIdleKwhDayMax": 0.064,
     "usbOrionBankRemoteOffKwhDayMax": 0.0006,
-    "sharedServiceCapacityWatts": 240,
-    "chargeItNameplateWatts": 300
+    "chargeItNameplateWatts": 300,
+    "sharedServiceTypicalWatts": 60,
+    "sharedServiceConservativeWatts": 100,
+    "sharedServiceMinimumVoltageV": 20,
+    "sharedServiceMaximumCalculatedCurrentA": 5,
+    "sharedServiceBreakerNameplateWattsAt24V": 240,
+    "sharedServicePlanningCeilingWatts": 160,
+    "pvCombinedConductorAreaMm2": 6,
+    "pvCombinedConductorAmpacityA": 32,
+    "activePowerProfiles": 30,
+    "circuitPowerBudgets": 13,
+    "mainNegativeTrunkModeledAmpacityA": 120,
+    "toolOperatingLimitWatts": 1800,
+    "toolDcCurrentAt19VAnd94PercentA": 100.8,
+    "mainNegativeTrunkControlledDischargeA": 106.5,
+    "mainNegativeTrunkChargeLimitA": 100,
+    "mainNegativeTrunkUnmanagedAllLoadsA": 148.6
   },
   "batteryCablePlan": {
     "conductor": "Purchased iGreely and Shirbly 1/0 AWG flexible OFC cable assemblies with pre-crimped 3/8 in / M10 lugs; conductor tinning and UL 1426 status unverified",
@@ -721,8 +746,8 @@
       "totalUsd": 939,
       "location": "Fiji",
       "procurement": "Deposit paid",
-      "priority": "Must",
-      "description": "A 20% deposit has been paid to purchase the exact PMP242305010 in Fiji; 80% remains due. The displayed $939 is the prior USD planning value, so the budget provisionally counts $187.80 as paid until the actual Fiji invoice total and deposit amount replace it. This is the 3 kVA inverter/charger with 2.4 kW output at 25°C, 2.2 kW at 40°C, 5.5 kW peak and 70 A charger. The non-GX model is intentional because the Ekrano is the system's one GX controller; do not substitute a 48 V, GX or 120 V model. Includes the battery-temperature sensor. IP22/non-condensing still requires the protected indoor salt-air installation shown in the design.",
+      "priority": "Must · DC branch redesign hold",
+      "description": "A 20% deposit has been paid to purchase the exact PMP242305010 in Fiji; 80% remains due. The displayed $939 is the prior USD planning value, so the budget provisionally counts $187.80 as paid until the actual Fiji invoice total and deposit amount replace it. This is the 3 kVA inverter/charger with 2.4 kW output at 25°C, 2.2 kW at 40°C, 5.5 kW peak and 70 A charger. The non-GX model is intentional because the Ekrano is the system's one GX controller; do not substitute a 48 V, GX or 120 V model. Includes the battery-temperature sensor. IP22/non-condensing still requires the protected indoor salt-air installation shown in the design. The normal system budget applies the posted one-tool limit of 1,800 W rather than assuming the inverter's full 2.4 kW rating is a continuous load. At the conservative 19 V input floor and 94% efficiency, 1,800 W is about 100.8 A DC and fits the modeled 120 A branch-cable envelope. The exact 24/3000/70 installation table still requires a 300 A external DC protective device and at least 50 mm² copper for a 0–5 m run. The canonical graph therefore keeps its direct main-bus DC branch on a genuine fault-protection hold: select a resettable DC breaker with adequate interrupt capacity and coordinate it with the final conductor, 250 A bus architecture, battery-string protection and installer requirements before energizing.",
       "paidFraction": 0.2,
       "productUrl": "https://www.victronenergy.com/inverters-chargers/multiplus-ii",
       "specUrl": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/technical-specifications-mp-ii-230v.html",
@@ -868,7 +893,7 @@
       "location": "Import",
       "procurement": "Purchased",
       "priority": "Must",
-      "description": "Two units purchased from Amazon on 17 Aug 2026 and delivered 19–20 Aug: one new at $48.45 and one used–mint at $43.60, totaling $92.05 before the order-level promotion and tax. Bench-test both, inspect the used unit closely and install one balancer per independent two-battery 24 V string, with each alarm relay wired to a separate Ekrano digital input.",
+      "description": "Two units purchased from Amazon on 17 Aug 2026 and delivered 19–20 Aug: one new at $48.45 and one used–mint at $43.60, totaling $92.05 before the order-level promotion and tax. Bench-test both, inspect the used unit closely and install one balancer per independent two-battery 24 V string, with each alarm relay wired to a separate Ekrano digital input. Victron publishes 0.7 A maximum balance current, 0.7 mA off current and a 0.75 mm² minimum lead size. The modeled 1.5 mm² leads are ample in normal operation, but the battery-adjacent positive/midpoint leads still need accepted fault protection; Victron specifies 10 A near-battery fuses when UL compliance is required, so use locally accepted resettable protection where possible or obtain installer approval for an alternative.",
       "productUrl": "https://www.amazon.com/dp/B01DH6B2D2",
       "specUrl": "https://www.victronenergy.com/batteries/battery-balancer",
       "unitWeightKg": 0.4,
@@ -1140,16 +1165,21 @@
       "category": "DC distribution",
       "currency": "USD",
       "location": "Import",
-      "procurement": "Select and buy · design hold",
-      "priority": "Must · selection required",
+      "procurement": "Purchased · commissioning verification hold",
+      "priority": "Must · verify received markings",
       "id": "dse-switched-load-breaker",
-      "item": "Unselected generic 10 A DC shared switched-services breaker",
+      "item": "CHTAIXI 10 A single-pole DC shared switched-services breaker",
       "qty": 1,
       "unit": "ea",
-      "unitCost": 0,
-      "description": "Required R28 shared switched-services branch position inside the secondary enclosure. No make or part number is approved or purchased. Select the exact generic 10 A breaker only after confirming 24 VDC rating, polarity, interrupt capacity, terminal range, downstream conductor ampacity and ambient derating.",
-      "totalUsd": 0,
-      "weightNote": "Physical mass unknown until an exact breaker is selected; zero cost is a placeholder, not a quote."
+      "unitCost": 8.99,
+      "description": "Purchased from Amazon on 26 Aug 2026, ASIN B09H4W5HSW, for the shared lights, Starlink Mini and UniFi branch. The listing identifies a single-pole 10 A thermal-magnetic B-curve breaker for 12–110 VDC and claims IEC 60947-2 compliance and 6 kA breaking capacity. Those listing claims are provisional: before commissioning, confirm the received DC voltage and polarity markings, interrupt rating, terminal range, torque, temperature derating and local acceptance. The known branch load is 60 W in normal use and no more than 100 W from published/user-confirmed device limits plus reserve, so 10 A leaves substantial normal-load headroom while still matching the modeled 10 A branch conductors.",
+      "totalUsd": 8.99,
+      "weightNote": "Amazon listing item weight of 3.52 oz, converted to approximately 0.10 kg; weigh the received breaker before final filing.",
+      "productUrl": "https://www.amazon.com/dp/B09H4W5HSW",
+      "unitWeightKg": 0.1,
+      "totalWeightKg": 0.1,
+      "weightBasis": "listing",
+      "weightSourceUrl": "https://www.amazon.com/dp/B09H4W5HSW"
     },
     {
       "category": "DC distribution",
@@ -1217,7 +1247,7 @@
       "qty": 1,
       "unit": "ea",
       "unitCost": 50.99,
-      "description": "One enclosure ordered 26 Aug 2026, ASIN B0DJNJ53MN. The invoice title identifies an IP65 indoor/outdoor ABS body, ventilated design, cable grommets, mounting panel and nominal 11.9 × 11.9 × 7 in (about 302 × 302 × 178 mm) size. Its R28 fit is accepted and verified for the generic 10 A shared-services breaker, purchased 32 A Orion and ChargeIT breakers, secondary positive/negative Blue Sea 2314 buses, six-gang panel, 24 V-to-5 V USB-A converter and Starlink power routing. Preserve the accepted device clearances, vent function, sealing and cable-entry arrangement during installation.",
+      "description": "One enclosure ordered 26 Aug 2026, ASIN B0DJNJ53MN. The invoice title identifies an IP65 indoor/outdoor ABS body, ventilated design, cable grommets, mounting panel and nominal 11.9 × 11.9 × 7 in (about 302 × 302 × 178 mm) size. Its R28 fit is accepted and verified for the purchased CHTAIXI 10 A shared-services breaker, purchased 32 A Orion and ChargeIT breakers, secondary positive/negative Blue Sea 2314 buses, six-gang panel, 24 V-to-5 V USB-A converter and Starlink power routing. Preserve the accepted device clearances, vent function, sealing and cable-entry arrangement during installation.",
       "productUrl": "https://www.amazon.com/dp/B0DJNJ53MN",
       "unitWeightKg": 2,
       "weightBasis": "estimate",
@@ -1306,6 +1336,49 @@
       "weightNote": "Excluded from Fiji shipping; retained only as purchase history."
     },
     {
+      "id": "dse-existing-generator",
+      "category": "Existing equipment",
+      "item": "Husqvarna G3200P petrol generator",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 0,
+      "currency": "USD",
+      "totalUsd": 0,
+      "location": "Fiji",
+      "procurement": "Purchased · pre-existing",
+      "priority": "Existing backup source · verify nameplate",
+      "accountingGroup": "excluded",
+      "includedInTotal": false,
+      "description": "Already owned before this solar project and now explicitly recorded as purchased/pre-existing equipment. Husqvarna publishes approximately 2.8 kW rated output for the 230 V / 50 Hz G3200P family, while model-family maximum ratings vary. Confirm the actual unit nameplate, Fiji receptacle, resettable outlet-breaker rating, protective-earth continuity and neutral-earth arrangement before connecting the held 10 A generator-input circuit.",
+      "productUrl": "https://www.husqvarna.com/my/generators/g3200p/",
+      "specUrl": "https://www-static-nw.husqvarna.com/hbd/tdrdownload/v2/pub000092074/doc000221989/OM/67_v-w4tEgqdgrxTerwPMkodyk8?httproute=True",
+      "unitWeightKg": 49,
+      "totalWeightKg": 49,
+      "weightBasis": "manufacturer",
+      "weightSourceUrl": "https://www.husqvarna.com/my/generators/g3200p/",
+      "weightNote": "Manufacturer product-family net weight. Existing in Fiji and excluded from import shipping/budget totals."
+    },
+    {
+      "id": "dse-existing-pv-comb-rails",
+      "category": "PV safety",
+      "item": "Pre-existing insulated positive/negative PV comb rails",
+      "qty": 1,
+      "unit": "pair",
+      "unitCost": 0,
+      "currency": "USD",
+      "totalUsd": 0,
+      "location": "Fiji",
+      "procurement": "Existing · already owned",
+      "priority": "Must · verify rating and fit",
+      "accountingGroup": "excluded",
+      "includedInTotal": false,
+      "description": "The insulated positive and negative comb rails are already existing/owned hardware, not a future purchase. The combined two-string path carries 26.56 A at maximum-power current, so verify at least 32 A continuous capacity, insulation, tooth pitch, breaker/SPD/disconnect compatibility, creepage/clearance and retention before use. Existing ownership does not remove this received-part safety check.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Existing Fiji inventory; not part of imported shipping weight."
+    },
+    {
       "id": "dse-amazon-promotion",
       "category": "Purchase adjustments",
       "item": "Amazon order promotions",
@@ -1326,16 +1399,16 @@
     {
       "id": "dse-us-sales-tax",
       "category": "Purchase adjustments",
-      "item": "U.S. sales tax on thirty-four Amazon project receipts",
+      "item": "U.S. sales tax on thirty-five Amazon project receipts",
       "qty": 1,
       "unit": "lot",
-      "unitCost": 371.63,
+      "unitCost": 372.51,
       "currency": "USD",
-      "totalUsd": 371.63,
+      "totalUsd": 372.51,
       "location": "Import",
       "procurement": "Purchased",
       "priority": "Reference",
-      "description": "Actual U.S. sales tax across thirty-four reconciled Amazon project receipts through 26 Aug 2026, including $21.70 on the three cable/protection orders ingested in this revision.",
+      "description": "Actual U.S. sales tax across thirty-five reconciled Amazon project receipts through 26 Aug 2026, including $0.88 on the shared-services breaker order. The separate personal/outside-scope tax row remains excluded from the solar-system total.",
       "unitWeightKg": 0,
       "totalWeightKg": 0,
       "weightBasis": "not-applicable",
@@ -1437,7 +1510,7 @@
       "location": "Import",
       "procurement": "Purchased",
       "priority": "Must",
-      "description": "Purchased on 21 Aug 2026. Retain the SPD and common disconnect only if a qualified installer approves the rebuilt entry assembly. The canonical backplate layout resolves a 320 × 280 × 150 mm usable enclosure with one evenly spaced seven-gland bottom row. It has no standalone combiner component: insulated positive and negative comb rails run across the top terminals of both common-trip 20 A string breakers, the SPD and the disconnect. Measure the received box and replace it if its usable envelope is smaller. Do not install the supplied 32 A fuse links.",
+      "description": "Purchased on 21 Aug 2026. Retain the SPD and common disconnect only if a qualified installer approves the rebuilt entry assembly. The canonical backplate layout resolves a 320 × 280 × 150 mm usable enclosure with one evenly spaced seven-gland bottom row. The pre-existing insulated positive/negative comb rails connect the two common-trip 20 A string breakers, SPD and disconnect. Each string remains on 4 mm² conductors; after combining, use the revised 6 mm² / 32 A-rated positive and negative pair to the SmartSolar. Verify every rail/device rating and terminal fit. Do not install the supplied 32 A fuse links.",
       "productUrl": "https://www.amazon.com/dp/B0FSQB97T2",
       "unitWeightKg": 2.5,
       "totalWeightKg": 2.5,
@@ -2819,7 +2892,9 @@
     "Never equalize GEL batteries. Inspect individual battery voltage, temperature, swelling, torque and corrosion monthly.",
     "Keep all power electronics dry and away from direct salt air. Every three months, isolate the system, inspect for salt deposits or corrosion, clean/replace the alcove filter and correct any moisture source.",
     "Treat the generator as tested backup only. Have the qualified installer verify the accepted AC-input assembly, generator neutral-earth arrangement and coordination between the input and output 30 mA devices. Keep AC-in N and AC-out N isolated; only protective earth is common, through the continuous unswitched PE chain. Do not add a permanent N–PE link in the AC box.",
-    "AC neutral and PE are not interchangeable. Neutral carries normal load return current; PE normally carries no current and remains continuously bonded for fault protection. Never switch PE, never use PE as a neutral, and never add a permanent N–PE link in the AC box—the MultiPlus ground relay manages the output bond."
+    "AC neutral and PE are not interchangeable. Neutral carries normal load return current; PE normally carries no current and remains continuously bonded for fault protection. Never switch PE, never use PE as a neutral, and never add a permanent N–PE link in the AC box—the MultiPlus ground relay manages the output bond.",
+    "Treat the 10 A shared-services breaker as a 160 W planning ceiling, not a promise of 240 W continuous expansion. The current 60 W expected / 100 W conservative load is appropriate. Before adding anything, recompute demand at 20 V, preserve the 10 A conductor limit and verify enclosure-temperature/curve margin.",
+    "Before running a high-load corded tool, switch ORION REMOTE H off and open the ChargeIT 32 A branch breaker; keep only the Ekrano and shared essential services running. Together with the one-tool 1,800 W limit, this keeps the modeled common battery-return current near 106.5 A at the conservative 19 V floor, below its 120 A envelope. Do not defeat the Ekrano DVCC 100 A system charge-current limit."
   ],
   "commissioning": [
     "Confirm all four panel and battery nameplates before terminating anything.",
@@ -2840,14 +2915,18 @@
     "Keep both purchased Mollom HT-8 units out of the installed AC assembly. Install the separately tracked second HT-8 as the verified-fit R28 three-device battery/MPPT cutoff enclosure; retain the first as an owned spare. The two purchased DIHOOL 10 A ground-fault/surge units are assigned to AC-in and AC-out, but both remain commissioning holds until exact 10 A, 30 mA Type A, SPD classification, L/N/PE arrangement, interrupt rating, 230 V / 50 Hz suitability and qualified-installer acceptance are confirmed. Purchase-fade state must not be interpreted as electrical approval. No unselected replacement AC-enclosure allowance remains in the BOM; add only the actual AC enclosure after its separate fit check.",
     "Route four separate three-core cables through the AC enclosure: generator → input LINE, input LOAD → MultiPlus AC-in, MultiPlus AC-out-1 → output LINE, and output LOAD → Type I trailing socket. Keep the two neutrals segregated. Daisy-chain PE only through dedicated unswitched PE pass-through terminals rated for the exact conductor count: generator → input protector → MultiPlus chassis/PE → output protector → socket, with the main PE bond joined at the input PE node. If any received terminal cannot do this, use a larger enclosure and approved PE terminal block.",
     "Cut the purchased six-gang panel opening at the accepted secondary-services enclosure face/cover location from the verified layout. Label the vertical rockers, top to bottom: STARLINK + UNIFI; OUTDOOR LIGHT; ORION REMOTE H; SPARE; SPARE; SPARE. Gasket the perimeter, insulate every rear terminal and verify the protected daisy-chain conductors. Switch 3 carries only the Orion H-pin control signal; L is unused and USB charging current bypasses the switch panel.",
-    "Secure two genuine WAGO 221-413 connectors in proper carriers inside the secondary-services enclosure. The first splits the selected generic 10 A shared-services positive branch between the six-gang common feed and remote room-switch run. The second splits the STARLINK + UNIFI positive switch output between the Starlink bulkhead jack and dedicated UniFi converter. Do not add modeled negative-return split devices: land the nine graph connections directly on the seven-position secondary negative bus, retain the terminal-count warning, and select any necessary listed splitter arrangement onsite. Connect Starlink Ethernet directly to the UniFi Express WAN port and bench-test at least ten simultaneous Starlink/UniFi power cycles.",
+    "Secure two genuine WAGO 221-413 connectors in proper carriers inside the secondary-services enclosure. The first splits the purchased CHTAIXI 10 A shared-services positive branch between the six-gang common feed and remote room-switch run. The second splits the STARLINK + UNIFI positive switch output between the Starlink bulkhead jack and dedicated UniFi converter. Do not add modeled negative-return split devices: land the nine graph connections directly on the seven-position secondary negative bus, retain the terminal-count warning, and select any necessary listed splitter arrangement onsite. Connect Starlink Ethernet directly to the UniFi Express WAN port and bench-test at least ten simultaneous Starlink/UniFi power cycles.",
     "Use QHLightlux B0F1V59NXC 3000 K fixtures for both locations. Suspend the indoor unit from a short dry bracket with its lens down; mount the outdoor unit under an eave with 316 stainless fasteners and sealed bedding. Put two 3 A silicon rectifier diodes in series with each switched positive branch. Route one protected positive from the secondary-services enclosure to one pole of the IP66 DPST switch beside the opposite doorway, one switched positive onward to the indoor fixture, and one direct unswitched negative from the secondary negative bus to the fixture. Dress all three long conductors along the ceiling, cap the unused pole and verify the received contact diagram before energizing.",
     "Bench-test the Starlink Mini from the 24 V branch through its complete OEM 15 m cable: verify center-positive polarity at the bulkhead jack, cold-start it at low battery voltage, and confirm STARLINK + UNIFI simultaneously removes Starlink and UniFi without interrupting the independently switched USB or lights.",
     "Run the 1,800 W saw alone for 30 minutes in warm conditions with the 5 m lead fully uncoiled while monitoring inverter, lead, plug/socket, cable and terminal temperature; post the one-page operating rules and breaker map beside the equipment.",
     "Continuity-test the complete AC PE chain with each protection device ON and OFF. Prove low-resistance continuity from generator earth and the main PE bond to MultiPlus chassis and the Type I socket, prove no input-neutral/output-neutral cross-connection, and test the MultiPlus ground-relay behavior in inverter and generator/bypass modes before energizing the socket.",
-    "Build the R28 secondary-services rail with exactly three branch positions: the to-be-selected generic 10 A shared-services breaker, purchased 32 A Orion input breaker and purchased 32 A ChargeIT breaker. Do not add a separate 80 A incomer. No make or part number is yet approved for the 10 A position. The direct secondary positive feeder remains a commissioning hold until its source-side overcurrent protection, ampacity and both 100 A Blue Sea 2314 bus envelopes are documented; downstream branch breakers do not protect that feeder from an upstream fault.",
+    "Build the secondary-services rail with exactly three branch positions: purchased CHTAIXI B09H4W5HSW 10 A shared services, purchased 32 A Orion input and purchased 32 A ChargeIT. Do not add a separate 80 A incomer. Verify the received B10 12–110 VDC/polarity/curve/6 kA/terminal/torque markings and bound battery prospective fault current before energizing it. The direct secondary feeder remains a separate hold until source-side overcurrent protection, its ampacity and both 100 A bus interfaces are accepted.",
     "No insulated secondary-enclosure feed-through studs are purchased. Route one held positive feeder and one negative feeder through ordinary strain-relieved glands unless a stud pair is later selected and electrically and mechanically verified. Verify both purchased 32 A breakers, their 24 V conductors and every downstream terminal before energizing. The verified Orion output limiter enables its downstream socket routes, but retain the graph verifier's separate limitation until the published short-circuit envelope, harness ampacity and fault-clearing behavior are coordinated.",
-    "Use the canonical graph as the wiring authority: every physical device and conductor in the detailed diagram is the same object rendered in 3D. Treat its programmatic per-supply current-protection traversal as fail-closed evidence: resolve missing source/channel/return metadata, inadequate ratings, bypasses and incomplete fault-clearing evidence before commissioning. Resolve graph validation or A* routing failures in code; do not add hand-positioned glands, routing exceptions or undocumented wires."
+    "Use the canonical graph as the wiring authority: every physical device and conductor in the detailed diagram is the same object rendered in 3D. Treat its programmatic per-supply current-protection traversal as fail-closed evidence: resolve missing source/channel/return metadata, inadequate ratings, bypasses and incomplete fault-clearing evidence before commissioning. Resolve graph validation or A* routing failures in code; do not add hand-positioned glands, routing exceptions or undocumented wires.",
+    "Before commissioning the MultiPlus DC branch, follow the exact 24/3000/70 manual: select a resettable external DC breaker with a manufacturer-accepted trip characteristic and adequate interrupt rating, use at least the specified 50 mm² copper for a 0–5 m run (or the final engineer-sized conductor), and re-check the 250 A buses and two 120 A string-breaker architecture. Do not rely on MultiPlus internal electronic protection to protect the field cable.",
+    "After the PV string breakers/rails/disconnect, use the canonical 6 mm² positive and negative combined-array leads to the SmartSolar. At 26.56 A Imp, the former 4 mm² / 20 A combined lead was undersized. Confirm received rail, disconnect and terminal capacity before uncovering the array.",
+    "Measure every active device during bench commissioning: record Starlink average/peak, UniFi converter input and temperature, both switch-indicator draws, Coolgear 145 W idle draw, and actual ChargeIT idle draw. Compare results with the device-power table and lower operating limits if measured values exceed it.",
+    "Verify the SmartShunt SYSTEM MINUS-to-main-negative-bus trunk under the controlled operating envelope before commissioning. Confirm the actual 1/0 conductor, insulation, support, lugs and terminations sustain the modeled 120 A envelope; enforce one tool at or below 1,800 W, ORION REMOTE H off and the ChargeIT breaker open during heavy tool use, and the Ekrano DVCC charge-current limit at 100 A. The controlled discharge budget is about 106.5 A, but every installed DC branch at maximum could reach about 148.6 A if the load-shedding rule is ignored. Test and record SmartShunt current and temperature during the 30-minute saw run. Fault/OCP coordination remains a separate hold; do not infer cable ampacity from the SmartShunt's 500 A body rating."
   ],
   "research": [
     {
@@ -3134,6 +3213,51 @@
       "title": "CHTAIXI DZ47Z DC-breaker ratings and two-pole wiring diagrams",
       "publisher": "CHTAIXI / Amazon product document",
       "url": "https://m.media-amazon.com/images/I/81SNSe8ULbL.pdf"
+    },
+    {
+      "title": "Fiji Electricity Regulations 2019 · wiring rules and licensed installation",
+      "publisher": "Laws of Fiji",
+      "url": "https://www.laws.gov.fj/Acts/DisplayAct/2619"
+    },
+    {
+      "title": "MultiPlus-II 24/3000 DC cable and 300 A protection table",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/installation.html"
+    },
+    {
+      "title": "Orion-Tr Smart cable, fuse and terminal installation table",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/Orion-Tr_Smart_DC-DC_Charger_-_Non-Isolated/en/installation.html"
+    },
+    {
+      "title": "Orion-Tr Smart 24/12-30 output, efficiency and idle specifications",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/media/pg/Orion-Tr_Smart_DC-DC_Charger_-_Non-Isolated/en/specifications.html"
+    },
+    {
+      "title": "Battery Balancer current, cable and optional 10 A fuse guidance",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/upload/documents/Manual-Battery-Balancer-EN.pdf"
+    },
+    {
+      "title": "SmartShunt IP65 draw and supplied 1 A fused lead",
+      "publisher": "Victron Energy",
+      "url": "https://www.victronenergy.com/upload/documents/Datasheet-SmartShunt-IP65-EN.pdf"
+    },
+    {
+      "title": "Suntech STP565S-C72/Vmh electrical and 25 A series-fuse limits",
+      "publisher": "Suntech",
+      "url": "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf"
+    },
+    {
+      "title": "Husqvarna G3200P rated output and operating manual",
+      "publisher": "Husqvarna",
+      "url": "https://www-static-nw.husqvarna.com/hbd/tdrdownload/v2/pub000092074/doc000221989/OM/67_v-w4tEgqdgrxTerwPMkodyk8?httproute=True"
+    },
+    {
+      "title": "CHTAIXI B09H4W5HSW 10 A DC breaker purchase listing",
+      "publisher": "Amazon / CHTAIXI",
+      "url": "https://www.amazon.com/dp/B09H4W5HSW"
     }
   ]
 }

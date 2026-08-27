@@ -3,9 +3,11 @@
 import { type ComponentType, useEffect, useMemo, useRef, useState } from "react";
 import dseRaw from "@/data/dse-system.json";
 import { CustomsView } from "./CustomsView";
+import { dseRuntime } from "./dseRuntime";
 import { GraphInspector } from "./GraphInspector";
 import { ShippingView } from "./ShippingView";
-import type { GraphSelection } from "./systemGraph";
+import { titleCase } from "./systemGraph";
+import type { DevicePowerReading, GraphSelection } from "./systemGraph";
 import { UnifiedSystemDiagram } from "./UnifiedSystemDiagram";
 
 const loadSystemModel3D = () => import("./UnifiedSystemModel3D")
@@ -144,6 +146,56 @@ function money(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 }
 
+function compactPowerReading(reading: DevicePowerReading) {
+  return [
+    reading.wattsRange ? `${reading.wattsRange[0]}–${reading.wattsRange[1]} W` : undefined,
+    reading.watts !== undefined ? `${reading.watts} W` : undefined,
+    reading.wattHours !== undefined ? `${reading.wattHours} Wh` : undefined,
+    reading.voltAmps !== undefined ? `${reading.voltAmps} VA` : undefined,
+    reading.currentA !== undefined ? `${reading.currentA} A` : undefined,
+    reading.percent !== undefined ? `${reading.percent}%` : undefined,
+    reading.voltage,
+  ].filter(Boolean).join(" · ") || "Measure received unit";
+}
+
+function PowerAudit() {
+  const devices = dseRuntime.graph.devices.filter((device) => device.power)
+    .toSorted((first, second) => first.label.localeCompare(second.label));
+  const circuits = dseRuntime.graph.powerCircuits ?? [];
+  const passiveCount = dseRuntime.graph.devices.filter((device) => (
+    !device.power && device.presentation !== "wire-join" && device.presentation !== "cable-breakout"
+  )).length;
+  return (
+    <section className="system-power-audit" aria-labelledby="power-audit-title">
+      <div className="system-power-heading">
+        <div><p className="eyebrow">Normal demand ≠ fault current</p><h2 id="power-audit-title">Device power and circuit capacity</h2></div>
+        <p>{devices.length} active/source devices checked · {passiveCount} passive devices have no standing load modeled</p>
+      </div>
+      <div className="power-audit-table-wrap">
+        <table className="power-audit-table">
+          <thead><tr><th>Device</th><th>Role / evidence</th><th>Published or confirmed power</th></tr></thead>
+          <tbody>{devices.map((device) => <tr key={device.id}>
+            <th>{device.label}</th>
+            <td><span className={`power-evidence power-evidence-${device.power!.verified ? "documented" : "provisional"}`}>{titleCase(device.power!.role)} · {device.power!.verified ? "documented" : "provisional"}</span></td>
+            <td>{device.power!.readings.map((reading) => <span key={reading.label}><b>{reading.label}</b> · {compactPowerReading(reading)}</span>)}</td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+      <div className="circuit-budget-grid">{circuits.map((circuit) => <article key={circuit.id} className={`circuit-budget circuit-normal-${circuit.normalStatus}`}>
+        <div><h3>{circuit.label}</h3><span>{titleCase(circuit.normalStatus)}</span></div>
+        <dl>
+          {circuit.typicalWatts !== undefined && <div><dt>Typical</dt><dd>{circuit.typicalWatts} W</dd></div>}
+          {circuit.maximumWatts !== undefined && <div><dt>Maximum</dt><dd>{circuit.maximumWatts} W</dd></div>}
+          {circuit.maximumCurrentA !== undefined && <div><dt>Calculated current</dt><dd>{circuit.maximumCurrentA} A</dd></div>}
+          {circuit.conductorAmpacityA !== undefined && <div><dt>Path rating</dt><dd>{circuit.conductorAmpacityA} A</dd></div>}
+          <div><dt>Fault / OCP</dt><dd className={`fault-status fault-status-${circuit.faultStatus}`}>{titleCase(circuit.faultStatus)}</dd></div>
+        </dl>
+        <p>{circuit.note}</p>
+      </article>)}</div>
+    </section>
+  );
+}
+
 function ModeIcon({ mode }: { mode: ViewerMode }) {
   if (mode === "model") return <><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4 7.5 8 4.5 8-4.5M12 12v9" /></>;
   if (mode === "diagram") return <><rect x="3" y="4" width="7" height="6" rx="1" /><rect x="14" y="14" width="7" height="6" rx="1" /><path d="M10 7h5a3 3 0 0 1 3 3v4M6.5 10v5a2 2 0 0 0 2 2H14" /></>;
@@ -170,6 +222,7 @@ function SystemOverview() {
         <article><h2>Operating rules</h2><ol>{system.operatingRules.map((rule) => <li key={rule}>{rule}</li>)}</ol></article>
         <article><h2>Commissioning</h2><ol>{system.commissioning.map((rule) => <li key={rule}>{rule}</li>)}</ol></article>
       </div>
+      <PowerAudit />
     </section>
   );
 }

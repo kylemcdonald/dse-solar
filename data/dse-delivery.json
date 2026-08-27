@@ -221,8 +221,8 @@
       "amazonStatus": "not-applicable",
       "sourceLabel": "Amazon checkout tax",
       "eta": "Paid through Aug 26",
-      "time": "Thirty-four reconciled project receipts",
-      "note": "$371.63 combined U.S. sales tax through the latest cable/protection orders."
+      "time": "Thirty-five reconciled project receipts",
+      "note": "$372.51 combined U.S. sales tax through the shared-services breaker order."
     },
     "dse-pv-protection": {
       "amazonStatus": "purchased",
@@ -917,11 +917,12 @@
       "note": "Actual sales tax across the three newly ingested Amazon orders, whose goods are personal or outside the solar-system scope."
     },
     "dse-switched-load-breaker": {
-      "amazonStatus": "unavailable",
-      "sourceLabel": "Selection pending · no approved part",
-      "eta": "Select before installation",
-      "time": "Not purchased · price unknown",
-      "note": "Required generic 10 A DC shared switched-services branch breaker. No make or part number is selected; zero BOM cost is not a quote."
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · purchased CHTAIXI B10 breaker",
+      "sourceUrl": "https://www.amazon.com/dp/B09H4W5HSW",
+      "eta": "Arriving Aug 27",
+      "time": "Purchased Aug 26 · $8.99",
+      "note": "Allocated to the shared lights/internet branch. Keep de-energized until the received 12–110 VDC, polarity, 10 A, interrupt, terminal and torque markings are verified."
     },
     "dse-secondary-feedthrough-studs": {
       "amazonStatus": "unavailable",

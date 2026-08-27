@@ -103,6 +103,55 @@ export type Conductor = {
 
 export type ProcurementStatus = "purchased" | "existing" | "planned";
 
+export type PowerEvidenceBasis = "manufacturer" | "retailer" | "user-confirmed" | "calculated";
+
+export type DevicePowerReading = {
+  label: string;
+  watts?: number;
+  wattsRange?: readonly [number, number];
+  wattHours?: number;
+  voltAmps?: number;
+  percent?: number;
+  currentA?: number;
+  voltage?: string;
+  durationSeconds?: number;
+  note?: string;
+};
+
+/** Operating-power evidence is deliberately separate from fault-current
+ * metadata. A device drawing 10 W does not prove that its supply lead can
+ * clear a battery-fed short circuit, and an internal output limiter does not
+ * automatically protect the device's upstream field wiring. */
+export type DevicePowerProfile = {
+  role: "source" | "storage" | "load" | "converter" | "monitor" | "variable-load" | "control-load";
+  basis: PowerEvidenceBasis;
+  verified: boolean;
+  sourceUrl?: string;
+  readings: readonly DevicePowerReading[];
+  note?: string;
+  internalProtection?: {
+    verified: boolean;
+    features: readonly string[];
+    note?: string;
+  };
+};
+
+export type CircuitPowerBudget = {
+  id: string;
+  label: string;
+  deviceIds: readonly string[];
+  nominalVoltageV: number;
+  minimumVoltageV?: number;
+  typicalWatts?: number;
+  maximumWatts?: number;
+  maximumCurrentA?: number;
+  protectionDeviceId?: string;
+  conductorAmpacityA?: number;
+  normalStatus: "within-capacity" | "conditional" | "over-capacity" | "variable";
+  faultStatus: "verified" | "provisional" | "incomplete";
+  note: string;
+};
+
 export type CurrentActiveChannel = "positive" | "ac-line";
 export type CurrentReturnChannel = "negative" | "ac-neutral";
 export type CurrentSafetyChannel = CurrentActiveChannel | CurrentReturnChannel;
@@ -242,6 +291,9 @@ export type Device = {
   /** Continuous current rating used by the current-safety traversal where the
    * hardware rating is known (notably distribution buses). */
   currentRatingA?: number;
+  /** Manufacturer-, retailer-, user- or calculation-backed operating power.
+   * This is shown independently from the graph's fault/OCP proof. */
+  power?: DevicePowerProfile;
   /** Explicit source-body paths. Members sharing an assembly ID must contain a
    * valid terminal-owned supply somewhere in that assembly; malformed or
    * source-less declarations are excluded from traversal and reported. */
@@ -326,6 +378,9 @@ export type SystemGraph = {
   connections: readonly Connection[];
   junctions: readonly Junction[];
   currentSources: readonly CurrentSource[];
+  /** Explicit normal-operation circuit budgets. Fault-clearing status remains
+   * a separate axis because a low load does not make an unfused fault safe. */
+  powerCircuits?: readonly CircuitPowerBudget[];
 };
 
 export type ResolvedConductor = Conductor & {
@@ -367,6 +422,7 @@ export type CurrentSafetyIssue = {
     | "unpaired-return-conductor"
     | "missing-device-rating"
     | "missing-interrupt-rating"
+    | "fault-current-unresolved"
     | "interrupt-rating-insufficient"
     | "conductor-protection-incomplete"
     | "conductor-protection-provisional"

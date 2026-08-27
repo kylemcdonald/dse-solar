@@ -7,6 +7,8 @@ import type {
   CurrentSafetyConnectionCheck,
   CurrentSafetyDeviceCheck,
   CurrentSafetyIssue,
+  Device,
+  DevicePowerReading,
   GraphSelection,
 } from "./systemGraph";
 
@@ -57,7 +59,8 @@ function CurrentSafetyDetails({
     : checks.some((check) => check.status === "provisional") || issues.length > 0 ? "provisional" : "verified";
   return (
     <div className={`graph-current-safety graph-current-safety-${status}`} data-current-safety-status={status}>
-      <strong>Programmatic current-protection audit · {status}</strong>
+      <strong>Fault-clearing / OCP audit · {status}</strong>
+      <small>Operating power is audited separately. An incomplete result here means a fault path or its evidence still needs work; it does not mean the device consumes too much power.</small>
       {checks.map((check) => (
         <div className="graph-current-check"
           key={`${"connectionId" in check ? `connection:${check.connectionId}` : `device:${check.deviceId}`}:${check.channel}`}>
@@ -84,9 +87,52 @@ function CurrentSafetyDetails({
       ))}
       {issues.length > 0 && <ul>{issues.map((issue, index) => (
         <li key={`${issue.code}:${issue.connectionId ?? issue.deviceId ?? issue.endpoint ?? index}:${issue.channel ?? "all"}`}>
-          <b>{issue.severity === "error" ? "Error" : "Warning"}</b> · {issue.message}
+          <b>{issue.severity === "error" ? "Design hold" : "Verification item"}</b> · {issue.message}
         </li>
       ))}</ul>}
+    </div>
+  );
+}
+
+function formatPowerReading(reading: DevicePowerReading) {
+  const values = [
+    reading.wattsRange ? `${reading.wattsRange[0]}–${reading.wattsRange[1]} W` : undefined,
+    reading.watts !== undefined ? `${reading.watts} W` : undefined,
+    reading.wattHours !== undefined ? `${reading.wattHours} Wh` : undefined,
+    reading.voltAmps !== undefined ? `${reading.voltAmps} VA` : undefined,
+    reading.currentA !== undefined ? `${reading.currentA} A` : undefined,
+    reading.percent !== undefined ? `${reading.percent}%` : undefined,
+    reading.voltage,
+    reading.durationSeconds !== undefined ? `${reading.durationSeconds} s` : undefined,
+  ].filter(Boolean);
+  return values.join(" · ") || "Measurement required";
+}
+
+function DevicePowerDetails({ device }: { device: Device }) {
+  const passive = ["breaker", "busbar", "switch", "connector", "junction", "protection", "earth"].includes(device.kind);
+  if (!device.power && !passive) return (
+    <div className="graph-power-details graph-power-unknown">
+      <strong>Operating power · not yet documented</strong>
+    </div>
+  );
+  if (!device.power) return (
+    <div className="graph-power-details">
+      <strong>Operating power · passive hardware</strong>
+      <small>No standing load is modeled. Contact resistance, SPD leakage and switch indicators are installation losses, not connected appliance demand.</small>
+    </div>
+  );
+  return (
+    <div className={`graph-power-details ${device.power.verified ? "graph-power-verified" : "graph-power-provisional"}`}>
+      <strong>Operating power · {titleCase(device.power.role)} · {device.power.verified ? "documented" : "provisional"}</strong>
+      {device.power.readings.map((reading) => <div key={reading.label} className="graph-power-reading">
+        <b>{reading.label}</b><small>{formatPowerReading(reading)}</small>
+        {reading.note && <small>{reading.note}</small>}
+      </div>)}
+      {device.power.note && <p>{device.power.note}</p>}
+      {device.power.internalProtection && <small><b>Internal protection · {device.power.internalProtection.verified ? "documented" : "listing claim"}</b>
+        {device.power.internalProtection.features.length > 0 ? ` · ${device.power.internalProtection.features.join(" · ")}` : " · none documented"}
+        {device.power.internalProtection.note ? ` · ${device.power.internalProtection.note}` : ""}</small>}
+      <ExternalLink href={device.power.sourceUrl}>Power source</ExternalLink>
     </div>
   );
 }
@@ -104,7 +150,7 @@ export function GraphInspector({ selection, bom, onClose, onSelect }: Props) {
     return (
       <aside className="inspector graph-inspector" aria-label="Device details">
         <button type="button" className="inspector-close" onClick={onClose} aria-label="Close details">×</button>
-        <p className="inspector-kicker">{titleCase(device.kind)} · {device.status ?? "planned"}</p>
+        <p className="inspector-kicker">{titleCase(device.kind)} · {device.status ?? "planned"}{device.procurementStatus === "existing" ? " · pre-existing" : ""}</p>
         <h2>{device.label}</h2>
         {device.subtitle && <p>{device.subtitle}</p>}
         <dl className="graph-detail-list">
@@ -112,6 +158,7 @@ export function GraphInspector({ selection, bom, onClose, onSelect }: Props) {
           <div><dt>Location</dt><dd>{device.placement.space === "junction" ? `Inside ${dseRuntime.deviceById.get(device.placement.junctionId)?.label ?? device.placement.junctionId}` : titleCase(device.placement.surface)}</dd></div>
           {device.poles && <div><dt>Breaker width</dt><dd>{device.poles} way · {Math.round(device.size[0] * 1000)} mm</dd></div>}
         </dl>
+        <DevicePowerDetails device={device} />
         <CurrentSafetyDetails checks={safetyChecks} issues={safetyIssues} />
         {device.holdReason && <div className="graph-hold"><strong>Installation hold</strong><p>{device.holdReason}</p></div>}
         <div className="graph-inspector-links">
