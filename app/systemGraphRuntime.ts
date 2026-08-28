@@ -14,6 +14,7 @@ import {
 } from "./systemGraph";
 import {
   MAX_SEMANTIC_SECTION_M,
+  renderedRoutePoints,
   renderedSemanticCables,
   roundedRoutePieces,
   sampleCableCurve,
@@ -69,6 +70,12 @@ type RoutingSpace = {
 
 export const routingFailureDiagnostics: Array<{ owner: string; space: string; expansions: number; reason: string }> = [];
 export const renderedGeometryFailureDiagnostics: string[] = [];
+export const routingTargetAssignmentDiagnostics: Array<{
+  connectionId: string;
+  side: "from" | "to";
+  authoredEndpoint: string;
+  resolvedEndpoint: string;
+}> = [];
 
 const directionByFace: Record<Face, Vec3> = {
   top: [0, 1, 0],
@@ -600,6 +607,12 @@ function resolveDevices(graph: SystemGraph) {
     const dinWidth = rowSpan(din, effectiveDinGap);
     const crossingCount = crossingBundles(graph, junction.deviceId).size;
     const effectiveGlandSpacing = junction.glandSpacing;
+    // Autosized shells use a two-cell gland throat. Keep that complete ingress
+    // below a bottom-mounted equipment band; otherwise a gland can terminate
+    // inside the first DIN/body row even though the enclosure has ample room.
+    const glandBandHeight = effectiveGlandSpacing + (junction.sizePolicy === "verified-fixed" || junction.dinPosition !== "bottom"
+      ? 0
+      : geometryMetres(ROUTING_STEP_UNITS * 2));
     const glandWidth = crossingCount > 0
       ? (crossingCount - 1) * effectiveGlandSpacing + effectivePadding * 2 + 0.020
       : 0;
@@ -631,6 +644,9 @@ function resolveDevices(graph: SystemGraph) {
 
     const backplateRows = flowRows(backplate, width, effectivePadding, effectiveBackplateGap);
     const backplateHeight = rowsHeight(backplateRows, effectiveBackplateGap);
+    const backplateTopReach = junction.dinPosition === "bottom"
+      ? Math.max(0, ...(backplateRows[0] ?? []).map((device) => routingReach(device, "top")))
+      : 0;
     const dinHeight = Math.max(0, ...din.map((device) => device.size[1]));
     const powerHeight = Math.max(0, ...power.map((device) => device.size[1]));
     const lowHeight = Math.max(dinHeight, powerHeight);
@@ -646,7 +662,8 @@ function resolveDevices(graph: SystemGraph) {
         + (junction.dinPosition === "bottom" ? lowHeight : dinHeight + powerHeight)
         + bandGaps
         + backplateHeight
-        + effectiveGlandSpacing,
+        + backplateTopReach
+        + glandBandHeight,
     );
     const snapUp = (value: number, increment: number) => Math.ceil((value - 1e-9) / increment) * increment;
     const junctionDevice = layoutDevices.find((device) => device.id === junction.deviceId)!;
@@ -710,7 +727,9 @@ function resolveDevices(graph: SystemGraph) {
     // margin in the renderer or router.
     const routingHeadroom = junction.sizePolicy === "verified-fixed" ? 0 : effectivePadding;
     const enclosureTop = cy + height / 2 - effectivePadding - routingHeadroom;
-    const glandReserve = junction.glandSpacing;
+    const glandReserve = junction.glandSpacing + (junction.sizePolicy === "verified-fixed" || junction.dinPosition !== "bottom"
+      ? 0
+      : geometryMetres(ROUTING_STEP_UNITS * 2));
     const dinAtBottom = junction.dinPosition === "bottom";
     const lowBandBottom = cy - height / 2 + effectivePadding + glandReserve;
     const dinTop = dinAtBottom
@@ -969,7 +988,13 @@ function resolveDevices(graph: SystemGraph) {
     } else {
       const backplateRows = flowRows(backplate, width, effectivePadding, layoutGap);
       let cursorY = dinAtBottom
-        ? enclosureTop
+        // Anchor the planar backplate stack to the protected low-equipment
+        // clearance, leaving any snapped surplus at the enclosure top. Packing
+        // down from the top could consume one route cell from this gap and cage
+        // bottom-facing terminals above the DIN/power row.
+        ? lowBandBottom + Math.max(dinHeight, Math.max(0, ...power.map((device) => device.size[1])))
+          + verticalGap(backplateRows.at(-1) ?? [], [...din, ...power], layoutGap)
+          + rowsHeight(backplateRows, layoutGap)
         : dinTop - dinHeight - (din.length && backplateRows.length
           ? verticalGap(din, backplateRows[0], layoutGap)
           : 0);
@@ -1039,10 +1064,35 @@ function resolveDevices(graph: SystemGraph) {
     });
   });
 
-  // Resolve bodyless joins only after their owners. The join's left terminal
-  // sits one 20 mm routing-cell lead beyond the physical landing; local +X follows
-  // the owner's conductor axis. No placement coordinates or per-device rules
-  // are required, and moving the owner moves the complete splice.
+  const layoutDeviceById = new Map(layoutDevices.map((device) => [device.id, device]));
+  const joinConnectionsByEndpoint = new Map<string, SystemGraph["connections"][number][]>();
+  graph.connections.forEach((connection) => [connection.from, connection.to].forEach((endpoint) => {
+    joinConnectionsByEndpoint.set(endpoint, [
+      ...(joinConnectionsByEndpoint.get(endpoint) ?? []),
+      connection,
+    ]);
+  }));
+  const attachmentRootEndpoint = (initialEndpoint: string) => {
+    let endpoint = initialEndpoint;
+    const visited = new Set<string>();
+    while (!visited.has(endpoint)) {
+      visited.add(endpoint);
+      const attached = layoutDeviceById.get(endpointDeviceId(endpoint));
+      if (!attached?.attachment) return endpoint;
+      endpoint = attached.attachment.endpoint;
+    }
+    throw new Error(`Attachment cycle at ${initialEndpoint}`);
+  };
+
+  // Resolve bodyless joins only after their owners. The join's device terminal
+  // sits one 20 mm routing-cell lead beyond the physical landing; local +X
+  // follows the owner's conductor axis. For a downward-facing landing whose
+  // two connected destinations lie on opposite transverse sides, place their
+  // terminals at the two forward corners and launch outward. This makes a
+  // daisy-chain splice a real upside-down Y: device stem above, left
+  // destination on the left arm, and right destination on the right arm. The
+  // choice is topology/geometry-derived, so moving or reordering devices moves
+  // the complete fan without ID rules.
   layoutDevices.filter((device) => device.attachment).forEach((device) => {
     const targetEndpoint = device.attachment!.endpoint;
     const owner = resolvedById.get(endpointDeviceId(targetEndpoint));
@@ -1058,11 +1108,70 @@ function resolveDevices(graph: SystemGraph) {
     const centerDistance = size[0] / 2 + lead + (attachmentAxialOffsetById.get(device.id) ?? 0);
     const rawPosition = add(targetPosition, scale(targetDirection, centerDistance));
     const axisAligned = targetDirection.filter((value) => Math.abs(value) > 1e-9).length === 1;
+    const position = axisAligned ? snapRoutingVec(rawPosition) : rawPosition;
+    const rotation = rotationForXAxis(targetDirection);
+    let conductors = device.conductors;
+    let resolvedConductorPositions: Record<string, Vec3> | undefined;
+    let resolvedConductorDirections: Record<string, Vec3> | undefined;
+    const deviceAboveFan = targetDirection[1] < -1 + 1e-8;
+    if (device.presentation === "wire-join" && axisAligned && deviceAboveFan) {
+      const lateral = rotateVector([0, 1, 0], rotation);
+      const targets = (["through", "branch"] as const).flatMap((conductorId) => {
+        const endpoint = `${device.id}.${conductorId}`;
+        const connections = joinConnectionsByEndpoint.get(endpoint) ?? [];
+        if (connections.length !== 1) return [];
+        const connection = connections[0];
+        const peerEndpoint = connection.from === endpoint ? connection.to : connection.from;
+        const rootEndpoint = attachmentRootEndpoint(peerEndpoint);
+        const rootOwner = resolvedById.get(endpointDeviceId(rootEndpoint));
+        if (!rootOwner) return [];
+        const rootConductorId = rootEndpoint.slice(rootEndpoint.lastIndexOf(".") + 1);
+        const rootDefinition = rootOwner.conductors.find((candidate) => candidate.id === rootConductorId);
+        if (!rootDefinition) return [];
+        const destination = terminalPosition(rootOwner, rootConductorId);
+        return [{
+          conductorId,
+          projection: dot(subtract(destination, position), lateral),
+        }];
+      });
+      const oppositeSides = targets.length === 2
+        && targets.some(({ projection }) => projection < -1e-8)
+        && targets.some(({ projection }) => projection > 1e-8);
+      if (oppositeSides) {
+        const sideByConductorId = new Map(targets.map(({ conductorId, projection }) => (
+          [conductorId, Math.sign(projection)] as const
+        )));
+        resolvedConductorPositions = Object.fromEntries(targets.map(({ conductorId, projection }) => [
+          conductorId,
+          add(
+            add(position, scale(targetDirection, size[0] / 2)),
+            scale(lateral, Math.sign(projection) * size[1] / 2),
+          ),
+        ]));
+        resolvedConductorDirections = Object.fromEntries(targets.map(({ conductorId, projection }) => [
+          conductorId,
+          scale(lateral, Math.sign(projection)),
+        ]));
+        // Keep terminalApproach's face-derived tangent identical to the
+        // resolved direction. The bodyless terminal is on this lateral face
+        // even though its selectable Y arm begins at the forward corner.
+        conductors = device.conductors.map((conductor) => {
+          const side = sideByConductorId.get(conductor.id);
+          return side === undefined ? conductor : {
+            ...conductor,
+            face: side > 0 ? "top" as const : "bottom" as const,
+          };
+        });
+      }
+    }
     resolvedById.set(device.id, {
       ...device,
-      position: axisAligned ? snapRoutingVec(rawPosition) : rawPosition,
+      conductors,
+      position,
       size,
-      rotation: rotationForXAxis(targetDirection),
+      rotation,
+      ...(resolvedConductorPositions ? { resolvedConductorPositions } : {}),
+      ...(resolvedConductorDirections ? { resolvedConductorDirections } : {}),
     });
   });
 
@@ -1725,9 +1834,15 @@ function buildBlockedVoxels(
   return { columns, cells };
 }
 
-function aStar(
+type AStarTarget = { point: Vec3; direction?: Vec3 };
+
+/** One voxel solve against a virtual device node. Every candidate terminal is
+ * connected to that node with a zero-cost edge, so the first settled target
+ * identifies the shortest reachable free landing under the same clearance,
+ * bend and occupancy rules as an ordinary cable route. */
+function aStarToAny(
   startPoint: Vec3,
-  endPoint: Vec3,
+  targets: readonly AStarTarget[],
   space: RoutingSpace,
   diameterMm: number,
   occupancyOwner = "route",
@@ -1735,31 +1850,42 @@ function aStar(
   floorPreference = 1,
   endpointAccess: EndpointAccessMap = new Map(),
   startDirection?: Vec3,
-  goalDirection?: Vec3,
   terminalNeighborhoods: readonly { point: Vec3; direction: Vec3 }[] = [],
+  heuristicWeight = 8,
 ) {
+  if (targets.length === 0) return null;
   const start = toGrid(startPoint, space);
-  const goal = toGrid(endPoint, space);
+  const targetGrids = targets.map((target, index) => ({
+    ...target,
+    index,
+    grid: toGrid(target.point, space),
+  }));
+  const targetByKey = new Map(targetGrids.map((target) => [gridKey(target.grid), target]));
+  if (targetByKey.size !== targetGrids.length) {
+    throw new Error(`${occupancyOwner}: virtual routing target contains duplicate terminal voxels`);
+  }
   const bounds = gridBounds(space);
   const searchMargin = isWorldRoutingSpace(space)
-    ? Math.max(32, Math.ceil(Math.abs(startPoint[2] - endPoint[2]) / space.cell) + 24)
+    ? Math.max(32, ...targets.map((target) => (
+      Math.ceil(Math.abs(startPoint[2] - target.point[2]) / space.cell) + 24
+    )))
     : Math.max(bounds[0], bounds[1]);
   const preferredDepthM = preferredDepthOverride ?? (isWorldRoutingSpace(space)
     ? space.worldRegion === "outside" ? -0.080 : 0.020
     : space.min[2] + space.cell);
   const preferredPlane = toGrid([0, 0, preferredDepthM], space)[2];
   const searchMin: GridPoint = [
-    Math.max(0, Math.min(start[0], goal[0]) - searchMargin),
-    Math.max(0, Math.min(start[1], goal[1]) - searchMargin),
+    Math.max(0, Math.min(start[0], ...targetGrids.map((target) => target.grid[0])) - searchMargin),
+    Math.max(0, Math.min(start[1], ...targetGrids.map((target) => target.grid[1])) - searchMargin),
     isWorldRoutingSpace(space)
-      ? Math.max(0, Math.min(start[2], goal[2], preferredPlane) - 20)
+      ? Math.max(0, Math.min(start[2], preferredPlane, ...targetGrids.map((target) => target.grid[2])) - 20)
       : 0,
   ];
   const searchMax: GridPoint = [
-    Math.min(bounds[0], Math.max(start[0], goal[0]) + searchMargin),
-    Math.min(bounds[1], Math.max(start[1], goal[1]) + searchMargin),
+    Math.min(bounds[0], Math.max(start[0], ...targetGrids.map((target) => target.grid[0])) + searchMargin),
+    Math.min(bounds[1], Math.max(start[1], ...targetGrids.map((target) => target.grid[1])) + searchMargin),
     isWorldRoutingSpace(space)
-      ? Math.min(bounds[2], Math.max(start[2], goal[2], preferredPlane) + 20)
+      ? Math.min(bounds[2], Math.max(start[2], preferredPlane, ...targetGrids.map((target) => target.grid[2])) + 20)
       : bounds[2],
   ];
   const radiusM = Math.max(space.cell * 0.15, diameterMm / 2000);
@@ -1772,7 +1898,6 @@ function aStar(
   type SearchNode = { point: GridPoint; direction: number; run: number };
   const open = new MinHeap<SearchNode>();
   const startKey = gridKey(start);
-  const goalKey = gridKey(goal);
   const cameFrom = new Map<string, string>();
   const nodeKey = (node: SearchNode) => `${gridKey(node.point)}|${node.direction}|${node.run}`;
   const startNode: SearchNode = { point: start, direction: -1, run: minimumRunCells };
@@ -1780,17 +1905,28 @@ function aStar(
   const nodeByKey = new Map<string, SearchNode>([[startNodeKey, startNode]]);
   const cost = new Map<string, number>([[startNodeKey, 0]]);
   const closed = new Set<string>();
-  const heuristic = (point: GridPoint) => (
-    Math.abs(point[0] - goal[0]) + Math.abs(point[1] - goal[1]) + Math.abs(point[2] - goal[2]) * 5
-  );
-  open.push(startNode, heuristic(start));
   const neighbors: readonly GridPoint[] = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
   const startUnavailable = isBlockedByDevice(blocked, start, space, endpointAccess)
     || hasNearbyCableConflict(start, space, diameterMm, occupancyOwner, "both");
-  const goalUnavailable = isBlockedByDevice(blocked, goal, space, endpointAccess)
-    || hasNearbyCableConflict(goal, space, diameterMm, occupancyOwner, "both");
-  if (startUnavailable || goalUnavailable) {
-    const unavailablePoint = startUnavailable ? start : goal;
+  const reachableTargets = targetGrids.filter((target) => !(
+    isBlockedByDevice(blocked, target.grid, space, endpointAccess)
+    || hasNearbyCableConflict(target.grid, space, diameterMm, occupancyOwner, "both")
+  ));
+  const reachableTargetByKey = new Map(reachableTargets.map((target) => [gridKey(target.grid), target]));
+  const representativeTarget = reachableTargets[0] ?? targetGrids[0];
+  const allTerminalNeighborhoods = [
+    ...terminalNeighborhoods,
+    ...reachableTargets.flatMap((target) => target.direction
+      ? [{ point: target.point, direction: target.direction }]
+      : []),
+  ];
+  const heuristic = (point: GridPoint) => Math.min(...reachableTargets.map((target) => (
+    Math.abs(point[0] - target.grid[0])
+    + Math.abs(point[1] - target.grid[1])
+    + Math.abs(point[2] - target.grid[2]) * 5
+  )));
+  if (startUnavailable || reachableTargets.length === 0) {
+    const unavailablePoint = startUnavailable ? start : targetGrids[0].grid;
     const unavailableKey = gridKey(unavailablePoint);
     const conflictDetails = [
       ...blockedDeviceLabels(blocked, unavailablePoint, space, endpointAccess).map((deviceId) => `device:${deviceId}`),
@@ -1803,10 +1939,11 @@ function aStar(
       owner: occupancyOwner,
       space: space.key,
       expansions: 0,
-      reason: `${startUnavailable ? `start ${startKey}` : `goal ${goalKey}`} conflicts with ${conflictDetails.join("+") || "nearby swept cable clearance"}`,
+      reason: `${startUnavailable ? `start ${startKey}` : "every virtual target"} conflicts with ${conflictDetails.join("+") || "nearby swept cable clearance"}`,
     });
     return null;
   }
+  open.push(startNode, heuristic(start));
   let expansions = 0;
   // Enclosure solves are offline and now use a true-radius routing margin.
   // A compact, populated box can have many valid depth states; cap generously
@@ -1821,7 +1958,8 @@ function aStar(
     const currentPointKey = gridKey(current);
     if (closed.has(currentNodeKey)) continue;
     closed.add(currentNodeKey);
-    if (currentPointKey === goalKey) {
+    const settledTarget = reachableTargetByKey.get(currentPointKey);
+    if (settledTarget) {
       const reversed: GridPoint[] = [current];
       let cursor = currentNodeKey;
       while (cameFrom.has(cursor)) {
@@ -1834,7 +1972,7 @@ function aStar(
       // On the 10 mm enclosure grid the search state already certifies the
       // minimum straight run between turns. Preserve that proof; a later
       // string-pull could reintroduce an uncertified one-cell elbow.
-      return space.cell <= GEOMETRY_UNIT_M + 1e-9
+      const points = space.cell <= GEOMETRY_UNIT_M + 1e-9
         ? simplify(gridPoints)
         : stringPullOrthogonal(
           gridPoints,
@@ -1844,9 +1982,10 @@ function aStar(
           preferredDepthM,
           endpointAccess,
           startDirection,
-          goalDirection,
-          terminalNeighborhoods,
+          settledTarget.direction,
+          allTerminalNeighborhoods,
         );
+      return { points, targetIndex: settledTarget.index };
     }
     expansions += 1;
     for (let direction = 0; direction < neighbors.length; direction += 1) {
@@ -1855,7 +1994,8 @@ function aStar(
       if (next[0] < searchMin[0] || next[1] < searchMin[1] || next[2] < searchMin[2] || next[0] > searchMax[0] || next[1] > searchMax[1] || next[2] > searchMax[2]) continue;
       const nextPointKey = gridKey(next);
       if (currentPointKey === startKey && startDirection && dot(delta as Vec3, startDirection) < -1e-9) continue;
-      if (nextPointKey === goalKey && goalDirection && dot(delta as Vec3, goalDirection) > 1e-9) continue;
+      const enteredTarget = reachableTargetByKey.get(nextPointKey);
+      if (enteredTarget?.direction && dot(delta as Vec3, enteredTarget.direction) > 1e-9) continue;
       if (currentNode.direction >= 0 && currentNode.direction !== direction && currentNode.run < minimumRunCells) continue;
       if (
         isBlockedByDevice(blocked, next, space, endpointAccess) ||
@@ -1875,12 +2015,7 @@ function aStar(
           && dot(subtract(world, startPoint), startDirection) < -1e-9
           && distance(world, startPoint) < noReverseRadius - 1e-9
         ) continue;
-        if (
-          goalDirection
-          && dot(subtract(world, endPoint), goalDirection) < -1e-9
-          && distance(world, endPoint) < noReverseRadius - 1e-9
-        ) continue;
-        if (terminalNeighborhoods.some((terminal) => (
+        if (allTerminalNeighborhoods.some((terminal) => (
           distance(world, terminal.point) < noReverseRadius - 1e-9
           && dot(subtract(world, terminal.point), terminal.direction) < -1e-9
         ))) continue;
@@ -1915,7 +2050,7 @@ function aStar(
       // Weighted A* is intentional here: the cost field still strongly prefers
       // the wall plane, while the weight prevents long roof/ceiling drops from
       // spending seconds exploring equivalent lateral voxels.
-      open.push(nextNode, tentative + heuristic(next) * 8);
+      open.push(nextNode, tentative + heuristic(next) * heuristicWeight);
     }
   }
   routingFailureDiagnostics.push({
@@ -1951,7 +2086,11 @@ function aStar(
         ].filter(Boolean).join("+");
         return `${key}=${flags || "open"}`;
       }).join(", ")}` : ""}; goal-neighbours ${neighbors.map((delta) => {
-        const next: GridPoint = [goal[0] + delta[0], goal[1] + delta[1], goal[2] + delta[2]];
+        const next: GridPoint = [
+          representativeTarget.grid[0] + delta[0],
+          representativeTarget.grid[1] + delta[1],
+          representativeTarget.grid[2] + delta[2],
+        ];
         const key = gridKey(next);
         const flags = [
           isBlockedByDevice(blocked, next, space, endpointAccess)
@@ -1963,7 +2102,11 @@ function aStar(
         return `${key}=${flags || "open"}`;
       }).join(", ")}`
       : `expansion limit; goal-neighbours ${neighbors.map((delta) => {
-        const next: GridPoint = [goal[0] + delta[0], goal[1] + delta[1], goal[2] + delta[2]];
+        const next: GridPoint = [
+          representativeTarget.grid[0] + delta[0],
+          representativeTarget.grid[1] + delta[1],
+          representativeTarget.grid[2] + delta[2],
+        ];
         const key = gridKey(next);
         const flags = [
           isBlockedByDevice(blocked, next, space, endpointAccess)
@@ -1977,6 +2120,34 @@ function aStar(
       }).join(", ")}`,
   });
   return null;
+}
+
+function aStar(
+  startPoint: Vec3,
+  endPoint: Vec3,
+  space: RoutingSpace,
+  diameterMm: number,
+  occupancyOwner = "route",
+  preferredDepthOverride?: number,
+  floorPreference = 1,
+  endpointAccess: EndpointAccessMap = new Map(),
+  startDirection?: Vec3,
+  goalDirection?: Vec3,
+  terminalNeighborhoods: readonly { point: Vec3; direction: Vec3 }[] = [],
+) {
+  return aStarToAny(
+    startPoint,
+    [{ point: endPoint, direction: goalDirection }],
+    space,
+    diameterMm,
+    occupancyOwner,
+    preferredDepthOverride,
+    floorPreference,
+    endpointAccess,
+    startDirection,
+    terminalNeighborhoods,
+    8,
+  )?.points ?? null;
 }
 
 /**
@@ -2478,16 +2649,10 @@ function glandExternalApproach(
   ];
 }
 
-function buildRoutes(
+function createGraphRoutingSpaces(
   graph: SystemGraph,
   devices: readonly ResolvedDevice[],
-  conductors: readonly ResolvedConductor[],
-  glands: readonly Gland[],
 ) {
-  const cableById = new Map(graph.cables.map((cable) => [cable.id, cable]));
-  const conductorByKey = new Map(conductors.map((candidate) => [candidate.key, candidate]));
-  const deviceById = new Map(devices.map((device) => [device.id, device]));
-  const glandByConnection = new Map(glands.flatMap((gland) => gland.connectionIds.map((id) => [id, gland] as const)));
   const worldDevices = devices.filter((device) => device.placement.space === "world");
   const worldMin = ([0, 1, 2] as const).map((axis) => Math.min(...worldDevices.map((device) => {
     const half = worldHalfExtents(device);
@@ -2523,21 +2688,21 @@ function buildRoutes(
     )],
   ]);
   const junctionSpaces = new Map(graph.junctions.map((junction) => {
-    const container = deviceById.get(junction.deviceId)!;
+    const container = devices.find((device) => device.id === junction.deviceId)!;
     // Keep the swept cable body away from the shell, not merely its
     // centreline. The definition's installation padding remains available to
     // devices; this second, generic inset defines the actual routing volume.
     const edgeInset = Math.max(0.012, Math.min(0.020, junction.padding - 0.008));
     const minimum = [
-        container.position[0] - container.size[0] / 2 + edgeInset,
-        container.position[1] - container.size[1] / 2 + edgeInset,
-        container.position[2] - container.size[2] / 2 + 0.010,
-      ] as Vec3;
+      container.position[0] - container.size[0] / 2 + edgeInset,
+      container.position[1] - container.size[1] / 2 + edgeInset,
+      container.position[2] - container.size[2] / 2 + 0.010,
+    ] as Vec3;
     const maximum = [
-        container.position[0] + container.size[0] / 2 - edgeInset,
-        container.position[1] + container.size[1] / 2 - edgeInset,
-        container.position[2] + container.size[2] / 2 - 0.006,
-      ] as Vec3;
+      container.position[0] + container.size[0] / 2 - edgeInset,
+      container.position[1] + container.size[1] / 2 - edgeInset,
+      container.position[2] + container.size[2] / 2 - 0.006,
+    ] as Vec3;
     return [junction.deviceId, createRoutingSpace(
       junction.deviceId,
       JUNCTION_ROUTING_STEP_UNITS,
@@ -2554,6 +2719,243 @@ function buildRoutes(
       if (!space.blockedByRadius.has(key)) space.blockedByRadius.set(key, buildBlockedVoxels(devices, space, radius));
     });
   });
+  return { worldSpaceByRegion, junctionSpaces, allRoutingSpaces };
+}
+
+type RoutingTargetAssignment = GraphRuntime["diagnostics"]["routingTargetAssignments"][number];
+
+/** Resolve opt-in terminal pools before reserving any cable geometry. Each
+ * connection is solved toward one virtual device target whose zero-cost goal
+ * edges are the currently unused, mechanically equivalent landings. The
+ * diameter-descending order mirrors the production serial router. A landing
+ * with explicit stack capacity remains eligible only after every physical
+ * terminal in its group has received its first conductor. */
+function resolveInterchangeableRoutingTargets(
+  graph: SystemGraph,
+  devices: readonly ResolvedDevice[],
+  conductors: readonly ResolvedConductor[],
+  glands: readonly Gland[],
+) {
+  const conductorByKey = new Map(conductors.map((conductor) => [conductor.key, conductor]));
+  const deviceById = new Map(devices.map((device) => [device.id, device]));
+  const cableById = new Map(graph.cables.map((cable) => [cable.id, cable]));
+  const glandByConnection = new Map(glands.flatMap((gland) => (
+    gland.connectionIds.map((connectionId) => [connectionId, gland] as const)
+  )));
+  const { worldSpaceByRegion, junctionSpaces } = createGraphRoutingSpaces(graph, devices);
+  const routingSpaceFor = (port: ResolvedConductor, device: ResolvedDevice) => (
+    device.placement.space === "junction"
+      ? junctionSpaces.get(device.placement.junctionId)!
+      : worldSpaceByRegion.get(conductorWorldRegion(device, port))!
+  );
+  const groupKey = (port: ResolvedConductor) => `${port.deviceId}|${port.routingGroup}`;
+  const candidatesByGroup = new Map<string, ResolvedConductor[]>();
+  conductors.filter((port) => port.routingGroup).forEach((port) => {
+    const key = groupKey(port);
+    candidatesByGroup.set(key, [...(candidatesByGroup.get(key) ?? []), port]);
+  });
+  candidatesByGroup.forEach((ports, key) => {
+    candidatesByGroup.set(key, ports.toSorted((first, second) => (
+      (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER)
+      || first.id.localeCompare(second.id)
+    )));
+  });
+
+  const resolvedById = new Map(graph.connections.map((connection) => [connection.id, { ...connection }]));
+  const fixedUses = new Map<string, number>();
+  const claims: Array<{
+    connectionId: string;
+    side: "from" | "to";
+    authoredEndpoint: string;
+    group: string;
+  }> = [];
+  graph.connections.forEach((connection) => {
+    (["from", "to"] as const).forEach((side) => {
+      const endpoint = connection[side];
+      const port = conductorByKey.get(endpoint);
+      if (!port?.routingGroup) return;
+      if (connection.topologyRole === "terminal-join") {
+        fixedUses.set(endpoint, (fixedUses.get(endpoint) ?? 0) + 1);
+        return;
+      }
+      claims.push({ connectionId: connection.id, side, authoredEndpoint: endpoint, group: groupKey(port) });
+    });
+  });
+  if (claims.length === 0) return { connections: graph.connections, assignments: [] as RoutingTargetAssignment[] };
+
+  const usedByEndpoint = new Map(fixedUses);
+  const assignments: RoutingTargetAssignment[] = [];
+  const claimSpan = (claim: typeof claims[number]) => {
+    const connection = resolvedById.get(claim.connectionId)!;
+    const otherEndpoint = connection[claim.side === "from" ? "to" : "from"];
+    const otherPort = conductorByKey.get(otherEndpoint)!;
+    const targetPort = candidatesByGroup.get(claim.group)?.[0];
+    return targetPort ? distance(otherPort.position, deviceById.get(targetPort.deviceId)!.position) : 0;
+  };
+  const sortedClaims = claims.toSorted((first, second) => {
+    const firstConnection = resolvedById.get(first.connectionId)!;
+    const secondConnection = resolvedById.get(second.connectionId)!;
+    return (cableById.get(secondConnection.cableId)?.outsideDiameterMm ?? 0)
+      - (cableById.get(firstConnection.cableId)?.outsideDiameterMm ?? 0)
+      || claimSpan(second) - claimSpan(first)
+      || first.connectionId.localeCompare(second.connectionId)
+      || first.side.localeCompare(second.side);
+  });
+
+  sortedClaims.forEach((claim) => {
+    const connection = resolvedById.get(claim.connectionId)!;
+    const cable = cableById.get(connection.cableId)!;
+    const targetPorts = candidatesByGroup.get(claim.group) ?? [];
+    const unused = targetPorts.filter((port) => (usedByEndpoint.get(port.key) ?? 0) === 0);
+    const remaining = targetPorts.filter((port) => (
+      (usedByEndpoint.get(port.key) ?? 0) < (port.routingCapacity ?? 1)
+    ));
+    const available = (unused.length > 0 ? unused : remaining).filter((port) => port.kind === connection.kind);
+    if (available.length === 0) {
+      throw new Error(`${claim.group}: no unoccupied compatible terminal remains for ${connection.id}.${claim.side}`);
+    }
+
+    const otherSide = claim.side === "from" ? "to" : "from";
+    const otherEndpoint = connection[otherSide];
+    const otherPort = conductorByKey.get(otherEndpoint)!;
+    const otherDevice = deviceById.get(otherPort.deviceId)!;
+    const targetDevice = deviceById.get(available[0].deviceId)!;
+    const targetSpace = routingSpaceFor(available[0], targetDevice);
+    const targetJunction = targetDevice.placement.space === "junction"
+      ? targetDevice.placement.junctionId
+      : undefined;
+    const otherJunction = otherDevice.placement.space === "junction"
+      ? otherDevice.placement.junctionId
+      : undefined;
+    const endpointAccess = new Map<string, EndpointFaceAccess[]>();
+    const addEndpointAccess = (port: ResolvedConductor, device: ResolvedDevice) => {
+      if (port.face !== "front" && port.face !== "back") return;
+      endpointAccess.set(device.id, [
+        ...(endpointAccess.get(device.id) ?? []),
+        {
+          position: port.position,
+          direction: port.direction,
+          clearance: protectedTerminalClearance(device, port, cable.outsideDiameterMm),
+        },
+      ]);
+    };
+    available.forEach((port) => addEndpointAccess(port, targetDevice));
+
+    let start: Vec3;
+    let startDirection: Vec3 | undefined;
+    if (targetJunction === otherJunction) {
+      const otherSpace = routingSpaceFor(otherPort, otherDevice);
+      if (otherSpace !== targetSpace) {
+        throw new Error(`${connection.id}: interchangeable terminals span incompatible routing regions`);
+      }
+      const otherApproach = protectedTerminalLaunch(otherPort, otherDevice, otherSpace, cable.outsideDiameterMm);
+      start = otherApproach.at(-1)!;
+      startDirection = routingIngressDirection(otherPort, otherSpace, start);
+      addEndpointAccess(otherPort, otherDevice);
+    } else {
+      const gland = glandByConnection.get(connection.id);
+      if (!gland || (!targetJunction && !otherJunction)) {
+        throw new Error(`${connection.id}: interchangeable cross-space target has no generated gland`);
+      }
+      const junctionId = targetJunction ?? otherJunction!;
+      const junction = deviceById.get(junctionId)!;
+      const junctionDefinition = graph.junctions.find((candidate) => candidate.deviceId === junctionId)!;
+      if (targetJunction) {
+        const glandIngressCells = junctionDefinition.sizePolicy === "verified-fixed" ? 1 : 2;
+        start = snapRoutingVec([
+          gland.position[0],
+          gland.position[1] + geometryMetres(ROUTING_STEP_UNITS * glandIngressCells),
+          gland.position[2],
+        ]);
+      } else {
+        const preferredDepth = targetSpace.worldRegion === "outside" ? -0.080 : 0.020;
+        const externalApproach = glandExternalApproach(gland, junction, preferredDepth, cable.outsideDiameterMm);
+        // The final serial-ingress cell is reserved for the production solve
+        // and may lie inside a nearby device's conservative radius halo. The
+        // preceding throat point is the last independently clear voxel and is
+        // therefore the honest anchor for terminal-choice scoring.
+        start = externalApproach.at(-2)!;
+      }
+    }
+
+    const targetOptions = available.flatMap((port) => {
+      const approach = protectedTerminalLaunch(port, targetDevice, targetSpace, cable.outsideDiameterMm);
+      const conflict = terminalApproachDeviceConflict(
+        approach,
+        targetDevice,
+        devices,
+        cable.outsideDiameterMm,
+        targetSpace,
+        new Set([targetDevice.id, otherDevice.id]),
+      );
+      if (conflict) return [];
+      const escape = approach.at(-1)!;
+      return [{
+        port,
+        approach,
+        target: { point: escape, direction: routingIngressDirection(port, targetSpace, escape) },
+      }];
+    });
+    if (targetOptions.length === 0) {
+      throw new Error(`${connection.id}: every free ${claim.group} terminal has an obstructed launch`);
+    }
+    const preferredDepth = isWorldRoutingSpace(targetSpace)
+      ? targetSpace.worldRegion === "outside" ? -0.080 : 0.020
+      : targetSpace.min[2] + targetSpace.cell;
+    const selected = aStarToAny(
+      start,
+      targetOptions.map((option) => option.target),
+      targetSpace,
+      cable.outsideDiameterMm,
+      `target:${connection.id}:${claim.side}`,
+      preferredDepth,
+      targetSpace.worldRegion === "outside" ? 120 : 1,
+      endpointAccess,
+      startDirection,
+      [],
+      1,
+    );
+    if (!selected) {
+      throw new Error(`Voxel A* could not reach any free ${claim.group} terminal for ${connection.id}`);
+    }
+    const resolvedEndpoint = targetOptions[selected.targetIndex].port.key;
+    resolvedById.set(connection.id, { ...connection, [claim.side]: resolvedEndpoint });
+    usedByEndpoint.set(resolvedEndpoint, (usedByEndpoint.get(resolvedEndpoint) ?? 0) + 1);
+    assignments.push({
+      connectionId: connection.id,
+      side: claim.side,
+      authoredEndpoint: claim.authoredEndpoint,
+      resolvedEndpoint,
+    });
+  });
+
+  const orderedAssignments = assignments.toSorted((first, second) => (
+    first.connectionId.localeCompare(second.connectionId) || first.side.localeCompare(second.side)
+  ));
+  routingTargetAssignmentDiagnostics.splice(
+    0,
+    routingTargetAssignmentDiagnostics.length,
+    ...orderedAssignments,
+  );
+  return {
+    connections: graph.connections.map((connection) => resolvedById.get(connection.id)!),
+    assignments: orderedAssignments,
+  };
+}
+
+function buildRoutes(
+  graph: SystemGraph,
+  devices: readonly ResolvedDevice[],
+  conductors: readonly ResolvedConductor[],
+  glands: readonly Gland[],
+) {
+  const targetResolution = resolveInterchangeableRoutingTargets(graph, devices, conductors, glands);
+  const routingGraph: SystemGraph = { ...graph, connections: targetResolution.connections };
+  const cableById = new Map(graph.cables.map((cable) => [cable.id, cable]));
+  const conductorByKey = new Map(conductors.map((candidate) => [candidate.key, candidate]));
+  const deviceById = new Map(devices.map((device) => [device.id, device]));
+  const glandByConnection = new Map(glands.flatMap((gland) => gland.connectionIds.map((id) => [id, gland] as const)));
+  const { worldSpaceByRegion, junctionSpaces, allRoutingSpaces } = createGraphRoutingSpaces(routingGraph, devices);
   const routes: RoutedConnection[] = [];
   const preferredWorldDepth = (space: RoutingSpace) => space.worldRegion === "outside" ? -0.080 : 0.020;
   const routingSpaceFor = (port: ResolvedConductor, device: ResolvedDevice) => (
@@ -2561,9 +2963,9 @@ function buildRoutes(
       ? junctionSpaces.get(device.placement.junctionId)!
       : worldSpaceByRegion.get(conductorWorldRegion(device, port))!
   );
-  const connectionById = new Map(graph.connections.map((connection) => [connection.id, connection]));
+  const connectionById = new Map(routingGraph.connections.map((connection) => [connection.id, connection]));
   const connectionsByEndpoint = new Map<string, SystemGraph["connections"][number][]>();
-  graph.connections.forEach((connection) => [connection.from, connection.to].forEach((endpoint) => {
+  routingGraph.connections.forEach((connection) => [connection.from, connection.to].forEach((endpoint) => {
     connectionsByEndpoint.set(endpoint, [...(connectionsByEndpoint.get(endpoint) ?? []), connection]);
   }));
   const sharedLaunchByConnectionEndpoint = new Map<string, Vec3[]>();
@@ -2622,7 +3024,7 @@ function buildRoutes(
     });
   });
   const connectionsByBundle = new Map<string, SystemGraph["connections"][number][]>();
-  graph.connections.forEach((connection) => {
+  routingGraph.connections.forEach((connection) => {
     if (!connection.bundleId) return;
     connectionsByBundle.set(connection.bundleId, [...(connectionsByBundle.get(connection.bundleId) ?? []), connection]);
   });
@@ -2683,6 +3085,70 @@ function buildRoutes(
     }
     return base;
   };
+  const compactThreeCoreBreakoutLaunch = (
+    connection: SystemGraph["connections"][number],
+    port: ResolvedConductor,
+    device: ResolvedDevice,
+    space: RoutingSpace,
+    outsideDiameterMm: number,
+  ): Vec3[] | undefined => {
+    const bundle = connection.bundleId ? connectionsByBundle.get(connection.bundleId) ?? [] : [];
+    if (bundle.length !== 3) return undefined;
+    const breakoutPorts = bundle.flatMap((peerConnection) => [peerConnection.from, peerConnection.to])
+      .map((endpoint) => conductorByKey.get(endpoint))
+      .filter((candidate): candidate is ResolvedConductor => Boolean(candidate && (() => {
+        const owner = deviceById.get(candidate.deviceId);
+        return owner?.presentation === "cable-breakout" && owner.conductors.some((definition) => (
+          definition.kind === "multicore"
+          && definition.internalMates?.length === 3
+          && definition.internalMates.includes(candidate.id)
+        ));
+      })()));
+    if (breakoutPorts.length !== 3 || new Set(breakoutPorts.map((candidate) => candidate.deviceId)).size !== 1) {
+      return undefined;
+    }
+    const ranges = [0, 1, 2].map((axis) => (
+      Math.max(...breakoutPorts.map((candidate) => candidate.position[axis]))
+      - Math.min(...breakoutPorts.map((candidate) => candidate.position[axis]))
+    ));
+    const transverseAxis = [0, 1, 2].toSorted((first, second) => ranges[second] - ranges[first])[0];
+    const coordinates = breakoutPorts.map((candidate) => candidate.position[transverseAxis]).toSorted((a, b) => a - b);
+    if (coordinates.slice(1).some((coordinate, index) => (
+      Math.abs(coordinate - coordinates[index] - space.cell) > 1e-8
+    ))) return undefined;
+    const base = protectedTerminalLaunch(port, device, space, outsideDiameterMm);
+    // On the wall, the compact terminal row and its destination row already
+    // occupy matching adjacent lanes. Preserve their common forward tangent.
+    if (isWorldRoutingSpace(space) || base.length < 3) return base;
+    const breakoutEndpoint = [connection.from, connection.to].find((endpoint) => (
+      breakoutPorts.some((candidate) => candidate.key === endpoint)
+    ));
+    const breakoutPort = breakoutEndpoint ? conductorByKey.get(breakoutEndpoint) : undefined;
+    if (!breakoutPort) return base;
+    const centre = coordinates.reduce((sum, coordinate) => sum + coordinate, 0) / coordinates.length;
+    const side = Math.sign(breakoutPort.position[transverseAxis] - centre);
+    if (side === 0) return base;
+    const depthAxis = [2, 0, 1].find((axis) => (
+      axis !== transverseAxis && Math.abs(port.direction[axis]) < 1e-9
+    ));
+    if (depthAxis === undefined) return base;
+    const fork = base.at(-2)!;
+    const ingress = base.at(-1)!;
+    for (const sign of [side, -side]) {
+      const direction: [number, number, number] = [0, 0, 0];
+      direction[depthAxis] = sign;
+      const points = [
+        ...base.slice(0, -1),
+        add(fork, scale(direction, space.cell)),
+        add(ingress, scale(direction, space.cell)),
+      ];
+      const inside = points.every((point) => point.every((value, axis) => (
+        value >= space.min[axis] - 1e-9 && value <= space.max[axis] + 1e-9
+      )));
+      if (inside) return points;
+    }
+    return base;
+  };
   const terminalLaunchFor = (
     connection: SystemGraph["connections"][number],
     port: ResolvedConductor,
@@ -2690,6 +3156,7 @@ function buildRoutes(
     space: RoutingSpace,
     outsideDiameterMm: number,
   ) => sharedLaunchByConnectionEndpoint.get(launchKey(connection.id, port.key))
+    ?? compactThreeCoreBreakoutLaunch(connection, port, device, space, outsideDiameterMm)
     ?? crowdedBundleLaunch(connection, port, device, space, outsideDiameterMm);
   const launchGeometry = new Map<string, Vec3[][]>();
   const fixedGeometry = new Map<string, Vec3[][]>();
@@ -2729,7 +3196,7 @@ function buildRoutes(
   // protected ingress cell—not a speculative full route or lane. Completed
   // approaches are occupied immediately after each serial solve, so diameter-
   // descending precedence remains real rather than nominal.
-  graph.connections.forEach((connection) => {
+  routingGraph.connections.forEach((connection) => {
     const from = conductorByKey.get(connection.from)!;
     const to = conductorByKey.get(connection.to)!;
     const fromDevice = deviceById.get(from.deviceId)!;
@@ -2893,7 +3360,7 @@ function buildRoutes(
       )).length;
     }, 0)
   );
-  const sorted = [...graph.connections].toSorted((first, second) => (
+  const sorted = [...routingGraph.connections].toSorted((first, second) => (
     (cableById.get(second.cableId)?.outsideDiameterMm ?? 0) - (cableById.get(first.cableId)?.outsideDiameterMm ?? 0)
     || Number(isDirectConnection(second)) - Number(isDirectConnection(first))
     || terminalCrowding(second) - terminalCrowding(first)
@@ -2956,7 +3423,7 @@ function buildRoutes(
       const lengthM = direct.slice(1).reduce((sum, point, index) => sum + distance(direct[index], point), 0);
       routes.push({
         ...connection,
-        label: connection.label ?? graphConnectionDisplayLabel(graph, connection),
+        label: connection.label ?? graphConnectionDisplayLabel(routingGraph, connection),
         points: direct,
         lengthM,
         diameterMm: cable.outsideDiameterMm,
@@ -3069,7 +3536,7 @@ function buildRoutes(
     const lengthM = points.slice(1).reduce((sum, point, index) => sum + distance(points[index], point), 0);
     routes.push({
       ...connection,
-      label: connection.label ?? graphConnectionDisplayLabel(graph, connection),
+      label: connection.label ?? graphConnectionDisplayLabel(routingGraph, connection),
       points,
       lengthM,
       diameterMm: cable.outsideDiameterMm,
@@ -3079,7 +3546,9 @@ function buildRoutes(
   });
 
   return {
-    routes: graph.connections.map((connection) => routes.find((route) => route.id === connection.id)!),
+    routes: routingGraph.connections.map((connection) => routes.find((route) => route.id === connection.id)!),
+    connections: routingGraph.connections,
+    routingTargetAssignments: targetResolution.assignments,
     fallbackCount: 0,
     occupiedCells: allRoutingSpaces.reduce((sum, space) => sum + space.occupied.size, 0),
   };
@@ -4289,7 +4758,11 @@ function validateGraph(graph: SystemGraph) {
     ));
   });
   [...endpointUseCount].filter(([, count]) => count > 1).forEach(([endpoint, count]) => {
-    if (["warning", "approved-stack"].includes(conductorDefinitionByEndpoint.get(endpoint)?.sharedConnectionPolicy ?? "expand")) return;
+    const conductor = conductorDefinitionByEndpoint.get(endpoint);
+    if (count > (conductor?.routingCapacity ?? Number.POSITIVE_INFINITY)) {
+      problems.push(`${endpoint}: routing capacity ${conductor?.routingCapacity ?? 1} is below ${count} field wires`);
+    }
+    if (["warning", "approved-stack"].includes(conductor?.sharedConnectionPolicy ?? "expand")) return;
     problems.push(`${endpoint}: one physical conductor has ${count} external wires; add an explicit wire join`);
   });
   graph.devices.forEach((device) => {
@@ -4300,6 +4773,30 @@ function validateGraph(graph: SystemGraph) {
     if (placement.space === "junction" && !graph.junctions.some((junction) => junction.deviceId === placement.junctionId)) {
       problems.push(`${device.id}: unknown junction ${placement.junctionId}`);
     }
+    const routingGroups = Map.groupBy(
+      device.conductors.filter((conductor) => conductor.routingGroup),
+      (conductor) => conductor.routingGroup!,
+    );
+    device.conductors.forEach((conductor) => {
+      if (conductor.routingCapacity !== undefined) {
+        if (!conductor.routingGroup) problems.push(`${device.id}.${conductor.id}: routing capacity requires a routing group`);
+        if (!Number.isSafeInteger(conductor.routingCapacity) || conductor.routingCapacity < 1) {
+          problems.push(`${device.id}.${conductor.id}: routing capacity must be a positive integer`);
+        }
+        if (conductor.routingCapacity > 1 && !["warning", "approved-stack"].includes(conductor.sharedConnectionPolicy ?? "expand")) {
+          problems.push(`${device.id}.${conductor.id}: routing capacity above one requires warning or approved-stack policy`);
+        }
+      }
+    });
+    routingGroups.forEach((members, group) => {
+      if (members.length < 2) problems.push(`${device.id}.${group}: routing group must contain at least two terminals`);
+      if (new Set(members.map((conductor) => conductor.kind)).size > 1) {
+        problems.push(`${device.id}.${group}: routing group crosses conductor kinds`);
+      }
+      if (new Set(members.map((conductor) => conductor.terminalSize ?? "")).size > 1) {
+        problems.push(`${device.id}.${group}: routing group crosses physical terminal sizes`);
+      }
+    });
     if (device.presentation === "wire-join") {
       if (!device.attachment || !endpoints.has(device.attachment.endpoint)) problems.push(`${device.id}: invalid wire-join attachment`);
       if (device.conductors.map((port) => port.id).join(",") !== "device,through,branch") {
@@ -4840,7 +5337,8 @@ export function sampledRouteDeviceConflicts(
 
 /**
  * Audit the exact centreline authority consumed by TubeGeometry: quadratic
- * route bends plus the selectable cubic Y/breakout arms. This is deliberately
+ * route bends plus selectable cubic Y/breakout arms and straight orthogonal
+ * T joins. This is deliberately
  * offline; the browser only hydrates the already-certified artifact.
  */
 export function sampledRenderedGeometryConflicts(
@@ -4850,10 +5348,12 @@ export function sampledRenderedGeometryConflicts(
   graph: SystemGraph,
 ) {
   const conflicts = new Set<string>();
+  const renderedSemantic = renderedSemanticCables(devices, conductors, routes);
   const piecesByRoute = new Map<string, ReturnType<typeof roundedRoutePieces>>();
   const renderedRoutes = routes.map((route): RoutedConnection => {
     const radiusM = Math.max(0.0012, route.diameterMm / 2000);
-    const pieces = roundedRoutePieces(route.points, Math.max(0.009, radiusM * 4.25));
+    const visiblePoints = renderedRoutePoints(route, renderedSemantic);
+    const pieces = roundedRoutePieces(visiblePoints, Math.max(0.009, radiusM * 4.25));
     piecesByRoute.set(route.id, pieces);
     return {
       ...route,
@@ -4939,7 +5439,7 @@ export function sampledRenderedGeometryConflicts(
     });
   });
 
-  const semantic = renderedSemanticCables(devices, conductors, routes).map((cable) => ({
+  const semantic = renderedSemantic.map((cable) => ({
     ...cable,
     points: sampleCableCurve(cable.pieces),
   }));
@@ -5036,7 +5536,7 @@ export function sampledRenderedGeometryConflicts(
       const [first, second] = key.split(":").map(Number);
       return first >= firstOriented.length - 1 || second >= secondOriented.length - 1;
     });
-    // A valid Y must become distinct conductors before both field terminals.
+    // A valid multi-arm join must become distinct conductors before both field terminals.
     // If its connected overlap component reaches either final segment, retain
     // only the ideal-ray allowance so pairConflicts reports the fused arms.
     if (fusionReachesTerminal) return rayEnvelope;
@@ -5157,6 +5657,7 @@ export function sampledRenderedGeometryConflicts(
 }
 
 let cached: GraphRuntime | undefined;
+let cachedInputGraph: SystemGraph | undefined;
 
 /** Geometry-only seam for enclosure sizing and placement audits. It does not
  * invoke the router, so a placement problem can be inspected even when it has
@@ -5217,19 +5718,37 @@ export function resolveSystemGeometry(
 }
 
 export function buildSystemRuntime(graph: SystemGraph): GraphRuntime {
-  if (cached?.graph === graph) return cached;
+  if (cached && cachedInputGraph === graph) return cached;
   const started = typeof performance === "undefined" ? Date.now() : performance.now();
   routingFailureDiagnostics.length = 0;
+  routingTargetAssignmentDiagnostics.length = 0;
   validateGraph(graph);
-  const { devices, conductors, glands } = resolveSystemGeometry(graph);
-  const routed = buildRoutes(graph, devices, conductors, glands);
+  const { devices: geometryDevices, conductors: geometryConductors, glands } = resolveSystemGeometry(graph);
+  const routed = buildRoutes(graph, geometryDevices, geometryConductors, glands);
+  const resolvedGraph: SystemGraph = { ...graph, connections: routed.connections };
+  validateGraph(resolvedGraph);
+  const resolvedLabelByEndpoint = new Map(geometryConductors.map((conductor) => [
+    conductor.key,
+    graphEndpointDisplayLabel(resolvedGraph, conductor.key),
+  ]));
+  const devices = geometryDevices.map((device): ResolvedDevice => ({
+    ...device,
+    conductors: device.conductors.map((conductor) => ({
+      ...conductor,
+      label: resolvedLabelByEndpoint.get(`${device.id}.${conductor.id}`) ?? conductor.label,
+    })),
+  }));
+  const conductors = geometryConductors.map((conductor): ResolvedConductor => ({
+    ...conductor,
+    label: resolvedLabelByEndpoint.get(conductor.key) ?? conductor.label,
+  }));
   const routedAt = typeof performance === "undefined" ? Date.now() : performance.now();
   // The serial, radius-aware A* result is final. There is deliberately no
   // post-route nudge/repair stage that can add local kinks or violate solve
   // precedence after a route has been committed.
   const resolvedRoutes = routed.routes;
   const centerlineConflicts = sampledRouteCenterlineConflicts(resolvedRoutes, 0.0005);
-  const sweptCableConflicts = sampledRouteSweptCableConflicts(resolvedRoutes, graph);
+  const sweptCableConflicts = sampledRouteSweptCableConflicts(resolvedRoutes, resolvedGraph);
   const selfIntersections = sampledRouteSelfIntersections(resolvedRoutes);
   const deviceConflicts = sampledRouteDeviceConflicts(resolvedRoutes, devices);
   const wallPlaneCrossings = sampledRouteWallPlaneCrossings(resolvedRoutes, devices);
@@ -5241,12 +5760,12 @@ export function buildSystemRuntime(graph: SystemGraph): GraphRuntime {
     resolvedRoutes,
     devices,
     conductors,
-    graph,
+    resolvedGraph,
   );
-  const currentSafety = verifyCurrentProtection(graph);
+  const currentSafety = verifyCurrentProtection(resolvedGraph);
   const finished = typeof performance === "undefined" ? Date.now() : performance.now();
   cached = {
-    graph,
+    graph: resolvedGraph,
     devices,
     deviceById: new Map(devices.map((device) => [device.id, device])),
     conductors,
@@ -5274,8 +5793,10 @@ export function buildSystemRuntime(graph: SystemGraph): GraphRuntime {
       routingOrder: [...resolvedRoutes]
         .toSorted((first, second) => first.routingRank - second.routingRank)
         .map((route) => route.id),
+      routingTargetAssignments: routed.routingTargetAssignments,
       currentSafety,
     },
   };
+  cachedInputGraph = graph;
   return cached;
 }

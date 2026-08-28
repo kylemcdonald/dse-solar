@@ -20,12 +20,12 @@ test("DSE-only shell exposes only retained tabs", async ({ page }) => {
 
 test("detailed diagram and canonical counts render", async ({ page }) => {
   const diagram = page.locator(".unified-diagram");
-  await expect(diagram).toHaveAttribute("data-device-count", "87");
-  await expect(diagram).toHaveAttribute("data-wire-count", "143");
+  await expect(diagram).toHaveAttribute("data-device-count", "89");
+  await expect(diagram).toHaveAttribute("data-wire-count", "149");
   await expect(diagram).toHaveAttribute("data-layout-source", "build-generated-artifact");
   await expect(diagram).toHaveAttribute("data-junctions-abstracted", "true");
-  await expect(diagram).toHaveAttribute("data-visible-device-count", "58");
-  await expect(diagram).toHaveAttribute("data-visible-wire-count", "97");
+  await expect(diagram).toHaveAttribute("data-visible-device-count", "60");
+  await expect(diagram).toHaveAttribute("data-visible-wire-count", "103");
   await expect(diagram).toHaveAttribute("data-routing-fallbacks", "0");
   await expect(diagram).toHaveAttribute("data-coincident-wire-segments", "0");
   await expect(diagram).toHaveAttribute("data-non-orthogonal-wire-segments", "0");
@@ -81,12 +81,12 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   };
   await expect(page.locator('.diagram-wire[data-connection-id="pv-spd-earth"]'))
     .toHaveCSS("stroke", "rgb(74, 242, 135)");
-  await expect(page.locator(".diagram-device")).toHaveCount(58);
-  await expect(page.locator(".diagram-wire")).toHaveCount(97);
+  await expect(page.locator(".diagram-device")).toHaveCount(60);
+  await expect(page.locator(".diagram-wire")).toHaveCount(103);
   await expect(page.locator('[data-device-id="servicePenetration"]')).toHaveCount(0);
-  await expect(page.locator(".diagram-wire-join-node")).toHaveCount(20);
+  await expect(page.locator(".diagram-wire-join-node")).toHaveCount(22);
   await expect(page.locator(".diagram-wire-join-node > rect")).toHaveCount(0);
-  await expect(page.locator(".diagram-wire-join-center")).toHaveCount(20);
+  await expect(page.locator(".diagram-wire-join-center")).toHaveCount(22);
   await expect(page.locator(".diagram-wire-join-node .diagram-conductor")).toHaveCount(0);
   const joinGeometry = await page.locator(".diagram-wire-join-node").evaluateAll((joins) => joins.map((join) => {
     const center = join.querySelector(":scope > .diagram-wire-join-center");
@@ -108,39 +108,26 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
     && (arms === 3 || arms === 4)
     && (!deviceId.startsWith("join-") || colorMatched)
     && widthMatched && vectorEffects.every((effect) => effect === "none"))).toBe(true);
-  expect(joinGeometry.filter(({ arms }) => arms === 4)).toHaveLength(2);
-  for (const { id, endpoint } of [
-    { id: "generator", endpoint: "generator.cable" },
-    { id: "toolOutlet", endpoint: "toolOutlet.cable" },
+  expect(joinGeometry.filter(({ arms }) => arms === 4)).toHaveLength(4);
+  for (const { id, breakoutId, diagramRouteId } of [
+    { id: "generator", breakoutId: "generatorLeadBreakout", diagramRouteId: "generator-cable-inside" },
+    { id: "toolOutlet", breakoutId: "toolOutletLeadBreakout", diagramRouteId: "tool-white-cable" },
   ]) {
-    const integrated = page.locator(`[data-device-id="${id}"] .diagram-integrated-breakout`);
-    await expect(integrated).toHaveCount(1);
-    await expect(integrated.locator(".diagram-integrated-breakout-arm")).toHaveCount(3);
-    await expect(integrated.locator(".diagram-integrated-breakout-center")).toHaveCount(1);
-    await expect(page.locator(`.diagram-port[data-endpoint-id="${endpoint}"]`)).toHaveCount(0);
-    const whiteRoute = page.locator(
-      `.diagram-wire[data-from-endpoint="${endpoint}"], .diagram-wire[data-to-endpoint="${endpoint}"]`,
-    );
+    const device = page.locator(`[data-device-id="${id}"]`);
+    await expect(device.locator(".diagram-integrated-breakout")).toHaveCount(0);
+    await expect(page.locator(`.diagram-port[data-endpoint-id="${id}.cable"]`)).toHaveCount(0);
+    for (const conductorId of ["line", "neutral", "earth"]) {
+      await expect(page.locator(`.diagram-port[data-endpoint-id="${id}.${conductorId}"]`)).toHaveCount(1);
+    }
+    const breakout = page.locator(`[data-device-id="${breakoutId}"]`);
+    await expect(breakout).toHaveClass(/diagram-wire-join-node/);
+    await expect(breakout.locator(":scope > .diagram-wire-join-arm")).toHaveCount(4);
+    const whiteRoute = page.locator(`.diagram-wire[data-connection-id="${diagramRouteId}"]`);
     await expect(whiteRoute).toHaveCount(1);
-    await expect(whiteRoute).toHaveAttribute("data-integrated-fusion-trimmed", endpoint);
-    const fusionGap = await whiteRoute.evaluate((path, input) => {
-      const center = document.querySelector(
-        `[data-device-id="${input.id}"] .diagram-integrated-breakout-center`,
-      );
-      if (!(path instanceof SVGPathElement) || !(center instanceof SVGCircleElement)) return null;
-      const routePoint = path.getPointAtLength(
-        path.dataset.fromEndpoint === input.endpoint ? 0 : path.getTotalLength(),
-      );
-      const routeMatrix = path.getCTM(); const centerMatrix = center.getCTM();
-      if (!routeMatrix || !centerMatrix) return null;
-      const routeScreen = new DOMPoint(routePoint.x, routePoint.y).matrixTransform(routeMatrix);
-      const centerScreen = new DOMPoint(
-        center.cx.baseVal.value, center.cy.baseVal.value,
-      ).matrixTransform(centerMatrix);
-      return Math.hypot(routeScreen.x - centerScreen.x, routeScreen.y - centerScreen.y);
-    }, { id, endpoint });
-    expect(fusionGap).not.toBeNull();
-    expect(fusionGap).toBeLessThan(0.5);
+    await expect(whiteRoute).not.toHaveAttribute("data-integrated-fusion-trimmed", /.+/);
+    const endpoints = await whiteRoute.evaluate((path) => [path.dataset.fromEndpoint, path.dataset.toEndpoint]);
+    expect(endpoints).toContain(`${breakoutId}.cable`);
+    expect(endpoints.some((endpoint) => endpoint?.startsWith(`${id}.`))).toBe(false);
   }
   await expect(page.locator(".diagram-device-kind")).toHaveCount(0);
   const deviceFontSizes = await page.locator(".diagram-device-title").evaluateAll((labels) => (
@@ -163,7 +150,7 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   expect(bridgeCount).toBeGreaterThan(0);
   expect(bridgeCount).toBeLessThan(250);
   expect(Number(await diagram.getAttribute("data-wire-turns"))).toBeLessThan(350);
-  expect(Number(await diagram.getAttribute("data-wire-length"))).toBeLessThan(125_000);
+  expect(Number(await diagram.getAttribute("data-wire-length"))).toBeLessThan(130_000);
   const bridgeGroups = page.locator(".diagram-local-bridge-layer > g");
   const bridgeGroupCount = await bridgeGroups.count();
   expect(bridgeGroupCount).toBeGreaterThan(0);
@@ -412,10 +399,15 @@ test("BOM reflects purchased protection and cables, selected busbars and current
     const row = page.locator(`[data-bom-id="${id}"]`);
     await expect(row).toContainText(/unallocated/i);
   }
-  for (const id of ["dse-ventilated-ip65-enclosure", "dse-mollom-8-way-enclosure-second"]) {
-    const row = page.locator(`[data-bom-id="${id}"]`);
-    await expect(row).toContainText(/R28 fit is accepted and verified/i);
-  }
+  const ownedSecondarySpare = page.locator('[data-bom-id="dse-ventilated-ip65-enclosure"]');
+  await expect(ownedSecondarySpare).toContainText(/retain this purchased box as an owned spare/i);
+  await expect(ownedSecondarySpare).toContainText(/no longer the installed secondary-services enclosure/i);
+  const cutoffEnclosure = page.locator('[data-bom-id="dse-mollom-8-way-enclosure-second"]');
+  await expect(cutoffEnclosure).toContainText(/R28 fit is accepted and verified/i);
+  const largerSecondaryEnclosure = page.locator('[data-bom-id="dse-secondary-enclosure-larger"]');
+  await expect(largerSecondaryEnclosure).toBeVisible();
+  await expect(largerSecondaryEnclosure).toContainText(/480 × 520 × 240 mm routed envelope/i);
+  await expect(largerSecondaryEnclosure).toContainText(/Select and buy · fit hold/i);
   const mainBusbars = page.locator('[data-bom-id="dse-main-busbars"]');
   await expect(mainBusbars).toBeVisible();
   await expect(mainBusbars).toContainText("Joinfworld 250 A");
@@ -432,6 +424,11 @@ test("3D model uses canonical router and has no removed controls", async ({ page
   await expect(model).toHaveAttribute("data-route-centerline-conflicts", "0");
   await expect(model).toHaveAttribute("data-route-swept-conflicts", "0");
   await expect(model).toHaveAttribute("data-route-device-conflicts", "0");
+  await expect(model).toHaveAttribute("data-route-total-length-m", "153.94");
+  await expect(model).toHaveAttribute("data-route-turns", "864");
+  await expect(model).toHaveAttribute("data-routing-target-assignments", "30");
+  await expect(model).toHaveAttribute("data-routing-target-changes", "16");
+  await expect(model).toHaveAttribute("data-earth-bus-route-length-m", "5.58");
   await expect(model).toHaveAttribute("data-runtime-source", "precomputed");
   await expect(model).toHaveAttribute("data-route-solve-ms", "0.0");
   await expect(model).toHaveAttribute("data-runtime-hydrate-ms", /\d+\.\d{3}/);
@@ -446,14 +443,15 @@ test("3D model uses canonical router and has no removed controls", async ({ page
   await expect(model).toHaveAttribute("data-pe-bus-rendering", "rectangular-busbar");
   await expect(model).toHaveAttribute("data-breakout-rendering", "true-y-two-way-plus-minus-45-three-way-red-45-black-0-green-minus-45");
   await expect(model).toHaveAttribute("data-cable-breakout-count", /[1-9]\d*/);
-  await expect(model).toHaveAttribute("data-integrated-cable-breakout-count", "2");
-  await expect(model).toHaveAttribute("data-integrated-breakout-rendering",
-    "external-fusion-trimmed-depth-tested-core-fan");
+  await expect(model).toHaveAttribute("data-integrated-cable-breakout-count", "0");
   await expect(model).toHaveAttribute("data-usb-outlet-rendering", "metadata-driven-usb-c-pill-usb-a-rectangle");
   await expect(model).toHaveAttribute("data-usb-c-outlet-count", /[1-9]\d*/);
   await expect(model).toHaveAttribute("data-usb-a-outlet-count", "5");
-  await expect(model).toHaveAttribute("data-wire-join-rendering", "presentation-driven-selectable-y");
+  await expect(model).toHaveAttribute("data-wire-join-rendering",
+    "presentation-driven-selectable-y-or-straight-orthogonal-t");
   await expect(model).toHaveAttribute("data-wire-join-count", /[1-9]\d*/);
+  await expect(model).toHaveAttribute("data-orthogonal-wire-join-count", /[1-9]\d*/);
+  await expect(model).toHaveAttribute("data-orthogonal-wire-join-bends", "0");
   await expect(model).toHaveAttribute("data-supplied-busbar-cover-count", "4");
   await expect(model).toHaveAttribute("data-smart-shunt-rendering", "uncovered-monitor-body");
   await expect(model).toHaveAttribute("data-wall-shadow", "casts-and-receives");

@@ -675,7 +675,7 @@ test("automatic naming expands approved stacks, remote join owners and coherent 
   for (const [endpointId, expected] of [
     ["multiAcInBreakout.cable", "To Victron MultiPlus-II 24/3000"],
     ["acInputCableBreakout.cable", "To Victron MultiPlus-II 24/3000"],
-    ["multiAcOutBreakout.cable", "From Victron MultiPlus-II 24/3000"],
+    ["multiAcOutBreakout.cable", "To AC-out 10 A Type A RCBO + SPD"],
     ["acOutputCableBreakout.cable", "From Victron MultiPlus-II 24/3000"],
   ] as const) {
     assert.equal(graphEndpointDisplayLabel(dseTopology, endpointId), expected, endpointId);
@@ -692,8 +692,8 @@ test("automatic naming expands approved stacks, remote join owners and coherent 
 });
 
 test("automatic names preserve real owners, semantic fallbacks and distinct attached join arms", () => {
-  assert.equal(graphEndpointDisplayLabel(dseTopology, "generator.line"), "Internal active core");
-  assert.equal(graphEndpointDisplayLabel(dseTopology, "toolOutlet.line"), "Internal active / L");
+  assert.equal(graphEndpointDisplayLabel(dseTopology, "generator.line"), "To AC-in 10 A Type A RCBO + SPD");
+  assert.equal(graphEndpointDisplayLabel(dseTopology, "toolOutlet.line"), "From AC-out 10 A Type A RCBO + SPD");
   assert.equal(graphEndpointDisplayLabel(dseTopology, "serviceSplit.room"), "To Indoor-light wall switch");
   assert.equal(
     graphEndpointDisplayLabel(dseTopology, "secondaryNegativeBus.post2"),

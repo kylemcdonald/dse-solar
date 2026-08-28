@@ -5,11 +5,7 @@ import { dseRuntime } from "../app/dseRuntime";
 import { dseTopology } from "../app/dseTopology";
 import { routeVoxelForTest, sampledRouteWallPlaneCrossings } from "../app/systemGraphRuntime";
 import { GEOMETRY_UNIT_M, WORLD_ROUTING_STEP_UNITS } from "../app/systemGraph";
-import {
-  renderedRoutePoints,
-  renderedSemanticCables,
-  sampleCableCurve,
-} from "../app/renderedCableGeometry";
+import { renderedSemanticCables } from "../app/renderedCableGeometry";
 import type { Vec3 } from "../app/systemGraph";
 
 const runtime = dseRuntime;
@@ -17,17 +13,18 @@ const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const subtract = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 const magnitude = (a: Vec3) => Math.hypot(...a);
 const endpointDeviceId = (endpoint: string) => endpoint.split(".", 1)[0];
-const attachmentRootDeviceId = (endpoint: string) => {
-  let deviceId = endpointDeviceId(endpoint);
+const attachmentRootEndpoint = (initialEndpoint: string) => {
+  let endpoint = initialEndpoint;
   const visited = new Set<string>();
-  while (!visited.has(deviceId)) {
-    visited.add(deviceId);
-    const attachment = runtime.deviceById.get(deviceId)?.attachment?.endpoint;
-    if (!attachment) return deviceId;
-    deviceId = endpointDeviceId(attachment);
+  while (!visited.has(endpoint)) {
+    visited.add(endpoint);
+    const attachment = runtime.deviceById.get(endpointDeviceId(endpoint))?.attachment?.endpoint;
+    if (!attachment) return endpoint;
+    endpoint = attachment;
   }
-  throw new Error(`Attachment cycle at ${endpoint}`);
+  throw new Error(`Attachment cycle at ${initialEndpoint}`);
 };
+const attachmentRootDeviceId = (endpoint: string) => endpointDeviceId(attachmentRootEndpoint(endpoint));
 const topologyDeviceById = (id: string) => {
   const device = dseTopology.devices.find((candidate) => candidate.id === id);
   assert.ok(device, `missing topology device ${id}`);
@@ -50,6 +47,38 @@ test("canonical graph resolves every device, conductor and connection", () => {
   assert.ok(runtime.diagnostics.artifactBytes > 100_000);
 });
 
+test("voxel routing assigns each bus connection to the shortest compatible free landing", () => {
+  const assignments = runtime.diagnostics.routingTargetAssignments;
+  assert.ok(assignments.length > 0);
+  assert.ok(assignments.some((assignment) => assignment.authoredEndpoint !== assignment.resolvedEndpoint));
+
+  for (const assignment of assignments) {
+    const authored = runtime.conductorByKey.get(assignment.authoredEndpoint)!;
+    const resolved = runtime.conductorByKey.get(assignment.resolvedEndpoint)!;
+    const route = runtime.routeById.get(assignment.connectionId)!;
+    assert.equal(resolved.deviceId, authored.deviceId, assignment.connectionId);
+    assert.equal(resolved.kind, authored.kind, assignment.connectionId);
+    assert.equal(resolved.routingGroup, authored.routingGroup, assignment.connectionId);
+    assert.equal(resolved.terminalSize, authored.terminalSize, assignment.connectionId);
+    assert.equal(route[assignment.side], assignment.resolvedEndpoint, assignment.connectionId);
+  }
+
+  for (const device of runtime.devices) {
+    for (const port of device.conductors.filter((candidate) => candidate.routingGroup)) {
+      const uses = runtime.routes.filter((route) => route.from === `${device.id}.${port.id}` || route.to === `${device.id}.${port.id}`).length;
+      assert.ok(uses <= (port.routingCapacity ?? 1), `${device.id}.${port.id} capacity`);
+    }
+  }
+
+  const earthRoutes = runtime.routes.filter((route) => (
+    route.from.startsWith("earthBar.") || route.to.startsWith("earthBar.")
+  ));
+  const earthLengthM = earthRoutes.reduce((sum, route) => sum + route.lengthM, 0);
+  assert.ok(earthLengthM <= 5.6, `route-aware PE landings total ${earthLengthM.toFixed(3)} m`);
+  assert.ok(runtime.diagnostics.totalLengthM < 156.14);
+  assert.ok(runtime.diagnostics.totalTurns < 887);
+});
+
 test("browser runtime hydrates the committed artifact without importing the solver", async () => {
   const source = await readFile(new URL("../app/dseRuntime.ts", import.meta.url), "utf8");
   assert.doesNotMatch(source, /buildSystemRuntime|systemGraphRuntime/);
@@ -68,42 +97,29 @@ test("battery cutoff enclosure contains exactly the A, B and MPPT single-pole cu
   assert.equal(runtime.devices.some((device) => /usb.*breaker|breaker.*usb/i.test(device.id)), false);
 });
 
-test("purchased cutoff and secondary enclosures retain their exact received dimensions", () => {
-  const expected = [
-    {
-      id: "batteryCutoffJunction",
-      junctionId: "battery-cutoff",
-      label: "Battery / MPPT cutoff junction box · verified 200 × 155 × 92 mm",
-      physicalSize: [0.200, 0.155, 0.092],
-      latticeSize: [0.20, 0.16, 0.10],
-      bomId: "dse-mollom-8-way-enclosure-second",
-    },
-    {
-      id: "secondaryJunction",
-      junctionId: "secondary",
-      label: "Secondary 24 V services junction box · verified 302 × 302 × 178 mm",
-      physicalSize: [0.302, 0.302, 0.178],
-      latticeSize: [0.30, 0.30, 0.18],
-      bomId: "dse-ventilated-ip65-enclosure",
-    },
-  ] as const;
+test("cutoff retains its verified shell while secondary services uses the larger routed enclosure", () => {
+  const cutoff = topologyDeviceById("batteryCutoffJunction");
+  const cutoffDefinition = dseTopology.junctions.find((candidate) => candidate.id === "battery-cutoff");
+  assert.equal(cutoff.label, "Battery / MPPT cutoff junction box · verified 200 × 155 × 92 mm");
+  assert.equal(cutoff.status, "purchased");
+  assert.ok(cutoff.bomIds?.includes("dse-mollom-8-way-enclosure-second"));
+  assert.deepEqual(cutoff.physicalSize, [0.200, 0.155, 0.092]);
+  assert.deepEqual(cutoff.size, [0.20, 0.16, 0.10]);
+  assert.equal(cutoffDefinition?.sizePolicy, "verified-fixed");
+  assert.deepEqual(runtime.deviceById.get(cutoff.id)?.size, cutoff.size);
+  assert.deepEqual(runtime.deviceById.get(cutoff.id)?.physicalSize, cutoff.physicalSize);
 
-  for (const specification of expected) {
-    const source = topologyDeviceById(specification.id);
-    const definition = dseTopology.junctions.find((candidate) => candidate.id === specification.junctionId);
-    assert.equal(source.label, specification.label);
-    assert.equal(source.status, "purchased");
-    assert.ok(source.bomIds?.includes(specification.bomId));
-    assert.deepEqual(source.physicalSize, specification.physicalSize,
-      `${specification.id} received external dimensions`);
-    assert.deepEqual(source.size, specification.latticeSize, `${specification.id} modeled lattice envelope`);
-    assert.equal(definition?.sizePolicy, "verified-fixed");
-    assert.deepEqual(definition?.minimumSize, specification.latticeSize, `${specification.id} fixed definition`);
-    assert.deepEqual(runtime.deviceById.get(specification.id)?.size, specification.latticeSize,
-      `${specification.id} precomputed geometry must not auto-grow`);
-    assert.deepEqual(runtime.deviceById.get(specification.id)?.physicalSize, specification.physicalSize,
-      `${specification.id} precomputed rendering must use received dimensions`);
-  }
+  const secondary = topologyDeviceById("secondaryJunction");
+  const secondaryDefinition = dseTopology.junctions.find((candidate) => candidate.id === "secondary");
+  assert.match(secondary.label, /larger enclosure required/i);
+  assert.equal(secondary.status, "hold");
+  assert.equal(secondary.physicalSize, undefined);
+  assert.ok(secondary.bomIds?.includes("dse-secondary-enclosure-larger"));
+  assert.ok(!secondary.bomIds?.includes("dse-ventilated-ip65-enclosure"));
+  assert.deepEqual(secondary.size, [0.48, 0.40, 0.24]);
+  assert.equal(secondaryDefinition?.sizePolicy, "auto");
+  assert.deepEqual(secondaryDefinition?.minimumSize, [0.48, 0.40, 0.24]);
+  assert.deepEqual(runtime.deviceById.get(secondary.id)?.size, [0.48, 0.52, 0.24]);
 });
 
 test("secondary services has exactly the three requested branch breakers and no incomer device", () => {
@@ -130,6 +146,25 @@ test("secondary services has exactly the three requested branch breakers and no 
   assert.deepEqual(sourceRail.map((device) => device.id), rail.map((device) => device.id));
   assert.equal(sourceMembers.some((device) => /\b80\s*A\b|incomer/i.test(`${device.id} ${device.label} ${device.subtitle ?? ""}`)), false);
   assert.equal(dseTopology.connections.some((connection) => connection.id === "secondary-feeder-positive-protected"), false);
+});
+
+test("secondary buses and six-gang panel share the rear plane with bottom-facing switch posts", () => {
+  const enclosure = runtime.deviceById.get("secondaryJunction")!;
+  const rearMountingPlane = enclosure.position[2] - enclosure.size[2] / 2 + 0.020;
+  const buses = [runtime.deviceById.get("secondaryPositiveBus")!, runtime.deviceById.get("secondaryNegativeBus")!];
+  const panel = runtime.deviceById.get("switchPanel")!;
+
+  for (const device of [...buses, panel]) {
+    assert.ok(Math.abs(device.position[2] - device.size[2] / 2 - rearMountingPlane) < 1e-9,
+      `${device.id} is mounted on the rear backplate`);
+  }
+  assert.ok(buses.every((bus) => bus.conductors.every((port) => port.face === "front")),
+    "rear-mounted busbar posts remain visible and routable from the front");
+  assert.equal(panel.conductors.length, 7);
+  assert.ok(panel.conductors.every((port) => port.face === "bottom"));
+  assert.equal(panel.terminalPitchByFaceM?.bottom, 0.040);
+  assert.ok(enclosure.size[0] > 0.302 && enclosure.size[1] > 0.302 && enclosure.size[2] > 0.178,
+    "the routed enclosure is larger than the retired 302 × 302 × 178 mm shell on every axis");
 });
 
 test("R29 records ownership, device power and circuit-level capacity separately from fault holds", async () => {
@@ -235,7 +270,7 @@ test("Orion and ChargeIT inputs use their dedicated 32 A breakers without output
   assert.deepEqual([runtime.routeById.get("orion-input-positive")?.from, runtime.routeById.get("orion-input-positive")?.to],
     ["orionBreaker32.load", "usbOrion.positiveIn"]);
   assert.deepEqual([runtime.routeById.get("chargeit-breaker-feed")?.from, runtime.routeById.get("chargeit-breaker-feed")?.to],
-    ["secondaryPositiveBus.post3", "chargeItBreaker32.line"]);
+    ["secondaryPositiveBus.post7", "chargeItBreaker32.line"]);
   assert.deepEqual([runtime.routeById.get("mini-positive-feed")?.from, runtime.routeById.get("mini-positive-feed")?.to],
     ["chargeItBreaker32.load", "join-usbMiniA-positive.branch"]);
   assert.equal(runtime.devices.some((device) => /output.*breaker|breaker.*output/i.test(device.id)), false);
@@ -290,7 +325,7 @@ test("only warning-policy and approved-stack landings may retain multiple direct
   });
 });
 
-test("wire joins are true Y symbols with route-exact arm widths", () => {
+test("wire joins use true Y fans or straight orthogonal T cylinders with route-exact widths", () => {
   const semantic = renderedSemanticCables(runtime.devices, runtime.conductors, runtime.routes);
   const routeRadiusByEndpoint = new Map(runtime.routes.flatMap((route) => [
     [route.from, Math.max(0.0012, route.diameterMm / 2000)] as const,
@@ -299,8 +334,31 @@ test("wire joins are true Y symbols with route-exact arm widths", () => {
   for (const join of runtime.devices.filter((device) => device.presentation === "wire-join")) {
     const arms = semantic.filter((cable) => cable.deviceId === join.id);
     assert.equal(arms.length, 3, join.id);
-    assert.deepEqual(arms.filter((arm) => arm.branchAngleDegrees !== undefined)
-      .map((arm) => arm.branchAngleDegrees).toSorted(), [-45, 45], join.id);
+    assert.equal(new Set(arms.map((arm) => arm.joinGeometry)).size, 1, `${join.id} geometry`);
+    if (arms[0].joinGeometry === "orthogonal-t") {
+      assert.ok(arms.every((arm) => (
+        arm.branchAngleDegrees === undefined
+        && arm.pieces.length === 1
+        && arm.pieces[0].kind === "line"
+        && arm.pieces[0].bend === false
+      )), `${join.id} T arms remain straight`);
+      const directions = arms.map((arm) => {
+        const offset = subtract(arm.pieces[0].points[0], arm.splitPoint);
+        return offset.map((value) => value / magnitude(offset)) as unknown as Vec3;
+      });
+      const dots = [
+        dot(directions[0], directions[1]),
+        dot(directions[0], directions[2]),
+        dot(directions[1], directions[2]),
+      ].toSorted((first, second) => first - second);
+      assert.ok(Math.abs(dots[0] + 1) < 1e-9, `${join.id} has one continuous cylinder axis`);
+      assert.ok(Math.abs(dots[1]) < 1e-9 && Math.abs(dots[2]) < 1e-9,
+        `${join.id} tap cylinder is orthogonal`);
+    } else {
+      assert.equal(arms[0].joinGeometry, "y", join.id);
+      assert.deepEqual(arms.filter((arm) => arm.branchAngleDegrees !== undefined)
+        .map((arm) => arm.branchAngleDegrees).toSorted(), [-45, 45], join.id);
+    }
     arms.forEach((arm) => assert.equal(arm.radiusM, routeRadiusByEndpoint.get(arm.conductorKey), arm.id));
     const device = arms.find((arm) => arm.conductorKey.endsWith(".device"))!;
     const through = arms.find((arm) => arm.conductorKey.endsWith(".through"))!;
@@ -311,6 +369,147 @@ test("wire joins are true Y symbols with route-exact arm widths", () => {
   const batteryPostJoin = semantic.filter((cable) => cable.deviceId === "join-battery1-positive");
   assert.ok(Math.max(...batteryPostJoin.map((cable) => cable.radiusM))
     > Math.min(...batteryPostJoin.map((cable) => cable.radiusM)), "stacked balancer lead remains visibly smaller");
+});
+
+test("AC PE daisy taps render as curve-free orthogonal cylinders", () => {
+  const semantic = renderedSemanticCables(runtime.devices, runtime.conductors, runtime.routes);
+  for (const deviceId of [
+    "join-generatorAcBreakout-earth-1",
+    "join-generatorAcBreakout-earth-2",
+    "join-acOutputCableBreakout-earth",
+  ]) {
+    const arms = semantic.filter((cable) => cable.deviceId === deviceId);
+    assert.equal(arms.length, 3, deviceId);
+    assert.ok(arms.every((arm) => arm.joinGeometry === "orthogonal-t"), deviceId);
+    assert.ok(arms.flatMap((arm) => arm.pieces).every((piece) => piece.kind === "line" && !piece.bend),
+      `${deviceId} has no curved semantic pieces`);
+  }
+});
+
+test("USB daisy joins put the device stem on top and route each arm toward its neighbor", () => {
+  const semantic = renderedSemanticCables(runtime.devices, runtime.conductors, runtime.routes);
+  const joins = runtime.devices.filter((device) => (
+    device.presentation === "wire-join" && /^join-usb(?:Mini|Socket)/.test(device.id)
+  ));
+  assert.equal(joins.length, 8);
+  for (const join of joins) {
+    assert.ok(semantic.filter((cable) => cable.deviceId === join.id)
+      .every((cable) => cable.joinGeometry === "y"), `${join.id} retains established Y rendering`);
+    const split = join.position;
+    const devicePort = runtime.conductorByKey.get(`${join.id}.device`)!;
+    const deviceOffset = subtract(devicePort.position, split);
+    assert.ok(deviceOffset[1] > 0, `${join.id} device stem must be above the split`);
+    assert.ok(Math.abs(deviceOffset[0]) < 1e-9, `${join.id} device stem must remain centered`);
+
+    const arms = ["through", "branch"].map((conductorId) => {
+      const port = runtime.conductorByKey.get(`${join.id}.${conductorId}`)!;
+      const offset = subtract(port.position, split);
+      const route = runtime.routes.find((candidate) => (
+        candidate.from === port.key || candidate.to === port.key
+      ));
+      assert.ok(route, `${port.key} route`);
+      const peer = route.from === port.key ? route.to : route.from;
+      const destination = runtime.conductorByKey.get(attachmentRootEndpoint(peer))!;
+      return { port, offset, destination };
+    });
+    assert.deepEqual(arms.map(({ offset }) => Math.sign(offset[0])).toSorted(), [-1, 1], `${join.id} left/right arms`);
+    arms.forEach(({ port, offset, destination }) => {
+      assert.ok(offset[1] < 0, `${port.key} arm must descend from the split`);
+      assert.ok(Math.abs(Math.abs(offset[0]) - Math.abs(offset[1])) < 1e-9, `${port.key} arm must be 45 degrees`);
+      assert.equal(Math.sign(port.direction[0]), Math.sign(offset[0]), `${port.key} route must launch outward`);
+      assert.equal(
+        Math.sign(destination.position[0] - split[0]),
+        Math.sign(offset[0]),
+        `${port.key} must use the arm facing its neighboring device`,
+      );
+    });
+  }
+});
+
+test("three-core AC breakouts use a 45-degree outer fan with one straight centre core", () => {
+  const semantic = renderedSemanticCables(runtime.devices, runtime.conductors, runtime.routes);
+  const usbReferenceArm = semantic.find((candidate) => (
+    candidate.deviceId === "join-usbMiniB-positive" && candidate.branchAngleDegrees === 45
+  ))!;
+  const usbOuterLengthM = usbReferenceArm.pieces[0].lengthM;
+  const breakoutIds = [
+    "multiAcInBreakout", "multiAcOutBreakout",
+    "generatorLeadBreakout", "generatorAcBreakout",
+    "acInputCableBreakout", "acOutputCableBreakout",
+    "toolAcBreakout", "toolOutletLeadBreakout",
+  ];
+  for (const deviceId of breakoutIds) {
+    const device = runtime.deviceById.get(deviceId)!;
+    assert.equal(device.presentation, "cable-breakout");
+    assert.deepEqual(device.size.slice(0, 2), [0.08, 0.04], `${deviceId} retained routing envelope`);
+    const cable = runtime.conductorByKey.get(`${deviceId}.cable`)!;
+    const cableLength = magnitude(cable.direction);
+    const forward = cable.direction.map((value) => -value / cableLength) as unknown as Vec3;
+    const arms = semantic.filter((candidate) => (
+      candidate.deviceId === deviceId && candidate.branchAngleDegrees !== undefined
+    ));
+    assert.deepEqual(arms.map((arm) => arm.branchAngleDegrees).toSorted(), [-45, 0, 45], deviceId);
+    const splitOffset = subtract(arms[0].splitPoint, cable.position);
+    assert.ok(Math.abs(magnitude(splitOffset) - 0.020) < 1e-9, `${deviceId} sheath stem matches the USB Y stem`);
+    arms.forEach((arm) => {
+      const port = runtime.conductorByKey.get(arm.conductorKey)!;
+      const offset = subtract(port.position, arm.splitPoint);
+      const axial = dot(offset, forward);
+      const transverse = subtract(offset, forward.map((value) => value * axial) as unknown as Vec3);
+      const transverseLength = magnitude(transverse);
+      assert.ok(Math.abs(axial - 0.020) < 1e-9, `${arm.id} matches the USB Y arm depth`);
+      if (arm.branchAngleDegrees === 0) {
+        assert.ok(transverseLength < 1e-9, `${arm.id} is the straight centre core`);
+        assert.ok(dot(port.direction, forward) > 0.999999, `${arm.id} launches forward`);
+      } else {
+        assert.ok(Math.abs(transverseLength - 0.020) < 1e-9, `${arm.id} matches the USB Y arm width`);
+      }
+      assert.equal(arm.pieces.length, 1, `${arm.id} uses one uninterrupted fan arm`);
+      assert.equal(arm.pieces[0].kind, arm.branchAngleDegrees === 0 ? "line" : "cubic",
+        `${arm.id} uses the matching centre/outer Y geometry`);
+      if (arm.pieces[0].kind === "cubic") {
+        assert.ok(Math.abs(arm.pieces[0].lengthM - usbOuterLengthM) < 1e-12,
+          `${arm.id} matches the USB Y curve length`);
+        const points = arm.pieces[0].points;
+        const arrival = subtract(points.at(-1)!, points.at(-2)!);
+        assert.ok(dot(arrival, port.direction) / magnitude(arrival) > 0.999999,
+          `${arm.id} meets its routed wire with the centre-core tangent`);
+      }
+    });
+  }
+});
+
+test("tool outlet, AC protection, Ekrano and UniFi share the upper bottom datum", () => {
+  const devices = ["toolOutlet", "acJunction", "ekrano", "unifi"].map((id) => runtime.deviceById.get(id)!);
+  const bottoms = devices.map((device) => device.position[1] - device.size[1] / 2);
+  bottoms.forEach((bottom, index) => assert.ok(Math.abs(bottom - 1.36) < 1e-9, devices[index].id));
+  assert.equal(new Set(bottoms.map((bottom) => bottom.toFixed(9))).size, 1);
+});
+
+test("MPPT, PV box, Orion and secondary services share the MultiPlus bottom datum", () => {
+  const multiPlus = runtime.deviceById.get("multiPlus")!;
+  const lowerBottom = multiPlus.position[1] - multiPlus.size[1] / 2;
+  const aligned = ["smartSolar", "pvJunction", "usbOrion", "secondaryJunction"]
+    .map((id) => runtime.deviceById.get(id)!);
+  aligned.forEach((device) => assert.ok(
+    Math.abs(device.position[1] - device.size[1] / 2 - lowerBottom) < 1e-9,
+    `${device.id} lower datum`,
+  ));
+
+  const smartSolar = runtime.deviceById.get("smartSolar")!;
+  const balancerRight = Math.max(...["balancerA", "balancerB"].map((id) => {
+    const device = runtime.deviceById.get(id)!;
+    return device.position[0] + device.size[0] / 2;
+  }));
+  assert.ok(smartSolar.position[0] - smartSolar.size[0] / 2 > balancerRight,
+    "SmartSolar sits to the right of both balancers");
+  assert.ok(smartSolar.position[0] + smartSolar.size[0] / 2 < multiPlus.position[0] - multiPlus.size[0] / 2,
+    "SmartSolar sits to the left of the MultiPlus");
+
+  const pv = runtime.deviceById.get("pvJunction")!;
+  const penetration = runtime.deviceById.get("servicePenetration")!;
+  assert.ok(penetration.position[1] + penetration.size[1] / 2
+    < pv.position[1] - pv.size[1] / 2, "inside/outside penetration remains wholly below the PV box");
 });
 
 test("every exterior circuit crosses only at the one service penetration", () => {
@@ -442,7 +641,7 @@ test("MultiPlus rigid assembly is aligned with the balancers between main negati
   assert.deepEqual(multiPlus.placement.position, [1.70, 0.82, 0.071]);
   assert.deepEqual(acBreakouts.map((breakout) => (
     breakout.placement.space === "world" ? breakout.placement.position : undefined
-  )), [[1.64, 0.42, 0.018], [1.78, 0.42, 0.018]]);
+  )), [[1.68, 0.42, 0.018], [1.74, 0.42, 0.018]]);
 
   const multiPlusBottom = multiPlus.placement.position[1] - multiPlus.size[1] / 2;
   for (const breakout of acBreakouts) {
@@ -515,15 +714,16 @@ test("secondary service branches take positive sources and negative returns from
   assert.equal(dseTopology.devices.some((device) => /serviceReturn|internetReturn/i.test(device.id)), false);
 });
 
-test("the socket return leaves secondary-negative post 3 through the right-hand gland approach", () => {
+test("the socket return uses its route-selected right-hand bus landing and gland approach", () => {
   const enclosure = runtime.deviceById.get("secondaryJunction")!;
-  const port = runtime.conductorByKey.get("secondaryNegativeBus.post3")!;
   const route = runtime.routeById.get("socket-negative-feed")!;
+  const port = runtime.conductorByKey.get(route.from)!;
   const gland = runtime.glands.find((candidate) => candidate.connectionIds.includes(route.id))!;
   const enclosureBottom = enclosure.position[1] - enclosure.size[1] / 2;
   const exteriorPoints = route.points.filter((point) => point[1] < enclosureBottom - 1e-8);
 
-  assert.ok(port.position[0] > enclosure.position[0], "post 3 is on the bus's right half");
+  assert.equal(route.from, "secondaryNegativeBus.post6");
+  assert.ok(port.position[0] > enclosure.position[0], "the selected post is on the bus's right half");
   assert.ok(gland.position[0] >= enclosure.position[0], "socket return uses a right-half gland");
   assert.ok(exteriorPoints.length > 0);
   assert.ok(exteriorPoints.every((point) => point[0] >= gland.position[0] - 1e-8),
@@ -667,66 +867,156 @@ test("AC protection has terminals on top and bottom only", () => {
   }
 });
 
-test("generator and Type I outlet retain their bodies and expose integrated three-core Y breakouts", () => {
-  const semantic = renderedSemanticCables(runtime.devices, runtime.conductors, runtime.routes);
-  for (const deviceId of ["generator", "toolOutlet"]) {
+test("AC enclosure retains the compact low-profile backplate order and bodyless PE daisy chain", () => {
+  const junctionId = "acJunction";
+  const memberIds = new Set(dseTopology.devices.filter((device) => (
+    device.placement.space === "junction" && device.placement.junctionId === junctionId
+  )).map((device) => device.id));
+  const orderedBackplateIds = dseTopology.devices.filter((device) => (
+    !device.attachment && device.placement.space === "junction"
+    && device.placement.junctionId === junctionId
+    && device.placement.section === "backplate"
+  )).toSorted((first, second) => (
+    (first.placement.space === "junction" ? first.placement.order : 0)
+    - (second.placement.space === "junction" ? second.placement.order : 0)
+  )).map((device) => device.id);
+  assert.deepEqual(orderedBackplateIds, [
+    "generatorAcBreakout", "acInputCableBreakout", "acOutputCableBreakout", "toolAcBreakout",
+  ]);
+  const peJoins = dseTopology.devices.filter((device) => [
+    "join-generatorAcBreakout-earth-1",
+    "join-generatorAcBreakout-earth-2",
+    "join-acOutputCableBreakout-earth",
+  ].includes(device.id));
+  assert.deepEqual(peJoins.map((device) => device.id).toSorted(), [
+    "join-acOutputCableBreakout-earth",
+    "join-generatorAcBreakout-earth-1",
+    "join-generatorAcBreakout-earth-2",
+  ]);
+  assert.ok(peJoins.every((device) => device.presentation === "wire-join" && device.attachment));
+  assert.equal(dseTopology.devices.some((device) => /ac(?:Input|Output)PeSplice/.test(device.id)), false);
+
+  const enclosure = runtime.deviceById.get(junctionId)!;
+  assert.deepEqual(enclosure.size, [0.36, 0.44, 0.12]);
+  const bounds = {
+    left: enclosure.position[0] - enclosure.size[0] / 2,
+    right: enclosure.position[0] + enclosure.size[0] / 2,
+    bottom: enclosure.position[1] - enclosure.size[1] / 2,
+    top: enclosure.position[1] + enclosure.size[1] / 2,
+  };
+  const routes = runtime.routes.filter((route) => (
+    memberIds.has(endpointDeviceId(route.from)) || memberIds.has(endpointDeviceId(route.to))
+  ));
+  let inBoxLengthM = 0;
+  let inBoxTurns = 0;
+  const horizontal: Array<{ routeId: string; fixed: number; low: number; high: number }> = [];
+  const vertical: Array<{ routeId: string; fixed: number; low: number; high: number }> = [];
+  routes.forEach((route) => {
+    route.points.slice(1, -1).forEach((point, index) => {
+      if (point[0] < bounds.left - 1e-9 || point[0] > bounds.right + 1e-9
+        || point[1] < bounds.bottom - 1e-9 || point[1] > bounds.top + 1e-9) return;
+      const previous = route.points[index];
+      const next = route.points[index + 2];
+      const before = point.map((value, axis) => Math.sign(value - previous[axis]));
+      const after = next.map((value, axis) => Math.sign(value - point[axis]));
+      if (before.some((value, axis) => value !== after[axis])) inBoxTurns += 1;
+    });
+    route.points.slice(1).forEach((point, index) => {
+      const previous = route.points[index];
+      const delta = point.map((value, axis) => value - previous[axis]);
+      const axis = delta.findIndex((value) => Math.abs(value) > 1e-9);
+      if (axis === 0 && previous[1] >= bounds.bottom - 1e-9 && previous[1] <= bounds.top + 1e-9) {
+        const low = Math.max(bounds.left, Math.min(previous[0], point[0]));
+        const high = Math.min(bounds.right, Math.max(previous[0], point[0]));
+        if (high > low + 1e-9) {
+          inBoxLengthM += high - low;
+          horizontal.push({ routeId: route.id, fixed: previous[1], low, high });
+        }
+      } else if (axis === 1 && previous[0] >= bounds.left - 1e-9 && previous[0] <= bounds.right + 1e-9) {
+        const low = Math.max(bounds.bottom, Math.min(previous[1], point[1]));
+        const high = Math.min(bounds.top, Math.max(previous[1], point[1]));
+        if (high > low + 1e-9) {
+          inBoxLengthM += high - low;
+          vertical.push({ routeId: route.id, fixed: previous[0], low, high });
+        }
+      } else if (axis === 2 && previous[0] >= bounds.left - 1e-9 && previous[0] <= bounds.right + 1e-9
+        && previous[1] >= bounds.bottom - 1e-9 && previous[1] <= bounds.top + 1e-9) {
+        inBoxLengthM += Math.abs(delta[2]);
+      }
+    });
+  });
+  const crossings = new Set<string>();
+  horizontal.forEach((first) => vertical.forEach((second) => {
+    if (first.routeId === second.routeId) return;
+    if (second.fixed > first.low + 1e-9 && second.fixed < first.high - 1e-9
+      && first.fixed > second.low + 1e-9 && first.fixed < second.high - 1e-9) {
+      crossings.add(`${[first.routeId, second.routeId].toSorted().join("|")}@${second.fixed},${first.fixed}`);
+    }
+  }));
+  assert.ok(crossings.size <= 2, `AC enclosure projected crossings: ${crossings.size}`);
+  assert.ok(inBoxTurns <= 75, `AC enclosure turns: ${inBoxTurns}`);
+  assert.ok(inBoxLengthM <= 5 + 1e-9, `AC enclosure routed length: ${inBoxLengthM.toFixed(3)} m`);
+});
+
+test("generator and Type I outlet expose only three posts behind explicit cable breakouts", () => {
+  const cases = [
+    {
+      deviceId: "generator", breakoutId: "generatorLeadBreakout", whiteRouteId: "generator-white-cable",
+      coreRouteIds: ["generator-lead-line", "generator-lead-neutral", "generator-lead-earth"],
+    },
+    {
+      deviceId: "toolOutlet", breakoutId: "toolOutletLeadBreakout", whiteRouteId: "tool-white-cable",
+      coreRouteIds: ["tool-outlet-line", "tool-outlet-neutral", "tool-outlet-earth"],
+    },
+  ] as const;
+  for (const { deviceId, breakoutId, whiteRouteId, coreRouteIds } of cases) {
     const device = runtime.deviceById.get(deviceId)!;
-    assert.equal(device.presentation, "integrated-cable-breakout");
-    const arms = semantic.filter((cable) => cable.deviceId === deviceId);
-    assert.equal(arms.length, 3, `${deviceId} three colored cores use the routed multicore cable as their white trunk`);
-    assert.deepEqual(new Set(arms.map((arm) => arm.conductorKey)), new Set([
-      `${deviceId}.line`, `${deviceId}.neutral`, `${deviceId}.earth`,
-    ]));
-    const cablePort = runtime.conductorByKey.get(`${deviceId}.cable`)!;
-    const outwardScale = 1 / magnitude(cablePort.direction);
-    const outward = cablePort.direction.map((value) => value * outwardScale) as unknown as Vec3;
-    arms.forEach((arm) => {
-      const conductor = runtime.conductorByKey.get(arm.conductorKey)!;
-      const points = sampleCableCurve(arm.pieces);
-      assert.deepEqual(points[0], conductor.position, `${arm.id} begins at its real colored post`);
-      assert.deepEqual(points.at(-1), arm.splitPoint, `${arm.id} terminates at the common white-cable split`);
-      assert.ok(dot(subtract(arm.splitPoint, cablePort.position), outward) > 0.020,
-        `${arm.id} split is outside the device body`);
-      assert.ok(points.slice(1).every((point) => dot(subtract(point, conductor.position), outward) >= -1e-9),
-        `${arm.id} remains outside its terminal face`);
+    const breakout = runtime.deviceById.get(breakoutId)!;
+    assert.notEqual(device.presentation, "integrated-cable-breakout");
+    assert.equal(breakout.presentation, "cable-breakout");
+    assert.deepEqual(device.conductors.map((port) => port.id), ["line", "neutral", "earth"]);
+    assert.equal(device.conductors.some((port) => port.kind === "multicore"), false,
+      `${deviceId} has no hidden sheath anchor`);
+    const posts = device.conductors.map((port) => runtime.conductorByKey.get(`${deviceId}.${port.id}`)!);
+    assert.ok(Math.abs(magnitude(subtract(posts[0].position, posts[1].position)) - 0.020) < 1e-9,
+      `${deviceId} L/N pitch`);
+    assert.ok(Math.abs(magnitude(subtract(posts[1].position, posts[2].position)) - 0.020) < 1e-9,
+      `${deviceId} N/PE pitch`);
+    assert.equal(device.terminalPitchByFaceM?.[posts[0].face], 0.020,
+      `${deviceId} declares the shared three-core pitch`);
+    coreRouteIds.forEach((routeId, index) => {
+      const route = runtime.routeById.get(routeId)!;
+      assert.deepEqual(new Set([route.from, route.to]), new Set([
+        `${deviceId}.${posts[index].id}`,
+        `${breakoutId}.${posts[index].id}`,
+      ]), `${routeId} joins one breakout core directly to its device post`);
     });
-    assert.equal(new Set(arms.map((arm) => arm.splitPoint.join(","))).size, 1,
-      `${deviceId} cores combine at one external point`);
-    assert.ok(arms.every((arm) => arm.routedCableEndpoint === `${deviceId}.cable`),
-      `${deviceId} arms identify the routed white sheath they replace`);
-    const whiteRoute = runtime.routes.find((route) => (
-      route.from === `${deviceId}.cable` || route.to === `${deviceId}.cable`
-    ));
-    assert.ok(whiteRoute, `${deviceId} has one routed white multicore sheath`);
-    const canonicalPoints = whiteRoute.points.map((point) => [...point] as Vec3);
-    const cableAtStart = whiteRoute.from === `${deviceId}.cable`;
-    const cableRouteEndpoint = cableAtStart ? whiteRoute.points[0] : whiteRoute.points.at(-1)!;
-    assert.deepEqual(cableRouteEndpoint, cablePort.position,
-      `${deviceId} graph route retains its physical terminal endpoint`);
-    const visiblePoints = renderedRoutePoints(whiteRoute, semantic);
-    const visibleCableEndpoint = cableAtStart ? visiblePoints[0] : visiblePoints.at(-1)!;
-    assert.deepEqual(visibleCableEndpoint, arms[0].splitPoint,
-      `${deviceId} visible white route begins at the external three-core fusion`);
-    assert.ok(!visiblePoints.some((point) => point.every((coordinate, index) => (
-      Math.abs(coordinate - cablePort.position[index]) < 1e-9
-    ))), `${deviceId} duplicate white terminal segment is hidden`);
-    assert.deepEqual(whiteRoute.points, canonicalPoints,
-      `${deviceId} visible trimming does not mutate canonical graph geometry`);
-    device.conductors.forEach((port) => {
-      assert.ok((port.internalMates?.length ?? 0) > 0, `${deviceId}.${port.id} has internal continuity`);
-      port.internalMates!.forEach((mateId) => {
-        assert.ok(device.conductors.find((candidate) => candidate.id === mateId)?.internalMates?.includes(port.id),
-          `${deviceId}.${port.id}/${mateId} reciprocal`);
-      });
-    });
+    const whiteRoute = runtime.routeById.get(whiteRouteId)!;
+    assert.ok([whiteRoute.from, whiteRoute.to].includes(`${breakoutId}.cable`));
+    assert.ok(![whiteRoute.from, whiteRoute.to].some((endpoint) => endpoint.startsWith(`${deviceId}.`)),
+      `${whiteRouteId} terminates at the explicit breakout, not the device`);
   }
+  assert.equal(runtime.devices.some((device) => device.presentation === "integrated-cable-breakout"), false);
+
   const toolOutlet = topologyDeviceById("toolOutlet");
   assert.deepEqual(toolOutlet.conductors.map((port) => [port.id, port.face, port.order]), [
     ["line", "bottom", 0],
-    ["cable", "bottom", 1],
-    ["neutral", "bottom", 2],
-    ["earth", "bottom", 3],
+    ["neutral", "bottom", 1],
+    ["earth", "bottom", 2],
   ]);
+  const resolvedToolOutlet = runtime.deviceById.get("toolOutlet")!;
+  const resolvedToolBreakout = runtime.deviceById.get("toolOutletLeadBreakout")!;
+  assert.equal(resolvedToolOutlet.position[0], resolvedToolBreakout.position[0],
+    "tool-outlet breakout is centered directly beneath the outlet");
+  assert.ok(resolvedToolOutlet.position[1] > resolvedToolBreakout.position[1]);
+  for (const routeId of ["tool-outlet-line", "tool-outlet-neutral", "tool-outlet-earth"]) {
+    const route = runtime.routeById.get(routeId)!;
+    assert.ok(route.lengthM <= 0.12 + 1e-9, `${routeId} remains a short breakout core`);
+    assert.ok(route.points.every((point) => Math.abs(point[0] - route.points[0][0]) < 1e-9),
+      `${routeId} does not loop sideways`);
+    assert.ok(route.points.every((point, index) => index === 0 || point[1] >= route.points[index - 1][1] - 1e-9),
+      `${routeId} rises monotonically into the outlet`);
+  }
   assert.equal(toolOutlet.placement.space, "world");
   const acJunction = topologyDeviceById("acJunction");
   if (toolOutlet.placement.space === "world" && acJunction.placement.space === "world") {
@@ -775,6 +1065,7 @@ test("serial route order is thickest cable first", () => {
 test("purchased six-gang panel has the three assigned controls and three spares", () => {
   const panel = runtime.deviceById.get("switchPanel")!;
   assert.equal(panel.status, "purchased");
+  assert.ok(panel.conductors.every((port) => port.face === "bottom"));
   assert.deepEqual(panel.conductors.slice(1).map((port) => port.label), [
     "To Starlink Mini / UniFi 24 V to 5 V USB-A converter",
     "To Outdoor utility light",

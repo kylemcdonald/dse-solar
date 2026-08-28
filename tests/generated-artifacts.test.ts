@@ -43,6 +43,14 @@ test("precomputed 3D runtime artifact is current and conflict-free", async () =>
       selfIntersections: number;
       deviceConflicts: number;
       renderedGeometryConflicts: number;
+      totalLengthM: number;
+      totalTurns: number;
+      routingTargetAssignments: Array<{
+        connectionId: string;
+        side: "from" | "to";
+        authoredEndpoint: string;
+        resolvedEndpoint: string;
+      }>;
       currentSafety: {
         scope: string;
         status: "verified" | "provisional" | "incomplete";
@@ -74,14 +82,20 @@ test("precomputed 3D runtime artifact is current and conflict-free", async () =>
     devices: artifact.diagnostics.deviceConflicts,
     rendered: artifact.diagnostics.renderedGeometryConflicts,
   }, { fallbacks: 0, centerline: 0, swept: 0, self: 0, devices: 0, rendered: 0 });
-  assert.equal(artifact.devices.length, 87);
-  assert.equal(artifact.conductors.length, 307);
-  assert.equal(artifact.routes.length, 143);
+  assert.equal(artifact.devices.length, 89);
+  assert.equal(artifact.conductors.length, 313);
+  assert.equal(artifact.routes.length, 149);
+  assert.ok(artifact.diagnostics.routingTargetAssignments.length > 0);
+  assert.ok(artifact.diagnostics.routingTargetAssignments.some((assignment) => (
+    assignment.authoredEndpoint !== assignment.resolvedEndpoint
+  )));
+  assert.ok(artifact.diagnostics.totalLengthM < 156.14);
+  assert.ok(artifact.diagnostics.totalTurns < 887);
   const expectedEnclosures = new Map([
     ["batteryCutoffJunction", { size: [0.20, 0.16, 0.10], physicalSize: [0.200, 0.155, 0.092], glands: 6 }],
-    ["secondaryJunction", { size: [0.30, 0.30, 0.18], physicalSize: [0.302, 0.302, 0.178], glands: 15 }],
+    ["secondaryJunction", { size: [0.48, 0.52, 0.24], glands: 15 }],
     ["pvJunction", { size: [0.32, 0.28, 0.16], glands: 7 }],
-    ["acJunction", { size: [0.52, 0.60, 0.24], glands: 5 }],
+    ["acJunction", { size: [0.36, 0.44, 0.12], glands: 5 }],
   ] as const);
   for (const [id, expected] of expectedEnclosures) {
     assert.deepEqual(artifact.devices.find((device) => device.id === id)?.size, expected.size, `${id} size`);
@@ -155,7 +169,7 @@ test("precomputed diagram artifact is current and has audited visible geometry",
   }
   assert.ok(artifact.layouts.system.bridgedCrossings < 240, "system crossing budget");
   assert.ok(artifact.layouts.system.wireTurns < 340, "system turn budget");
-  assert.ok(artifact.layouts.system.wireLength < 120_000, "system wire-length budget");
+  assert.ok(artifact.layouts.system.wireLength < 130_000, "system wire-length budget");
   assert.ok(artifact.layouts.batteryCutoffJunction.bridgedCrossings < 20, "cutoff-junction crossing budget");
   assert.ok(artifact.layouts.batteryCutoffJunction.wireTurns < 20, "cutoff-junction turn budget");
   assert.ok(artifact.layouts.secondaryJunction.bridgedCrossings < 100, "secondary-junction crossing budget");

@@ -151,6 +151,12 @@ dseRuntime.conductors.forEach((port) => {
   if (hasReciprocalInternalMate) connectedConductorKeys.add(port.key);
 });
 const unusedConductorCount = dseRuntime.conductors.filter((port) => !connectedConductorKeys.has(port.key)).length;
+const routingTargetChangeCount = dseRuntime.diagnostics.routingTargetAssignments.filter((assignment) => (
+  assignment.authoredEndpoint !== assignment.resolvedEndpoint
+)).length;
+const earthBusRouteLengthM = dseRuntime.routes.filter((route) => (
+  route.from.startsWith("earthBar.") || route.to.startsWith("earthBar.")
+)).reduce((sum, route) => sum + route.lengthM, 0);
 const semanticCables = renderedSemanticCables(dseRuntime.devices, dseRuntime.conductors, dseRuntime.routes);
 const semanticConductorKeys = new Set(semanticCables.flatMap((cable) => (
   cable.routedCableEndpoint ? [cable.conductorKey, cable.routedCableEndpoint] : [cable.conductorKey]
@@ -160,6 +166,9 @@ const cableBreakoutCount = dseRuntime.devices.filter((device) => (
 )).length;
 const integratedCableBreakoutCount = dseRuntime.devices.filter((device) => device.presentation === "integrated-cable-breakout").length;
 const wireJoinCount = dseRuntime.devices.filter((device) => device.presentation === "wire-join").length;
+const orthogonalWireJoinCount = new Set(semanticCables.filter((cable) => (
+  cable.joinGeometry === "orthogonal-t"
+)).map((cable) => cable.deviceId)).size;
 const serviceSpliceCount = dseRuntime.devices.filter((device) => device.presentation === "service-splice").length;
 const rigidRailCount = dseRuntime.devices.filter((device) => device.presentation === "rigid-rail").length;
 const suppliedBusbarCoverCount = dseRuntime.devices.filter((device) => (
@@ -640,6 +649,29 @@ function deviceBody(device: ResolvedDevice) {
       );
       face.position.z = device.size[2] / 2 + 0.007;
       group.add(face);
+    }
+
+    if (device.id === "switchPanel") {
+      const faceplate = new THREE.Mesh(
+        new THREE.BoxGeometry(device.size[0] * 0.94, device.size[1] * 0.82, 0.006),
+        new THREE.MeshStandardMaterial({ color: "#3e4545", roughness: 0.58, metalness: 0.04 }),
+      );
+      faceplate.position.z = device.size[2] / 2 + 0.004;
+      group.add(faceplate);
+      const gangPitch = device.size[0] * 0.145;
+      for (let gang = 0; gang < 6; gang += 1) {
+        const rocker = new THREE.Mesh(
+          new THREE.BoxGeometry(gangPitch * 0.68, device.size[1] * 0.56, 0.009),
+          new THREE.MeshStandardMaterial({ color: "#171a1b", roughness: 0.46 }),
+        );
+        rocker.position.set(
+          (gang - 2.5) * gangPitch,
+          0,
+          device.size[2] / 2 + 0.011,
+        );
+        rocker.rotation.x = -0.08;
+        group.add(rocker);
+      }
     }
 
     if (device.id === "toolOutlet") {
@@ -1176,6 +1208,9 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
       data-route-device-conflicts={dseRuntime.diagnostics.deviceConflicts}
       data-route-total-length-m={dseRuntime.diagnostics.totalLengthM.toFixed(2)}
       data-route-turns={dseRuntime.diagnostics.totalTurns}
+      data-routing-target-assignments={dseRuntime.diagnostics.routingTargetAssignments.length}
+      data-routing-target-changes={routingTargetChangeCount}
+      data-earth-bus-route-length-m={earthBusRouteLengthM.toFixed(2)}
       data-route-solve-ms={dseRuntime.diagnostics.buildMs.toFixed(1)}
       data-runtime-source={dseRuntime.diagnostics.source}
       data-runtime-hydrate-ms={dseRuntime.diagnostics.hydrateMs.toFixed(3)}
@@ -1191,13 +1226,15 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
       data-breakout-rendering="true-y-two-way-plus-minus-45-three-way-red-45-black-0-green-minus-45"
       data-cable-breakout-count={cableBreakoutCount}
       data-integrated-cable-breakout-count={integratedCableBreakoutCount}
-      data-integrated-breakout-rendering="external-fusion-trimmed-depth-tested-core-fan"
+      data-integrated-breakout-rendering="external-fusion-trimmed-tangent-continuous-20mm-core-fan"
       data-usb-outlet-rendering="metadata-driven-usb-c-pill-usb-a-rectangle"
       data-usb-c-outlet-count={usbCOutletCount}
       data-usb-a-outlet-count={usbAOutletCount}
       data-conductor-usage="field-routes-plus-reciprocal-internal-mates"
-      data-wire-join-rendering="presentation-driven-selectable-y"
+      data-wire-join-rendering="presentation-driven-selectable-y-or-straight-orthogonal-t"
       data-wire-join-count={wireJoinCount}
+      data-orthogonal-wire-join-count={orthogonalWireJoinCount}
+      data-orthogonal-wire-join-bends="0"
       data-service-splice-count={serviceSpliceCount}
       data-rigid-rail-rendering="insulated-separated-dual-polarity"
       data-rigid-rail-count={rigidRailCount}

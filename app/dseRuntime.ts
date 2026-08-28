@@ -23,12 +23,18 @@ if (
 const deviceById = new Map(artifact.devices.map((device) => [device.id, device]));
 const conductorByKey = new Map(artifact.conductors.map((candidate) => [candidate.key, candidate]));
 const routeById = new Map(artifact.routes.map((route) => [route.id, route]));
+const resolvedConnections = dseTopology.connections.map((connection) => {
+  const route = routeById.get(connection.id);
+  if (!route) throw new Error(`Precomputed runtime is missing route ${connection.id}.`);
+  return { ...connection, from: route.from, to: route.to };
+});
+const resolvedTopology = { ...dseTopology, connections: resolvedConnections };
 const finished = typeof performance === "undefined" ? Date.now() : performance.now();
 
 /** One statically solved graph shared by the diagram and 3D scene. Hydration
  * only rebuilds three indexes and never imports or runs voxel A*. */
 export const dseRuntime: GraphRuntime = {
-  graph: dseTopology,
+  graph: resolvedTopology,
   devices: artifact.devices,
   deviceById,
   conductors: artifact.conductors,

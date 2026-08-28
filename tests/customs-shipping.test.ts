@@ -89,7 +89,7 @@ test("public invoice references are numeric, canonical and separate from ASIN de
   assert.equal(hasDistinctModel("Title", "Model 123"), true);
 });
 
-test("new purchases retain receipt status while the user-selected enclosures enter the design", () => {
+test("new purchases retain receipt status while the larger secondary shell supersedes the owned spare", () => {
   const purchasedIds = [
     "dse-airic-npt-cable-glands", "dse-ventilated-ip65-enclosure", "dse-pg11-cable-glands",
     "dse-mollom-8-way-enclosure-second", "dse-shirbly-2awg-cable-pairs",
@@ -98,7 +98,7 @@ test("new purchases retain receipt status while the user-selected enclosures ent
   assert.ok(purchasedRows.every((row) => row.procurement === "Purchased"));
   assert.deepEqual(Object.fromEntries(purchasedRows.map((row) => [row.id, row.priority])), {
     "dse-airic-npt-cable-glands": "Integration pending",
-    "dse-ventilated-ip65-enclosure": "Must · verified secondary enclosure",
+    "dse-ventilated-ip65-enclosure": "Not in design · owned undersized spare",
     "dse-pg11-cable-glands": "Integration pending",
     "dse-mollom-8-way-enclosure-second": "Must · verified cutoff enclosure",
     "dse-shirbly-2awg-cable-pairs": "Integration pending",
@@ -107,12 +107,18 @@ test("new purchases retain receipt status while the user-selected enclosures ent
   assert.equal(Math.round(purchasedRows.reduce((sum, row) => sum + row.totalUsd, 0) * 100) / 100, 136.34);
   assert.ok(purchasedIds.every((id) => itemMeta[id] && itemInvoices[id]?.length >= 1));
   const topology = fs.readFileSync("app/dseTopology.ts", "utf8");
-  const selectedEnclosureIds = [
-    "dse-airic-npt-cable-glands", "dse-ventilated-ip65-enclosure", "dse-pg11-cable-glands",
-    "dse-mollom-8-way-enclosure-second",
+  const installedEnclosureIds = [
+    "dse-airic-npt-cable-glands", "dse-pg11-cable-glands",
+    "dse-mollom-8-way-enclosure-second", "dse-secondary-enclosure-larger",
   ];
-  assert.ok(selectedEnclosureIds.every((id) => topology.includes(id)),
-    "the split-DC revision explicitly allocates the purchased enclosure hardware");
+  assert.ok(installedEnclosureIds.every((id) => topology.includes(id)),
+    "the split-DC revision explicitly allocates the installed enclosure hardware");
+  assert.ok(!topology.includes("dse-ventilated-ip65-enclosure"),
+    "the undersized owned enclosure is no longer allocated to a device");
+  const replacementEnclosure = system.bom.find((item) => item.id === "dse-secondary-enclosure-larger")!;
+  assert.equal(replacementEnclosure.location, "Fiji");
+  assert.match(replacementEnclosure.procurement, /select and buy/i);
+  assert.equal(replacementEnclosure.totalUsd, 0);
   assert.ok(!topology.includes("dse-shirbly-2awg-cable-pairs"),
     "bulk cable inventory remains procurement data rather than a device allocation");
   const mainBusbars = system.bom.find((item) => item.id === "dse-main-busbars")!;

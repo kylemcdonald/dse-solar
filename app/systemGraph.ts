@@ -64,6 +64,15 @@ export type Conductor = {
   face: Face;
   /** Optional order along the selected face. Positions are otherwise automatic. */
   order?: number;
+  /** Mechanically and electrically equivalent landings on one device may
+   * share a routing group. The offline voxel solver then treats every free
+   * member of that group as a zero-cost edge to one virtual device target and
+   * commits the shortest reachable landing for each field connection. */
+  routingGroup?: string;
+  /** Number of separately rendered field conductors this physical landing may
+   * accept during routing-target assignment. Values above one require an
+   * explicit warning/approved-stack connection policy. */
+  routingCapacity?: number;
   /** Optional schematic edge. Physical terminal geometry still comes from
    * `face`; this keeps a panel junction lead or battery post physically honest
    * while allowing the wiring diagram to read consistently left-to-right. */
@@ -525,6 +534,14 @@ export type GraphRuntime = {
     totalLengthM: number;
     totalTurns: number;
     routingOrder: readonly string[];
+    /** Authored bus/device endpoints replaced by the route-aware terminal
+     * assignment pass before the exact serial cable solve. */
+    routingTargetAssignments: readonly {
+      connectionId: string;
+      side: "from" | "to";
+      authoredEndpoint: string;
+      resolvedEndpoint: string;
+    }[];
     /** Deterministic graph/max-flow proof over every declared supply. */
     currentSafety: CurrentSafetyReport;
   };

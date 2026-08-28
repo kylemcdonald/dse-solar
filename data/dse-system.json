@@ -17,7 +17,7 @@
     "targetBasis": "remaining",
     "donorFundedIncrementUsd": 607.11,
     "contingencyIncluded": false,
-    "note": "Purchased project equipment and reconciled transaction adjustments through 26 Aug 2026 are included. Thirty-five Amazon project receipts are now reconciled. The actual 1/0 AWG inventory is nine red/black pairs (18 individual cables and 27 conductor-feet) across the preserved Shirbly and iGreely receipt rows; two Shirbly 2 AWG pairs and two purchased DIHOOL 10 A AC-in/out protection units are also recorded at actual transaction value. The Joinfworld 250 A pair is the selected main-bus purchase; its supplied covers and required main-positive lug stacking are accepted. The superseded AMOMD pair remains excluded return history. The retained layout uses the verified HT-8 cutoff-box and 302 × 302 × 178 mm secondary-box fits, uses exactly three secondary branch-breaker positions, omits a separate 80 A incomer, and records supplemental correctly terminated 1/0 AWG cable as an onsite Fiji purchase. The purchased CHTAIXI 10 A shared-services breaker is linked to receipt 43 and remains on a received-marking/AIC commissioning hold. The purchased AC protection remains on commissioning hold pending received-device and installer verification. The MultiPlus Fiji invoice/deposit, donor-funded Ekrano increment, refunds, freight beyond Nadi, panel mounting and labor still require final reconciliation."
+    "note": "Purchased project equipment and reconciled transaction adjustments through 26 Aug 2026 are included. Thirty-five Amazon project receipts are now reconciled. The actual 1/0 AWG inventory is nine red/black pairs (18 individual cables and 27 conductor-feet) across the preserved Shirbly and iGreely receipt rows; two Shirbly 2 AWG pairs and two purchased DIHOOL 10 A AC-in/out protection units are also recorded at actual transaction value. The Joinfworld 250 A pair is the selected main-bus purchase; its supplied covers and required main-positive lug stacking are accepted. The superseded AMOMD pair remains excluded return history. The retained layout uses the verified HT-8 cutoff box, requires a larger secondary-services enclosure so its two buses and six-gang panel can share the rear mounting plane, uses exactly three secondary branch-breaker positions, omits a separate 80 A incomer, and records supplemental correctly terminated 1/0 AWG cable as an onsite Fiji purchase. The purchased 302 × 302 × 178 mm shell remains owned but is no longer the installed secondary enclosure. The purchased CHTAIXI 10 A shared-services breaker is linked to receipt 43 and remains on a received-marking/AIC commissioning hold. The purchased AC protection remains on commissioning hold pending received-device and installer verification. The MultiPlus Fiji invoice/deposit, donor-funded Ekrano increment, refunds, freight beyond Nadi, panel mounting and labor still require final reconciliation."
   },
   "summary": "DSE/Fiji R29 separates normal operating power from fault-clearing evidence. The 10 A shared-services breaker is now purchased and is comfortably sized for roughly 60 W expected / 100 W conservative demand; Starlink Mini is recorded as purchased, the Husqvarna generator as purchased pre-existing equipment, and the insulated PV comb rails as existing inventory. Manufacturer power limits are attached to every active/source device and thirteen circuit budgets now apply the real operating envelope: one tool at or below 1,800 W, high-power USB branches off during heavy tool use, and a 100 A Ekrano DVCC charge-current limit. No circuit is knowingly over capacity in that controlled normal mode; conditional modes are labeled separately from fault-clearing evidence. Genuine holds remain explicit: MultiPlus external DC protection/cable coordination, common SmartShunt-trunk fault and received-installation evidence, the unprotected secondary feeder, balancer taps, Orion's 60 A fault envelope versus the 30 A socket harness, received breaker/AIC evidence and the held AC enclosure/protection assembly.",
   "keyFacts": [
@@ -130,16 +130,16 @@
   "batteryCablePlan": {
     "conductor": "Purchased iGreely and Shirbly 1/0 AWG flexible OFC cable assemblies with pre-crimped 3/8 in / M10 lugs; conductor tinning and UL 1426 status unverified",
     "procurement": "Nine fixed-length red/black pairs purchased: 3 × 1 ft iGreely, 3 × 1.5 ft Shirbly and 3 × 2 ft (1 iGreely plus 2 Shirbly); 18 individual cables and 27 conductor-feet total.",
-    "routedTotalLengthM": 8.72,
-    "planningTotalLengthM": 9.95,
-    "planningTotalLengthFt": 32.64,
-    "planningRule": "Each planning length adds at least 10% to the accepted R28 routed centerline and then rounds upward to the next 0.05 m. It is a minimum procurement/mock-up allowance, not a cut instruction; increase it wherever the received terminal body, bend radius, support spacing or service loop requires more.",
+    "routedTotalLengthM": 8.96,
+    "planningTotalLengthM": 10.2,
+    "planningTotalLengthFt": 33.46,
+    "planningRule": "Each planning length adds at least 10% to the current accepted routed centerline and then rounds upward to the next 0.05 m. It is a minimum procurement/mock-up allowance, not a cut instruction; increase it wherever the received terminal body, bend radius, support spacing or service loop requires more.",
     "sourceLeadComparison": {
       "definition": "Four battery-post source leads only: string A/B positive to the cutoff inputs plus string A/B negative to SmartShunt BATTERY MINUS; series links and protected downstream conductors are excluded.",
       "currentRoutedTotalM": 2.6,
       "retiredLayoutRoutedTotalM": 6.58
     },
-    "inventoryAllocationStatus": "Accepted procurement plan: allocate the fixed purchased assemblies only where their received length, lug geometry and conductor markings match the final supported route, then purchase the remaining correctly terminated red and black 1/0 AWG cable onsite in Fiji. A 2 ft / 0.61 m nominal piece is not automatically assigned to a 0.62 m routed lead because termination take-up, bends and service slack can make it too short. The 1.18 m / 0.56 m MultiPlus feeds and 0.52 m / 1.82 m secondary feeder pair require correctly matched onsite terminations; source/protection and #10-32 transition coordination remains on hold for the secondary feeder pair. The equal red/black purchased-pair inventory does not match the routed demand by polarity, so the final onsite quantity follows received-part allocation rather than a gross-length subtraction.",
+    "inventoryAllocationStatus": "Accepted procurement plan: allocate the fixed purchased assemblies only where their received length, lug geometry and conductor markings match the final supported route, then purchase the remaining correctly terminated red and black 1/0 AWG cable onsite in Fiji. A 2 ft / 0.61 m nominal piece is not automatically assigned to a 0.66 m routed lead because termination take-up, bends and service slack can make it too short. The route-selected bus landings produce 1.10 m / 0.56 m MultiPlus feeds and a 0.66 m / 2.00 m secondary feeder pair; all require correctly matched onsite terminations, and source/protection plus #10-32 transition coordination remains on hold for the secondary feeder pair. The equal red/black purchased-pair inventory does not match the routed demand by polarity, so the final onsite quantity follows received-part allocation rather than a gross-length subtraction.",
     "measurementRule": "Use the routed centerlines only as geometry evidence. Mock up the received batteries, DIHOOL cutoff devices, external SmartShunt, Joinfworld buses and MultiPlus at full size; measure along the supported conductor path and verify terminal take-up, service slack, bend radius, lug orientation and paired-path requirements before selecting or ordering an assembly. Battery and MultiPlus posts require M8 while the purchased assemblies have 3/8 in / M10 rings, and the DIHOOL/SmartSolar devices use clamp terminals; use only approved terminations or transitions. Never trim strands, drill lugs or claim UL 1426/tinned-marine construction without received markings.",
     "assemblies": [
       {
@@ -189,8 +189,8 @@
       {
         "route": "cutoff-a-to-main-positive",
         "qty": 1,
-        "routedLengthM": 0.58,
-        "planningLengthM": 0.65,
+        "routedLengthM": 0.54,
+        "planningLengthM": 0.6,
         "color": "red",
         "from": "DIHOOL cutoff A output",
         "to": "Main positive bus",
@@ -200,8 +200,8 @@
       {
         "route": "cutoff-b-to-main-positive",
         "qty": 1,
-        "routedLengthM": 0.62,
-        "planningLengthM": 0.7,
+        "routedLengthM": 0.66,
+        "planningLengthM": 0.75,
         "color": "red",
         "from": "DIHOOL cutoff B output",
         "to": "Main positive bus",
@@ -244,8 +244,8 @@
       {
         "route": "main-positive-to-multiplus",
         "qty": 1,
-        "routedLengthM": 1.18,
-        "planningLengthM": 1.3,
+        "routedLengthM": 1.1,
+        "planningLengthM": 1.25,
         "color": "red",
         "from": "Main positive bus",
         "to": "MultiPlus-II positive",
@@ -264,10 +264,10 @@
         "purpose": "Supplemental correctly terminated inverter negative feed required"
       },
       {
-        "route": "main-positive-to-secondary-positive",
-        "qty": 1,
-        "routedLengthM": 0.52,
-        "planningLengthM": 0.6,
+      "route": "main-positive-to-secondary-positive",
+      "qty": 1,
+        "routedLengthM": 0.66,
+        "planningLengthM": 0.75,
         "color": "red",
         "from": "Main positive bus",
         "to": "Secondary positive bus",
@@ -275,10 +275,10 @@
         "purpose": "Direct secondary positive feeder; coordinate upstream protection and 100 A bus rating before energizing"
       },
       {
-        "route": "main-negative-to-secondary-negative",
-        "qty": 1,
-        "routedLengthM": 1.82,
-        "planningLengthM": 2.05,
+      "route": "main-negative-to-secondary-negative",
+      "qty": 1,
+        "routedLengthM": 2,
+      "planningLengthM": 2.2,
         "color": "black",
         "from": "Main negative bus",
         "to": "Secondary negative bus",
@@ -382,7 +382,7 @@
       "location": "Fiji",
       "procurement": "Buy onsite in Fiji · accepted plan",
       "priority": "Must · final quantity after allocation",
-      "description": "Purchase onsite the red and black 1/0 AWG cable assemblies not safely covered by the nine imported fixed pairs. This definitely includes the correctly terminated 1.18 m routed / 1.30 m planned positive and 0.56 m routed / 0.65 m planned negative MultiPlus feeds, the 0.52 m routed / 0.60 m planned secondary positive feeder, the 1.86 m routed / 2.05 m planned secondary return, and any other route whose received imported assembly is too short or has incompatible lugs. Final quantity and price follow the physical allocation and supported-path measurement; zero cost is an unknown-price placeholder, not a quote. Coordinate conductor ampacity, insulation, lug material/hole size, crimp method, bend radius and source-side protection before energizing.",
+      "description": "Purchase onsite the red and black 1/0 AWG cable assemblies not safely covered by the nine imported fixed pairs. This definitely includes the correctly terminated 1.10 m routed / 1.25 m planned positive and 0.56 m routed / 0.65 m planned negative MultiPlus feeds, the 0.66 m routed / 0.75 m planned secondary positive feeder, the 2.00 m routed / 2.20 m planned secondary return, and any other route whose received imported assembly is too short or has incompatible lugs. Final quantity and price follow the physical allocation and supported-path measurement; zero cost is an unknown-price placeholder, not a quote. Coordinate conductor ampacity, insulation, lug material/hole size, crimp method, bend radius and source-side protection before energizing.",
       "weightNote": "Local-purchase quantity and mass are unknown until received imported assemblies are allocated."
     },
     {
@@ -1240,20 +1240,35 @@
       "currency": "USD",
       "location": "Import",
       "procurement": "Purchased",
-      "priority": "Must · verified secondary enclosure",
+      "priority": "Not in design · owned undersized spare",
       "id": "dse-ventilated-ip65-enclosure",
       "category": "Mounting",
       "item": "Ventilated IP65 ABS electrical enclosure with mounting panel · grey · 11.9 × 11.9 × 7 in",
       "qty": 1,
       "unit": "ea",
       "unitCost": 50.99,
-      "description": "One enclosure ordered 26 Aug 2026, ASIN B0DJNJ53MN. The invoice title identifies an IP65 indoor/outdoor ABS body, ventilated design, cable grommets, mounting panel and nominal 11.9 × 11.9 × 7 in (about 302 × 302 × 178 mm) size. Its R28 fit is accepted and verified for the purchased CHTAIXI 10 A shared-services breaker, purchased 32 A Orion and ChargeIT breakers, secondary positive/negative Blue Sea 2314 buses, six-gang panel, 24 V-to-5 V USB-A converter and Starlink power routing. Preserve the accepted device clearances, vent function, sealing and cable-entry arrangement during installation.",
+      "description": "One enclosure ordered 26 Aug 2026, ASIN B0DJNJ53MN. The invoice title identifies an IP65 indoor/outdoor ABS body, ventilated design, cable grommets, mounting panel and nominal 11.9 × 11.9 × 7 in (about 302 × 302 × 178 mm) size. It is no longer the installed secondary-services enclosure: keeping both Blue Sea buses and the six-gang panel on the rear mounting plane requires the larger routed shell tracked separately. Retain this purchased box as an owned spare; do not recreate the former front-layer busbar layout to make it fit.",
       "productUrl": "https://www.amazon.com/dp/B0DJNJ53MN",
       "unitWeightKg": 2,
       "weightBasis": "estimate",
       "weightNote": "Planning estimate for a roughly 12 × 12 × 7 in ABS enclosure and mounting panel pending receipt and weighing.",
       "totalUsd": 50.99,
       "totalWeightKg": 2
+    },
+    {
+      "currency": "USD",
+      "location": "Fiji",
+      "procurement": "Select and buy · fit hold",
+      "priority": "Must · larger secondary enclosure",
+      "id": "dse-secondary-enclosure-larger",
+      "category": "Mounting",
+      "item": "Larger ventilated secondary-services enclosure · 480 × 520 × 240 mm routed envelope",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 0,
+      "description": "Select an IP-rated ventilated enclosure whose usable mounting plane and cable depth accommodate the canonical 480 × 520 × 240 mm routing envelope. Both covered Blue Sea 2314 buses and the six-gang switch panel must mount against the rear backplate, with the switch posts facing down, all three branch breakers retained, and one unobstructed 15-gland bottom row. Verify the exact internal panel dimensions, cover depth, ventilation, sealing, terminal access, bend space and gland clearances with a 1:1 mock-up before purchase or drilling; zero cost is an unknown-price placeholder, not a quote.",
+      "totalUsd": 0,
+      "weightNote": "Price and mass remain unknown until an exact locally available enclosure is selected."
     },
     {
       "currency": "USD",
@@ -2906,7 +2921,7 @@
     "Program MultiPlus and SmartSolar for the exact GEL label; planning values are 28.2 V absorption, 27.2 V float and equalization disabled. Install the temperature sensor supplied with the 24 V MultiPlus on Battery 1's negative terminal. In Ekrano DVCC, select the SmartShunt for Shared Voltage Sense and Shared Current Sense, select the MultiPlus sensor for Shared Temperature Sense, and set the system-wide charge-current limit to 100 A with both strings healthy. Do not add a Smart Battery Sense unless this wired sensing path is later removed or proves unusable.",
     "Return or exchange the incompatible SCC950400300 / MC4 WireBox unopened. Obtain SCC950400210 WireBox-XL Tr for the purchased SmartSolar 150/85-Tr VE.Can, verify both part-number labels and install per Victron's quick guide.",
     "Set the MultiPlus to 230 V / 50 Hz with a 10 A AC input-current limit for the G3200P; verify generator acceptance before enabling unattended charging.",
-    "With the 24 V bank isolated, install the accepted verified-fit HT-8 battery/MPPT cutoff enclosure and nominal 302 × 302 × 178 mm ABS secondary-services enclosure in their R28 wall positions. Keep the MultiPlus between the external main negative bus and battery cutoff at the balancers' vertical height, with both AC cable breakouts below the inverter. Preserve the verified breaker access, bends, guarded terminals, vent sealing, cable entries and shortest-practical 1/0 AWG battery leads.",
+    "With the 24 V bank isolated, install the accepted verified-fit HT-8 battery/MPPT cutoff enclosure and select the larger secondary-services enclosure from the current 480 × 520 × 240 mm routed envelope. Mount both secondary buses and the six-gang panel against its rear backplate, with all switch posts facing down and the one bottom gland row unobstructed. Keep the MultiPlus, SmartSolar, PV protection box, Orion and secondary enclosure on the common lower datum, with both AC cable breakouts below the inverter. Preserve breaker access, bends, guarded terminals, ventilation, sealing, cable entries and shortest-practical 1/0 AWG battery leads.",
     "Power the Ekrano directly from the protected 24 V bus with its supplied 3.15 A slow-blow fused lead, with negative on the system side of the SmartShunt. Never power it from MultiPlus AC-out or from the voltage-controlled DC-load branch.",
     "Connect the MultiPlus by Victron RJ45 UTP/VE.Bus, SmartSolar and SmartShunt by separate VE.Direct cables, both balancer alarm relays to separate Ekrano digital inputs, and Ekrano Ethernet to the UniFi Express LAN port. Confirm all three Victron devices, SmartShunt battery state, battery temperature, SVS/SCS/STS sources and both balancer alarms appear locally.",
     "Register the Ekrano in VRM over UniFi/Starlink, enable HTTPS and two-factor authentication on administrator accounts, configure useful battery/temperature/offline alarms, set a connection-appropriate log interval, and test both local operation without internet and remote recovery after reconnect.",

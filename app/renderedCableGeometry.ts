@@ -29,8 +29,12 @@ export type RenderedSemanticCable = {
    * Renderers trim that route to `splitPoint` and suppress the otherwise
    * duplicated white terminal post without changing the graph endpoint. */
   routedCableEndpoint?: string;
-  /** Common physical fusion point for every arm of one declared Y symbol. */
+  /** Common physical fusion point for every arm of one declared join. */
   splitPoint: Vec3;
+  /** Geometry is derived from the resolved terminals. A genuine Y keeps the
+   * established tangent fan; a resolved sideways T is three selectable arms
+   * drawn as two visually continuous orthogonal cylinder axes. */
+  joinGeometry?: "y" | "orthogonal-t";
   branchAngleDegrees?: number;
   pieces: readonly CableCurvePiece[];
 };
@@ -179,14 +183,20 @@ function semanticLine(start: Vec3, end: Vec3) {
   return curvePiece("line", [start, end], "semantic");
 }
 
+function reverseSemanticPiece(piece: CableCurvePiece) {
+  return curvePiece(piece.kind, [...piece.points].reverse(), "semantic");
+}
+
 function semanticBranch(
   split: Vec3,
   initialDirection: Vec3,
   terminal: Vec3,
   terminalDirection: Vec3,
+  handleLengthOverride?: number,
 ) {
   const span = Math.max(0.001, distance(split, terminal));
-  const handleLength = Math.max(0.004, Math.min(0.024, span * 0.34));
+  const handleLength = handleLengthOverride
+    ?? Math.max(0.004, Math.min(0.024, span * 0.34));
   return curvePiece("cubic", [
     split,
     add(split, scale(initialDirection, handleLength)),
@@ -232,6 +242,20 @@ function stableLateral(
   return normalize(subtract(fallbackAxis, scale(forward, dot(fallbackAxis, forward))));
 }
 
+function isOrthogonalT(split: Vec3, ports: readonly ResolvedConductor[]) {
+  if (ports.length !== 3) return false;
+  const directions = ports.map((port) => normalize(subtract(port.position, split)));
+  for (let first = 0; first < directions.length; first += 1) {
+    for (let second = first + 1; second < directions.length; second += 1) {
+      if (dot(directions[first], directions[second]) > -0.999999) continue;
+      const third = [0, 1, 2].find((index) => index !== first && index !== second)!;
+      if (Math.abs(dot(directions[first], directions[third])) < 1e-7
+        && Math.abs(dot(directions[second], directions[third])) < 1e-7) return true;
+    }
+  }
+  return false;
+}
+
 /** Exact renderer authority for selectable Y joins and multicore breakouts. */
 export function renderedSemanticCables(
   devices: readonly ResolvedDevice[],
@@ -258,9 +282,13 @@ export function renderedSemanticCables(
         // merge in clear space along that trunk. Keeping this geometry here—
         // rather than as a renderer-only exception—makes the exact collision
         // audit and the Three.js scene share one physical authority.
-        const cableRadius = Math.max(0.0024, (resolved.terminalDiameterMm ?? 6) / 2400);
-        const integratedLandingDistance = cableRadius + 0.003;
-        const integratedSplitDistance = integratedLandingDistance + 0.020;
+        const integratedFanDepth = 0.020;
+        // The routed sheath owns a two-cell protected launch. Use its midpoint
+        // for the fan landing and its outer point for the split: this gives
+        // the real, asymmetrically spaced device posts room to converge before
+        // the exact 20 mm ±45°/centre fan begins.
+        const integratedLandingDistance = 0.020;
+        const integratedSplitDistance = integratedLandingDistance + integratedFanDepth;
         const split = integrated
           ? add(resolved.position, scale(direction, integratedSplitDistance))
           : add(resolved.position, scale(direction, -trunkLength));
@@ -271,7 +299,10 @@ export function renderedSemanticCables(
             color: "white", splitPoint: split, pieces: [semanticLine(resolved.position, split)],
           });
         }
-        const forward = integrated ? direction : scale(direction, -1);
+        // Every fan is parameterized from the sheath split toward its three
+        // cores. This is opposite the sheath terminal's outward direction for
+        // both standalone and equipment-integrated breakouts.
+        const forward = scale(direction, -1);
         const angleByKey = breakoutAngles(mates);
         const lateral = stableLateral(forward, split, mates, angleByKey);
         mates.forEach((mate) => {
@@ -279,18 +310,31 @@ export function renderedSemanticCables(
           const angle = angleDegrees * Math.PI / 180;
           const initialDirection = normalize(add(scale(forward, Math.cos(angle)), scale(lateral, Math.sin(angle))));
           const pieces = integrated ? (() => {
-            const offset = subtract(mate.position, resolved.position);
-            const lateralOffset = subtract(offset, scale(direction, dot(offset, direction)));
+            // Give the integrated lead the same 20 × 20 mm fan as a standalone
+            // breakout. Each outer fan finishes parallel to the centre core;
+            // a second tangent-continuous curve then reaches the equipment's
+            // real, asymmetrically spaced post without a visible elbow.
             const landing = add(
-              add(resolved.position, scale(direction, integratedLandingDistance)),
-              lateralOffset,
+              add(split, scale(forward, integratedFanDepth)),
+              scale(lateral, Math.tan(angle) * integratedFanDepth),
             );
-            const towardSplit = normalize(subtract(split, landing));
+            const fanFromSplit = angleDegrees === 0
+              ? semanticLine(split, landing)
+              : semanticBranch(split, initialDirection, landing, forward);
+            const adapter = semanticBranch(
+              mate.position,
+              normalize(mate.direction),
+              landing,
+              direction,
+              integratedFanDepth * 0.34,
+            );
             return [
-              semanticLine(mate.position, landing),
-              semanticBranch(landing, direction, split, towardSplit),
+              adapter,
+              reverseSemanticPiece(fanFromSplit),
             ];
-          })() : [semanticBranch(split, initialDirection, mate.position, normalize(mate.direction))];
+          })() : [angleDegrees === 0
+            ? semanticLine(split, mate.position)
+            : semanticBranch(split, initialDirection, mate.position, normalize(mate.direction))];
           rendered.push({
             id: `${device.id}:${mate.id}`, deviceId: device.id, conductorKey: mate.key,
             radiusM: Math.max(0.0017, (mate.terminalDiameterMm ?? 4) / 2400),
@@ -326,6 +370,21 @@ export function renderedSemanticCables(
       .toSorted((first, second) => dot(second.direction, forward) - dot(first.direction, forward));
     const [throughPort, branchPort] = arms;
     if (!throughPort || !branchPort) return;
+    if (isOrthogonalT(split, [devicePort, throughPort, branchPort])) {
+      [devicePort, throughPort, branchPort].forEach((port) => {
+        rendered.push({
+          id: port.key === devicePort.key ? `${device.id}:trunk` : `${device.id}:${port.id}`,
+          deviceId: device.id,
+          conductorKey: port.key,
+          radiusM: wireRadius(port),
+          color: port.kind,
+          splitPoint: split,
+          joinGeometry: "orthogonal-t",
+          pieces: [semanticLine(port.position, split)],
+        });
+      });
+      return;
+    }
     const branchOffset = subtract(branchPort.position, split);
     const projected = subtract(branchOffset, scale(forward, dot(branchOffset, forward)));
     let lateral = magnitude(projected) < 1e-10
@@ -335,7 +394,8 @@ export function renderedSemanticCables(
     rendered.push({
       id: `${device.id}:trunk`, deviceId: device.id, conductorKey: devicePort.key,
       radiusM: wireRadius(devicePort),
-      color: devicePort.kind, splitPoint: split, pieces: [semanticLine(devicePort.position, split)],
+      color: devicePort.kind, splitPoint: split, joinGeometry: "y",
+      pieces: [semanticLine(devicePort.position, split)],
     });
     ([{ port: throughPort, angle: 45 }, { port: branchPort, angle: -45 }] as const).forEach(({ port, angle }) => {
       const radians = angle * Math.PI / 180;
@@ -344,6 +404,7 @@ export function renderedSemanticCables(
         id: `${device.id}:${port.id}`, deviceId: device.id, conductorKey: port.key,
         radiusM: wireRadius(port),
         color: port.kind, splitPoint: split, branchAngleDegrees: angle,
+        joinGeometry: "y",
         pieces: [semanticBranch(split, initialDirection, port.position, normalize(port.direction))],
       });
     });

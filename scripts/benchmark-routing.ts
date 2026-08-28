@@ -15,7 +15,7 @@ const started = performance.now();
 const last = buildSystemRuntime(dseTopology);
 const elapsedMs = performance.now() - started;
 console.log(JSON.stringify({
-  algorithm: "serial radius-aware weighted voxel A* with turn penalty",
+  algorithm: "serial radius-aware weighted voxel A* with route-aware virtual-device terminal targets and turn penalty",
   devices: last.devices.length,
   conductors: last.conductors.length,
   routes: last.routes.length,
@@ -38,6 +38,13 @@ console.log(JSON.stringify({
   },
   totalLengthM: Number(last.diagnostics.totalLengthM.toFixed(3)),
   totalTurns: last.diagnostics.totalTurns,
+  routingTargetAssignments: last.diagnostics.routingTargetAssignments.length,
+  routingTargetChanges: last.diagnostics.routingTargetAssignments.filter((assignment) => (
+    assignment.authoredEndpoint !== assignment.resolvedEndpoint
+  )).length,
+  earthBusLengthM: Number(last.routes.filter((route) => (
+    route.from.startsWith("earthBar.") || route.to.startsWith("earthBar.")
+  )).reduce((sum, route) => sum + route.lengthM, 0).toFixed(3)),
   routingMs: Number(last.diagnostics.routingMs.toFixed(1)),
   renderedAuditMs: Number(last.diagnostics.renderedAuditMs.toFixed(1)),
   totalBuildMs: Number(last.diagnostics.buildMs.toFixed(1)),
