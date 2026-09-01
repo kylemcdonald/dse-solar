@@ -1,20 +1,36 @@
 {
-  "checkedOn": "2026-08-26",
+  "checkedOn": "2026-08-30",
   "destination": "Los Angeles, CA 90065",
   "items": {
-    "dse-panels": {
+    "dse-suntech-panels-superseded": {
       "amazonStatus": "unavailable",
       "sourceLabel": "Purchased in Fiji",
       "eta": "Already purchased",
       "time": "No LA shipment needed",
-      "note": "The exact Suntech STP565S-C72/Vmh panel was not found on Amazon; results were unrelated panels."
+      "note": "The four purchased Suntech modules are superseded purchase history and are not installed in R30; disposition remains unresolved."
+    },
+    "dse-panels": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "AIKO / Fiji distributor quote required",
+      "sourceUrl": "https://aikosolar.com/en/products/neostar-3p54-mono-glass/",
+      "eta": "Not ordered",
+      "time": "Three required · exact AIKO-A490-MCE54Mw suffix",
+      "note": "Active R30 array. Obtain a local quote and verify all three nameplates; the zero BOM cost is not a quote."
+    },
+    "dse-everexceed-batteries-superseded": {
+      "amazonStatus": "unavailable",
+      "sourceLabel": "Purchased in Fiji",
+      "eta": "Already purchased",
+      "time": "No LA shipment needed",
+      "note": "The four purchased EverExceed batteries are superseded purchase history and are not installed in R30; disposition remains unresolved."
     },
     "dse-batteries": {
       "amazonStatus": "unavailable",
-      "sourceLabel": "Purchased in Fiji",
-      "eta": "Already purchased",
-      "time": "No LA shipment needed",
-      "note": "The exact EverExceed ES200-12G GEL battery was not found on Amazon; results were different AGM or lithium batteries."
+      "sourceLabel": "Victron / Fiji distributor quote required",
+      "sourceUrl": "https://www.victronenergy.com/batteries/gel-and-agm-batteries",
+      "eta": "Not ordered",
+      "time": "Four matched BAT412201104 units required",
+      "note": "Active R30 bank. Obtain a local quote for four matched 12 V / 220 Ah GEL Deep Cycle batteries; the zero BOM cost is not a quote."
     },
     "dse-pv-cable": {
       "amazonStatus": "substitute",
@@ -30,7 +46,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B0F93TT9CW",
       "eta": "Arriving Aug 27",
       "time": "3 × 1.5 ft pairs + 2 × 2 ft pairs",
-      "note": "This receipt row covers five Shirbly pairs (ten individual cables, 17 conductor-feet). Together with the preserved iGreely rows, actual 1/0 inventory is nine pairs, 18 individual cables and 27 conductor-feet. Allocate compatible assemblies onsite and purchase the remaining correctly terminated cable in Fiji."
+      "note": "This retained receipt row covers all five usable Shirbly pairs: ten individual cables and 17 conductor-feet. The four iGreely pairs were returned and must not be counted. Allocate compatible assemblies onsite and purchase the remaining correctly terminated cable in Fiji."
     },
     "dse-supplemental-1-0-cable-fiji": {
       "amazonStatus": "unavailable",
@@ -208,7 +224,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B0BF636VBX",
       "eta": "Delivered Aug 20",
       "time": "Purchased Aug 17",
-      "note": "New IP65 500 A SmartShunt purchased for $98.93 before the order-level promotion and tax. R28 wall-mounts it outside the enclosures beside the main negative bus and leaves it uncovered."
+      "note": "New IP65 500 A SmartShunt purchased for $98.93 before the order-level promotion and tax. R30 wall-mounts it outside the enclosures beside the main negative bus and leaves it uncovered."
     },
     "dse-amazon-promotion": {
       "amazonStatus": "not-applicable",
@@ -220,17 +236,17 @@
     "dse-us-sales-tax": {
       "amazonStatus": "not-applicable",
       "sourceLabel": "Amazon checkout tax",
-      "eta": "Paid through Aug 26",
-      "time": "Thirty-five reconciled project receipts",
-      "note": "$372.51 combined U.S. sales tax through the shared-services breaker order."
+      "eta": "Paid through Aug 28",
+      "time": "Thirty-eight reconciled project receipts",
+      "note": "$379.24 gross U.S. sales tax; tax-inclusive refunds are recorded as five separate credit rows."
     },
     "dse-pv-protection": {
       "amazonStatus": "purchased",
-      "sourceLabel": "Amazon · purchased CXCESNS 2-in/1-out combiner",
+      "sourceLabel": "Amazon · purchased CXCESNS enclosure package",
       "sourceUrl": "https://www.amazon.com/dp/B0FSQB97T2",
       "eta": "Aug 22",
       "time": "Purchased Aug 21",
-      "note": "Purchased assembly contains unacceptable 32 A fuse links. Do not energize those paths; qualified installer must approve a breaker-based rebuild or replacement."
+      "note": "R30 reuses only a suitable stripped enclosure shell for one 20 A two-pole cutoff. Remove and isolate its fuse links, comb rails, SPD and redundant disconnect; qualified-installer approval remains required."
     },
     "dse-breaker-mnedc100": {
       "amazonStatus": "purchased",
@@ -330,11 +346,17 @@
     },
     "dse-customs-vat": {
       "amazonStatus": "not-applicable",
-      "sourceLabel": "Fiji Revenue & Customs",
-      "sourceUrl": "https://frcs.org.fj/our-services/customs/travellers/visiting-fiji/arriving-in-fiji/",
-      "eta": "At Fiji entry",
-      "time": "No parcel delivery",
-      "note": "This is a border-tax allowance, not an Amazon item."
+      "sourceLabel": "Extreme Customs Clearance · invoice 00070037",
+      "eta": "Paid in Fiji",
+      "time": "Invoice dated Aug 28 · paid directly by DSE",
+      "note": "FJD 1,736.65 import VAT paid directly by Seta on behalf of DSE; not an IYOIYO purchase."
+    },
+    "dse-customs-agent-costs": {
+      "amazonStatus": "not-applicable",
+      "sourceLabel": "Extreme Customs Clearance · invoice 00070037",
+      "eta": "Paid in Fiji",
+      "time": "Invoice dated Aug 28 · paid directly by DSE",
+      "note": "FJD 1,071.88 in fiscal duty, clearance/agent charges and service VAT paid directly by Seta on behalf of DSE; not an IYOIYO purchase."
     },
     "dse-ex-starlink": {
       "amazonStatus": "not-applicable",
@@ -405,12 +427,12 @@
       "note": "$11.61 actual shipping on the MidNite breaker order."
     },
     "dse-chtai-ac-rcbos-rejected": {
-      "amazonStatus": "return-pending",
-      "sourceLabel": "Amazon · purchased CHTAIXI B0CSV93CTN",
+      "amazonStatus": "refund-issued",
+      "sourceLabel": "Amazon · returned CHTAIXI B0CSV93CTN",
       "sourceUrl": "https://www.amazon.com/dp/B0CSV93CTN",
-      "eta": "Aug 22",
-      "time": "Purchased Aug 21",
-      "note": "Marked for return and excluded from the Fiji import/customs manifest."
+      "eta": "Two returns in transit as of Aug 30",
+      "time": "2 of 2 returned · $35.96 refunds issued Aug 26",
+      "note": "Both one-unit returns are excluded from the installation and Fiji manifest."
     },
     "dse-multimeter": {
       "amazonStatus": "purchased",
@@ -500,12 +522,12 @@
       "note": "Marked for return and excluded from the Fiji import/customs manifest."
     },
     "dse-mppt-wirebox-mc4-rejected": {
-      "amazonStatus": "return-pending",
-      "sourceLabel": "Amazon · Victron B08LBWWV47",
+      "amazonStatus": "refund-issued",
+      "sourceLabel": "Amazon · returned Victron B08LBWWV47",
       "sourceUrl": "https://www.amazon.com/dp/B08LBWWV47",
-      "eta": "Arriving Aug 23",
-      "time": "Purchased Aug 22 · $35.40",
-      "note": "Marked for return and excluded from the Fiji import/customs manifest."
+      "eta": "Settlement expected by Sep 2",
+      "time": "$38.85 refund issued Aug 26",
+      "note": "Removed from project inventory; confirm the original-payment refund settles by 2 Sep."
     },
     "dse-mppt-wirebox-tr": {
       "amazonStatus": "purchased",
@@ -529,7 +551,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B0D4JR95Y4",
       "eta": "Arriving",
       "time": "Ordered Aug 26 · quantity 2",
-      "note": "Correct 20 A two-pole replacements; overnight ETA."
+      "note": "R30 installs exactly one 20 A two-pole device as the 3S-array cutoff; retain the second uninstalled as a labeled spare or return it."
     },
     "dse-usb-c-cables-240w": {
       "amazonStatus": "purchased",
@@ -595,12 +617,12 @@
       "note": "$24.28 actual sales tax on the Starlink Mini Kit order."
     },
     "dse-ac-30a-rejected": {
-      "amazonStatus": "return-pending",
-      "sourceLabel": "Amazon · DIHOOL 30 A B0DCN7HK57",
+      "amazonStatus": "refund-issued",
+      "sourceLabel": "Amazon · returned DIHOOL 30 A B0DCN7HK57 pair",
       "sourceUrl": "https://www.amazon.com/dp/B0DCN7HK57",
-      "eta": "Arriving Aug 25",
-      "time": "2 purchased Aug 23 · $51.98",
-      "note": "Marked for return and excluded from the Fiji import/customs manifest."
+      "eta": "Return in transit as of Aug 30",
+      "time": "2 of 2 returned · $57.04 refund issued Aug 26",
+      "note": "Both units remain excluded from the installation and Fiji manifest."
     },
     "dse-pv-breakers-32a-rejected": {
       "amazonStatus": "return-pending",
@@ -659,12 +681,12 @@
       "note": "Reconciled to order 111-2349613-5829811. Install stock · verify fit."
     },
     "dse-1-0-battery-cables-1ft": {
-      "amazonStatus": "purchased",
-      "sourceLabel": "Amazon · iGreely 1/0 AWG one-foot red/black cable pairs",
+      "amazonStatus": "refund-issued",
+      "sourceLabel": "Amazon · returned iGreely one-foot cable pairs",
       "sourceUrl": "https://www.amazon.com/dp/B0FMK1W3T5",
-      "eta": "Arriving Aug 25–26",
-      "time": "Purchased Aug 23–24",
-      "note": "Reconciled to order 111-2349613-5829811. Allocate onsite only where received length, construction and terminals match; remaining cable is an accepted Fiji purchase."
+      "eta": "Return in transit as of Aug 30",
+      "time": "3 of 3 returned · $62.52 refund issued Aug 27",
+      "note": "Exclude all three pairs from usable inventory, shipping and customs."
     },
     "dse-10awg-wire-30ft": {
       "amazonStatus": "purchased",
@@ -683,12 +705,12 @@
       "note": "Reconciled to order 111-2349613-5829811. Allocate onsite only where received length, construction and terminals match; remaining cable is an accepted Fiji purchase."
     },
     "dse-1-0-battery-cables-2ft": {
-      "amazonStatus": "purchased",
-      "sourceLabel": "Amazon · iGreely 1/0 AWG two-foot red/black cable pair",
+      "amazonStatus": "return-complete",
+      "sourceLabel": "Amazon · returned iGreely two-foot cable pair",
       "sourceUrl": "https://www.amazon.com/dp/B0GR8WW7J7",
-      "eta": "Arriving Aug 25–26",
-      "time": "Purchased Aug 23–24",
-      "note": "Reconciled to order 111-2349613-5829811. High-current install candidate."
+      "eta": "Return complete",
+      "time": "1 of 1 returned · $31.82 credited Aug 27",
+      "note": "Exclude the pair from usable inventory, shipping and customs."
     },
     "dse-14awg-wire-pair-25ft": {
       "amazonStatus": "purchased",
@@ -917,12 +939,12 @@
       "note": "Actual sales tax across the three newly ingested Amazon orders, whose goods are personal or outside the solar-system scope."
     },
     "dse-switched-load-breaker": {
-      "amazonStatus": "purchased",
+      "amazonStatus": "delayed",
       "sourceLabel": "Amazon · purchased CHTAIXI B10 breaker",
       "sourceUrl": "https://www.amazon.com/dp/B09H4W5HSW",
-      "eta": "Arriving Aug 27",
+      "eta": "Delayed · not yet shipped as of Aug 30",
       "time": "Purchased Aug 26 · $8.99",
-      "note": "Allocated to the shared lights/internet branch. Keep de-energized until the received 12–110 VDC, polarity, 10 A, interrupt, terminal and torque markings are verified."
+      "note": "Still the canonical shared-services selection, but not received. The delivered KERWINN unit is tracked separately as an unselected alternate; verify and explicitly select before any substitution."
     },
     "dse-secondary-feedthrough-studs": {
       "amazonStatus": "unavailable",
@@ -996,12 +1018,76 @@
       "note": "Integration pending; M10 ring ends do not directly match the SmartSolar screw clamp."
     },
     "dse-amomd-600a-busbars-unused": {
-      "amazonStatus": "return",
-      "sourceLabel": "Amazon · AMOMD pair removed from project",
+      "amazonStatus": "return-complete",
+      "sourceLabel": "Amazon · returned AMOMD B0DG4WLVT7 pair",
       "sourceUrl": "https://www.amazon.com/dp/B0DG4WLVT7",
-      "eta": "Do not ship to Fiji",
-      "time": "Return or dispose outside project",
-      "note": "Excluded purchase-history row; replaced by the Joinfworld pair."
+      "eta": "Return complete",
+      "time": "$98.76 credited Aug 26",
+      "note": "Excluded purchase/return history; replaced by the selected Joinfworld pair."
+    },
+    "dse-extra-dihool-120a-breaker": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · surplus fourth DIHOOL 120 A breaker",
+      "sourceUrl": "https://www.amazon.com/dp/B0BFF7F46Y",
+      "eta": "Delivered Aug 28",
+      "time": "1 surplus unit · $11.99 before tax",
+      "note": "Not in the canonical three-breaker design; return/spare decision pending."
+    },
+    "dse-extra-ac-rcbo-pair": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · duplicate DIHOOL 10 A AC-protection pair",
+      "sourceUrl": "https://www.amazon.com/dp/B0CRKNJSRH",
+      "eta": "Delivered Aug 28",
+      "time": "2 duplicate units · $47.98 before tax",
+      "note": "Exact duplicate of the two selected candidates; return decision pending."
+    },
+    "dse-kerwinn-shared-services-breaker-alternate": {
+      "amazonStatus": "purchased",
+      "sourceLabel": "Amazon · KERWINN 10 A DC-breaker alternate",
+      "sourceUrl": "https://www.amazon.com/dp/B0BYSCXBH9",
+      "eta": "Delivered Aug 29",
+      "time": "1 alternate unit · $8.99 before tax",
+      "note": "Unselected alternate; do not substitute for the CHTAIXI unit without explicit electrical verification and selection."
+    },
+    "dse-refund-igreely-1-0-cables": {
+      "amazonStatus": "refund-issued",
+      "sourceLabel": "Amazon refund · returned iGreely 1/0 AWG cable pairs",
+      "sourceUrl": "https://www.amazon.com/dp/B0FMK1W3T5",
+      "eta": "Issued or credited",
+      "time": "$94.34 credit",
+      "note": "Combined tax-inclusive refund for all three one-foot B0FMK1W3T5 pairs ($62.52) and the one two-foot B0GR8WW7J7 pair ($31.82), issued/credited 27 Aug 2026."
+    },
+    "dse-refund-dihool-30a-ac-protection": {
+      "amazonStatus": "refund-issued",
+      "sourceLabel": "Amazon refund · returned DIHOOL 30 A AC-protection pair",
+      "sourceUrl": "https://www.amazon.com/dp/B0DCN7HK57",
+      "eta": "Issued or credited",
+      "time": "$57.04 credit",
+      "note": "Tax-inclusive refund issued 26 Aug 2026 for both returned B0DCN7HK57 assemblies; Amazon still labeled the physical return in transit on 30 Aug."
+    },
+    "dse-refund-amomd-600a-busbars": {
+      "amazonStatus": "refund-issued",
+      "sourceLabel": "Amazon refund · returned AMOMD 600 A busbar pair",
+      "sourceUrl": "https://www.amazon.com/dp/B0DG4WLVT7",
+      "eta": "Issued or credited",
+      "time": "$98.76 credit",
+      "note": "Tax-inclusive refund credited to the Amazon account balance on 26 Aug 2026 after the B0DG4WLVT7 return completed."
+    },
+    "dse-refund-chtaixi-ac-rcbos": {
+      "amazonStatus": "refund-issued",
+      "sourceLabel": "Amazon refund · returned CHTAIXI 120 V Type AC RCBOs",
+      "sourceUrl": "https://www.amazon.com/dp/B0CSV93CTN",
+      "eta": "Issued or credited",
+      "time": "$35.96 credit",
+      "note": "Two tax-inclusive $17.98 refunds issued 26 Aug 2026 for the two B0CSV93CTN one-unit returns; Amazon still labeled both physical returns in transit on 30 Aug."
+    },
+    "dse-refund-victron-wirebox-mc4": {
+      "amazonStatus": "refund-issued",
+      "sourceLabel": "Amazon refund · incompatible Victron MPPT WireBox-XL MC4",
+      "sourceUrl": "https://www.amazon.com/dp/B08LBWWV47",
+      "eta": "Settlement expected by Sep 2",
+      "time": "$38.85 credit",
+      "note": "Tax-inclusive refund issued 26 Aug 2026 for B08LBWWV47; Amazon stated settlement to the original payment method was expected by 2 Sep 2026."
     }
   }
 }

@@ -6,9 +6,10 @@ import test from "node:test";
 import customs from "../data/dse-customs.json";
 import receipts from "../data/dse-receipts.json";
 import system from "../data/dse-system.json";
+import { buildCostTreemap, costTreemapItems, filterCostTreemapItems, type CostBomItem } from "../app/CostView";
 import { buildCustomsCsv, buildCustomsLines, hasDistinctModel, isCustomsManifestItem, sortCustomsItems, stripAsinFromDescription, unitCostInput, type CustomsBomItem } from "../app/CustomsView";
 import { buildWeightTreemap, shippingGroupFor, type ShippingBomItem } from "../app/ShippingView";
-import { createStoredZip, loadReceiptArchive, privateModeEnabled, receiptAllowlist } from "../app/api/receipts/receiptServer";
+import { createStoredZip, loadReceiptArchive, privateModeEnabled, receiptAllowlist, receiptZipFilename } from "../app/api/receipts/receiptServer";
 import { GET as getReceiptStatus } from "../app/api/receipts/status/route";
 import { GET as downloadReceipts } from "../app/api/receipts/download/route";
 
@@ -23,6 +24,19 @@ const edits = Object.fromEntries(imports.map((item) => [item.id, {
   origin: itemMeta[item.id].origin,
   condition: itemMeta[item.id].defaultCondition ?? "New", serials: itemMeta[item.id].defaultSerials ?? "",
 }]));
+
+function storedZipEntryNames(archive: Buffer) {
+  const names: string[] = [];
+  let offset = 0;
+  while (offset + 30 <= archive.length && archive.readUInt32LE(offset) === 0x04034b50) {
+    const size = archive.readUInt32LE(offset + 18);
+    const nameLength = archive.readUInt16LE(offset + 26);
+    const extraLength = archive.readUInt16LE(offset + 28);
+    names.push(archive.subarray(offset + 30, offset + 30 + nameLength).toString("utf8"));
+    offset += 30 + nameLength + extraLength + size;
+  }
+  return names;
+}
 
 test("radio permit items sort first and item values are conserved by optional grouping", () => {
   const sorted = sortCustomsItems(imports);
@@ -55,7 +69,7 @@ test("radio permit items sort first and item values are conserved by optional gr
 });
 
 test("public invoice references are numeric, canonical and separate from ASIN descriptions", () => {
-  assert.equal(receipts.invoices.length, 43);
+  assert.equal(receipts.invoices.length, 47);
   assert.ok(receipts.invoices.every((invoice, index) => invoice.number === index + 1));
   assert.ok(receipts.invoices.every((invoice) => /^[A-Za-z0-9][A-Za-z0-9._-]*\.pdf$/.test(invoice.filename)));
   const validInvoiceNumbers = new Set(receipts.invoices.map((invoice) => invoice.number));
@@ -83,6 +97,23 @@ test("public invoice references are numeric, canonical and separate from ASIN de
   assert.deepEqual(itemInvoices["dse-pg11-cable-glands"], [42]);
   assert.deepEqual(itemInvoices["dse-mollom-8-way-enclosure-second"], [42]);
   assert.deepEqual(itemInvoices["dse-switched-load-breaker"], [43]);
+  assert.deepEqual(itemInvoices["dse-extra-dihool-120a-breaker"], [45]);
+  assert.deepEqual(itemInvoices["dse-extra-ac-rcbo-pair"], [46]);
+  assert.deepEqual(itemInvoices["dse-kerwinn-shared-services-breaker-alternate"], [47]);
+  assert.deepEqual(receipts.invoices.find((invoice) => invoice.number === 44), {
+    number: 44,
+    date: "2026-08-28",
+    filename: "extreme-customs-clearance-2026-08-28-invoice-00070037-drua-sailing.pdf",
+    supplier: "Extreme Customs Clearance",
+  });
+  assert.deepEqual(itemInvoices["dse-customs-vat"], [44]);
+  assert.deepEqual(itemInvoices["dse-customs-agent-costs"], [44]);
+  assert.deepEqual(receipts.invoices.at(-1), {
+    number: 47,
+    date: "2026-08-28",
+    filename: "amazon-2026-08-28-order-111-7441385-7705847-kerwinn-10a-shared-services-breaker.pdf",
+    supplier: "Amazon",
+  });
   assert.equal(stripAsinFromDescription("Breaker · ASIN B0B1WC651R"), "Breaker");
   assert.equal(stripAsinFromDescription("Victron Ekrano GX BPP900480100"), "Victron Ekrano GX BPP900480100");
   assert.equal(hasDistinctModel("Same title", "same title"), false);
@@ -134,7 +165,7 @@ test("new purchases retain receipt status while the larger secondary shell super
   assert.ok(!imports.some((item) => item.id === removedBusbars.id));
   assert.ok(!topology.includes(removedBusbars.id));
   const tax = system.bom.find((item) => item.id === "dse-us-sales-tax")!;
-  assert.equal(tax.totalUsd, 372.51);
+  assert.equal(tax.totalUsd, 379.24);
 });
 
 test("customs descriptions are structured once and CSV mirrors the filing table", () => {
@@ -157,17 +188,39 @@ test("customs descriptions are structured once and CSV mirrors the filing table"
 });
 
 test("return-bound and personal-use goods stay in the BOM but out of project imports", () => {
-  const returnIds = [
-    "dse-chtai-ac-rcbos-rejected", "dse-ac-30a-rejected", "dse-mppt-wirebox-mc4-rejected",
+  const pendingReturnIds = [
     "dse-b125-chtaixi-unused", "dse-battery-string-breakers-midnite-unused", "dse-pv-breakers-32a-rejected",
     "dse-usb-output-breaker", "dse-starlink-portable-battery-cable",
   ];
-  for (const id of returnIds) {
+  const completedOrRefundedReturnIds = [
+    "dse-chtai-ac-rcbos-rejected", "dse-ac-30a-rejected", "dse-mppt-wirebox-mc4-rejected",
+    "dse-amomd-600a-busbars-unused", "dse-1-0-battery-cables-1ft", "dse-1-0-battery-cables-2ft",
+  ];
+  for (const id of pendingReturnIds) {
     const row = system.bom.find((item) => item.id === id)!;
     assert.equal(row.location, "Return");
     assert.equal(row.procurement, "Purchased · return pending");
     assert.ok(!imports.some((item) => item.id === id));
   }
+  for (const id of completedOrRefundedReturnIds) {
+    const row = system.bom.find((item) => item.id === id)!;
+    assert.equal(row.location, "Return");
+    assert.match(row.procurement, /refund (?:issued|credited)/);
+    assert.equal(row.includedInTotal, false);
+    assert.ok(!imports.some((item) => item.id === id));
+  }
+  const decisionIds = [
+    "dse-extra-dihool-120a-breaker", "dse-extra-ac-rcbo-pair",
+    "dse-kerwinn-shared-services-breaker-alternate",
+  ];
+  assert.ok(decisionIds.every((id) => {
+    const row = system.bom.find((item) => item.id === id)!;
+    return row.location === "Return" && row.includedInTotal === false && !imports.some((item) => item.id === id);
+  }));
+  const refundRows = system.bom.filter((item) => item.id.startsWith("dse-refund-"));
+  assert.equal(refundRows.length, 5);
+  assert.equal(Math.round(refundRows.reduce((sum, row) => sum + row.totalUsd, 0) * 100) / 100, -324.95);
+  assert.ok(refundRows.every((row) => row.procurement === "Purchased · refund issued" && row.includedInTotal === false));
   const personalIds = ["dse-personal-garmin-montana-710i", "dse-personal-flexsolar-panels", "dse-personal-takoci-hx870-batteries"];
   for (const id of personalIds) {
     const row = system.bom.find((item) => item.id === id)!;
@@ -187,7 +240,7 @@ test("origin data is researched, blank when unresolved, and never stores the US 
   assert.ok(importedMeta.every((meta) => ["2026-08-25", "2026-08-26"].includes(meta.originReviewedOn ?? "")));
   assert.ok(importedMeta.every((meta) => meta.origin === "" || /^[A-Z]{2}$/.test(meta.origin)));
   assert.equal(importedMeta.filter((meta) => Boolean(meta.origin)).length, 16);
-  assert.equal(importedMeta.filter((meta) => !meta.origin).length, 67);
+  assert.equal(importedMeta.filter((meta) => !meta.origin).length, 65);
   assert.equal("originDisplayDefault" in customs, false);
   assert.equal(customs.itemMeta["dse-multiplus"].origin, "");
   assert.equal(itemMeta["dse-balancers"].defaultCondition, "1 new; 1 used - mint");
@@ -223,6 +276,36 @@ test("shipping treemap covers every imported physical row with area proportional
   }
 });
 
+test("cost treemap covers every positive-cost BOM row with area proportional to USD value", () => {
+  const costed = costTreemapItems(system.bom as CostBomItem[]);
+  const tiles = buildCostTreemap(costed);
+  assert.equal(costed.length, 120);
+  assert.equal(tiles.length, costed.length);
+  assert.ok(costed.every((item) => item.totalUsd > 0));
+  assert.ok(costed.some((item) => item.costScope === "Solar + internet"));
+  assert.ok(costed.some((item) => item.costScope === "Additional purchases"));
+  assert.ok(costed.some((item) => item.costScope === "Excluded / returns"));
+  assert.deepEqual(Object.fromEntries(([
+    "Solar + internet", "Additional purchases", "Excluded / returns",
+  ] as const).map((scope) => {
+    const subset = filterCostTreemapItems(costed, scope);
+    return [scope, { rows: subset.length, total: Math.round(subset.reduce((sum, item) => sum + item.totalUsd, 0) * 100) / 100 }];
+  })), {
+    "Solar + internet": { rows: 96, total: 10_654.71 },
+    "Additional purchases": { rows: 10, total: 3_348.22 },
+    "Excluded / returns": { rows: 14, total: 572.12 },
+  });
+  const totalCost = costed.reduce((sum, item) => sum + item.totalUsd, 0);
+  assert.ok(Math.abs(totalCost - 14_575.05) < 0.001);
+  const totalArea = tiles.reduce((sum, tile) => sum + tile.width * tile.height, 0);
+  assert.ok(Math.abs(totalArea - 10_000) < 0.001);
+  for (const tile of tiles) {
+    const actual = tile.width * tile.height / 10_000;
+    const expected = tile.item.totalUsd / totalCost;
+    assert.ok(Math.abs(actual - expected) < 1e-10);
+  }
+});
+
 test("obsolete enclosure placeholders are removed while the selected PV enclosure remains documented", () => {
   const bomById = new Map(system.bom.map((item) => [item.id, item]));
   const pv = bomById.get("dse-pv-protection")!;
@@ -232,7 +315,7 @@ test("obsolete enclosure placeholders are removed while the selected PV enclosur
   assert.equal(itemMeta["dse-junction-box"], undefined);
   assert.equal(itemMeta["dse-ac-install-enclosure"], undefined);
   assert.match(pv.description, /320 × 280 × 150 mm/);
-  assert.match(pv.description, /seven-gland bottom row/);
+  assert.match(pv.description, /four active bottom-row glands/);
   assert.equal(pv.procurement, "Purchased");
 });
 
@@ -244,13 +327,23 @@ test("receipt ZIP creation is portable to public checkouts and rejects unsafe fi
   fs.mkdirSync(privateRoot);
   try {
     const filenames = ["amazon-2026-08-24-order-111-test.pdf", "home-depot-2026-08-23-order-test.pdf"];
+    const references = [
+      { number: 7, filename: filenames[0] },
+      { number: 12, filename: filenames[1] },
+    ];
     for (const filename of filenames) fs.writeFileSync(path.join(privateRoot, filename), Buffer.from("%PDF-1.4\n% test receipt\n"));
     fs.writeFileSync(path.join(privateRoot, "ignored.txt"), "not a receipt");
     assert.deepEqual([...receiptAllowlist(privateRoot)], filenames);
-    const archive = loadReceiptArchive(privateRoot);
+    const archive = loadReceiptArchive(privateRoot, references);
     assert.equal(archive.readUInt32LE(0), 0x04034b50);
     assert.equal(archive.readUInt16LE(archive.length - 12), filenames.length);
-    assert.ok(filenames.every((filename) => archive.includes(Buffer.from(filename))));
+    assert.deepEqual(storedZipEntryNames(archive), [
+      `07-${filenames[0]}`,
+      `12-${filenames[1]}`,
+    ]);
+    assert.equal(receiptZipFilename("amazon-2026-08-24-order-111-test-status-update.pdf", references),
+      "07-amazon-2026-08-24-order-111-test-status-update.pdf");
+    assert.throws(() => receiptZipFilename("unindexed-receipt.pdf", references), /No public receipt reference/);
 
     const unsafeName = path.join(privateRoot, "unsafe receipt.pdf");
     fs.writeFileSync(unsafeName, Buffer.from("%PDF-1.4\n"));
@@ -260,7 +353,7 @@ test("receipt ZIP creation is portable to public checkouts and rejects unsafe fi
     const outsidePdf = path.join(fixtureRoot, "outside.pdf");
     fs.writeFileSync(outsidePdf, Buffer.from("%PDF-1.4\n"));
     fs.symlinkSync(outsidePdf, path.join(privateRoot, "escape.pdf"));
-    assert.throws(() => loadReceiptArchive(privateRoot), /Receipt symlink escaped private root/);
+    assert.throws(() => loadReceiptArchive(privateRoot, references), /Receipt symlink escaped private root/);
     assert.equal(createStoredZip([]).readUInt32LE(0), 0x06054b50);
   } finally {
     fs.rmSync(fixtureRoot, { recursive: true, force: true });
@@ -288,6 +381,12 @@ test("private receipt endpoint includes every archived PDF", { skip: !fs.existsS
     assert.ok(pdfCount >= receipts.invoices.length);
     const localArchive = loadReceiptArchive(localPrivateRoot);
     assert.equal(localArchive.readUInt16LE(localArchive.length - 12), pdfCount);
+    const localEntryNames = storedZipEntryNames(localArchive);
+    assert.equal(localEntryNames.length, pdfCount);
+    assert.ok(localEntryNames.every((name) => /^\d{2}-[A-Za-z0-9][A-Za-z0-9._-]*\.pdf$/.test(name)));
+    assert.ok(receipts.invoices.every((invoice) => localEntryNames.includes(
+      `${String(invoice.number).padStart(2, "0")}-${invoice.filename}`,
+    )));
 
     process.env.DSE_PRIVATE_MODE = "1";
     assert.equal((await getReceiptStatus()).status, 200);
@@ -295,6 +394,7 @@ test("private receipt endpoint includes every archived PDF", { skip: !fs.existsS
     assert.equal(response.status, 200);
     assert.equal(response.headers.get("Content-Type"), "application/zip");
     assert.equal(response.headers.get("X-Receipt-Count"), String(pdfCount));
+    assert.deepEqual(storedZipEntryNames(Buffer.from(await response.arrayBuffer())), localEntryNames);
   } finally {
     if (previous === undefined) delete process.env.DSE_PRIVATE_MODE;
     else process.env.DSE_PRIVATE_MODE = previous;

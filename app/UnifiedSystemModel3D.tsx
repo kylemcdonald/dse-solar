@@ -32,6 +32,7 @@ type CameraPose = {
 const BATTERY_CUTOFF_JUNCTION_ID = "batteryCutoffJunction";
 const SECONDARY_SERVICES_JUNCTION_ID = "secondaryJunction";
 const MAIN_DISTRIBUTION_COMPONENT_ID = "mainDistribution";
+const HOVER_HIGHLIGHT = "#fff200";
 const DC_CLUSTER_COMPONENT_IDS = new Set([
   MAIN_DISTRIBUTION_COMPONENT_ID,
   "solarController",
@@ -1022,6 +1023,7 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
     });
 
     renderer.domElement.dataset.unusedConductorOpacity = "0.5";
+    renderer.domElement.dataset.hoverHighlight = HOVER_HIGHLIGHT;
     renderer.domElement.dataset.unusedConductorCount = String(unusedConductorCount);
     renderer.domElement.dataset.cableBreakoutCount = String(cableBreakoutCount);
     renderer.domElement.dataset.wireJoinCount = String(wireJoinCount);
@@ -1087,7 +1089,7 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
         const size = bounds.getSize(new THREE.Vector3());
         bounds.expandByScalar(Math.max(0.004, Math.max(size.x, size.y, size.z) * 0.25));
       }
-      hoverHelper = new THREE.Box3Helper(bounds, "#d8792f");
+      hoverHelper = new THREE.Box3Helper(bounds, HOVER_HIGHLIGHT);
       (Array.isArray(hoverHelper.material) ? hoverHelper.material : [hoverHelper.material])
         .forEach((material) => { material.depthTest = false; });
       hoverHelper.renderOrder = 80;

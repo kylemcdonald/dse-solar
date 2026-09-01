@@ -11,6 +11,7 @@ test("DSE-only shell exposes only retained tabs", async ({ page }) => {
   await expect(page.getByLabel("Current project")).toContainText("DSEFiji");
   await expect(page.getByRole("button", { name: "Detailed diagram" })).toBeVisible();
   await expect(page.getByRole("button", { name: "3D model" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open wire cut list" })).toHaveAttribute("href", "./cable-plan/");
   await expect(page.getByRole("checkbox", { name: "Fade purchased" })).not.toBeChecked();
   const navigation = page.getByRole("navigation", { name: "Viewer mode" });
   await expect(navigation.getByRole("button", { name: /Junction box/i })).toHaveCount(0);
@@ -18,14 +19,25 @@ test("DSE-only shell exposes only retained tabs", async ({ page }) => {
   await expect(page.getByText(/Pasana|PNG|PG solar/i)).toHaveCount(0);
 });
 
+test("header wire-cut link opens the consolidated R30 schedule", async ({ page }) => {
+  await page.getByRole("link", { name: "Open wire cut list" }).click();
+  await expect(page).toHaveURL(/\/cable-plan\/?$/);
+  await expect(page.getByRole("heading", { name: "Wire cut list", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Field wire by size and construction" })).toBeVisible();
+  await expect(page.getByText("1/0 AWG · 53.5 mm²", { exact: true })).toBeVisible();
+  await expect(page.getByText("35.00 m", { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "1/0 AWG assembly cuts and eyelets" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Return to DSE Fiji system viewer" })).toHaveAttribute("href", "../");
+});
+
 test("detailed diagram and canonical counts render", async ({ page }) => {
   const diagram = page.locator(".unified-diagram");
-  await expect(diagram).toHaveAttribute("data-device-count", "89");
-  await expect(diagram).toHaveAttribute("data-wire-count", "149");
+  await expect(diagram).toHaveAttribute("data-device-count", "86");
+  await expect(diagram).toHaveAttribute("data-wire-count", "137");
   await expect(diagram).toHaveAttribute("data-layout-source", "build-generated-artifact");
   await expect(diagram).toHaveAttribute("data-junctions-abstracted", "true");
-  await expect(diagram).toHaveAttribute("data-visible-device-count", "60");
-  await expect(diagram).toHaveAttribute("data-visible-wire-count", "103");
+  await expect(diagram).toHaveAttribute("data-visible-device-count", "59");
+  await expect(diagram).toHaveAttribute("data-visible-wire-count", "99");
   await expect(diagram).toHaveAttribute("data-routing-fallbacks", "0");
   await expect(diagram).toHaveAttribute("data-coincident-wire-segments", "0");
   await expect(diagram).toHaveAttribute("data-non-orthogonal-wire-segments", "0");
@@ -36,6 +48,9 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   await expect(diagram).toHaveAttribute("data-routing-lane-spacing", "12");
   await expect(diagram).toHaveAttribute("data-wire-node-body-crossings", "0");
   await expect(diagram).toHaveAttribute("data-node-overlaps", "0");
+  await expect(diagram).toHaveAttribute("data-busbar-landing-candidates", "2");
+  await expect(diagram).toHaveAttribute("data-busbar-landing-reassignments", "0");
+  await expect(diagram).toHaveAttribute("data-peer-ordered-busbars", "");
   await expect(diagram).toHaveAttribute("data-wire-crossing-rendering", "arched-jumps");
   await expect(diagram).toHaveAttribute("data-wire-continuity", "single-path-with-integrated-jumps");
   await expect(diagram).toHaveAttribute("data-port-layout", "inputs-left-outputs-right-storage-signals-bottom");
@@ -50,8 +65,8 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   await expect(diagram).toHaveAttribute("data-current-safety-warnings", /[1-9]\d*/);
   const powerStatus = page.getByRole("status", { name: /Normal power audit.*Circuit-level fault audit/i });
   await expect(powerStatus).toBeVisible();
-  await expect(powerStatus).toHaveAttribute("data-power-circuits", "13");
-  await expect(powerStatus).toHaveAttribute("data-power-within-capacity", "9");
+  await expect(powerStatus).toHaveAttribute("data-power-circuits", "12");
+  await expect(powerStatus).toHaveAttribute("data-power-within-capacity", "8");
   await expect(powerStatus).toHaveAttribute("data-power-conditional-capacity", "4");
   await expect(powerStatus).toHaveAttribute("data-power-over-capacity", "0");
   await expect(page.locator(".diagram-wire-layer[mask]")).toHaveCount(0);
@@ -79,10 +94,10 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
     y: await diagram.getAttribute("data-view-y"),
     scale: await diagram.getAttribute("data-view-scale"),
   };
-  await expect(page.locator('.diagram-wire[data-connection-id="pv-spd-earth"]'))
+  await expect(page.locator('.diagram-wire[data-connection-id="pv-frame-inside"]'))
     .toHaveCSS("stroke", "rgb(74, 242, 135)");
-  await expect(page.locator(".diagram-device")).toHaveCount(60);
-  await expect(page.locator(".diagram-wire")).toHaveCount(103);
+  await expect(page.locator(".diagram-device")).toHaveCount(59);
+  await expect(page.locator(".diagram-wire")).toHaveCount(99);
   await expect(page.locator('[data-device-id="servicePenetration"]')).toHaveCount(0);
   await expect(page.locator(".diagram-wire-join-node")).toHaveCount(22);
   await expect(page.locator(".diagram-wire-join-node > rect")).toHaveCount(0);
@@ -129,6 +144,14 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
     expect(endpoints).toContain(`${breakoutId}.cable`);
     expect(endpoints.some((endpoint) => endpoint?.startsWith(`${id}.`))).toBe(false);
   }
+  for (const routeId of [
+    "generator-lead-line", "generator-lead-neutral", "generator-lead-earth", "generator-cable-inside",
+    "tool-white-cable", "tool-outlet-line", "tool-outlet-neutral", "tool-outlet-earth",
+  ]) {
+    const route = page.locator(`.diagram-wire[data-connection-id="${routeId}"]`);
+    await expect(route).toHaveAttribute("data-crossing-count", "0");
+    await expect(route).toHaveAttribute("data-jump-count", "0");
+  }
   await expect(page.locator(".diagram-device-kind")).toHaveCount(0);
   const deviceFontSizes = await page.locator(".diagram-device-title").evaluateAll((labels) => (
     labels.map((label) => Number.parseFloat(getComputedStyle(label).fontSize))
@@ -151,6 +174,12 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   expect(bridgeCount).toBeLessThan(250);
   expect(Number(await diagram.getAttribute("data-wire-turns"))).toBeLessThan(350);
   expect(Number(await diagram.getAttribute("data-wire-length"))).toBeLessThan(130_000);
+  expect(await page.locator('.diagram-port[data-endpoint-id^="earthBar."]').evaluateAll((ports) => (
+    ports.map((port) => port.getAttribute("data-endpoint-id"))
+  ))).toEqual([
+    "earthBar.post1", "earthBar.post5", "earthBar.post2", "earthBar.post6",
+    "earthBar.post3", "earthBar.post7", "earthBar.post4", "earthBar.post8",
+  ]);
   const bridgeGroups = page.locator(".diagram-local-bridge-layer > g");
   const bridgeGroupCount = await bridgeGroups.count();
   expect(bridgeGroupCount).toBeGreaterThan(0);
@@ -278,7 +307,21 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   await expect(page.locator('[data-boundary-port="true"][data-port-side="input"]')).toHaveCount(2);
   await expect(page.locator('[data-boundary-port="true"][data-port-side="output"]')).toHaveCount(13);
   await expect(page.locator('[data-boundary-port="true"][data-port-side="neutral"]')).toHaveCount(0);
-  expect(Number(await diagram.getAttribute("data-bridged-wire-crossings"))).toBeLessThan(100);
+  expect(Number(await diagram.getAttribute("data-bridged-wire-crossings"))).toBeLessThanOrEqual(47);
+  expect(Number(await diagram.getAttribute("data-wire-turns"))).toBeLessThanOrEqual(80);
+  expect(Number(await diagram.getAttribute("data-wire-length"))).toBeLessThanOrEqual(31_560);
+  await expect(diagram).toHaveAttribute("data-busbar-landing-candidates", "4");
+  await expect(diagram).toHaveAttribute("data-busbar-landing-reassignments", "4");
+  await expect(diagram).toHaveAttribute("data-peer-ordered-busbars", "secondaryPositiveBus");
+  for (const [routeId, endpointId] of [
+    ["service-main", "secondaryPositiveBus.post1"],
+    ["orion-breaker-feed", "secondaryPositiveBus.post4"],
+    ["chargeit-breaker-feed", "secondaryPositiveBus.post6"],
+    ["ekrano-positive", "secondaryPositiveBus.post7"],
+  ]) {
+    await expect(page.locator(`.diagram-wire[data-connection-id="${routeId}"]`))
+      .toHaveAttribute("data-from-endpoint", endpointId);
+  }
   for (const [id, label] of [
     ["secondaryPositiveBus", "Secondary 24 V positive bus · 100 A"],
     ["secondaryNegativeBus", "Secondary 24 V negative bus · 100 A"],
@@ -303,8 +346,8 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   for (const removedId of ["serviceReturnSplit", "lightingReturnSplit", "internetReturnSplit"]) {
     await expect(page.locator(`[data-device-id="${removedId}"]`)).toHaveCount(0);
   }
-  await expect(page.locator('.diagram-port[data-boundary-port="false"][data-endpoint-id="secondaryNegativeBus.post2"]'))
-    .toHaveAttribute("aria-label", /Victron Orion/);
+  await expect(page.locator('.diagram-port[data-boundary-port="false"][data-endpoint-id^="secondaryNegativeBus."][aria-label*="Victron Orion"]'))
+    .toHaveCount(1);
   await expect(page.locator('[data-boundary-port="true"][aria-label*="Victron Ekrano GX"]')).toHaveCount(2);
   await expect(page.locator(".diagram-subpatch-frame, .diagram-patcher-background")).toHaveCount(0);
   await expect(page.locator(".graph-inspector")).toHaveCount(0);
@@ -322,23 +365,59 @@ test("detailed diagram and canonical counts render", async ({ page }) => {
   await expect(diagram).toHaveAttribute("data-view-scale", rememberedSystemView.scale);
   await expect(diagram).toHaveAttribute("data-escape-navigation", "inactive");
   await expect(page.getByRole("button", { name: "Back to full-system diagram" })).toHaveCount(0);
-  await page.locator('[aria-label="PV protection / combiner junction box"]').click();
+  await page.locator('[aria-label="Single-string PV cutoff junction box"]').click();
   await expect(diagram).toHaveAttribute("data-junction-id", "pvJunction");
-  await expect(diagram).toHaveAttribute("data-visible-device-count", "5");
-  await expect(diagram).toHaveAttribute("data-visible-wire-count", "15");
-  await expect(page.locator(".diagram-rigid-rail-node")).toHaveCount(1);
-  await expect(page.locator(".diagram-rigid-rail-core")).toHaveCount(2);
-  await expect(page.locator(".diagram-rigid-rail-tooth")).toHaveCount(8);
+  await expect(diagram).toHaveAttribute("data-visible-device-count", "1");
+  await expect(diagram).toHaveAttribute("data-visible-wire-count", "4");
+  await expect(page.locator(".diagram-rigid-rail-node")).toHaveCount(0);
+  await expect(page.locator(".diagram-rigid-rail-core")).toHaveCount(0);
+  await expect(page.locator(".diagram-rigid-rail-tooth")).toHaveCount(0);
   await page.getByRole("button", { name: "Back to full-system diagram" }).click();
   await page.locator('[aria-label="AC input / output protection box"]').click();
   await expect(diagram).toHaveAttribute("data-junction-id", "acJunction");
-  await expect(page.locator(".diagram-wire-join-node")).toHaveCount(7);
+  await expect(diagram).toHaveAttribute("data-orthogonal-t-join-count", "5");
+  await expect(diagram).toHaveAttribute("data-interchangeable-tap-candidates", "144");
+  await expect(diagram).toHaveAttribute("data-interchangeable-tap-reassignments", "4");
+  await expect(diagram).toHaveAttribute("data-tap-routing-order-candidates", "2");
+  await expect(diagram).toHaveAttribute("data-selected-routing-order", "diameter-short-first");
+  await expect(page.locator(".diagram-wire-join-node")).toHaveCount(9);
   for (const id of ["generatorAcBreakout", "acInputCableBreakout", "acOutputCableBreakout", "toolAcBreakout"]) {
     const breakout = page.locator(`[data-device-id="${id}"]`);
     await expect(breakout).toHaveClass(/diagram-wire-join-node/);
     await expect(breakout.locator(":scope > rect")).toHaveCount(0);
     await expect(breakout.locator(":scope > .diagram-wire-join-arm")).toHaveCount(4);
   }
+  const earthTees = page.locator('.diagram-wire-join-orthogonal-t[data-join-geometry="orthogonal-t"]');
+  await expect(earthTees).toHaveCount(5);
+  expect(await earthTees.evaluateAll((tees) => tees.every((tee) => {
+    const arms = [...tee.querySelectorAll(":scope > .diagram-wire-join-arm")];
+    return arms.length === 3 && arms.every((arm) => /^M[^CQSA]+ L0,0$/.test(arm.getAttribute("d") ?? ""));
+  }))).toBe(true);
+  expect(Number(await diagram.getAttribute("data-bridged-wire-crossings"))).toBe(3);
+  expect(Number(await diagram.getAttribute("data-wire-turns"))).toBeLessThanOrEqual(10);
+  expect(Number(await diagram.getAttribute("data-wire-length"))).toBeLessThanOrEqual(4_776);
+  await expect(page.locator('.diagram-wire[data-connection-id="ac-generator-earth"]'))
+    .toHaveAttribute("data-from-endpoint", "join-generatorAcBreakout-earth-2.branch");
+  await expect(page.locator('.diagram-wire[data-connection-id="ac-input-earth"]'))
+    .toHaveAttribute("data-from-endpoint", "join-generatorAcBreakout-earth-3.through");
+  await expect(page.locator('.diagram-wire[data-connection-id="ac-earth-continuity"]'))
+    .toHaveAttribute("data-from-endpoint", "join-generatorAcBreakout-earth-3.branch");
+  await expect(page.locator('.diagram-wire[data-connection-id="ac-earth-continuity"]'))
+    .toHaveAttribute("data-to-endpoint", "join-acOutputCableBreakout-earth-2.branch");
+  await expect(page.locator('.diagram-wire[data-connection-id="ac-output-spd-earth"]'))
+    .toHaveAttribute("data-from-endpoint", "join-acOutputCableBreakout-earth-2.through");
+  await expect(page.locator('.diagram-wire[data-connection-id="ac-socket-earth"]'))
+    .toHaveAttribute("data-from-endpoint", "join-acOutputCableBreakout-earth-1.through");
+  for (const routeId of ["join-generatorAcBreakout-earth-2-device-link", "ac-generator-earth"]) {
+    const commands = await page.locator(`.diagram-wire[data-connection-id="${routeId}"]`)
+      .getAttribute("d");
+    expect(commands?.match(/ L/g)).toHaveLength(1);
+  }
+  await expect(page.locator('.diagram-wire[data-connection-id="ac-earth-continuity"]'))
+    .toHaveAttribute("data-jump-count", "2");
+  const mainEarthPath = await page.locator('.diagram-wire[data-connection-id="ac-main-earth"]')
+    .getAttribute("d");
+  expect(mainEarthPath?.match(/ L/g)).toHaveLength(1);
   for (const id of ["acInputProtection", "acOutputProtection"]) {
     await expect(page.locator(`[data-device-id="${id}"]`)).toHaveClass(/hold/);
     await expect(page.locator(`[data-device-id="${id}"]`)).not.toHaveClass(/faded/);
@@ -366,8 +445,8 @@ test("device and conductor inspection use graph data", async ({ page }) => {
   await expect(page.getByRole("button", {
     name: /Six-gang service switch panel.*To Victron Orion-Tr Smart 24\/12-30/,
   })).toBeVisible();
-  await page.locator('[aria-label="PV panel 1 · string A"]').click();
-  await expect(page.getByRole("heading", { name: "PV panel 1 · string A" })).toBeVisible();
+  await page.locator('[aria-label="AIKO panel 1 · 3S string"]').click();
+  await expect(page.getByRole("heading", { name: "AIKO panel 1 · 3S string" })).toBeVisible();
   await page.locator(".unified-diagram-viewport").click({ position: { x: 8, y: 8 } });
   await expect(page.locator(".graph-inspector")).toHaveCount(0);
 });
@@ -403,10 +482,10 @@ test("BOM reflects purchased protection and cables, selected busbars and current
   await expect(ownedSecondarySpare).toContainText(/retain this purchased box as an owned spare/i);
   await expect(ownedSecondarySpare).toContainText(/no longer the installed secondary-services enclosure/i);
   const cutoffEnclosure = page.locator('[data-bom-id="dse-mollom-8-way-enclosure-second"]');
-  await expect(cutoffEnclosure).toContainText(/R28 fit is accepted and verified/i);
+  await expect(cutoffEnclosure).toContainText(/R30 fit is accepted and verified/i);
   const largerSecondaryEnclosure = page.locator('[data-bom-id="dse-secondary-enclosure-larger"]');
   await expect(largerSecondaryEnclosure).toBeVisible();
-  await expect(largerSecondaryEnclosure).toContainText(/480 × 520 × 240 mm routed envelope/i);
+  await expect(largerSecondaryEnclosure).toContainText(/600 × 640 × 240 mm routed envelope/i);
   await expect(largerSecondaryEnclosure).toContainText(/Select and buy · fit hold/i);
   const mainBusbars = page.locator('[data-bom-id="dse-main-busbars"]');
   await expect(mainBusbars).toBeVisible();
@@ -424,11 +503,11 @@ test("3D model uses canonical router and has no removed controls", async ({ page
   await expect(model).toHaveAttribute("data-route-centerline-conflicts", "0");
   await expect(model).toHaveAttribute("data-route-swept-conflicts", "0");
   await expect(model).toHaveAttribute("data-route-device-conflicts", "0");
-  await expect(model).toHaveAttribute("data-route-total-length-m", "153.94");
-  await expect(model).toHaveAttribute("data-route-turns", "864");
-  await expect(model).toHaveAttribute("data-routing-target-assignments", "30");
-  await expect(model).toHaveAttribute("data-routing-target-changes", "16");
-  await expect(model).toHaveAttribute("data-earth-bus-route-length-m", "5.58");
+  await expect(model).toHaveAttribute("data-route-total-length-m", "148.52");
+  await expect(model).toHaveAttribute("data-route-turns", "850");
+  await expect(model).toHaveAttribute("data-routing-target-assignments", "28");
+  await expect(model).toHaveAttribute("data-routing-target-changes", "20");
+  await expect(model).toHaveAttribute("data-earth-bus-route-length-m", "4.22");
   await expect(model).toHaveAttribute("data-runtime-source", "precomputed");
   await expect(model).toHaveAttribute("data-route-solve-ms", "0.0");
   await expect(model).toHaveAttribute("data-runtime-hydrate-ms", /\d+\.\d{3}/);
@@ -438,7 +517,7 @@ test("3D model uses canonical router and has no removed controls", async ({ page
   await expect(model).toHaveAttribute("data-wire-min-bend-segments", "8");
   await expect(model).toHaveAttribute("data-wire-terminal-tangent-errors", "0");
   await expect(model).toHaveAttribute("data-unused-terminal-opacity", "0.5");
-  await expect(model).toHaveAttribute("data-unused-terminal-count", "19");
+  await expect(model).toHaveAttribute("data-unused-terminal-count", "21");
   await expect(model).toHaveAttribute("data-conductor-usage", "field-routes-plus-reciprocal-internal-mates");
   await expect(model).toHaveAttribute("data-pe-bus-rendering", "rectangular-busbar");
   await expect(model).toHaveAttribute("data-breakout-rendering", "true-y-two-way-plus-minus-45-three-way-red-45-black-0-green-minus-45");
@@ -472,6 +551,7 @@ test("3D model uses canonical router and has no removed controls", async ({ page
   await expect(canvas).toHaveAttribute("data-wheel-gestures", "wheel-and-two-finger-scroll-zoom-1x");
   await expect(canvas).toHaveAttribute("data-touch-gestures", "one-finger-orbit-two-finger-pan");
   await expect(canvas).toHaveAttribute("data-native-gesture-capture", "local-pinch-zoom");
+  await expect(canvas).toHaveAttribute("data-hover-highlight", "#fff200");
   await expect(canvas).toHaveAttribute("data-unused-conductor-opacity", "0.5");
   await expect(canvas).toHaveAttribute("data-wire-rendered-bends", /[1-9]\d*/);
   await expect(page.getByRole("button", { name: "DC distribution" })).toBeVisible();
@@ -677,7 +757,7 @@ test("3D model uses canonical router and has no removed controls", async ({ page
 
 test("BOM can show only items to purchase and sort by status, weight and cost", async ({ page }) => {
   await page.getByRole("button", { name: /Bill of materials/ }).click();
-  await expect(page.locator('[data-bom-total="design"]')).toContainText("$9,953.02");
+  await expect(page.locator('[data-bom-total="design"]')).toContainText("$10,564.48");
   await expect(page.locator('[data-bom-total="design"]')).toContainText("Solar + internet only");
   await expect(page.locator('[data-bom-total="additional"]')).toContainText("$3,338.52");
   await expect(page.locator('[data-bom-total="additional"]')).toContainText("11 rows");
@@ -692,7 +772,7 @@ test("BOM can show only items to purchase and sort by status, weight and cost", 
   await expect(page.getByRole("button", { name: "Show All" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: /^Weight/ }).click();
   await expect(page.getByRole("columnheader", { name: /^Weight/ })).toHaveAttribute("aria-sort", "descending");
-  await page.getByRole("button", { name: /^Cost/ }).click();
+  await page.getByRole("button", { name: "Cost", exact: true }).click();
   await expect(page.getByRole("columnheader", { name: /^Cost/ })).toHaveAttribute("aria-sort", "descending");
   await page.getByRole("button", { name: /^Status/ }).click();
   await expect(page.getByRole("columnheader", { name: /^Status/ })).toHaveAttribute("aria-sort", "ascending");
@@ -701,9 +781,34 @@ test("BOM can show only items to purchase and sort by status, weight and cost", 
 test("Shipping treemap includes every imported physical BOM line", async ({ page }) => {
   await page.getByRole("button", { name: "Shipping" }).click();
   await expect(page.getByRole("heading", { name: "Shipping by weight" })).toBeVisible();
-  await expect(page.locator(".shipping-tile")).toHaveCount(83);
-  await expect(page.getByText("50.6 kg", { exact: true })).toBeVisible();
+  await expect(page.locator(".shipping-tile")).toHaveCount(81);
+  await expect(page.getByText("48.4 kg", { exact: true })).toBeVisible();
   await expect(page.locator(".shipping-legend")).toContainText("Power & control");
+});
+
+test("Costs treemap includes every positive-cost BOM line", async ({ page }) => {
+  await page.getByRole("button", { name: "Costs" }).click();
+  await expect(page.getByRole("heading", { name: "Cost by item" })).toBeVisible();
+  await expect(page.locator(".cost-tile")).toHaveCount(120);
+  await expect(page.getByText("$14,575.05", { exact: true })).toBeVisible();
+  await expect(page.locator(".cost-legend")).toContainText("Power & generation");
+  await expect(page.locator('.cost-tile[data-accounting-scope="Solar + internet"]')).not.toHaveCount(0);
+  await expect(page.locator('.cost-tile[data-accounting-scope="Additional purchases"]')).not.toHaveCount(0);
+  await expect(page.locator('.cost-tile[data-accounting-scope="Excluded / returns"]')).not.toHaveCount(0);
+  const scope = page.getByLabel("Show costs for");
+  await scope.selectOption("Solar + internet");
+  await expect(page.locator(".cost-tile")).toHaveCount(96);
+  await expect(page.locator(".cost-total strong")).toHaveText("$10,654.71");
+  await expect(page.locator(".cost-total")).toContainText("$90.23 across 1 credit row stays");
+  await scope.selectOption("Additional purchases");
+  await expect(page.locator(".cost-tile")).toHaveCount(10);
+  await expect(page.locator(".cost-total strong")).toHaveText("$3,348.22");
+  await scope.selectOption("Excluded / returns");
+  await expect(page.locator(".cost-tile")).toHaveCount(14);
+  await expect(page.locator(".cost-total strong")).toHaveText("$572.12");
+  await expect(page.locator(".cost-total")).toContainText("$324.95 across 5 credit rows stay");
+  await scope.selectOption("All items");
+  await expect(page.locator(".cost-tile")).toHaveCount(120);
 });
 
 test("Customs uses concise columns, invoice footnotes, grouping and conditional private receipt download", async ({ page }) => {
@@ -763,7 +868,7 @@ test("Customs uses concise columns, invoice footnotes, grouping and conditional 
   await expect(manifest.locator("tbody tr").last()).toHaveAttribute("data-customs-id", "miscellaneous-electrical-accessories");
   await expect(page.getByText(/Optional presentation for broker review/)).toBeVisible();
   const privateMode = await page.locator(".customs-view").getAttribute("data-private-mode");
-  await expect(page.getByRole("link", { name: "Download receipts (.zip)" }))
+  await expect(page.getByRole("link", { name: "Download all receipts (.zip)" }))
     .toHaveCount(privateMode === "true" ? 1 : 0);
 });
 

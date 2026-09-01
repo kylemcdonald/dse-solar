@@ -45,7 +45,8 @@ const DIHOOL_120 = "https://www.amazon.com/dp/B0BFF7F46Y";
 const CHTAIXI_32 = "https://www.amazon.com/dp/B09H4X8K1C";
 const CHARGEIT_75 = "https://www.coolgear.com/product/chargeit-mini-75w-dual-port-usb-type-c-pd-charger";
 const COOLGEAR_145 = "https://www.coolgear.com/product/145w-dual-usb-c-pd-3-1-vehicle-charger-with-mountable-flanges";
-const SUNTECH_565 = "https://www.suntech-power.com/wp-content/uploads/download/product-specification/EN_Ultra_V_Pro_N-type_STP570S_C72_Vmh.pdf";
+const AIKO_490 = "https://aikosolar.com/static/pdfjs/web/viewer.html?file=%2Fwp-content%2Fuploads%2F2026%2F04%2FNeostar-3P54_193-AIKO-A-MCE54Mw_470-500W-1762%C3%971134%C3%9730_202601_V1.1_EN.pdf";
+const VICTRON_GEL_220 = "https://www.victronenergy.com/upload/documents/Datasheet-GEL-and-AGM-Batteries-EN.pdf";
 const SMARTSOLAR_SPEC = "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html";
 const MULTIPLUS_SPEC = "https://www.victronenergy.com/media/pg/MultiPlus-II_230V/en/technical-specifications-mp-ii-230v.html";
 const EKRANO_SPEC = "https://www.victronenergy.com/media/pg/Ekrano_GX/en/technical-specifications.html";
@@ -209,16 +210,16 @@ const usbMini = (id: string, label: string, x: number, layoutOrder: number): Dev
   },
   conductors: [
     p("positive", "24 V input +", "positive", "bottom", {
-      order: 0, gauge: "2.5 mm² daisy-chain conductor",
+      order: 0, gauge: "6 mm² consolidated branch conductor · terminal fit hold",
       terminal: "Removable Phoenix 2-pin screw plug", terminalSize: "Received plug range must be measured",
       termination: "Single or twin bootlace ferrule only after plug approval", terminalDiameterMm: 4,
-      terminalNote: "Coolgear identifies a Phoenix 2-pin input but does not publish its conductor range. A two-wire daisy landing is a commissioning hold.",
+      terminalNote: "Coolgear identifies a Phoenix 2-pin input but does not publish its conductor range. Verify that the received plug accepts one 6 mm² field lead; otherwise use an approved 6 mm²-to-terminal pigtail transition without trimming strands.",
     }),
     p("negative", "24 V input −", "negative", "bottom", {
-      order: 1, gauge: "2.5 mm² daisy-chain conductor",
+      order: 1, gauge: "6 mm² consolidated branch conductor · terminal fit hold",
       terminal: "Removable Phoenix 2-pin screw plug", terminalSize: "Received plug range must be measured",
       termination: "Single or twin bootlace ferrule only after plug approval", terminalDiameterMm: 4,
-      terminalNote: "Coolgear identifies a Phoenix 2-pin input but does not publish its conductor range. A two-wire daisy landing is a commissioning hold.",
+      terminalNote: "Coolgear identifies a Phoenix 2-pin input but does not publish its conductor range. Verify that the received plug accepts one 6 mm² field lead; otherwise use an approved 6 mm²-to-terminal pigtail transition without trimming strands.",
     }),
     p("usbC", "USB-C output", "multicore", "front", {
       order: 0, optional: true, terminal: "USB-C receptacle", terminalSize: "USB Type-C",
@@ -231,49 +232,16 @@ const usbMini = (id: string, label: string, x: number, layoutOrder: number): Dev
   ],
 });
 
-const rigidRail = (
-  id: string,
-  label: string,
-  taps: readonly { id: string; label: string; kind: "positive" | "negative"; endpoint: string }[],
-): Device => {
-  return {
-    id,
-    label,
-    subtitle: "Continuous rigid comb rail across protection-device tops",
-    kind: "busbar",
-    presentation: "rigid-rail",
-    railTargets: Object.fromEntries(taps.map((tap) => [tap.id, tap.endpoint])),
-    size: [0.200, 0.040, 0.020],
-    placement: inside("pvJunction", "backplate", 0),
-    componentId: "pvSafety",
-    bomIds: ["dse-existing-pv-comb-rails", "dse-pv-protection"],
-    status: "existing",
-    procurementStatus: "existing",
-    holdReason: "The insulated positive and negative comb rails are pre-existing hardware. Before energizing, verify at least 32 A continuous current capacity, insulation, tooth pitch, terminal compatibility, creepage/clearance and enclosure retention against the received devices.",
-    conductors: taps.map((tap, order) => p(tap.id, tap.label, tap.kind, "bottom", {
-      order,
-      gauge: "Received comb busbar · verify",
-      terminal: "Rigid comb-rail tooth",
-      terminalSize: "Match received breaker terminal pitch",
-      termination: "Factory rail tooth / approved rigid link",
-      terminalDiameterMm: 6.5,
-      terminalLengthMm: 4,
-      internalMates: taps.filter((peer) => peer.kind === tap.kind && peer.id !== tap.id).map((peer) => peer.id),
-      terminalNote: "Each insulated polarity rail is continuous; every device terminal still receives one physical tooth.",
-    })),
-  };
-};
-
 const PANEL_ROTATION = [-Math.PI / 2, -Math.PI / 10, -Math.PI / 2] as const;
 
 const pvStringSource = (id: string, label: string): TerminalCurrentSource => ({
   id,
   label,
   channel: "positive",
-  continuousCapacityA: 14.2,
-  shortCircuitCurrentA: 14.2,
+  continuousCapacityA: 14.88,
+  shortCircuitCurrentA: 14.88,
   inherentCurrentLimit: {
-    currentLimitA: 14.2,
+    currentLimitA: 14.88,
     verified: true,
     note: "Module Isc bounds the series-string contribution.",
   },
@@ -286,7 +254,7 @@ const batteryStringSource = (id: string, label: string): TerminalCurrentSource =
   id,
   label,
   channel: "positive",
-  continuousCapacityA: 200,
+  continuousCapacityA: 220,
   shortCircuitCurrentA: "unbounded",
   verified: true,
   basis: "electrochemical-source",
@@ -304,19 +272,19 @@ const panel = (
   id,
   label,
   kind: "panel",
-  size: [2.279, 1.134, 0.035],
+  size: [1.762, 1.134, 0.030],
   placement: outside(position, PANEL_ROTATION),
   componentId: id,
-  layoutGroup: { id: "pv-panels", label: "PV array", columns: 2, order: layoutOrder },
+  layoutGroup: { id: "pv-panels", label: "PV array", columns: 3, order: layoutOrder },
   bomIds: ["dse-panels"],
-  status: "purchased",
+  status: "planned",
   power: {
-    role: "source", basis: "manufacturer", verified: false, sourceUrl: SUNTECH_565,
+    role: "source", basis: "manufacturer", verified: true, sourceUrl: AIKO_490,
     readings: [
-      { label: "Maximum output at STC", watts: 565, voltage: "42.56 Vmp", currentA: 13.28 },
-      { label: "Short-circuit current", currentA: 14.2, voltage: "50.39 Voc" },
+      { label: "Maximum output at STC", watts: 490, voltage: "34.70 Vmp", currentA: 14.13 },
+      { label: "Short-circuit current", currentA: 14.88, voltage: "41.10 Voc" },
     ],
-    note: "The STP565S-C72/Vmh data sheet is the design basis; confirm every received module nameplate. Suntech's maximum series-fuse rating is 25 A.",
+    note: "The AIKO-A490-MCE54Mw Neostar 3P54 mono-glass data sheet is the design basis. Confirm the complete received model suffix before installation; AIKO specifies a 25 A maximum series-fuse rating.",
   },
   currentSourceAssemblyPaths: [{
     assemblyId: sourceAssemblyId,
@@ -327,21 +295,21 @@ const panel = (
     p("positive", "PV +", "positive", "bottom", {
       diagramSide: "output",
       order: 0, gauge: "Factory 4 mm² lead", terminal: "Factory PV connector",
-      terminalSize: "MC4 EVO2 / 01S / STP-XC4 family", termination: "Matching listed PV connector",
-      terminalDiameterMm: 6, terminalNote: "Suntech specifies a 4 mm² output lead; verify the connector fitted to the received module before mating.",
+      terminalSize: "Original MC4-EVO2A", termination: "Matching listed PV connector",
+      terminalDiameterMm: 6, terminalNote: "AIKO specifies 4 mm² / 12 AWG factory leads with original MC4-EVO2A connectors; verify every received connector before mating.",
       ...(currentSource ? { currentSource } : {}),
     }),
     p("negative", "PV −", "negative", "bottom", {
       diagramSide: "output",
       order: 1, gauge: "Factory 4 mm² lead", terminal: "Factory PV connector",
-      terminalSize: "MC4 EVO2 / 01S / STP-XC4 family", termination: "Matching listed PV connector",
-      terminalDiameterMm: 6, terminalNote: "Suntech specifies a 4 mm² output lead; verify the connector fitted to the received module before mating.",
+      terminalSize: "Original MC4-EVO2A", termination: "Matching listed PV connector",
+      terminalDiameterMm: 6, terminalNote: "AIKO specifies 4 mm² / 12 AWG factory leads with original MC4-EVO2A connectors; verify every received connector before mating.",
     }),
     p("frame", "Frame bond", "earth", "bottom", {
       diagramSide: "output",
       order: 2, gauge: "4 mm² minimum design bond", terminal: "Module grounding hole",
-      terminalSize: "Ø5.1 mm hole · M5 hardware", termination: "M5 closed ring + listed bonding hardware",
-      terminalDiameterMm: 5.1, terminalNote: "Use one of Suntech's designated grounding holes and corrosion-compatible hardware.",
+      terminalSize: "Ø4.3 mm designated grounding hole · verify hardware", termination: "Closed ring + listed bonding hardware",
+      terminalDiameterMm: 4.3, terminalNote: "Use one of AIKO's designated grounding holes with corrosion-compatible listed hardware; confirm the received frame drawing before selecting the ring.",
     }),
   ],
 });
@@ -358,7 +326,7 @@ const battery = (
   id,
   label,
   kind: "battery",
-  size: [0.522, 0.240, 0.220],
+  size: [0.522, 0.238, 0.240],
   // Both batteries in each string face the same way: the lower battery's + and
   // upper battery's - posts are the two adjacent posts. This makes the series
   // jumper a short local 1/0 lead instead of a long cable between the far ends.
@@ -367,12 +335,12 @@ const battery = (
   componentId,
   layoutGroup: { id: "battery-bank", label: "24 V battery bank", columns: 2, order: layoutOrder },
   bomIds: ["dse-batteries"],
-  status: "purchased",
+  status: "planned",
   power: {
-    role: "storage", basis: "manufacturer", verified: false,
-    sourceUrl: "https://www.everexceed.com/es200-12g-gel-battery_p363.html",
-    readings: [{ label: "Nominal stored energy", wattHours: 2400, voltage: "12 V nominal", currentA: 200 }],
-    note: "Each ES200-12G is a nominal 12 V, 200 Ah GEL battery. This is energy capacity, not a safe fault-current bound; confirm the received labels and obtain battery short-circuit/internal-resistance data for breaker-AIC verification.",
+    role: "storage", basis: "manufacturer", verified: true,
+    sourceUrl: VICTRON_GEL_220,
+    readings: [{ label: "Nominal stored energy", wattHours: 2640, voltage: "12 V nominal", currentA: 220 }],
+    note: "Each BAT412201104 is a nominal 12 V, 220 Ah Victron GEL Deep Cycle battery. Capacity is rated at the 20-hour rate and is not a safe fault-current bound; confirm matched received units and obtain prospective-fault-current evidence for breaker-AIC verification.",
   },
   currentSourceAssemblyPaths: [{
     assemblyId: sourceAssemblyId,
@@ -382,16 +350,16 @@ const battery = (
   conductors: [
     p("positive", "Positive post", "positive", "top", {
       diagramSide: "output",
-      order: 0, gauge: "1/0 AWG · 53.5 mm²", terminal: "F-M8 battery terminal",
+      order: 0, gauge: "1/0 AWG · 53.5 mm²", terminal: "Victron drilled flat-copper terminal",
       terminalSize: "M8 stud", termination: "1/0 AWG tinned-copper M8 closed lug", terminalDiameterMm: 8,
-      terminalNote: "EverExceed's ES200-12G table identifies F-M8 terminals; verify the received torque marking.",
+      terminalNote: "Victron specifies M8 drilled flat-copper terminals; verify the supplied hardware and torque instructions on the received battery.",
       ...(currentSource ? { currentSource } : {}),
     }),
     p("negative", "Negative post", "negative", "top", {
       diagramSide: "output",
-      order: 1, gauge: "1/0 AWG · 53.5 mm²", terminal: "F-M8 battery terminal",
+      order: 1, gauge: "1/0 AWG · 53.5 mm²", terminal: "Victron drilled flat-copper terminal",
       terminalSize: "M8 stud", termination: "1/0 AWG tinned-copper M8 closed lug", terminalDiameterMm: 8,
-      terminalNote: "EverExceed's ES200-12G table identifies F-M8 terminals; verify the received torque marking.",
+      terminalNote: "Victron specifies M8 drilled flat-copper terminals; verify the supplied hardware and torque instructions on the received battery.",
     }),
   ],
 });
@@ -400,17 +368,12 @@ export const dseCables: readonly Cable[] = [
   { id: "battery53", label: "1/0 AWG battery cable", cores: 1, outsideDiameterMm: 14.5, conductorSize: "53.5 mm²", sheath: "single", ampacityA: 120 },
   { id: "dc35", label: "35 mm² SmartSolar battery cable", cores: 1, outsideDiameterMm: 11.8, conductorSize: "35 mm²", sheath: "single", ampacityA: 120, notes: "Victron's exact SmartSolar 150/85 installation table pairs 35 mm² battery cable with 100–120 A protection. This 120 A coordination envelope remains conditional on received cable insulation, route length, bundling and temperature correction." },
   { id: "dc16", label: "16 mm² DC cable", cores: 1, outsideDiameterMm: 8.6, conductorSize: "16 mm²", sheath: "single", ampacityA: 75 },
-  { id: "dc10", label: "10 mm² DC cable", cores: 1, outsideDiameterMm: 7.2, conductorSize: "10 mm²", sheath: "single", ampacityA: 50 },
-  { id: "dc6", label: "6 mm² combined-PV DC cable", cores: 1, outsideDiameterMm: 6.8, conductorSize: "6 mm²", sheath: "single", ampacityA: 32, notes: "Carries both 13.28 A PV strings after the combiner; final installation ampacity and temperature correction must be verified." },
-  { id: "pv4", label: "4 mm² PV cable", cores: 1, outsideDiameterMm: 6.1, conductorSize: "4 mm²", sheath: "single", ampacityA: 20 },
-  { id: "service2.5", label: "2.5 mm² service conductor", cores: 1, outsideDiameterMm: 4.2, conductorSize: "2.5 mm²", sheath: "single", ampacityA: 20 },
-  { id: "branch5.26", label: "10 AWG protected branch conductor", cores: 1, outsideDiameterMm: 5.6, conductorSize: "10 AWG · 5.26 mm²", sheath: "single", ampacityA: 32 },
+  { id: "dc6", label: "6 mm² protected DC branch cable", cores: 1, outsideDiameterMm: 6.8, conductorSize: "6 mm²", sheath: "single", ampacityA: 32, notes: "Common consolidated size for the two 32 A USB supply branches. Verify hot-enclosure ampacity, breaker curve and every received terminal before commissioning." },
+  { id: "pv4", label: "4 mm² PV / service cable", cores: 1, outsideDiameterMm: 6.1, conductorSize: "4 mm²", sheath: "single", ampacityA: 20, notes: "The single AIKO 3S string carries 14.13 A at maximum power and 14.88 A short-circuit current. Use PV-rated insulation outdoors and installation-appropriate insulation for enclosed service conductors." },
   { id: "branch1.5", label: "1.5 mm² branch conductor", cores: 1, outsideDiameterMm: 3.4, conductorSize: "1.5 mm²", sheath: "single", ampacityA: 10 },
-  { id: "sense0.75", label: "0.75 mm² control conductor", cores: 1, outsideDiameterMm: 2.4, conductorSize: "0.75 mm²", sheath: "single", ampacityA: 6 },
   { id: "ac3", label: "3-core 10 A AC cable", cores: 3, outsideDiameterMm: 9.8, conductorSize: "3 × 1.5 mm²", sheath: "white", ampacityA: 10, carriedChannels: ["ac-line", "ac-neutral", "earth"] },
   { id: "acCore1.5", label: "Exposed 1.5 mm² AC core", cores: 1, outsideDiameterMm: 3.4, conductorSize: "1.5 mm²", sheath: "single", ampacityA: 10 },
   { id: "earth4", label: "4 mm² protective-earth conductor", cores: 1, outsideDiameterMm: 5.0, conductorSize: "4 mm²", sheath: "single" },
-  { id: "pvComb", label: "PV breaker comb link", cores: 1, outsideDiameterMm: 6.5, conductorSize: "Received comb busbar · verify", sheath: "single", ampacityA: 40 },
   { id: "light2", label: "2-core lighting cable", cores: 2, outsideDiameterMm: 6.4, conductorSize: "2 × 1.5 mm²", sheath: "white", ampacityA: 10, carriedChannels: ["positive", "negative"] },
   { id: "starlinkPower", label: "Starlink Mini two-core factory power cable", cores: 2, outsideDiameterMm: 6.0, conductorSize: "Factory multicore lead", sheath: "white", ampacityA: 10, carriedChannels: ["positive", "negative"] },
   { id: "usbAToCFactory", label: "Factory USB-A-to-USB-C power cable", cores: 2, outsideDiameterMm: 4.0, conductorSize: "Factory multicore lead", sheath: "white", ampacityA: 5, carriedChannels: ["positive", "negative"] },
@@ -421,83 +384,43 @@ export const dseCables: readonly Cable[] = [
 ];
 
 const dseBaseDevices: readonly Device[] = [
-  // Leave one routing cell beyond each frame-junction halo between adjacent
-  // modules. The geometry remains the same aligned two-panel array; the small
-  // installation gap prevents a frame-bond tangent from entering its neighbour.
-  panel("panel1", "PV panel 1 · string A", [-2.14, 0.38, -1.18], 0, "pv-string-a"),
-  panel("panel2", "PV panel 2 · string A", [-0.96, 0.75, -1.18], 1, "pv-string-a",
-    pvStringSource("pv-string-a-source", "PV string A")),
-  panel("panel3", "PV panel 3 · string B", [-2.14, 0.38, 1.18], 2, "pv-string-b"),
-  panel("panel4", "PV panel 4 · string B", [-0.96, 0.75, 1.18], 3, "pv-string-b",
-    pvStringSource("pv-string-b-source", "PV string B")),
+  // Three Neostar modules form one electrical series string. The 2 + 1 physical
+  // arrangement leaves routing cells around every frame so the factory leads
+  // and frame bonds clear neighbouring modules without hand-routed exceptions.
+  panel("panel1", "AIKO panel 1 · 3S string", [-2.14, 0.38, -1.18], 0, "pv-string"),
+  panel("panel2", "AIKO panel 2 · 3S string", [-0.96, 0.75, -1.18], 1, "pv-string"),
+  panel("panel3", "AIKO panel 3 · 3S string", [-2.14, 0.38, 1.18], 2, "pv-string",
+    pvStringSource("pv-string-source", "AIKO 3S PV string")),
 
   {
-    id: "pvJunction", label: "PV protection / combiner junction box", kind: "junction",
-    size: [0.32, 0.28, 0.16], placement: wall([0.38, 0.70, 0.08]), componentId: "pvSafety",
+    id: "pvJunction", label: "Single-string PV cutoff junction box", kind: "junction",
+    size: [0.32, 0.28, 0.15], placement: wall([0.38, 0.74, 0.08]), componentId: "pvSafety",
     bomIds: ["dse-pv-protection", "dse-pv-string-breakers"], status: "planned", conductors: [],
   },
   {
-    id: "pvBreakerA", label: "String A 20 A PV breaker", kind: "breaker", poles: 2,
+    id: "pvCutoff", label: "3S array cutoff · 20 A · two-pole", kind: "breaker", poles: 2,
     size: [0.040, 0.082, 0.070], placement: inside("pvJunction", "din", 0), componentId: "pvSafety",
     bomIds: ["dse-pv-string-breakers"], purchaseUrl: "https://www.amazon.com/dp/B0D4JR95Y4", status: "purchased",
-    currentProtection: { kind: "breaker", ratedCurrentA: 20, verified: false, terminalPairs: [["pvPosIn", "pvPosOut"]] }, conductors: [
-      p("pvPosIn", "String A + in", "positive", "bottom", {
+    currentProtection: { kind: "breaker", ratedCurrentA: 20, verified: false, terminalPairs: [["positiveIn", "positiveOut"]] }, conductors: [
+      p("positiveIn", "3S array + in", "positive", "bottom", {
         order: 0, gauge: "4 mm²", terminal: "CHTAIXI two-pole breaker screw clamp", terminalSize: "Verify received 20 A device",
         termination: "Bare fine-stranded PV conductor or maker-approved ferrule", terminalDiameterMm: 5.5,
-        terminalNote: "Verify the received 20 A marking, polarity diagram, torque and common-trip operation before commissioning.",
+        terminalNote: "Verify at least 150 VDC operating voltage, the received 20 A marking, polarity diagram, interrupt rating, torque and common-trip operation before commissioning.",
       }),
-      p("pvNegIn", "String A − in", "negative", "bottom", {
+      p("negativeIn", "3S array − in", "negative", "bottom", {
         order: 1, gauge: "4 mm²", terminal: "CHTAIXI two-pole breaker screw clamp", terminalSize: "Verify received 20 A device",
         termination: "Bare fine-stranded PV conductor or maker-approved ferrule", terminalDiameterMm: 5.5,
       }),
-      p("pvPosOut", "String A + comb tooth", "positive", "top", {
-        order: 0, gauge: "Comb link", terminal: "CHTAIXI two-pole breaker screw clamp", terminalSize: "Verify received 20 A device",
-        termination: "Approved insulated comb/link only", terminalDiameterMm: 5.5,
+      p("positiveOut", "Protected PV + out", "positive", "top", {
+        order: 0, gauge: "4 mm²", terminal: "CHTAIXI two-pole breaker screw clamp", terminalSize: "Verify received 20 A device",
+        termination: "Bare fine-stranded PV conductor or maker-approved ferrule", terminalDiameterMm: 5.5,
       }),
-      p("pvNegOut", "String A − comb tooth", "negative", "top", {
-        order: 1, gauge: "Comb link", terminal: "CHTAIXI two-pole breaker screw clamp", terminalSize: "Verify received 20 A device",
-        termination: "Approved insulated comb/link only", terminalDiameterMm: 5.5,
+      p("negativeOut", "Switched PV − out", "negative", "top", {
+        order: 1, gauge: "4 mm²", terminal: "CHTAIXI two-pole breaker screw clamp", terminalSize: "Verify received 20 A device",
+        termination: "Bare fine-stranded PV conductor or maker-approved ferrule", terminalDiameterMm: 5.5,
       }),
     ],
   },
-  {
-    id: "pvBreakerB", label: "String B 20 A PV breaker", kind: "breaker", poles: 2,
-    size: [0.040, 0.082, 0.070], placement: inside("pvJunction", "din", 1), componentId: "pvSafety",
-    bomIds: ["dse-pv-string-breakers"], purchaseUrl: "https://www.amazon.com/dp/B0D4JR95Y4", status: "purchased",
-    currentProtection: { kind: "breaker", ratedCurrentA: 20, verified: false, terminalPairs: [["pvPosIn", "pvPosOut"]] }, conductors: [
-      p("pvPosIn", "String B + in", "positive", "bottom", { order: 0, gauge: "4 mm²", terminal: "CHTAIXI two-pole breaker screw clamp", terminalSize: "Verify received 20 A device", termination: "Bare fine-stranded PV conductor or maker-approved ferrule", terminalDiameterMm: 5.5 }),
-      p("pvNegIn", "String B − in", "negative", "bottom", { order: 1, gauge: "4 mm²", terminal: "CHTAIXI two-pole breaker screw clamp", terminalSize: "Verify received 20 A device", termination: "Bare fine-stranded PV conductor or maker-approved ferrule", terminalDiameterMm: 5.5 }),
-      p("pvPosOut", "String B + comb tooth", "positive", "top", { order: 0, gauge: "Comb link", terminal: "CHTAIXI two-pole breaker screw clamp", terminalSize: "Verify received 20 A device", termination: "Approved insulated comb/link only", terminalDiameterMm: 5.5 }),
-      p("pvNegOut", "String B − comb tooth", "negative", "top", { order: 1, gauge: "Comb link", terminal: "CHTAIXI two-pole breaker screw clamp", terminalSize: "Verify received 20 A device", termination: "Approved insulated comb/link only", terminalDiameterMm: 5.5 }),
-    ],
-  },
-  {
-    id: "pvSpd", label: "PV Type 2 surge protector", kind: "protection", poles: 2, size: [0.040, 0.082, 0.07],
-    placement: inside("pvJunction", "din", 2), componentId: "pvSafety", status: "purchased", conductors: [
-      p("positive", "PV + comb tooth", "positive", "top", { order: 0, gauge: "Comb link", terminal: "SPD line clamp", terminalSize: "Verify received SPD", termination: "Approved comb/link", terminalDiameterMm: 5.5 }),
-      p("negative", "PV − comb tooth", "negative", "top", { order: 1, gauge: "Comb link", terminal: "SPD line clamp", terminalSize: "Verify received SPD", termination: "Approved comb/link", terminalDiameterMm: 5.5 }),
-      p("earth", "PE", "earth", "bottom", { order: 0, gauge: "10 mm²", terminal: "SPD PE clamp", terminalSize: "Verify received SPD", termination: "Maker-approved conductor/ferrule", terminalDiameterMm: 6 }),
-    ],
-  },
-  {
-    id: "pvDisconnect", label: "PV 2-pole disconnect", kind: "breaker", poles: 2, size: [0.040, 0.082, 0.07],
-    placement: inside("pvJunction", "din", 3), componentId: "pvSafety", status: "purchased", conductors: [
-      p("positiveIn", "+ comb tooth", "positive", "top", { order: 0, gauge: "Comb link", terminal: "Disconnect screw clamp", terminalSize: "Verify received device", termination: "Approved comb/link", terminalDiameterMm: 5.5 }),
-      p("negativeIn", "− comb tooth", "negative", "top", { order: 1, gauge: "Comb link", terminal: "Disconnect screw clamp", terminalSize: "Verify received device", termination: "Approved comb/link", terminalDiameterMm: 5.5 }),
-      p("positiveOut", "+ out", "positive", "bottom", { order: 0, gauge: "6 mm²", terminal: "Disconnect screw clamp", terminalSize: "Verify received device accepts 6 mm²", termination: "Maker-approved conductor/ferrule", terminalDiameterMm: 6.8 }),
-      p("negativeOut", "− out", "negative", "bottom", { order: 1, gauge: "6 mm²", terminal: "Disconnect screw clamp", terminalSize: "Verify received device accepts 6 mm²", termination: "Maker-approved conductor/ferrule", terminalDiameterMm: 6.8 }),
-    ],
-  },
-  rigidRail("pvCombRails", "Insulated positive / negative PV comb rails", [
-    { id: "positiveBreakerA", label: "Positive rail · string A tooth", kind: "positive", endpoint: ep("pvBreakerA", "pvPosOut") },
-    { id: "negativeBreakerA", label: "Negative rail · string A tooth", kind: "negative", endpoint: ep("pvBreakerA", "pvNegOut") },
-    { id: "positiveBreakerB", label: "Positive rail · string B tooth", kind: "positive", endpoint: ep("pvBreakerB", "pvPosOut") },
-    { id: "negativeBreakerB", label: "Negative rail · string B tooth", kind: "negative", endpoint: ep("pvBreakerB", "pvNegOut") },
-    { id: "positiveSpd", label: "Positive rail · SPD tooth", kind: "positive", endpoint: ep("pvSpd", "positive") },
-    { id: "negativeSpd", label: "Negative rail · SPD tooth", kind: "negative", endpoint: ep("pvSpd", "negative") },
-    { id: "positiveDisconnect", label: "Positive rail · disconnect tooth", kind: "positive", endpoint: ep("pvDisconnect", "positiveIn") },
-    { id: "negativeDisconnect", label: "Negative rail · disconnect tooth", kind: "negative", endpoint: ep("pvDisconnect", "negativeIn") },
-  ]),
   {
     id: "smartSolar", label: "Victron SmartSolar MPPT 150/85-Tr", kind: "converter", size: [0.295, 0.257, 0.103],
     placement: wall([1.28, 0.70, 0.052]), componentId: "solarController", bomIds: ["dse-smartsolar", "dse-mppt-wirebox-tr"],
@@ -510,12 +433,12 @@ const dseBaseDevices: readonly Device[] = [
         { label: "Peak conversion efficiency", percent: 98 },
         { label: "Self-consumption ceiling", watts: 0.84, voltage: "24 V", note: "Conservative conversion of the published <35 mA 12 V value." },
       ],
-      note: "The 2.26 kW array is within the controller's published 2.4 kW nominal-PV limit at 24 V.",
+      note: "The 1.47 kW AIKO array is within the controller's published 2.4 kW nominal-PV limit at 24 V. The array normally limits charge power to roughly 60 A near 24 V, but the controller and battery circuit retain their full 85 A / 35 mm² manufacturer envelope.",
       internalProtection: { verified: true, features: ["PV reverse-polarity", "output short-circuit", "over-temperature"] },
     },
     conductors: [
-      p("pvPositive", "PV +", "positive", "bottom", { order: 0, diagramSide: "input", gauge: "6 mm² combined-array lead", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded copper; ferrule only if Victron accepts the selected size", terminalDiameterMm: 8 }),
-      p("pvNegative", "PV −", "negative", "bottom", { order: 1, diagramSide: "input", gauge: "6 mm² combined-array lead", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded copper; ferrule only if Victron accepts the selected size", terminalDiameterMm: 8 }),
+      p("pvPositive", "PV +", "positive", "bottom", { order: 0, diagramSide: "input", gauge: "4 mm² single-string PV lead", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded copper; ferrule only if Victron accepts the selected size", terminalDiameterMm: 8 }),
+      p("pvNegative", "PV −", "negative", "bottom", { order: 1, diagramSide: "input", gauge: "4 mm² single-string PV lead", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded copper; ferrule only if Victron accepts the selected size", terminalDiameterMm: 8 }),
       p("batteryPositive", "Battery +", "positive", "bottom", {
         order: 2, diagramSide: "output", gauge: "35 mm²", terminal: "Victron screw terminal", terminalSize: "≤35 mm² / AWG 2", termination: "Fine-stranded 35 mm² copper", terminalDiameterMm: 9,
         currentSource: {
@@ -602,10 +525,10 @@ const dseBaseDevices: readonly Device[] = [
     ],
   },
   {
-    id: "secondaryJunction", label: "Secondary 24 V services junction box · larger enclosure required", kind: "junction", size: [0.48, 0.40, 0.24],
-    placement: wall([2.56, 0.76, 0.12]), componentId: "secondaryDistribution",
+    id: "secondaryJunction", label: "Secondary 24 V services junction box · larger enclosure required", kind: "junction", size: [0.60, 0.64, 0.24],
+    placement: wall([2.56, 0.88, 0.12]), componentId: "secondaryDistribution",
     bomIds: ["dse-secondary-enclosure-larger", "dse-pg11-cable-glands", "dse-din-rail-pack"], status: "hold", conductors: [],
-    holdReason: "The purchased 302 × 302 × 178 mm shell cannot keep both secondary busbars and the six-gang panel on one rear mounting plane. Select and mock up the larger enclosure represented by this planar routed envelope before installation.",
+    holdReason: "The purchased 302 × 302 × 178 mm shell cannot keep both secondary busbars, the six-gang panel and the UniFi converter on one rear mounting plane with unobstructed front-projection routing. Select and mock up the larger enclosure represented by this planar routed envelope before installation.",
   },
   breaker("sharedServicesBreaker", "Shared switched services · 10 A · 240 W", "secondaryJunction", 0, 10, {
     subtitle: "CHTAIXI B10 · purchased 26 Aug",
@@ -671,19 +594,19 @@ const dseBaseDevices: readonly Device[] = [
   },
   {
     id: "serviceSplit", label: "Shared service positive split", kind: "connector", presentation: "service-splice", diagramPresentation: "join", size: [0.040, 0.024, 0.030],
-    placement: inside("secondaryJunction", "backplate", 1), componentId: "switchedSplit", bomIds: ["dse-switch-connectors"], status: "planned", conductors: [
+    placement: inside("secondaryJunction", "backplate", 4), componentId: "switchedSplit", bomIds: ["dse-switch-connectors"], status: "planned", conductors: [
       p("in", "10 A feed", "positive", "left"), p("switches", "Six-gang feed", "positive", "right", { order: 0 }), p("room", "Room-switch feed", "positive", "right", { order: 1 }),
     ],
   },
   {
     id: "internetSplit", label: "Starlink / UniFi positive split", kind: "connector", presentation: "service-splice", diagramPresentation: "join", size: [0.040, 0.024, 0.030],
-    placement: inside("secondaryJunction", "backplate", 0), componentId: "internetSplit", bomIds: ["dse-switch-connectors"], status: "planned", conductors: [
+    placement: inside("secondaryJunction", "backplate", 3), componentId: "internetSplit", bomIds: ["dse-switch-connectors"], status: "planned", conductors: [
       p("in", "Switched feed", "positive", "left"), p("starlink", "Starlink +", "positive", "right", { order: 0 }), p("unifi", "UniFi converter +", "positive", "right", { order: 1 }),
     ],
   },
   {
     id: "unifiPower", label: "UniFi 24 V to 5 V USB-A converter", kind: "converter", size: [0.075, 0.040, 0.025],
-    placement: inside("secondaryJunction", "backplate", 5), componentId: "unifiPower", bomIds: ["dse-unifi-converter", "dse-unifi-usb-cable"], status: "purchased",
+    placement: inside("secondaryJunction", "backplate", 0), componentId: "unifiPower", bomIds: ["dse-unifi-converter", "dse-unifi-usb-cable"], status: "purchased",
     power: {
       role: "converter", basis: "retailer", verified: false, sourceUrl: "https://www.amazon.com/dp/B0G1W6JTX8",
       readings: [{ label: "Claimed maximum 5 V output", watts: 25, voltage: "5 V", currentA: 5 }],
@@ -692,7 +615,7 @@ const dseBaseDevices: readonly Device[] = [
     },
     conductors: [
       p("positiveIn", "24 V + in", "positive", "bottom", { order: 0 }), p("negativeIn", "24 V − in", "negative", "bottom", { order: 1 }),
-      p("usbA", "USB-A power out", "multicore", "top", {
+      p("usbA", "USB-A power out", "multicore", "bottom", { order: 2,
         terminal: "USB-A receptacle", terminalSize: "USB Type-A", termination: "Factory USB-A-to-USB-C cable", terminalDiameterMm: 9,
         currentSource: {
           id: "unifi-converter-output-source", label: "YRDZXG 5 V converter output", channel: "positive",
@@ -706,16 +629,16 @@ const dseBaseDevices: readonly Device[] = [
   },
   {
     id: "starlinkBreakout", label: "Starlink factory-lead breakout", kind: "connector", presentation: "cable-breakout", diagramPresentation: "join", size: [0.060, 0.034, 0.022],
-    placement: inside("secondaryJunction", "backplate", 3), componentId: "internetSplit", bomIds: ["dse-switch-connectors"], status: "planned", conductors: [
+    placement: inside("secondaryJunction", "backplate", 5), componentId: "internetSplit", bomIds: ["dse-switch-connectors"], status: "planned", conductors: [
       p("positive", "Starlink + core", "positive", "top", { order: 0, gauge: "Factory lead", terminal: "WAGO 221 lever splice", terminalSize: "0.14–4 mm² fine-stranded", termination: "Bare stripped conductor; no ferrule required", terminalDiameterMm: 4, internalMates: ["cable"] }),
       p("negative", "Starlink − core", "negative", "top", { order: 1, gauge: "Factory lead", terminal: "WAGO 221 lever splice", terminalSize: "0.14–4 mm² fine-stranded", termination: "Bare stripped conductor; no ferrule required", terminalDiameterMm: 4, internalMates: ["cable"] }),
       p("cable", "Starlink factory power cable", "multicore", "bottom", { terminal: "Factory two-core cable", terminalSize: "Complete Starlink Mini power lead", termination: "Strain relief / factory connector", terminalDiameterMm: 6, internalMates: ["positive", "negative"] }),
     ],
   },
-  twoCoreBreakout("outdoorLightBreakout", "Outdoor-light two-core breakout", inside("secondaryJunction", "backplate", 4)),
+  twoCoreBreakout("outdoorLightBreakout", "Outdoor-light two-core breakout", inside("secondaryJunction", "backplate", 6)),
   {
     id: "switchPanel", label: "Six-gang service switch panel", subtitle: "1 Internet · 2 outdoor light · 3 Orion H · 4–6 spare", kind: "switch",
-    size: [0.19, 0.085, 0.045], placement: inside("secondaryJunction", "backplate", 8), terminalPitchByFaceM: { bottom: 0.040 },
+    size: [0.19, 0.085, 0.045], placement: inside("secondaryJunction", "backplate", 0), terminalPitchByFaceM: { bottom: 0.040 },
     componentId: "loadSwitches", bomIds: ["dse-switch-array"], status: "purchased",
     power: {
       role: "control-load", basis: "retailer", verified: false, sourceUrl: "https://www.amazon.com/dp/B0DM87L1Q3",
@@ -808,7 +731,12 @@ const dseBaseDevices: readonly Device[] = [
       p("dcNegative", "Battery −", "negative", "bottom", { order: 1, gauge: "1/0 AWG · 53.5 mm²", terminal: "Victron DC bolt", terminalSize: "M8", termination: "1/0 AWG tinned-copper M8 closed lug", terminalDiameterMm: 8, terminalNote: "Victron specifies 12 N·m for the M8 DC connection." }),
       p("acInLine", "AC input L", "ac-line", "bottom", { order: 2, gauge: "1.5 mm²", terminal: "Victron AC screw terminal", terminalSize: "≤13 mm² / 6 AWG", termination: "Fine-stranded copper; approved ferrule if used", terminalDiameterMm: 6 }),
       p("acInNeutral", "AC input N", "ac-neutral", "bottom", { order: 3, gauge: "1.5 mm²", terminal: "Victron AC screw terminal", terminalSize: "≤13 mm² / 6 AWG", termination: "Fine-stranded copper; approved ferrule if used", terminalDiameterMm: 6 }),
-      p("acInEarth", "AC input PE", "earth", "bottom", { order: 4, gauge: "1.5 mm²", terminal: "Victron AC screw terminal", terminalSize: "≤13 mm² / 6 AWG", termination: "Green/yellow fine-stranded copper", terminalDiameterMm: 6 }),
+      p("acInEarth", "AC input PE", "earth", "bottom", {
+        order: 4, gauge: "1.5 mm²", terminal: "Victron AC screw terminal", terminalSize: "≤13 mm² / 6 AWG",
+        termination: "Green/yellow fine-stranded copper", terminalDiameterMm: 6,
+        internalMates: ["acOutEarth", "chassisEarth"],
+        terminalNote: "Victron connection overview H identifies one internal earth busbar shared by AC input PE, AC output PE and the M6 chassis-earth connection.",
+      }),
       p("acOutLine", "AC output L", "ac-line", "bottom", {
         order: 5, gauge: "1.5 mm²", terminal: "Victron AC screw terminal", terminalSize: "≤13 mm² / 6 AWG", termination: "Fine-stranded copper; approved ferrule if used", terminalDiameterMm: 6,
         currentSource: {
@@ -818,9 +746,19 @@ const dseBaseDevices: readonly Device[] = [
         },
       }),
       p("acOutNeutral", "AC output N", "ac-neutral", "bottom", { order: 6, gauge: "1.5 mm²", terminal: "Victron AC screw terminal", terminalSize: "≤13 mm² / 6 AWG", termination: "Fine-stranded copper; approved ferrule if used", terminalDiameterMm: 6 }),
-      p("acOutEarth", "AC output PE", "earth", "bottom", { order: 7, gauge: "1.5 mm²", terminal: "Victron AC screw terminal", terminalSize: "≤13 mm² / 6 AWG", termination: "Green/yellow fine-stranded copper", terminalDiameterMm: 6 }),
-      p("chassisEarth", "Chassis PE", "earth", "bottom", { order: 8, gauge: "16 mm²", terminal: "Primary chassis-earth bolt", terminalSize: "M6", termination: "16 mm² tinned-copper M6 closed lug", terminalDiameterMm: 6 }),
-      p("veBus", "VE.Bus", "data", "right", { order: 0, terminal: "RJ45 VE.Bus receptacle", terminalSize: "8P8C / RJ45", termination: "Factory Victron RJ45 cable", terminalDiameterMm: 9 }),
+      p("acOutEarth", "AC output PE", "earth", "bottom", {
+        order: 7, gauge: "1.5 mm²", terminal: "Victron AC screw terminal", terminalSize: "≤13 mm² / 6 AWG",
+        termination: "Green/yellow fine-stranded copper", terminalDiameterMm: 6,
+        internalMates: ["acInEarth", "chassisEarth"],
+        terminalNote: "Internally common with AC input PE and the M6 chassis-earth connection on the MultiPlus earth busbar.",
+      }),
+      p("chassisEarth", "Chassis PE", "earth", "bottom", {
+        order: 8, gauge: "16 mm²", terminal: "Primary chassis-earth bolt", terminalSize: "M6",
+        termination: "16 mm² tinned-copper M6 closed lug", terminalDiameterMm: 6,
+        internalMates: ["acInEarth", "acOutEarth"],
+        terminalNote: "Internally common with both AC protective-earth terminals on the MultiPlus earth busbar.",
+      }),
+      p("veBus", "VE.Bus", "data", "bottom", { order: 9, terminal: "RJ45 VE.Bus receptacle", terminalSize: "8P8C / RJ45", termination: "Factory Victron RJ45 cable", terminalDiameterMm: 9 }),
     ],
   },
   acBreakout("multiAcInBreakout", "MultiPlus AC-in cable breakout", wall([1.68, 0.42, 0.018]), "bottom", "top"),
@@ -863,26 +801,20 @@ const dseBaseDevices: readonly Device[] = [
     componentId: "mounting", bomIds: ["dse-terms"], status: "planned", conductors: [
       p("acOutside", "Generator cable · outside", "multicore", "back", { order: 0, terminal: "Sealed wall penetration", terminalSize: "3-core cable gland", termination: "Strain-relieved white cable", terminalDiameterMm: 9.8, internalMates: ["acInside"] }),
       p("earthOutside", "Electrode bond · outside", "earth", "back", { order: 1, gauge: "16 mm²", terminal: "Sealed wall penetration", terminalSize: "16 mm² conductor gland", termination: "Continuous insulated earth conductor", terminalDiameterMm: 8.6, internalMates: ["earthInside"] }),
-      p("pvAPosOutside", "PV string A + · outside", "positive", "back", { order: 2, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvAPosInside"] }),
-      p("pvANegOutside", "PV string A − · outside", "negative", "back", { order: 3, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvANegInside"] }),
-      p("pvBPosOutside", "PV string B + · outside", "positive", "back", { order: 4, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvBPosInside"] }),
-      p("pvBNegOutside", "PV string B − · outside", "negative", "back", { order: 5, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvBNegInside"] }),
-      p("frameAOutside", "PV frame bond A · outside", "earth", "back", { order: 6, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² bond-conductor gland", termination: "Continuous insulated copper bond", terminalDiameterMm: 5, internalMates: ["frameAInside"] }),
-      p("frameBOutside", "PV frame bond B · outside", "earth", "back", { order: 7, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² bond-conductor gland", termination: "Continuous insulated copper bond", terminalDiameterMm: 5, internalMates: ["frameBInside"] }),
-      p("lightOutside", "Outdoor-light cable · outside", "multicore", "back", { order: 8, gauge: "2 × 1.5 mm²", terminal: "Sealed wall penetration", terminalSize: "Two-core cable gland", termination: "Strain-relieved white cable", terminalDiameterMm: 6.4, internalMates: ["lightInside"] }),
-      p("starlinkPowerOutside", "Starlink power · outside", "multicore", "back", { order: 9, gauge: "Factory lead", terminal: "Sealed wall penetration", terminalSize: "Starlink power-cable gland", termination: "Strain-relieved factory cable", terminalDiameterMm: 6, internalMates: ["starlinkPowerInside"] }),
-      p("starlinkDataOutside", "Starlink Ethernet · outside", "data", "back", { order: 10, gauge: "Outdoor Ethernet", terminal: "Sealed wall penetration", terminalSize: "Ethernet cable gland", termination: "Outdoor-rated continuous data cable", terminalDiameterMm: 6, internalMates: ["starlinkDataInside"] }),
+      p("pvPosOutside", "PV 3S string + · outside", "positive", "back", { order: 2, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvPosInside"] }),
+      p("pvNegOutside", "PV 3S string − · outside", "negative", "back", { order: 3, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvNegInside"] }),
+      p("frameOutside", "PV frame bond · outside", "earth", "back", { order: 4, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² bond-conductor gland", termination: "Continuous insulated copper bond", terminalDiameterMm: 5, internalMates: ["frameInside"] }),
+      p("lightOutside", "Outdoor-light cable · outside", "multicore", "back", { order: 5, gauge: "2 × 1.5 mm²", terminal: "Sealed wall penetration", terminalSize: "Two-core cable gland", termination: "Strain-relieved white cable", terminalDiameterMm: 6.4, internalMates: ["lightInside"] }),
+      p("starlinkPowerOutside", "Starlink power · outside", "multicore", "back", { order: 6, gauge: "Factory lead", terminal: "Sealed wall penetration", terminalSize: "Starlink power-cable gland", termination: "Strain-relieved factory cable", terminalDiameterMm: 6, internalMates: ["starlinkPowerInside"] }),
+      p("starlinkDataOutside", "Starlink Ethernet · outside", "data", "back", { order: 7, gauge: "Outdoor Ethernet", terminal: "Sealed wall penetration", terminalSize: "Ethernet cable gland", termination: "Outdoor-rated continuous data cable", terminalDiameterMm: 6, internalMates: ["starlinkDataInside"] }),
       p("acInside", "Generator cable · inside", "multicore", "front", { order: 0, terminal: "Sealed wall penetration", terminalSize: "3-core cable gland", termination: "Strain-relieved white cable", terminalDiameterMm: 9.8, internalMates: ["acOutside"] }),
       p("earthInside", "Electrode bond · inside", "earth", "front", { order: 1, gauge: "16 mm²", terminal: "Sealed wall penetration", terminalSize: "16 mm² conductor gland", termination: "Continuous insulated earth conductor", terminalDiameterMm: 8.6, internalMates: ["earthOutside"] }),
-      p("pvAPosInside", "PV string A + · inside", "positive", "front", { order: 2, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvAPosOutside"] }),
-      p("pvANegInside", "PV string A − · inside", "negative", "front", { order: 3, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvANegOutside"] }),
-      p("pvBPosInside", "PV string B + · inside", "positive", "front", { order: 4, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvBPosOutside"] }),
-      p("pvBNegInside", "PV string B − · inside", "negative", "front", { order: 5, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvBNegOutside"] }),
-      p("frameAInside", "PV frame bond A · inside", "earth", "front", { order: 6, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² bond-conductor gland", termination: "Continuous insulated copper bond", terminalDiameterMm: 5, internalMates: ["frameAOutside"] }),
-      p("frameBInside", "PV frame bond B · inside", "earth", "front", { order: 7, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² bond-conductor gland", termination: "Continuous insulated copper bond", terminalDiameterMm: 5, internalMates: ["frameBOutside"] }),
-      p("lightInside", "Outdoor-light cable · inside", "multicore", "front", { order: 8, gauge: "2 × 1.5 mm²", terminal: "Sealed wall penetration", terminalSize: "Two-core cable gland", termination: "Strain-relieved white cable", terminalDiameterMm: 6.4, internalMates: ["lightOutside"] }),
-      p("starlinkPowerInside", "Starlink power · inside", "multicore", "front", { order: 9, gauge: "Factory lead", terminal: "Sealed wall penetration", terminalSize: "Starlink power-cable gland", termination: "Strain-relieved factory cable", terminalDiameterMm: 6, internalMates: ["starlinkPowerOutside"] }),
-      p("starlinkDataInside", "Starlink Ethernet · inside", "data", "front", { order: 10, gauge: "Outdoor Ethernet", terminal: "Sealed wall penetration", terminalSize: "Ethernet cable gland", termination: "Outdoor-rated continuous data cable", terminalDiameterMm: 6, internalMates: ["starlinkDataOutside"] }),
+      p("pvPosInside", "PV 3S string + · inside", "positive", "front", { order: 2, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvPosOutside"] }),
+      p("pvNegInside", "PV 3S string − · inside", "negative", "front", { order: 3, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² PV conductor gland", termination: "Continuous PV conductor", terminalDiameterMm: 6.1, internalMates: ["pvNegOutside"] }),
+      p("frameInside", "PV frame bond · inside", "earth", "front", { order: 4, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² bond-conductor gland", termination: "Continuous insulated copper bond", terminalDiameterMm: 5, internalMates: ["frameOutside"] }),
+      p("lightInside", "Outdoor-light cable · inside", "multicore", "front", { order: 5, gauge: "2 × 1.5 mm²", terminal: "Sealed wall penetration", terminalSize: "Two-core cable gland", termination: "Strain-relieved white cable", terminalDiameterMm: 6.4, internalMates: ["lightOutside"] }),
+      p("starlinkPowerInside", "Starlink power · inside", "multicore", "front", { order: 6, gauge: "Factory lead", terminal: "Sealed wall penetration", terminalSize: "Starlink power-cable gland", termination: "Strain-relieved factory cable", terminalDiameterMm: 6, internalMates: ["starlinkPowerOutside"] }),
+      p("starlinkDataInside", "Starlink Ethernet · inside", "data", "front", { order: 7, gauge: "Outdoor Ethernet", terminal: "Sealed wall penetration", terminalSize: "Ethernet cable gland", termination: "Outdoor-rated continuous data cable", terminalDiameterMm: 6, internalMates: ["starlinkDataOutside"] }),
     ],
   },
   {
@@ -927,10 +859,10 @@ const dseBaseDevices: readonly Device[] = [
     power: {
       role: "variable-load", basis: "calculated", verified: true,
       readings: [
-        { label: "Posted one-tool operating limit", watts: 1800, voltage: "230 VAC", currentA: 7.83 },
+        { label: "Posted one-tool operating limit", watts: 1200, voltage: "230 VAC", currentA: 5.22 },
         { label: "10 A outlet hardware ceiling", watts: 2300, voltage: "230 VAC", currentA: 10 },
       ],
-      note: "The 2.3 kW figure is only the outlet/nameplate ceiling. Normal operation is one corded tool at a time with a nameplate at or below 1.8 kW; motor starting current is transient and must pass the warm-condition commissioning test without nuisance trips or excessive voltage sag.",
+      note: "The 2.3 kW figure is only the outlet/nameplate ceiling. The revised operating profile is one corded tool at a time with a nameplate at or below 1.2 kW; motor starting current is transient and must pass the warm-condition commissioning test without nuisance trips or excessive voltage sag.",
     },
     conductors: [
       p("line", "Active / L post", "ac-line", "bottom", { order: 0, terminal: "Type I active contact", terminalSize: "AS/NZS 3112", termination: "Internal/factory contact", terminalDiameterMm: 5 }),
@@ -1010,7 +942,7 @@ const dseBaseDevices: readonly Device[] = [
     ],
   },
   {
-    id: "usbOrion", label: "Victron Orion-Tr Smart 24/12-30", kind: "converter", size: [0.130, 0.186, 0.055], placement: wall([2.92, 0.66, 0.028]),
+    id: "usbOrion", label: "Victron Orion-Tr Smart 24/12-30", kind: "converter", size: [0.130, 0.186, 0.055], placement: wall([3.00, 0.66, 0.028]),
     componentId: "orionUsb", bomIds: ["dse-orion-usb-converter"], status: "purchased", technicalUrl: ORION_SPEC,
     power: {
       role: "converter", basis: "manufacturer", verified: true, sourceUrl: ORION_SPEC,
@@ -1026,11 +958,11 @@ const dseBaseDevices: readonly Device[] = [
       internalProtection: { verified: true, features: ["60 A hard short-circuit output limit", "over-temperature derating"] },
     },
     conductors: [
-      p("remoteH", "Remote H", "control", "bottom", { order: 0, gauge: "0.75 mm²", terminal: "Orion remote H screw clamp", terminalSize: "Verify received remote connector", termination: "0.75 mm² bootlace ferrule if accepted", terminalDiameterMm: 4, terminalNote: "The six-gang switch applies positive to H; L remains unused." }),
+      p("remoteH", "Remote H", "control", "bottom", { order: 0, gauge: "1.5 mm²", terminal: "Orion remote H screw clamp", terminalSize: "Verify received remote connector", termination: "1.5 mm² bootlace ferrule if accepted", terminalDiameterMm: 4, terminalNote: "The six-gang switch applies positive to H; L remains unused. Confirm the received removable connector accepts the consolidated 1.5 mm² control conductor." }),
       p("positiveIn", "+ input · 24 V", "positive", "bottom", { order: 1, gauge: "6 mm²", terminal: "Orion power screw clamp", terminalSize: "Fine-stranded copper terminal", termination: "Bare fine-stranded copper; ferrule is not required by Victron", terminalDiameterMm: 7, terminalNote: "Victron's 24 V table recommends 6 mm² for a 1–2 m run; terminal torque is 1.6 N·m." }),
-      p("ground", "Common ground / −", "negative", "bottom", { order: 2, gauge: "10 mm²", terminal: "Orion common-negative screw clamp", terminalSize: "Fine-stranded copper terminal", termination: "Bare fine-stranded copper; ferrule is not required by Victron", terminalDiameterMm: 8, terminalNote: "This single common negative is shared by input and output in the non-isolated model; terminal torque is 1.6 N·m." }),
+      p("ground", "Common ground / −", "negative", "bottom", { order: 2, gauge: "6 mm²", terminal: "Orion common-negative screw clamp", terminalSize: "Fine-stranded copper terminal", termination: "Bare fine-stranded copper; ferrule is not required by Victron", terminalDiameterMm: 7, terminalNote: "This single common negative is shared by input and output in the non-isolated model; Victron's 1–2 m table uses 6 mm² and specifies 1.6 N·m terminal torque." }),
       p("positiveOut", "+ output · 12 V", "positive", "bottom", {
-        order: 3, gauge: "10 mm²", terminal: "Orion output screw clamp", terminalSize: "Fine-stranded copper terminal", termination: "Bare fine-stranded copper; ferrule is not required by Victron", terminalDiameterMm: 8,
+        order: 3, gauge: "6 mm²", terminal: "Orion output screw clamp", terminalSize: "Fine-stranded copper terminal", termination: "Bare fine-stranded copper; ferrule is not required by Victron", terminalDiameterMm: 7,
         terminalNote: "Official 2026 data: 30 A continuous, 45 A for 10 s and 60 A short-circuit output. The verified regulator enables the authored branch, but its 60 A fault envelope does not prove 12 AWG harness protection.",
         currentSource: {
           id: "orion-output-source", label: "Orion-Tr Smart 24/12-30 output", channel: "positive",
@@ -1043,7 +975,7 @@ const dseBaseDevices: readonly Device[] = [
     ],
   },
   {
-    id: "usbSocketA", label: "12 V cigarette-lighter socket A", kind: "connector", size: [0.052, 0.072, 0.048], placement: wall([3.08, 0.82, 0.024]),
+    id: "usbSocketA", label: "12 V cigarette-lighter socket A", kind: "connector", size: [0.052, 0.072, 0.048], placement: wall([3.18, 0.82, 0.024]),
     componentId: "usb", bomIds: ["dse-usb-sockets"], status: "purchased", conductors: [
       p("positive", "Rear centre-positive lead", "positive", "bottom", { order: 0, gauge: "12 AWG · 3.31 mm²", terminal: "YCIND factory red pigtail", terminalSize: "12 AWG received harness", termination: "Sealed listed splice after received-part inspection", terminalDiameterMm: 4.8, terminalNote: "This terminal carries the downstream socket as well as socket A; retain any integral protection and obtain installer approval." }),
       p("negative", "Rear shell-negative lead", "negative", "bottom", { order: 1, gauge: "12 AWG · 3.31 mm²", terminal: "YCIND factory black pigtail", terminalSize: "12 AWG received harness", termination: "Sealed listed splice after received-part inspection", terminalDiameterMm: 4.8 }),
@@ -1051,7 +983,7 @@ const dseBaseDevices: readonly Device[] = [
     ],
   },
   {
-    id: "usb145A", label: "Coolgear 145 W charger A", kind: "load", size: [0.052, 0.040, 0.092], placement: wall([3.08, 0.82, 0.100]),
+    id: "usb145A", label: "Coolgear 145 W charger A", kind: "load", size: [0.052, 0.040, 0.092], placement: wall([3.18, 0.82, 0.100]),
     componentId: "usb", layoutGroup: { id: "coolgear-145", label: "Coolgear 145 W chargers", columns: 2, order: 0 },
     bomIds: ["dse-usb"], purchaseUrl: COOLGEAR_145, status: "purchased",
     power: {
@@ -1100,7 +1032,7 @@ const dseBaseDevices: readonly Device[] = [
   usbMini("usbMiniB", "ChargeIT! Mini 75 W B", 3.50, 1),
   usbMini("usbMiniC", "ChargeIT! Mini 75 W C", 3.62, 2),
   usbMini("usbMiniD", "ChargeIT! Mini 75 W D", 3.74, 3),
-  twoCoreBreakout("indoorLightBreakout", "Indoor-light two-core breakout", wall([4.88, 0.52, 0.018])),
+  twoCoreBreakout("indoorLightBreakout", "Indoor-light two-core breakout", wall([3.18, 0.42, 0.018])),
   {
     id: "roomSwitch", label: "Indoor-light wall switch", kind: "switch", size: [0.090, 0.090, 0.035], placement: wall([4.58, 0.82, 0.018]),
     componentId: "roomSwitch", bomIds: ["dse-room-switch"], status: "purchased",
@@ -1126,39 +1058,24 @@ const dseBaseDevices: readonly Device[] = [
 
 export const dseJunctions: readonly Junction[] = [
   { id: "battery-cutoff", deviceId: "batteryCutoffJunction", label: "Battery / MPPT cutoff junction", minimumSize: [0.20, 0.16, 0.10], padding: 0.010, dinGap: 0.020, backplateGap: 0.010, glandSpacing: 0.020, sizePolicy: "verified-fixed" },
-  { id: "secondary", deviceId: "secondaryJunction", label: "Secondary 24 V services junction", minimumSize: [0.48, 0.40, 0.24], padding: 0.010, dinGap: 0.020, backplateGap: 0.020, glandSpacing: 0.020, sizePolicy: "auto", dinPosition: "bottom" },
-  { id: "pv", deviceId: "pvJunction", label: "PV junction", minimumSize: [0.29, 0.27, 0.15], padding: 0.020, dinGap: 0, backplateGap: 0.030, glandSpacing: 0.040 },
+  { id: "secondary", deviceId: "secondaryJunction", label: "Secondary 24 V services junction", minimumSize: [0.60, 0.64, 0.24], padding: 0.010, dinGap: 0.020, backplateGap: 0.020, glandSpacing: 0.040, sizePolicy: "auto", dinPosition: "bottom", powerBandFractionFromBottom: 1 / 3, backplatePosition: "top" },
+  { id: "pv", deviceId: "pvJunction", label: "Single-string PV cutoff", minimumSize: [0.32, 0.28, 0.15], padding: 0.020, dinGap: 0, backplateGap: 0.020, glandSpacing: 0.040, sizePolicy: "verified-fixed" },
   { id: "ac", deviceId: "acJunction", label: "AC junction", minimumSize: [0.36, 0.44, 0.12], padding: 0.020, dinGap: 0, backplateGap: 0, glandSpacing: 0.040 },
 ];
 
 const dseBaseConnections: readonly Connection[] = [
-  w("pv-a-series", ep("panel1", "positive"), ep("panel2", "negative"), "positive", "pv4", { seriesLink: true }),
-  w("pv-b-series", ep("panel3", "positive"), ep("panel4", "negative"), "positive", "pv4", { seriesLink: true }),
-  w("pv-a-positive-outside", ep("panel2", "positive"), ep("servicePenetration", "pvAPosOutside"), "positive", "pv4", { bundleId: "pv-string-a", circuitId: "pv-a-outside" }),
-  w("pv-a-positive-inside", ep("servicePenetration", "pvAPosInside"), ep("pvBreakerA", "pvPosIn"), "positive", "pv4", { bundleId: "pv-string-a", circuitId: "pv-a-inside" }),
-  w("pv-a-negative-outside", ep("panel1", "negative"), ep("servicePenetration", "pvANegOutside"), "negative", "pv4", { bundleId: "pv-string-a", returnFor: "pv-a-positive-outside", circuitId: "pv-a-outside" }),
-  w("pv-a-negative-inside", ep("servicePenetration", "pvANegInside"), ep("pvBreakerA", "pvNegIn"), "negative", "pv4", { bundleId: "pv-string-a", returnFor: "pv-a-positive-inside", circuitId: "pv-a-inside" }),
-  w("pv-b-positive-outside", ep("panel4", "positive"), ep("servicePenetration", "pvBPosOutside"), "positive", "pv4", { bundleId: "pv-string-b", circuitId: "pv-b-outside" }),
-  w("pv-b-positive-inside", ep("servicePenetration", "pvBPosInside"), ep("pvBreakerB", "pvPosIn"), "positive", "pv4", { bundleId: "pv-string-b", circuitId: "pv-b-inside" }),
-  w("pv-b-negative-outside", ep("panel3", "negative"), ep("servicePenetration", "pvBNegOutside"), "negative", "pv4", { bundleId: "pv-string-b", returnFor: "pv-b-positive-outside", circuitId: "pv-b-outside" }),
-  w("pv-b-negative-inside", ep("servicePenetration", "pvBNegInside"), ep("pvBreakerB", "pvNegIn"), "negative", "pv4", { bundleId: "pv-string-b", returnFor: "pv-b-positive-inside", circuitId: "pv-b-inside" }),
-  w("pv-comb-a-b-positive", ep("pvBreakerA", "pvPosOut"), ep("pvCombRails", "positiveBreakerA"), "positive", "pvComb", { circuitId: "pv-comb-a" }),
-  w("pv-comb-b-tap-positive", ep("pvBreakerB", "pvPosOut"), ep("pvCombRails", "positiveBreakerB"), "positive", "pvComb", { circuitId: "pv-comb-b" }),
-  w("pv-comb-b-spd-positive", ep("pvSpd", "positive"), ep("pvCombRails", "positiveSpd"), "positive", "pvComb", { circuitId: "pv-comb-spd" }),
-  w("pv-comb-spd-disconnect-positive", ep("pvDisconnect", "positiveIn"), ep("pvCombRails", "positiveDisconnect"), "positive", "pvComb", { circuitId: "pv-comb-disconnect" }),
-  w("pv-comb-a-b-negative", ep("pvBreakerA", "pvNegOut"), ep("pvCombRails", "negativeBreakerA"), "negative", "pvComb", { returnFor: "pv-comb-a-b-positive", circuitId: "pv-comb-a" }),
-  w("pv-comb-b-tap-negative", ep("pvBreakerB", "pvNegOut"), ep("pvCombRails", "negativeBreakerB"), "negative", "pvComb", { returnFor: "pv-comb-b-tap-positive", circuitId: "pv-comb-b" }),
-  w("pv-comb-b-spd-negative", ep("pvSpd", "negative"), ep("pvCombRails", "negativeSpd"), "negative", "pvComb", { returnFor: "pv-comb-b-spd-positive", circuitId: "pv-comb-spd" }),
-  w("pv-comb-spd-disconnect-negative", ep("pvDisconnect", "negativeIn"), ep("pvCombRails", "negativeDisconnect"), "negative", "pvComb", { returnFor: "pv-comb-spd-disconnect-positive", circuitId: "pv-comb-disconnect" }),
-  w("pv-output-positive", ep("pvDisconnect", "positiveOut"), ep("smartSolar", "pvPositive"), "positive", "dc6", { bundleId: "pv-mppt", circuitId: "pv-output" }),
-  w("pv-output-negative", ep("pvDisconnect", "negativeOut"), ep("smartSolar", "pvNegative"), "negative", "dc6", { bundleId: "pv-mppt", returnFor: "pv-output-positive", circuitId: "pv-output" }),
-  w("pv-spd-earth", ep("pvSpd", "earth"), ep("earthBar", "post3"), "earth", "dc10"),
-  w("pv-frame-a-daisy", ep("panel1", "frame"), ep("panel2", "frame"), "earth", "pv4"),
-  w("pv-frame-a-outside", ep("panel2", "frame"), ep("servicePenetration", "frameAOutside"), "earth", "earth4"),
-  w("pv-frame-a-inside", ep("servicePenetration", "frameAInside"), ep("earthBar", "post4"), "earth", "earth4"),
-  w("pv-frame-b-daisy", ep("panel3", "frame"), ep("panel4", "frame"), "earth", "pv4"),
-  w("pv-frame-b-outside", ep("panel4", "frame"), ep("servicePenetration", "frameBOutside"), "earth", "earth4"),
-  w("pv-frame-b-inside", ep("servicePenetration", "frameBInside"), ep("earthBar", "post6"), "earth", "earth4"),
+  w("pv-series-1-2", ep("panel1", "positive"), ep("panel2", "negative"), "positive", "pv4", { seriesLink: true }),
+  w("pv-series-2-3", ep("panel2", "positive"), ep("panel3", "negative"), "positive", "pv4", { seriesLink: true }),
+  w("pv-positive-outside", ep("panel3", "positive"), ep("servicePenetration", "pvPosOutside"), "positive", "pv4", { bundleId: "pv-string", circuitId: "pv-outside" }),
+  w("pv-positive-inside", ep("servicePenetration", "pvPosInside"), ep("pvCutoff", "positiveIn"), "positive", "pv4", { bundleId: "pv-string", circuitId: "pv-inside" }),
+  w("pv-negative-outside", ep("panel1", "negative"), ep("servicePenetration", "pvNegOutside"), "negative", "pv4", { bundleId: "pv-string", returnFor: "pv-positive-outside", circuitId: "pv-outside" }),
+  w("pv-negative-inside", ep("servicePenetration", "pvNegInside"), ep("pvCutoff", "negativeIn"), "negative", "pv4", { bundleId: "pv-string", returnFor: "pv-positive-inside", circuitId: "pv-inside" }),
+  w("pv-output-positive", ep("pvCutoff", "positiveOut"), ep("smartSolar", "pvPositive"), "positive", "pv4", { bundleId: "pv-mppt", circuitId: "pv-output" }),
+  w("pv-output-negative", ep("pvCutoff", "negativeOut"), ep("smartSolar", "pvNegative"), "negative", "pv4", { bundleId: "pv-mppt", returnFor: "pv-output-positive", circuitId: "pv-output" }),
+  w("pv-frame-1-2", ep("panel1", "frame"), ep("panel2", "frame"), "earth", "earth4"),
+  w("pv-frame-2-3", ep("panel2", "frame"), ep("panel3", "frame"), "earth", "earth4"),
+  w("pv-frame-outside", ep("panel3", "frame"), ep("servicePenetration", "frameOutside"), "earth", "earth4"),
+  w("pv-frame-inside", ep("servicePenetration", "frameInside"), ep("earthBar", "post4"), "earth", "earth4"),
 
   w("battery-a-series", ep("battery1", "positive"), ep("battery2", "negative"), "positive", "battery53", {
     seriesLink: true, sourceLeadReason: "Unfused battery-string series jumper; keep it shortest-practical, supported, guarded and separated from grounded metal throughout its route.",
@@ -1188,7 +1105,7 @@ const dseBaseConnections: readonly Connection[] = [
   }),
   w("shunt-negative-bus", ep("smartShunt", "systemMinus"), ep("mainNegativeBus", "post1"), "negative", "battery53", {
     status: "hold",
-    holdReason: "Controlled normal demand fits the modeled 120 A envelope: one tool at or below 1,800 W, both high-power USB branches off during tool use, and the Ekrano DVCC charge-current limit at 100 A. The hold remains for fault/OCP coordination and received conductor, lug and termination evidence; do not treat the SmartShunt's 500 A body rating as cable ampacity.",
+    holdReason: "Controlled normal demand fits the modeled 120 A envelope: one tool at or below 1,200 W, both high-power USB branches off during tool use, and the Ekrano DVCC charge-current limit at 88 A for the 440 Ah GEL bank. The hold remains for fault/OCP coordination and received conductor, lug and termination evidence; do not treat the SmartShunt's 500 A body rating as cable ampacity.",
   }),
   w("shunt-sense", ep("mainPositiveBus", "post4"), ep("smartShunt", "vBattPlus"), "positive", "factory", {
     currentProtection: { kind: "fuse", ratedCurrentA: 1, verified: true, note: "Victron supplies a 1 A fused positive sense lead; carry the exact maker-specified spare." },
@@ -1224,7 +1141,7 @@ const dseBaseConnections: readonly Connection[] = [
     returnFor: "secondary-feeder-positive", circuitId: "secondary-feeder",
     status: "hold", holdReason: "Field-procure the matching black 1/0 AWG return. Do not energize until an engineer approves the 100 A Blue Sea bus, #10-32 landing or listed transition, ring geometry, torque, enclosure clearance and full feeder protection coordination.",
   }),
-  w("service-main", ep("secondaryPositiveBus", "post4"), ep("sharedServicesBreaker", "line"), "positive", "service2.5", {
+  w("service-main", ep("secondaryPositiveBus", "post4"), ep("sharedServicesBreaker", "line"), "positive", "pv4", {
     sourceLeadReason: "Short enclosed bus-to-breaker tap; final coordination and physical protection remain required.",
   }),
   w("service-split", ep("sharedServicesBreaker", "load"), ep("serviceSplit", "in"), "positive", "branch1.5"),
@@ -1251,12 +1168,12 @@ const dseBaseConnections: readonly Connection[] = [
   }),
   w("ekrano-negative", ep("secondaryNegativeBus", "post6"), ep("ekrano", "negative"), "negative", "factory", { returnFor: "ekrano-positive", circuitId: "ekrano-power" }),
 
-  w("orion-breaker-feed", ep("secondaryPositiveBus", "post2"), ep("orionBreaker32", "line"), "positive", "dc10", {
+  w("orion-breaker-feed", ep("secondaryPositiveBus", "post2"), ep("orionBreaker32", "line"), "positive", "dc6", {
     sourceLeadReason: "Short enclosed bus-to-breaker tap; final coordination and physical protection remain required.",
   }),
-  w("orion-input-positive", ep("orionBreaker32", "load"), ep("usbOrion", "positiveIn"), "positive", "dc10", { circuitId: "orion-input" }),
-  w("orion-common-ground", ep("secondaryNegativeBus", "post2"), ep("usbOrion", "ground"), "negative", "dc10", { returnFor: "orion-input-positive", circuitId: "orion-input" }),
-  w("orion-remote-h", ep("switchPanel", "orionH"), ep("usbOrion", "remoteH"), "control", "sense0.75"),
+  w("orion-input-positive", ep("orionBreaker32", "load"), ep("usbOrion", "positiveIn"), "positive", "dc6", { circuitId: "orion-input" }),
+  w("orion-common-ground", ep("secondaryNegativeBus", "post2"), ep("usbOrion", "ground"), "negative", "dc6", { returnFor: "orion-input-positive", circuitId: "orion-input" }),
+  w("orion-remote-h", ep("switchPanel", "orionH"), ep("usbOrion", "remoteH"), "control", "branch1.5"),
   w("orion-output-socket-a", ep("usbOrion", "positiveOut"), ep("usbSocketA", "positive"), "positive", "socketHarness12", { circuitId: "orion-output-a" }),
   w("socket-a-b-positive", ep("usbSocketA", "positive"), ep("usbSocketB", "positive"), "positive", "socketHarness12", { circuitId: "socket-a-b" }),
   w("socket-negative-feed", ep("secondaryNegativeBus", "post3"), ep("usbSocketA", "negative"), "negative", "socketHarness12", { returnFor: "orion-output-socket-a", circuitId: "orion-output-a" }),
@@ -1267,17 +1184,17 @@ const dseBaseConnections: readonly Connection[] = [
   w("socket-b-charger-plug", ep("usbSocketB", "socket"), ep("usb145B", "plug"), "multicore", "socketPlug", {
     currentProtection: { kind: "fuse", ratedCurrentA: 15, verified: false, note: "Verify the retained charger-plug fuse." },
   }),
-  w("chargeit-breaker-feed", ep("secondaryPositiveBus", "post3"), ep("chargeItBreaker32", "line"), "positive", "branch5.26", {
+  w("chargeit-breaker-feed", ep("secondaryPositiveBus", "post3"), ep("chargeItBreaker32", "line"), "positive", "dc6", {
     sourceLeadReason: "Short enclosed bus-to-breaker tap; final coordination and physical protection remain required.",
   }),
-  w("mini-positive-feed", ep("chargeItBreaker32", "load"), ep("usbMiniA", "positive"), "positive", "branch5.26", { circuitId: "mini-feed" }),
-  w("mini-a-b-positive", ep("usbMiniA", "positive"), ep("usbMiniB", "positive"), "positive", "branch5.26", { circuitId: "mini-a-b" }),
-  w("mini-b-c-positive", ep("usbMiniB", "positive"), ep("usbMiniC", "positive"), "positive", "branch5.26", { circuitId: "mini-b-c" }),
-  w("mini-c-d-positive", ep("usbMiniC", "positive"), ep("usbMiniD", "positive"), "positive", "branch5.26", { circuitId: "mini-c-d" }),
-  w("mini-negative-feed", ep("secondaryNegativeBus", "post4"), ep("usbMiniA", "negative"), "negative", "branch5.26", { returnFor: "mini-positive-feed", circuitId: "mini-feed" }),
-  w("mini-a-b-negative", ep("usbMiniA", "negative"), ep("usbMiniB", "negative"), "negative", "branch5.26", { returnFor: "mini-a-b-positive", circuitId: "mini-a-b" }),
-  w("mini-b-c-negative", ep("usbMiniB", "negative"), ep("usbMiniC", "negative"), "negative", "branch5.26", { returnFor: "mini-b-c-positive", circuitId: "mini-b-c" }),
-  w("mini-c-d-negative", ep("usbMiniC", "negative"), ep("usbMiniD", "negative"), "negative", "branch5.26", { returnFor: "mini-c-d-positive", circuitId: "mini-c-d" }),
+  w("mini-positive-feed", ep("chargeItBreaker32", "load"), ep("usbMiniA", "positive"), "positive", "dc6", { circuitId: "mini-feed" }),
+  w("mini-a-b-positive", ep("usbMiniA", "positive"), ep("usbMiniB", "positive"), "positive", "dc6", { circuitId: "mini-a-b" }),
+  w("mini-b-c-positive", ep("usbMiniB", "positive"), ep("usbMiniC", "positive"), "positive", "dc6", { circuitId: "mini-b-c" }),
+  w("mini-c-d-positive", ep("usbMiniC", "positive"), ep("usbMiniD", "positive"), "positive", "dc6", { circuitId: "mini-c-d" }),
+  w("mini-negative-feed", ep("secondaryNegativeBus", "post4"), ep("usbMiniA", "negative"), "negative", "dc6", { returnFor: "mini-positive-feed", circuitId: "mini-feed" }),
+  w("mini-a-b-negative", ep("usbMiniA", "negative"), ep("usbMiniB", "negative"), "negative", "dc6", { returnFor: "mini-a-b-positive", circuitId: "mini-a-b" }),
+  w("mini-b-c-negative", ep("usbMiniB", "negative"), ep("usbMiniC", "negative"), "negative", "dc6", { returnFor: "mini-b-c-positive", circuitId: "mini-b-c" }),
+  w("mini-c-d-negative", ep("usbMiniC", "negative"), ep("usbMiniD", "negative"), "negative", "dc6", { returnFor: "mini-c-d-positive", circuitId: "mini-c-d" }),
 
   w("generator-lead-line", ep("generator", "line"), ep("generatorLeadBreakout", "line"), "ac-line", "acCore1.5", {
     bundleId: "generator-lead-cores", circuitId: "generator-ac",
@@ -1324,6 +1241,9 @@ const dseBaseConnections: readonly Connection[] = [
   w("ac-socket-line", ep("acOutputProtection", "lineOut"), ep("toolAcBreakout", "line"), "ac-line", "acCore1.5", { bundleId: "tool-ac-cores", circuitId: "tool-ac" }),
   w("ac-socket-neutral", ep("acOutputProtection", "neutralOut"), ep("toolAcBreakout", "neutral"), "ac-neutral", "acCore1.5", { bundleId: "tool-ac-cores", returnFor: "ac-socket-line", circuitId: "tool-ac" }),
   w("ac-socket-earth", ep("acOutputCableBreakout", "earth"), ep("toolAcBreakout", "earth"), "earth", "acCore1.5", { bundleId: "tool-ac-cores" }),
+  w("ac-earth-continuity", ep("generatorAcBreakout", "earth"), ep("acOutputCableBreakout", "earth"), "earth", "acCore1.5", {
+    label: "Unswitched AC-in / AC-out protective-earth continuity",
+  }),
   w("tool-white-cable", ep("toolAcBreakout", "cable"), ep("toolOutletLeadBreakout", "cable"), "multicore", "ac3"),
   w("tool-outlet-line", ep("toolOutletLeadBreakout", "line"), ep("toolOutlet", "line"), "ac-line", "acCore1.5", {
     bundleId: "tool-outlet-cores", circuitId: "tool-ac",
@@ -1434,6 +1354,7 @@ function expandSharedPhysicalLandings(
           subtitle: "Explicit 2-in / 1-out field splice",
           kind: "connector",
           presentation: "wire-join",
+          diagramJoinGeometry: landing.kind === "earth" ? "orthogonal-t" : "y",
           attachment: { endpoint: attachmentEndpoint },
           size: [0.040, 0.040, 0.040],
           placement: owner.placement,
@@ -1483,28 +1404,22 @@ export const dseCurrentSources = currentSourcesFromDevices(dseDevices);
 
 export const dsePowerCircuits: readonly CircuitPowerBudget[] = [
   {
-    id: "pv-strings", label: "Two independent 2-panel PV strings", deviceIds: ["panel1", "panel2", "panel3", "panel4", "pvBreakerA", "pvBreakerB"],
-    nominalVoltageV: 85.12, maximumWatts: 2260, maximumCurrentA: 13.28, protectionDeviceId: "pvBreakerA", conductorAmpacityA: 20,
+    id: "pv-array", label: "Three-panel AIKO series string", deviceIds: ["panel1", "panel2", "panel3", "pvCutoff", "smartSolar"],
+    nominalVoltageV: 104.1, maximumWatts: 1470, maximumCurrentA: 14.13, protectionDeviceId: "pvCutoff", conductorAmpacityA: 20,
     normalStatus: "within-capacity", faultStatus: "provisional",
-    note: "Each home run carries one 13.28 A operating string (14.20 A Isc) on a 20 A-rated 4 mm² path. Each 20 A breaker is below Suntech's 25 A maximum series-fuse rating, but received voltage, polarity and interrupt markings remain unverified.",
-  },
-  {
-    id: "pv-combined", label: "Combined PV comb rails to SmartSolar", deviceIds: ["pvCombRails", "pvSpd", "pvDisconnect", "smartSolar"],
-    nominalVoltageV: 85.12, maximumWatts: 2260, maximumCurrentA: 26.56, conductorAmpacityA: 32,
-    normalStatus: "within-capacity", faultStatus: "provisional",
-    note: "The prior 20 A/4 mm² combined lead was too small for both strings. The canonical plan now uses a 32 A-rated 6 mm² positive/negative pair; verify the pre-existing rails, disconnect and terminals accept that current and conductor.",
+    note: "The one 3S string carries 14.13 A Imp / 14.88 A Isc on one 20 A-rated 4 mm² pair from the array through the two-pole cutoff to the SmartSolar. Array Vmp is 104.1 V, Voc is 123.3 V at 25 °C and the 10 °C cold estimate is 127.37 V, below the SmartSolar's 145 V operating / 150 V absolute limits. The 20 A breaker remains below AIKO's 25 A maximum series-fuse rating; verify received DC voltage, polarity, interrupt and local-acceptance markings.",
   },
   {
     id: "mppt-battery", label: "SmartSolar battery output", deviceIds: ["smartSolar", "mpptBreaker"],
-    nominalVoltageV: 24, maximumWatts: 2448, maximumCurrentA: 85, protectionDeviceId: "mpptBreaker", conductorAmpacityA: 120,
+    nominalVoltageV: 24, minimumVoltageV: 19, maximumWatts: 1470, maximumCurrentA: 75.8, protectionDeviceId: "mpptBreaker", conductorAmpacityA: 120,
     normalStatus: "within-capacity", faultStatus: "provisional",
-    note: "Victron's exact table pairs 35 mm² battery cable with 100–120 A protection, so the 85 A regulated output and purchased 120 A breaker fit the manufacturer envelope. Confirm the final cable installation/temperature rating and received breaker AIC, terminal and torque evidence; keep the common-bus-to-breaker segment shortest-practical and guarded.",
+    note: "At the deliberately conservative 19 V floor, 1.47 kW at 98% conversion is about 75.8 A; around nominal battery voltage the array is roughly a 60 A source. The cable remains 35 mm² because Victron's 150/85 table pairs that terminal size with 100–120 A battery-side protection and the battery can backfeed a cable fault. Confirm installation/temperature ampacity and received breaker AIC, terminal and torque evidence.",
   },
   {
     id: "multiplus-dc", label: "MultiPlus 24 V DC input/charger branch", deviceIds: ["multiPlus"],
-    nominalVoltageV: 24, minimumVoltageV: 19, maximumWatts: 1800, maximumCurrentA: 100.8, conductorAmpacityA: 120,
+    nominalVoltageV: 24, minimumVoltageV: 19, maximumWatts: 1200, maximumCurrentA: 67.2, conductorAmpacityA: 120,
     normalStatus: "within-capacity", faultStatus: "incomplete",
-    note: "The posted one-tool rule caps normal AC load at 1.8 kW. At the conservative 19 V input floor and 94% efficiency, that is about 100.8 A DC (about 79.8 A at 24 V), within the modeled 120 A cable envelope. Tool starting surge is transient, not a continuous 2.4 kW load. The genuine hold remains: Victron requires a dedicated 300 A external DC protector and at least 50 mm² cable, coordinated with the final conductor and buses.",
+    note: "The revised one-tool rule caps normal AC load at 1.2 kW. At the conservative 19 V input floor and 94% efficiency, that is about 67.2 A DC (about 53.2 A at 24 V). The cable stays 1/0 AWG because Victron still requires a dedicated 300 A external DC protector and at least 50 mm² copper for this model's 0–5 m battery run; that protection/bus coordination remains a genuine hold.",
   },
   {
     id: "secondary-feeder", label: "Main bus to secondary-services enclosure", deviceIds: ["secondaryPositiveBus", "secondaryNegativeBus", "smartSolar", "multiPlus", "usbOrion", "ekrano"],
@@ -1514,9 +1429,9 @@ export const dsePowerCircuits: readonly CircuitPowerBudget[] = [
   },
   {
     id: "main-negative-trunk", label: "SmartShunt SYSTEM MINUS to main negative bus", deviceIds: ["smartShunt", "mainNegativeBus", "multiPlus", "secondaryNegativeBus", "smartSolar"],
-    nominalVoltageV: 24, minimumVoltageV: 19, maximumWatts: 2024, maximumCurrentA: 106.5, conductorAmpacityA: 120,
+    nominalVoltageV: 24, minimumVoltageV: 19, maximumWatts: 1385, maximumCurrentA: 72.9, conductorAmpacityA: 120,
     normalStatus: "conditional", faultStatus: "incomplete",
-    note: "Under the posted operating controls, the 1.8 kW tool draws about 100.8 A at 19 V / 94% efficiency and essential shared services plus Ekrano add about 5.7 A, for a controlled 106.5 A maximum below the modeled 120 A envelope. Available solar reduces net battery discharge but is deliberately not credited, so the tool budget remains valid under cloud; the array's 2,260 W rating is not an added load. This is conditional on ORION REMOTE H being off and the ChargeIT branch breaker being open during heavy tool use; otherwise all installed DC branches at their published maxima could reach about 148.6 A. Ekrano DVCC limits net battery charging through this shunt trunk to 100 A. Fault/OCP coordination and received conductor/termination evidence remain genuine holds.",
+    note: "Under the posted controls, the 1.2 kW tool draws about 67.2 A at 19 V / 94% efficiency and essential shared services plus Ekrano add about 5.7 A, for a controlled 72.9 A maximum below the 120 A 1/0 envelope. Solar is not credited to this discharge limit. This remains conditional on ORION REMOTE H being off and the ChargeIT branch breaker being open during tool use; every installed DC branch at published maximum with the tool could reach about 115.0 A. Ekrano DVCC limits net battery charging to 88 A, the preferred 0.2 C ceiling for the 440 Ah bank. Fault/OCP and received termination evidence remain genuine holds.",
   },
   {
     id: "shared-services", label: "Shared lights + Starlink + UniFi services", deviceIds: ["indoorLight", "outdoorLight", "starlink", "unifi", "unifiPower", "switchPanel", "roomSwitch"],
@@ -1526,9 +1441,9 @@ export const dsePowerCircuits: readonly CircuitPowerBudget[] = [
   },
   {
     id: "orion-input", label: "Orion 24 V input", deviceIds: ["usbOrion", "orionBreaker32"],
-    nominalVoltageV: 24, minimumVoltageV: 16, maximumWatts: 489, maximumCurrentA: 30.6, protectionDeviceId: "orionBreaker32", conductorAmpacityA: 50,
+    nominalVoltageV: 24, minimumVoltageV: 16, maximumWatts: 489, maximumCurrentA: 30.6, protectionDeviceId: "orionBreaker32", conductorAmpacityA: 32,
     normalStatus: "conditional", faultStatus: "provisional",
-    note: "The 32 A breaker and 6–10 mm² route fit the calculated worst published 25 °C output/88% efficiency/16 V input case, but with little trip margin. Victron recommends 30 A protection at 24 V; review the exact breaker curve, hot-enclosure derating and operating setpoint.",
+    note: "The consolidated 6 mm² route follows Victron's 1–2 m recommendation and the purchased 32 A breaker fits the calculated worst published 25 °C output/88% efficiency/16 V input case, but with little thermal or trip margin. Review the exact breaker curve, hot-enclosure derating and operating setpoint.",
   },
   {
     id: "orion-output", label: "Orion 12 V socket / 145 W charger chain", deviceIds: ["usbOrion", "usbSocketA", "usbSocketB", "usb145A", "usb145B"],
@@ -1556,16 +1471,16 @@ export const dsePowerCircuits: readonly CircuitPowerBudget[] = [
   },
   {
     id: "tool-ac", label: "MultiPlus AC output / tool outlet", deviceIds: ["multiPlus", "acOutputProtection", "toolOutlet"],
-    nominalVoltageV: 230, maximumWatts: 1800, maximumCurrentA: 7.83, protectionDeviceId: "acOutputProtection", conductorAmpacityA: 10,
+    nominalVoltageV: 230, maximumWatts: 1200, maximumCurrentA: 5.22, protectionDeviceId: "acOutputProtection", conductorAmpacityA: 10,
     normalStatus: "within-capacity", faultStatus: "provisional",
-    note: "The posted one-tool operating rule limits the connected nameplate to 1.8 kW, or about 7.83 A at 230 V, below the 10 A outlet/lead/RCBO envelope and the inverter's 2.2 kW continuous rating at 40 °C. Motor starting current is a short transient; verify it with the specified 30-minute warm-condition saw test and reject any excessive sag, heating or nuisance trip.",
+    note: "The posted one-tool operating rule limits the connected nameplate to 1.2 kW, or about 5.22 A at 230 V, below the 10 A outlet/lead/RCBO envelope and the inverter's 2.2 kW continuous rating at 40 °C. Motor starting current is a short transient; verify it with the specified warm-condition test and reject excessive sag, heating or nuisance trip.",
   },
 ];
 
 export const dseTopology: SystemGraph = {
   id: "dse-fiji",
   label: "DSE Solar System · Fiji",
-  revision: "R29 · researched device power and circuit-level fault classification",
+  revision: "R30 · 3S AIKO array, 440 Ah Victron GEL bank and consolidated cable schedule",
   devices: dseDevices,
   cables: dseCables,
   connections: dseConnections,

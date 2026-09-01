@@ -414,7 +414,7 @@ test("terminal-owned supply inventory catches an omitted source on an already en
 
 test("production supply inventory is derived from terminals and includes bidirectional/converter outputs", () => {
   assert.deepEqual(dseTopology.currentSources, currentSourcesFromDevices(dseTopology.devices));
-  assert.equal(dseTopology.currentSources.length, 10);
+  assert.equal(dseTopology.currentSources.length, 9);
   assert.equal(
     dseTopology.currentSources.find((candidate) => candidate.id === "multiplus-dc-charger-source")?.endpoint,
     "multiPlus.dcPositive",
@@ -533,8 +533,8 @@ test("production source assemblies and current-domain anchors remove only topolo
   const expectedConnections = [
     "battery-a-series",
     "battery-b-series",
-    "pv-a-series",
-    "pv-b-series",
+    "pv-series-1-2",
+    "pv-series-2-3",
     "balancer-a-mid",
     "balancer-b-mid",
     "balancer-a-negative",

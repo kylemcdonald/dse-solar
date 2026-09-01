@@ -2,6 +2,7 @@
 
 import { type ComponentType, useEffect, useMemo, useRef, useState } from "react";
 import dseRaw from "@/data/dse-system.json";
+import { CostView } from "./CostView";
 import { CustomsView } from "./CustomsView";
 import { dseRuntime } from "./dseRuntime";
 import { GraphInspector } from "./GraphInspector";
@@ -13,7 +14,7 @@ import { UnifiedSystemDiagram } from "./UnifiedSystemDiagram";
 const loadSystemModel3D = () => import("./UnifiedSystemModel3D")
   .then((module) => ({ default: module.UnifiedSystemModel3D }));
 
-type ViewerMode = "diagram" | "model" | "system" | "bom" | "shipping" | "customs" | "notes";
+type ViewerMode = "diagram" | "model" | "system" | "bom" | "cost" | "shipping" | "customs" | "notes";
 
 export type BomItem = {
   id: string;
@@ -32,6 +33,11 @@ export type BomItem = {
   specUrl?: string;
   accountingGroup?: BomAccountingGroup;
   includedInTotal?: boolean;
+  grantPayer?: "IYOIYO" | "DSE";
+  grantPaymentNote?: string;
+  grantFundingSource?: string;
+  grantFundingAmountUsd?: number;
+  grantFundingTreatment?: string;
   paidFraction?: number;
   unitWeightKg?: number;
   totalWeightKg?: number;
@@ -201,6 +207,7 @@ function ModeIcon({ mode }: { mode: ViewerMode }) {
   if (mode === "diagram") return <><rect x="3" y="4" width="7" height="6" rx="1" /><rect x="14" y="14" width="7" height="6" rx="1" /><path d="M10 7h5a3 3 0 0 1 3 3v4M6.5 10v5a2 2 0 0 0 2 2H14" /></>;
   if (mode === "system") return <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />;
   if (mode === "bom") return <path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" />;
+  if (mode === "cost") return <><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M3 13h8V4M11 9h10M16 9v11" /></>;
   if (mode === "shipping") return <><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M3 12h11M14 4v16M14 13h7" /></>;
   if (mode === "customs") return <path d="M5 3h10l4 4v14H5zM15 3v5h5M8 12h8M8 16h8" />;
   return <path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5" />;
@@ -344,7 +351,8 @@ export function SystemViewer() {
   const tabs: Array<{ id: ViewerMode; label: string }> = [
     { id: "diagram", label: "Detailed diagram" }, { id: "model", label: "3D model" },
     { id: "system", label: "System" }, { id: "bom", label: "Bill of materials" },
-    { id: "shipping", label: "Shipping" }, { id: "customs", label: "Customs" }, { id: "notes", label: "Field notes" },
+    { id: "cost", label: "Costs" }, { id: "shipping", label: "Shipping" },
+    { id: "customs", label: "Customs" }, { id: "notes", label: "Field notes" },
   ];
 
   return (
@@ -352,7 +360,9 @@ export function SystemViewer() {
       <header className="app-header">
         <nav className="mode-tabs" aria-label="Viewer mode">{tabs.map((tab) => <button key={tab.id} type="button" className={mode === tab.id ? "active" : ""} onClick={() => changeMode(tab.id)}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><ModeIcon mode={tab.id} /></svg>{tab.label}{tab.id === "bom" && <span>{system.bom.length}</span>}
-        </button>)}</nav>
+        </button>)}<a className="wire-cut-link" href="./cable-plan/" aria-label="Open wire cut list">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h10v17H7zM10 7h4M10 11h4M10 15h4M4 7h3M17 17h3" /></svg>Wire cut list
+        </a></nav>
         <div className="project-lockup" aria-label="Current project"><span>DSE</span><strong>Fiji</strong></div>
       </header>
       <main>
@@ -362,6 +372,7 @@ export function SystemViewer() {
           ? <Model3D fadePurchased={fadePurchased} onFadePurchasedChange={setFadePurchased} onSelect={setSelection} onClearSelection={() => setSelection(null)} />
           : <div className="model-loading">Loading precomputed canonical scene…</div>}</div>}
         {mode === "system" && <SystemOverview />}{mode === "bom" && <BomView />}
+        {mode === "cost" && <CostView bom={system.bom} />}
         {mode === "shipping" && <ShippingView bom={system.bom} />}
         {mode === "customs" && <CustomsView bom={system.bom} planningFjdPerUsd={system.currency.fjdPerUsd} />}
         {mode === "notes" && <FieldNotes />}

@@ -28,7 +28,7 @@ import {
   type DiagramTrackOptions,
 } from "./diagram-layout-optimizer-core";
 
-type PortSide = "input" | "output" | "neutral";
+type PortSide = "input" | "output" | "neutral" | "top";
 type Genome = readonly number[];
 type EdgeSpec = {
   id: string;
@@ -66,7 +66,7 @@ const MAX_ROW_MOVE = 2;
 const PROJECTED_COLUMN_SPAN = 12;
 const EPSILON = 1e-9;
 const DIRECTIONS = [[1, 0], [0, 1], [-1, 0], [0, -1]] as const;
-const SIDE_DIRECTION: Readonly<Record<PortSide, number>> = { input: 2, output: 0, neutral: 1 };
+const SIDE_DIRECTION: Readonly<Record<PortSide, number>> = { input: 2, output: 0, neutral: 1, top: 3 };
 const trackOptions: DiagramTrackOptions = {
   columns: COLUMNS,
   rows: ROWS,

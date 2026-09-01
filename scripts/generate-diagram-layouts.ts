@@ -6,7 +6,7 @@ import { buildDiagramLayout } from "../app/UnifiedSystemDiagram";
 import { dseRuntime } from "../app/dseRuntime";
 
 const SCHEMA_VERSION = 1 as const;
-const GENERATOR_VERSION = "dse-diagram-layout-v7-shared-terminal-fans";
+const GENERATOR_VERSION = "dse-diagram-layout-v18-routing-derived-busbar-slots";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const outputPath = path.join(root, "data", "generated", "diagram-layouts.json");
@@ -55,7 +55,20 @@ const serializeLayout = (junctionId?: string) => {
     || layout.unbridgedCrossings !== 0
     || layout.conductorOverlaps !== 0 || layout.parallelEnvelopeOverlaps !== 0 || layout.nodeBodyCrossings !== 0
     || layout.nodeOverlaps !== 0 || layout.minimumParallelWireSeparation < 12) {
-    throw new Error(`${layout.key}: invalid diagram geometry (${layout.routingFallbacks} fallbacks, `
+    const fallbackIds = new Set(layout.fallbackRouteIds);
+    if (fallbackIds.size > 0) console.error("Diagram fallback geometry:", JSON.stringify({
+      nodes: layout.nodes.filter((node) => [
+        "acJunction", "multiAcInBreakout", "multiPlus", "multiAcOutBreakout", "unifi",
+      ].includes(node.device.id)).map((node) => ({
+        id: node.device.id, x: node.x, y: node.y, width: node.width, height: node.height,
+        ports: node.ports.map((port) => ({ id: port.endpointId, side: port.side, offset: port.offset })),
+      })),
+      wires: layout.wires.filter((wire) => fallbackIds.has(wire.route.id)).map((wire) => ({
+        id: wire.route.id, from: wire.fromEndpointId, to: wire.toEndpointId, points: wire.points,
+      })),
+    }));
+    throw new Error(`${layout.key}: invalid diagram geometry (${layout.routingFallbacks} fallbacks`
+      + `${layout.fallbackRouteIds.length ? ` [${layout.fallbackRouteIds.join(", ")}]` : ""}, `
       + `${layout.coincidentSegments} coincident segments, ${layout.nonOrthogonalSegments} diagonal segments, `
       + `${layout.unbridgedCrossings} unbridged crossings, ${layout.conductorOverlaps} overlapping conductors, `
       + `${layout.parallelEnvelopeOverlaps} parallel cable-envelope overlaps, `

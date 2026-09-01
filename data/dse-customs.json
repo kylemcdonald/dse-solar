@@ -1,5 +1,5 @@
 {
-  "checkedOn": "2026-08-26",
+  "checkedOn": "2026-08-30",
   "manifestTitle": "Drua Sailing Experience solar-system equipment",
   "declaredPurpose": "Permanent donated equipment for a remote Fiji school teaching Polynesian voyaging; not for resale.",
   "defaultConsignee": "Drua Sailing Experiences Pte Limited",
@@ -93,7 +93,7 @@
       "additionalInfo": "Part number pending label"
     },
     "dse-pv-protection": {
-      "model": "Two-string PV combiner",
+      "model": "Purchased PV enclosure package · shell reused for cutoff",
       "origin": "",
       "serialRequired": false,
       "originBasis": "unresolved",
@@ -101,7 +101,7 @@
       "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
       "originReviewedOn": "2026-08-25",
       "make": "CXCESNS",
-      "additionalInfo": "600 VDC · 40 A · disconnect + SPD"
+      "additionalInfo": "R30: empty shell + one separate 20 A two-pole breaker; supplied rails/fuses/SPD/disconnect uninstalled"
     },
     "dse-breaker-mnedc100": {
       "make": "DIHOOL",
@@ -349,7 +349,7 @@
       "originNote": "TAIXI identifies its manufacturing operation and address in Zhejiang, China; verify the received product label before filing.",
       "originReviewedOn": "2026-08-25",
       "excludedFromManifest": true,
-      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "exclusionReason": "Both units were returned; $35.96 in refunds issued 26 Aug 2026. Do not import.",
       "make": "CHTAIXI",
       "additionalInfo": "120 VAC · 30 mA · 1P+N · Type AC"
     },
@@ -488,7 +488,7 @@
       "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
       "originReviewedOn": "2026-08-25",
       "excludedFromManifest": true,
-      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "exclusionReason": "Item was returned; $38.85 refund issued 26 Aug 2026. Do not import.",
       "make": "Victron",
       "additionalInfo": "SCC950400300"
     },
@@ -517,7 +517,7 @@
     "dse-pv-string-breakers": {
       "make": "CHTAIXI",
       "model": "DZ47NZ-63 two-pole PV breaker",
-      "additionalInfo": "600 VDC · 20 A",
+      "additionalInfo": "600 VDC · 20 A · quantity 2 purchased; one installed, one uninstalled spare/return",
       "serialRequired": false,
       "defaultCondition": "New",
       "origin": "CN",
@@ -594,7 +594,7 @@
       "originNote": "DIHOOL identifies DIHOOL Electric Zhejiang Co., Ltd. as its manufacturer in Zhejiang, China; verify the received product label before filing.",
       "originReviewedOn": "2026-08-25",
       "excludedFromManifest": true,
-      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "exclusionReason": "Both units were returned; $57.04 refund issued 26 Aug 2026. Do not import.",
       "make": "DIHOOL",
       "additionalInfo": "30 A · 30 mA"
     },
@@ -688,7 +688,9 @@
       "originSourceUrl": "https://www.amazon.com/dp/B0FMK1W3T5",
       "originReviewedOn": "2026-08-25",
       "make": "iGreely",
-      "additionalInfo": "1 ft"
+      "additionalInfo": "1 ft",
+      "excludedFromManifest": true,
+      "exclusionReason": "All three pairs were returned; $62.52 refund issued 27 Aug 2026. Do not import."
     },
     "dse-10awg-wire-30ft": {
       "model": "10 AWG red/black wire",
@@ -721,7 +723,9 @@
       "originSourceUrl": "https://www.amazon.com/dp/B0GR8WW7J7",
       "originReviewedOn": "2026-08-25",
       "make": "iGreely",
-      "additionalInfo": "2 ft"
+      "additionalInfo": "2 ft",
+      "excludedFromManifest": true,
+      "exclusionReason": "Pair was returned and $31.82 credited 27 Aug 2026. Do not import."
     },
     "dse-14awg-wire-pair-25ft": {
       "model": "14 AWG red/black wire",
@@ -1074,7 +1078,7 @@
     "dse-switched-load-breaker": {
       "make": "CHTAIXI",
       "model": "Single-pole B-curve DC miniature circuit breaker",
-      "additionalInfo": "10 A · 12–110 VDC · listing claims 6 kA",
+      "additionalInfo": "10 A · 12–110 VDC · delivery delayed",
       "origin": "CN",
       "originBasis": "manufacturer/listing",
       "originSourceUrl": "https://www.amazon.com/dp/B09H4W5HSW",
@@ -1082,6 +1086,62 @@
       "originReviewedOn": "2026-08-26",
       "serialRequired": false,
       "defaultCondition": "New"
+    },
+    "dse-amomd-600a-busbars-unused": {
+      "make": "AMOMD",
+      "model": "Covered positive/negative busbar pair",
+      "additionalInfo": "600 A · returned · not in design",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0DG4WLVT7",
+      "originNote": "Returned outside the import scope; manufacturing country was not required for filing.",
+      "originReviewedOn": "2026-08-30",
+      "serialRequired": false,
+      "defaultCondition": "Returned",
+      "excludedFromManifest": true,
+      "exclusionReason": "Return complete and $98.76 credited 26 Aug 2026. Do not import."
+    },
+    "dse-extra-dihool-120a-breaker": {
+      "make": "DIHOOL",
+      "model": "DZ47X-125-frame single-pole breaker",
+      "additionalInfo": "120 A · surplus fourth unit",
+      "serialRequired": false,
+      "defaultCondition": "New — surplus purchase",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0BFF7F46Y",
+      "originNote": "Confirm manufacturing country from the received product and packaging before filing.",
+      "originReviewedOn": "2026-08-26",
+      "excludedFromManifest": true,
+      "exclusionReason": "Not in the canonical three-breaker design; return/spare decision pending."
+    },
+    "dse-extra-ac-rcbo-pair": {
+      "make": "DIHOOL",
+      "model": "Two-pole ground-fault breaker with integrated surge protection",
+      "additionalInfo": "10 A · two duplicate units",
+      "origin": "CN",
+      "originBasis": "manufacturer/listing",
+      "originSourceUrl": "https://www.amazon.com/dp/B0CRKNJSRH",
+      "originNote": "The product-family listing identifies DIHOOL ELECTRIC and China; verify the exact received label before filing.",
+      "originReviewedOn": "2026-08-26",
+      "serialRequired": false,
+      "defaultCondition": "New — duplicate purchase",
+      "excludedFromManifest": true,
+      "exclusionReason": "Exact duplicate of the selected AC-in/out pair; return decision pending."
+    },
+    "dse-kerwinn-shared-services-breaker-alternate": {
+      "make": "KERWINN",
+      "model": "Single-pole B-curve DC miniature circuit breaker",
+      "additionalInfo": "10 A · 12–110 VDC · unselected alternate",
+      "origin": "",
+      "originBasis": "unresolved",
+      "originSourceUrl": "https://www.amazon.com/dp/B0BYSCXBH9",
+      "originNote": "Confirm manufacturing country and all safety markings from the received product before any selection or filing.",
+      "originReviewedOn": "2026-08-30",
+      "serialRequired": false,
+      "defaultCondition": "New — unselected alternate",
+      "excludedFromManifest": true,
+      "exclusionReason": "Not selected for the canonical design; verification and return/selection decision pending."
     }
   },
   "sources": [

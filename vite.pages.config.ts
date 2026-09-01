@@ -19,5 +19,11 @@ export default defineConfig({
     outDir: fileURLToPath(new URL("./dist-pages", import.meta.url)),
     emptyOutDir: true,
     sourcemap: true,
+    rolldownOptions: {
+      input: {
+        viewer: fileURLToPath(new URL("./static-site/index.html", import.meta.url)),
+        cablePlan: fileURLToPath(new URL("./static-site/cable-plan/index.html", import.meta.url)),
+      },
+    },
   },
 });

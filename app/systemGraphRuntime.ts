@@ -315,18 +315,17 @@ function deviceLocalPoint(device: ResolvedDevice, point: Vec3): Vec3 {
   return [dot(delta, xAxis), dot(delta, yAxis), dot(delta, zAxis)];
 }
 
-function blocksRoutingColumn(device: ResolvedDevice, devices: readonly ResolvedDevice[]) {
+function blocksRoutingColumn(device: ResolvedDevice) {
   if (device.presentation === "wall-passthrough") return false;
   if (device.placement.space === "world") {
     return ["wall", "outside-wall"].includes(device.placement.surface);
   }
-  // Enclosure routing is genuinely three-dimensional. The shell already
-  // removes the unusable volume behind the backplate, while exact body voxels
-  // prevent a cable from passing through mounted equipment. Projecting every
-  // internal device through the full enclosure depth would make verified
-  // cover/intermediate mounting planes impossible to route.
-  void devices;
-  return false;
+  // Every enclosure component is rear-mounted. Its X/Y footprint therefore
+  // remains unavailable all the way to the open front: an unrelated cable may
+  // go around a component, but never hide a crossing by passing in front of
+  // its face. Endpoint access still grants the owning cable its required
+  // straight launch away from its own terminal.
+  return true;
 }
 
 function orderedFacePorts(device: ResolvedDevice, face: Face) {
@@ -986,15 +985,32 @@ function resolveDevices(graph: SystemGraph) {
         if (!moved) break;
       }
     } else {
+      if (junction.powerBandFractionFromBottom !== undefined) {
+        const fraction = junction.powerBandFractionFromBottom;
+        if (!(fraction > 0 && fraction < 1)) {
+          throw new Error(`${junction.id}: power-band fraction must be between zero and one`);
+        }
+        const shellBottom = cy - height / 2;
+        const targetY = snapRoutingScalar(shellBottom + height * fraction);
+        power.forEach((device) => {
+          const resolved = resolvedById.get(device.id)!;
+          resolvedById.set(device.id, {
+            ...resolved,
+            position: [resolved.position[0], targetY, resolved.position[2]],
+          });
+        });
+      }
       const backplateRows = flowRows(backplate, width, effectivePadding, layoutGap);
       let cursorY = dinAtBottom
         // Anchor the planar backplate stack to the protected low-equipment
         // clearance, leaving any snapped surplus at the enclosure top. Packing
         // down from the top could consume one route cell from this gap and cage
         // bottom-facing terminals above the DIN/power row.
-        ? lowBandBottom + Math.max(dinHeight, Math.max(0, ...power.map((device) => device.size[1])))
-          + verticalGap(backplateRows.at(-1) ?? [], [...din, ...power], layoutGap)
-          + rowsHeight(backplateRows, layoutGap)
+        ? junction.backplatePosition === "top"
+          ? enclosureTop
+          : lowBandBottom + Math.max(dinHeight, Math.max(0, ...power.map((device) => device.size[1])))
+            + verticalGap(backplateRows.at(-1) ?? [], [...din, ...power], layoutGap)
+            + rowsHeight(backplateRows, layoutGap)
         : dinTop - dinHeight - (din.length && backplateRows.length
           ? verticalGap(din, backplateRows[0], layoutGap)
           : 0);
@@ -1138,7 +1154,7 @@ function resolveDevices(graph: SystemGraph) {
         && targets.some(({ projection }) => projection < -1e-8)
         && targets.some(({ projection }) => projection > 1e-8);
       if (oppositeSides) {
-        const sideByConductorId = new Map(targets.map(({ conductorId, projection }) => (
+        const sideByConductorId = new Map<string, number>(targets.map(({ conductorId, projection }) => (
           [conductorId, Math.sign(projection)] as const
         )));
         resolvedConductorPositions = Object.fromEntries(targets.map(({ conductorId, projection }) => [
@@ -1777,7 +1793,7 @@ function buildBlockedVoxels(
     const maxX = Math.min(bounds[0], Math.floor((device.position[0] + half[0] + radiusM - space.min[0] + 1e-9) / space.cell));
     const minY = Math.max(0, Math.ceil((device.position[1] - half[1] - radiusM - space.min[1] - 1e-9) / space.cell));
     const maxY = Math.min(bounds[1], Math.floor((device.position[1] + half[1] + radiusM - space.min[1] + 1e-9) / space.cell));
-    const blocksWholeColumn = blocksRoutingColumn(device, devices);
+    const blocksWholeColumn = blocksRoutingColumn(device);
     for (let x = minX; x <= maxX; x += 1) {
       for (let y = minY; y <= maxY; y += 1) {
         if (blocksWholeColumn) addDeviceObstacle(columns, `${x},${y}`, device.id);
@@ -2361,9 +2377,29 @@ function aStarWorld(
       ));
     const leg = directLeg ? directLeg : reverseRemoteArrival ? solvedLeg?.toReversed() ?? null : solvedLeg;
     if (!leg) {
+      const decomposedFailure = routingFailureDiagnostics.at(-1);
+      if (decomposedFailure?.owner === owner) routingFailureDiagnostics.pop();
+      // A preferred-plane anchor can be individually clear yet isolated by
+      // previously reserved thick cables. In that case solve the same exact
+      // obstacle field end-to-end so A* may change depth before the barrier.
+      // This is still a certified voxel route, not a geometric fallback.
+      const wholeRoute = aStar(
+        start,
+        end,
+        space,
+        diameterMm,
+        owner,
+        plane,
+        outsideFloorPreference,
+        endpointAccess,
+        startDirection,
+        endDirection,
+        terminalNeighborhoods,
+      );
+      if (wholeRoute) return wholeRoute;
       const failure = routingFailureDiagnostics.at(-1);
       if (failure?.owner === owner) {
-        failure.reason = `world leg ${legIndex + 1}/${legs.length} ${legStart.map((value) => value.toFixed(3)).join(",")} → ${legEnd.map((value) => value.toFixed(3)).join(",")}: ${failure.reason}`;
+        failure.reason = `preferred-plane leg ${legIndex + 1}/${legs.length} was isolated; full world solve: ${failure.reason}`;
       }
       return null;
     }
@@ -2592,7 +2628,7 @@ function terminalApproachDeviceConflict(
       }
       continue;
     }
-    const projectedColumn = blocksRoutingColumn(device, devices);
+    const projectedColumn = blocksRoutingColumn(device);
     for (let segment = 1; segment < points.length; segment += 1) {
       const start = points[segment - 1];
       const end = points[segment];
@@ -5306,7 +5342,7 @@ export function sampledRouteDeviceConflicts(
         } else if (device.placement.space === "world"
           && device.presentation !== "wall-passthrough"
           && deviceWorldRegion(device) !== "inside") return;
-        const blocksWholeColumn = blocksRoutingColumn(device, devices);
+        const blocksWholeColumn = blocksRoutingColumn(device);
         const routeRadiusM = route.diameterMm / 2000;
         const localStart = deviceLocalPoint(device, start);
         const localEnd = deviceLocalPoint(device, end);

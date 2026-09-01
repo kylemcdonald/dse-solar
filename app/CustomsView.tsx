@@ -200,7 +200,7 @@ export function CustomsView({ bom, planningFjdPerUsd }: { bom: CustomsBomItem[];
       <div className="customs-heading"><div><span>Fiji arrival planning · researched {customs.checkedOn}</span><h1>Customs manifest</h1><p>Pre-clear project equipment and retain every numbered invoice referenced below.</p></div>
         <div className="customs-actions">
           <button type="button" className={`customs-secondary-button ${groupMiscellaneous ? "active" : ""}`} aria-pressed={groupMiscellaneous} onClick={() => setGroupMiscellaneous((value) => !value)}>Group low-cost accessories</button>
-          {privateMode && <a className="customs-secondary-button" href="/api/receipts/download" download>Download receipts (.zip)</a>}
+          {privateMode && <a className="customs-secondary-button" href="/api/receipts/download" download>Download all receipts (.zip)</a>}
           <button type="button" className="customs-secondary-button" onClick={downloadCsv}>Export CSV</button>
           <button type="button" className="customs-print-button" onClick={() => printManifest("full")}>Print / save PDF</button>
           <button type="button" className="customs-print-button" onClick={() => printManifest("taf")}>Print / save TAF PDF</button>

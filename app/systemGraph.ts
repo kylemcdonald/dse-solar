@@ -293,6 +293,9 @@ export type Device = {
   /** Diagram-only bodyless fan/join presentation. The physical model retains
    * the real connector body and terminal construction. */
   diagramPresentation?: "join";
+  /** Diagram-only bodyless-join geometry. This changes no electrical or
+   * physical connectivity. */
+  diagramJoinGeometry?: "y" | "orthogonal-t";
   /** Series protection automatically spans the powered terminals on this
    * device. Direction is graph-derived so non-polarized devices work in either
    * source orientation. */
@@ -376,6 +379,10 @@ export type Junction = {
   sizePolicy?: "auto" | "verified-fixed";
   /** Declarative band policy; avoids enclosure-ID placement branches. */
   dinPosition?: "top" | "bottom";
+  /** Optional vertical datum for the power-device band. */
+  powerBandFractionFromBottom?: number;
+  /** Keep the first declared backplate row against the enclosure top. */
+  backplatePosition?: "above-equipment" | "top";
 };
 
 export type SystemGraph = {

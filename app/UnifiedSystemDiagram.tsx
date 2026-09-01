@@ -28,7 +28,7 @@ type Props = {
 };
 
 type Point = { x: number; y: number };
-type PortSide = "input" | "output" | "neutral";
+type PortSide = "input" | "output" | "neutral" | "top";
 type EndpointPosition = {
   point: Point;
   side: PortSide;
@@ -97,6 +97,13 @@ type DiagramLayout = {
   nodeOverlaps: number;
   wireTurns: number;
   wireLength: number;
+  interchangeableTapCandidates: number;
+  interchangeableTapReassignments: number;
+  busbarLandingCandidates: number;
+  busbarLandingReassignments: number;
+  peerOrderedBusbarIds: readonly string[];
+  tapRoutingOrderCandidates: number;
+  selectedRoutingOrder: DiagramRouteOrdering;
   layoutMs: number;
   precomputedLayoutMs?: number;
 };
@@ -125,10 +132,14 @@ const ABSTRACT_GLAND_PITCH = 36;
 const WORLD_COLUMN_GAP = 168;
 const WORLD_LANE_GAP = 192;
 const WORLD_STAGE_STACK_GAP = 96;
+const AC_CONVERSION_ROW_OFFSET = 360;
 const ATTACHED_JOIN_GAP = 72;
+const EXTERNAL_AC_JUNCTION_GAP = 144;
+const INVERTER_BREAKOUT_GAP = 96;
 const BATTERY_JOIN_GAP = 84;
 const JUNCTION_COLUMN_GAP = 168;
 const JUNCTION_ROW_GAP = 108;
+const JUNCTION_ATTACHED_JOIN_GAP = ROUTE_LEAD * 2 + GRID;
 const BOUNDARY_PORT_PITCH = 42;
 const WIRE_LANE_CLEARANCE = 0.05;
 const MIN_SCALE = 0.16;
@@ -216,6 +227,7 @@ function devicePorts(device: ResolvedDevice): DiagramPort[] {
 
 function nodeDimensions(device: ResolvedDevice, ports: readonly DiagramPort[], abstractJunction: boolean) {
   if (isDiagramJoin(device)) {
+    if (device.diagramJoinGeometry === "orthogonal-t") return { width: 72, height: 72 };
     const edgeCount = Math.max(1,
       ports.filter((port) => port.side === "input").length,
       ports.filter((port) => port.side === "output").length);
@@ -228,13 +240,14 @@ function nodeDimensions(device: ResolvedDevice, ports: readonly DiagramPort[], a
   const inputCount = ports.filter((port) => port.side === "input").length;
   const outputCount = ports.filter((port) => port.side === "output").length;
   const bottomCount = ports.filter((port) => port.side === "neutral").length;
+  const topCount = ports.filter((port) => port.side === "top").length;
   const longestText = device.label.length;
   const densityWidth = 120 + Math.ceil(Math.sqrt(Math.max(1, ports.length))) * 36;
   const sidePitch = abstractJunction || device.presentation === "wall-passthrough"
     ? ABSTRACT_GLAND_PITCH : PORT_PITCH;
   return {
     width: snapUp(Math.max(baseWidth, longestText * 7.2 + 48,
-      bottomCount * (abstractJunction ? ABSTRACT_GLAND_PITCH : PORT_PITCH) + 48,
+      Math.max(bottomCount, topCount) * (abstractJunction ? ABSTRACT_GLAND_PITCH : PORT_PITCH) + 48,
       densityWidth, abstractJunction ? 264 : 0)),
     height: snapUp(Math.max(baseHeight, Math.max(inputCount, outputCount) * sidePitch + 60)),
   };
@@ -253,12 +266,14 @@ function portPoint(node: DiagramNode, port: DiagramPort): Point {
   const offset = port.offset ?? (index - (peers.length - 1) / 2) * pitch;
   if (port.side === "input") return { x: node.x - node.width / 2, y: node.y + offset };
   if (port.side === "output") return { x: node.x + node.width / 2, y: node.y + offset };
+  if (port.side === "top") return { x: node.x + offset, y: node.y - node.height / 2 };
   return { x: node.x + offset, y: node.y + node.height / 2 };
 }
 
 function outwardVector(side: PortSide): Point {
   if (side === "input") return { x: -1, y: 0 };
   if (side === "output") return { x: 1, y: 0 };
+  if (side === "top") return { x: 0, y: -1 };
   return { x: 0, y: 1 };
 }
 
@@ -323,6 +338,21 @@ function groupedOrder(device: ResolvedDevice) {
   return device.layoutGroup?.order ?? Number.MAX_SAFE_INTEGER;
 }
 
+/** Return the one device receiving every individual core from a breakout.
+ * The sheath route is deliberately excluded: it belongs on the other side of
+ * the transition and may terminate at a junction boundary. */
+function exclusiveBreakoutCorePeer(device: ResolvedDevice) {
+  if (device.presentation !== "cable-breakout") return undefined;
+  const coreEndpointIds = device.conductors.filter((conductor) => conductor.kind !== "multicore")
+    .map((conductor) => `${device.id}.${conductor.id}`);
+  const peerIds = coreEndpointIds.flatMap((endpointId) => connectionsFor(endpointId).flatMap((route) => {
+    const peerEndpoint = route.from === endpointId ? route.to : route.from;
+    return [endpointDeviceId(peerEndpoint)];
+  }));
+  if (peerIds.length !== coreEndpointIds.length || new Set(peerIds).size !== 1) return undefined;
+  return dseRuntime.deviceById.get(peerIds[0]);
+}
+
 function worldStage(device: ResolvedDevice) {
   const lane = worldLane(device);
   if (device.presentation === "wall-passthrough") return 3;
@@ -336,10 +366,25 @@ function worldStage(device: ResolvedDevice) {
   }
   if (lane === "ac") {
     if (device.kind === "generator") return 0;
-    if (device.kind === "junction") return 4;
+    if (device.presentation === "cable-breakout" && dseRuntime.routes.some((route) => {
+      const endpoints = [route.from, route.to];
+      if (!endpoints.some((endpoint) => endpointDeviceId(endpoint) === device.id)) return false;
+      return endpoints.some((endpoint) => (
+        dseRuntime.deviceById.get(endpointDeviceId(endpoint))?.kind === "generator"
+      ));
+    })) return 1;
+    // The protected external-AC assembly shares the late-service column with
+    // network loads. Keeping its junction at that stage centers the complete
+    // generator -> protection -> outlet corridor over the same X datum as the
+    // router instead of exiling the assembly beyond the rest of the drawing.
+    if (device.kind === "junction") return 8;
     if (device.kind === "inverter") return 6;
     if (device.componentId === "toolOutlet") return 9;
-    if (device.presentation === "cable-breakout") return /AC-out/i.test(device.label) ? 7 : 5;
+    if (device.presentation === "cable-breakout") {
+      const peer = exclusiveBreakoutCorePeer(device);
+      const load = peer?.kind === "load" ? peer : undefined;
+      return load ? Math.max(0, worldStage(load) - 1) : /AC-out/i.test(device.label) ? 7 : 5;
+    }
   }
   if (lane === "earth") return device.kind === "earth" && device.conductors.length === 1 ? 0 : 5;
   if (lane === "network") {
@@ -381,7 +426,60 @@ function familyRowOffset(device: ResolvedDevice, nodeHeight: number) {
 function preferredLaneOffset(node: DiagramNode) {
   if (node.device.layoutGroup?.id === "coolgear-145") return 156;
   if (worldLane(node.device) === "usb12") return -60;
+  const breakoutPeer = exclusiveBreakoutCorePeer(node.device);
+  if (worldLane(node.device) === "ac"
+    && (node.device.kind === "inverter" || breakoutPeer?.kind === "inverter")) {
+    return AC_CONVERSION_ROW_OFFSET;
+  }
   return familyRowOffset(node.device, node.height);
+}
+
+type ExternalAcCorridorArm = { breakout: DiagramNode; peer: DiagramNode };
+type ExternalAcCorridor = {
+  junction: DiagramNode;
+  source: ExternalAcCorridorArm;
+  load: ExternalAcCorridorArm;
+};
+
+function externalAcCorridors(nodes: readonly DiagramNode[], seeds: readonly WireSeed[]) {
+  const nodeById = new Map(nodes.map((node) => [node.device.id, node]));
+  return nodes.filter((node) => worldLane(node.device) === "ac" && node.device.kind === "junction")
+    .flatMap((junction): ExternalAcCorridor[] => {
+      const connectedBreakouts = nodes.flatMap((breakout) => {
+        const peer = exclusiveBreakoutCorePeer(breakout.device);
+        const peerNode = peer ? nodeById.get(peer.id) : undefined;
+        const cableEndpoint = `${breakout.device.id}.cable`;
+        const reachesJunction = seeds.some((seed) => (
+          (seed.fromEndpointId === cableEndpoint && seed.toEndpointId.startsWith(`${junction.device.id}::`))
+          || (seed.toEndpointId === cableEndpoint && seed.fromEndpointId.startsWith(`${junction.device.id}::`))
+        ));
+        return peerNode && reachesJunction ? [{ breakout, peer: peerNode }] : [];
+      });
+      const source = connectedBreakouts.find((entry) => entry.peer.device.kind === "generator");
+      const load = connectedBreakouts.find((entry) => entry.peer.device.kind === "load");
+      return source && load ? [{ junction, source, load }] : [];
+    });
+}
+
+/** Keep the two three-core MultiPlus transitions immediately beside the
+ * inverter. The core-facing side tells us which flank owns the breakout, so
+ * this remains topology-derived rather than depending on device IDs. */
+function placeInverterAcBreakouts(nodes: readonly DiagramNode[]) {
+  const nodeById = new Map(nodes.map((node) => [node.device.id, node]));
+  nodes.forEach((breakout) => {
+    const peer = exclusiveBreakoutCorePeer(breakout.device);
+    const inverter = peer?.kind === "inverter" ? nodeById.get(peer.id) : undefined;
+    if (!inverter) return;
+    const coreSides = new Set(breakout.ports.filter((port) => port.kind !== "multicore")
+      .map((port) => port.side));
+    const direction = coreSides.size === 1 && coreSides.has("output") ? -1
+      : coreSides.size === 1 && coreSides.has("input") ? 1 : undefined;
+    if (!direction) return;
+    breakout.x = snap(inverter.x + direction * (
+      inverter.width / 2 + INVERTER_BREAKOUT_GAP + breakout.width / 2
+    ));
+    breakout.y = inverter.y;
+  });
 }
 
 function mean(values: readonly number[]) {
@@ -442,7 +540,7 @@ function collisionFreeLaneOffsets(members: readonly DiagramNode[]) {
   return members.map((node) => offsetById.get(node.device.id)!);
 }
 
-function layoutWorldNodes(nodes: DiagramNode[]) {
+function layoutWorldNodes(nodes: DiagramNode[], seeds: readonly WireSeed[]) {
   const primary = nodes.filter((node) => !(node.device.presentation === "wire-join" && node.device.attachment));
   const nodeById = new Map(nodes.map((node) => [node.device.id, node]));
   const attachedNodesByOwner = Map.groupBy(nodes.filter((node) => node.device.presentation === "wire-join"), (node) => (
@@ -478,6 +576,16 @@ function layoutWorldNodes(nodes: DiagramNode[]) {
     return cursor + width + gap;
   }, LAYOUT_MARGIN);
   flowNodes.forEach((node) => { node.x = snap(columnCenters[stageById.get(node.device.id)!]); });
+  externalAcCorridors(flowNodes, seeds).forEach(({ junction, source, load }) => {
+      source.breakout.x = snap(junction.x - junction.width / 2
+        - EXTERNAL_AC_JUNCTION_GAP - source.breakout.width / 2);
+      source.peer.x = snap(source.breakout.x - source.breakout.width / 2
+        - ATTACHED_JOIN_GAP - source.peer.width / 2);
+      load.breakout.x = snap(junction.x + junction.width / 2
+        + EXTERNAL_AC_JUNCTION_GAP + load.breakout.width / 2);
+      load.peer.x = snap(load.breakout.x + load.breakout.width / 2
+        + ATTACHED_JOIN_GAP + load.peer.width / 2);
+    });
 
   const laneCenters = new Map<WorldLane, number>();
   let cursor = LAYOUT_MARGIN;
@@ -636,15 +744,21 @@ function layoutWorldNodes(nodes: DiagramNode[]) {
     });
   });
 
+  placeInverterAcBreakouts(nodes);
+  externalAcCorridors(nodes, seeds).forEach(({ junction, source, load }) => {
+    [source.peer, source.breakout, load.breakout, load.peer].forEach((node) => {
+      node.y = junction.y;
+    });
+  });
   nodes.forEach((node) => { node.x = snap(node.x); node.y = snap(node.y); });
   orientAttachedJoinPorts(nodes);
   return normalizeNodes(nodes);
 }
 
-function normalizeNodes(nodes: DiagramNode[]) {
+function normalizeNodes(nodes: DiagramNode[], margin = LAYOUT_MARGIN) {
   const minX = Math.min(...nodes.map((node) => node.x - node.width / 2));
   const minY = Math.min(...nodes.map((node) => node.y - node.height / 2));
-  const shiftX = snap(LAYOUT_MARGIN - minX);
+  const shiftX = snap(margin - minX);
   const shiftY = snap(LAYOUT_MARGIN - minY);
   nodes.forEach((node) => { node.x += shiftX; node.y += shiftY; });
   return nodes;
@@ -662,9 +776,12 @@ function layoutJunctionNodes(devices: readonly ResolvedDevice[], seeds: readonly
     const ports = devicePorts(device);
     return { device, ports, ...nodeDimensions(device, ports, false), x: 0, y: 0, abstractJunction: false };
   });
-  const nodeIds = new Set(nodes.map((node) => node.device.id));
-  const adjacency = new Map(nodes.map((node) => [node.device.id, new Set<string>()]));
-  const reverse = new Map(nodes.map((node) => [node.device.id, new Set<string>()]));
+  const attachedNodes = nodes.filter((node) => node.device.presentation === "wire-join"
+    && node.device.diagramJoinGeometry === "orthogonal-t" && node.device.attachment);
+  const layoutNodes = nodes.filter((node) => !attachedNodes.includes(node));
+  const nodeIds = new Set(layoutNodes.map((node) => node.device.id));
+  const adjacency = new Map(layoutNodes.map((node) => [node.device.id, new Set<string>()]));
+  const reverse = new Map(layoutNodes.map((node) => [node.device.id, new Set<string>()]));
   seeds.filter((seed) => seed.route.kind !== "earth" && seed.route.kind !== "data").forEach((seed) => {
     const from = endpointDeviceId(seed.fromEndpointId); const to = endpointDeviceId(seed.toEndpointId);
     if (!nodeIds.has(from) || !nodeIds.has(to) || from === to) return;
@@ -691,7 +808,7 @@ function layoutJunctionNodes(devices: readonly ResolvedDevice[], seeds: readonly
     }
     components.push(component);
   };
-  nodes.forEach((node) => { if (!indexById.has(node.device.id)) visit(node.device.id); });
+  layoutNodes.forEach((node) => { if (!indexById.has(node.device.id)) visit(node.device.id); });
   const componentById = new Map<string, number>();
   components.forEach((component, index) => component.forEach((id) => componentById.set(id, index)));
   const componentEdges = components.map(() => new Set<number>()); const indegree = components.map(() => 0);
@@ -709,9 +826,9 @@ function layoutJunctionNodes(devices: readonly ResolvedDevice[], seeds: readonly
       indegree[target] -= 1; if (indegree[target] === 0) queue.push(target);
     });
   }
-  const rankById = new Map(nodes.map((node) => [node.device.id, componentRank[componentById.get(node.device.id)!]]));
+  const rankById = new Map(layoutNodes.map((node) => [node.device.id, componentRank[componentById.get(node.device.id)!]]));
   const rankCount = Math.max(...rankById.values()) + 1;
-  const columns = Array.from({ length: rankCount }, (_, rank) => nodes.filter((node) => rankById.get(node.device.id) === rank));
+  const columns = Array.from({ length: rankCount }, (_, rank) => layoutNodes.filter((node) => rankById.get(node.device.id) === rank));
   const physicalOrder = new Map(orderedDevices.map((device, index) => [device.id, index]));
   const position = new Map<string, number>();
   const refreshPositions = () => columns.forEach((column) => column.forEach((node, index) => position.set(node.device.id, index)));
@@ -732,6 +849,218 @@ function layoutJunctionNodes(devices: readonly ResolvedDevice[], seeds: readonly
     }
   }
   const columnWidths = columns.map((column) => Math.max(...column.map((node) => node.width)));
+  if (attachedNodes.length > 0) {
+    const nodeById = new Map(nodes.map((node) => [node.device.id, node]));
+    const childrenByOwner = Map.groupBy(attachedNodes, (node) => endpointDeviceId(node.device.attachment!.endpoint));
+    const verticalOffsetById = new Map<string, number>();
+    const subtreeBottom = (owner: DiagramNode, ownerOffset: number, visited = new Set<string>()): number => {
+      if (visited.has(owner.device.id)) throw new Error(`Junction attachment cycle includes ${owner.device.id}.`);
+      const nextVisited = new Set(visited); nextVisited.add(owner.device.id);
+      let cursor = ownerOffset + owner.height / 2;
+      (childrenByOwner.get(owner.device.id) ?? [])
+        .toSorted((first, second) => first.device.id.localeCompare(second.device.id))
+        .forEach((child) => {
+          const center = cursor + JUNCTION_ATTACHED_JOIN_GAP + child.height / 2;
+          verticalOffsetById.set(child.device.id, center);
+          cursor = subtreeBottom(child, center, nextVisited);
+        });
+      return cursor;
+    };
+    const macroBounds = new Map(layoutNodes.map((node) => {
+      verticalOffsetById.set(node.device.id, 0);
+      return [node.device.id, { top: -node.height / 2, bottom: subtreeBottom(node, 0) }] as const;
+    }));
+    const columnCenters: number[] = [];
+    columnWidths.reduce((cursor, width, rank) => {
+      columnCenters[rank] = cursor + width / 2; return cursor + width + JUNCTION_COLUMN_GAP;
+    }, LAYOUT_MARGIN);
+    columns.forEach((column, rank) => column.forEach((node) => { node.x = snap(columnCenters[rank]); }));
+
+    // If a tap chain receives a bottom-edge earth trunk, keep its spine in a
+    // dedicated lane between two source rows. The upstream breakout moves to
+    // the minimum terminal-lead margin; later breakout macros move beyond the
+    // spine. The trunk can then cross only their incoming cable, rather than
+    // detouring around the breakout body, L/N conductors, and another tee.
+    const tapRoots = layoutNodes.filter((node) => childrenByOwner.has(node.device.id));
+    const trunkRootIds = new Set(seeds.filter((seed) => seed.route.kind === "earth"
+      && (seed.fromEndpointId.startsWith("boundary::") || seed.toEndpointId.startsWith("boundary::")))
+      .flatMap((seed) => {
+        const internalEndpoint = seed.fromEndpointId.startsWith("boundary::")
+          ? seed.toEndpointId : seed.fromEndpointId;
+        const owner = nodeById.get(endpointDeviceId(internalEndpoint));
+        return owner?.device.attachment ? [attachmentRoot(owner.device).id] : [];
+      }));
+    let compactLeftMargin = false;
+    trunkRootIds.forEach((trunkRootId) => {
+      const trunkRoot = nodeById.get(trunkRootId);
+      if (!trunkRoot) return;
+      const rank = rankById.get(trunkRootId);
+      const column = rank === undefined ? undefined : columns[rank];
+      if (!column || !column.every((node) => tapRoots.includes(node))) return;
+      trunkRoot.x = snap(ROUTE_LEAD * 2 + trunkRoot.width / 2);
+      const firstAttached = childrenByOwner.get(trunkRootId)![0];
+      const attachmentPort = trunkRoot.ports.find((port) => (
+        port.endpointId === firstAttached.device.attachment!.endpoint
+      ))!;
+      const attachmentPoint = portPoint(trunkRoot, attachmentPort);
+      const attachmentOutward = outwardVector(attachmentPort.side);
+      const trunkX = snap(attachmentPoint.x + attachmentOutward.x * ROUTE_LEAD);
+      let nextLeft = trunkX + GRID * 2;
+      column.filter((node) => node !== trunkRoot).forEach((node) => {
+        node.x = snap(nextLeft + node.width / 2);
+        nextLeft = node.x + node.width / 2 + JUNCTION_COLUMN_GAP;
+      });
+      compactLeftMargin = true;
+    });
+
+    columns.forEach((column, rank) => {
+      let cursor = LAYOUT_MARGIN;
+      column.forEach((node) => {
+        const bounds = macroBounds.get(node.device.id)!;
+        const positionedPredecessors = [...reverse.get(node.device.id)!]
+          .flatMap((id) => nodeById.get(id)?.y ? [nodeById.get(id)!.y] : []);
+        const desired = positionedPredecessors.length ? mean(positionedPredecessors) : cursor - bounds.top;
+        node.y = snap(Math.max(desired, cursor - bounds.top));
+        cursor = node.y + bounds.bottom + JUNCTION_ROW_GAP;
+      });
+      // A source column establishes row coordinates. Later ranks inherit the
+      // barycenter of their already positioned predecessors, so an enclosure
+      // with two independent L/N paths becomes two aligned rows instead of
+      // three independently centered stacks.
+      if (rank > 0) {
+        column.forEach((node) => {
+          const predecessors = [...reverse.get(node.device.id)!].flatMap((id) => {
+            const predecessor = nodeById.get(id); return predecessor ? [predecessor.y] : [];
+          });
+          if (predecessors.length) node.y = snap(mean(predecessors));
+        });
+        cursor = LAYOUT_MARGIN;
+        column.forEach((node) => {
+          const bounds = macroBounds.get(node.device.id)!;
+          node.y = snap(Math.max(node.y, cursor - bounds.top));
+          cursor = node.y + bounds.bottom + JUNCTION_ROW_GAP;
+        });
+      }
+    });
+    attachedNodes.forEach((node) => {
+      const root = attachmentRoot(node.device);
+      const rootNode = nodeById.get(root.id);
+      if (!rootNode) throw new Error(`${node.device.id}: attached junction root ${root.id} is outside the subpatch.`);
+      const firstAttached = (childrenByOwner.get(root.id) ?? [])[0];
+      const attachmentPort = firstAttached && rootNode.ports.find((port) => (
+        port.endpointId === firstAttached.device.attachment!.endpoint
+      ));
+      const attachmentPoint = attachmentPort ? portPoint(rootNode, attachmentPort) : { x: rootNode.x, y: rootNode.y };
+      const attachmentOutward = attachmentPort ? outwardVector(attachmentPort.side) : { x: 0, y: 1 };
+      node.x = snap(attachmentPoint.x + attachmentOutward.x * ROUTE_LEAD);
+      node.y = snap(rootNode.y + verticalOffsetById.get(node.device.id)!);
+    });
+    // An attached orthogonal tee can absorb the bend of an upward branch:
+    // move the deepest tee in its continuous chain onto the X coordinate of
+    // the peer's bottom/top port. In a multi-tee chain it shares its parent's
+    // row, turning the inter-tee link into the horizontal cylinder while the
+    // branch becomes the short vertical cylinder at the former wire corner.
+    const ownerByEndpoint = new Map(nodes.flatMap((node) => node.ports.map((port) => (
+      [port.endpointId, { node, port }] as const
+    ))));
+    const tapGroups = Map.groupBy(attachedNodes, (node) => attachmentRoot(node.device).id);
+    tapGroups.forEach((group) => {
+      const chain = group.toSorted((first, second) => (
+        (verticalOffsetById.get(first.device.id) ?? 0) - (verticalOffsetById.get(second.device.id) ?? 0)
+          || first.device.id.localeCompare(second.device.id)
+      ));
+      const firstJoin = chain[0];
+      const groupIds = new Set(group.map((node) => node.device.id));
+      const groupEndpoints = new Set(group.flatMap((node) => node.ports
+        .filter((port) => port.id !== "device").map((port) => port.endpointId)));
+      const upwardCorners = seeds.flatMap((seed) => {
+        const tapEndpoint = groupEndpoints.has(seed.fromEndpointId) ? seed.fromEndpointId
+          : groupEndpoints.has(seed.toEndpointId) ? seed.toEndpointId : undefined;
+        if (!tapEndpoint) return [];
+        const peerEndpoint = tapEndpoint === seed.fromEndpointId ? seed.toEndpointId : seed.fromEndpointId;
+        if (groupIds.has(endpointDeviceId(peerEndpoint))) return [];
+        const peer = ownerByEndpoint.get(peerEndpoint);
+        if (!peer || (peer.port.side !== "neutral" && peer.port.side !== "top")) return [];
+        const point = portPoint(peer.node, peer.port);
+        const halfExtent = peer.node.width / 2 - GRID;
+        const tapNode = nodeById.get(endpointDeviceId(tapEndpoint));
+        if (!tapNode) return [];
+        point.x = peer.node.x + snap(Math.max(-halfExtent, Math.min(halfExtent, tapNode.x - peer.node.x)), ROUTE_GRID);
+        return point.y < tapNode.y ? [{ point, routeId: seed.route.id, tapNode }] : [];
+      }).toSorted((first, second) => (
+        Math.abs(first.point.x - first.tapNode.x) - Math.abs(second.point.x - second.tapNode.x)
+          || first.routeId.localeCompare(second.routeId)
+      ));
+      const corner = upwardCorners[0];
+      if (!corner) return;
+      const direction = corner.point.x < firstJoin.x ? -1 : 1;
+      let previous = firstJoin;
+      chain.slice(1).forEach((join) => {
+        const minimumX = previous.x + direction * (previous.width + join.width) / 2;
+        join.x = join === corner.tapNode ? snap(direction > 0
+          ? Math.max(corner.point.x, minimumX)
+          : Math.min(corner.point.x, minimumX)) : snap(minimumX);
+        join.y = firstJoin.y;
+        previous = join;
+      });
+      const attachmentOwner = nodeById.get(endpointDeviceId(corner.tapNode.device.attachment!.endpoint));
+      if (attachmentOwner?.device.presentation === "wire-join") {
+        chain.forEach((join) => { join.y = firstJoin.y; });
+      }
+      const portGap = corner.tapNode.y - corner.tapNode.height / 2 - corner.point.y;
+      if (portGap < PORT_RADIUS * 2 + 2) {
+        const shift = snapUp(PORT_RADIUS * 2 + 2 - portGap, GRID);
+        corner.tapNode.y += shift;
+        if (attachmentOwner?.device.presentation === "wire-join") attachmentOwner.y += shift;
+      }
+    });
+    // Turn absorption can collapse a multi-tee vertical subtree into one
+    // horizontal row after the initial rank layout has reserved its former
+    // height. Compact complete electrical rows using the actual final macro
+    // bounds while preserving cross-column alignment and the routing gap.
+    const macroMembers = Map.groupBy(nodes, (node) => attachmentRoot(node.device).id);
+    const rows = [...Map.groupBy(layoutNodes, (node) => node.y).entries()]
+      .toSorted(([first], [second]) => first - second);
+    let previousBottom: number | undefined;
+    rows.forEach(([, rowRoots]) => {
+      const members = rowRoots.flatMap((root) => macroMembers.get(root.device.id) ?? [root]);
+      const top = Math.min(...members.map((node) => node.y - node.height / 2));
+      const bottom = Math.max(...members.map((node) => node.y + node.height / 2));
+      const targetTop = previousBottom === undefined ? top : previousBottom + JUNCTION_ROW_GAP;
+      const shift = Math.min(0, targetTop - top);
+      if (shift < 0) members.forEach((node) => { node.y += shift; });
+      previousBottom = bottom + shift;
+    });
+    // When one canonical earth conductor joins two independent tap chains,
+    // their aligned tee centers define the shortest vertical trunk. Move only
+    // intervening ordinary device macros far enough aside to preserve one
+    // routing lane; active/neutral rows retain their Y alignment.
+    seeds.filter((seed) => seed.route.kind === "earth").forEach((seed) => {
+      const from = nodeById.get(endpointDeviceId(seed.fromEndpointId));
+      const to = nodeById.get(endpointDeviceId(seed.toEndpointId));
+      if (from?.device.presentation !== "wire-join" || to?.device.presentation !== "wire-join") return;
+      const fromRoot = attachmentRoot(from.device).id; const toRoot = attachmentRoot(to.device).id;
+      if (fromRoot === toRoot) return;
+      const upper = from.y <= to.y ? from : to; const lower = upper === from ? to : from;
+      const lowerRoot = upper === from ? toRoot : fromRoot;
+      const alignmentShift = snap(upper.x - lower.x);
+      (tapGroups.get(lowerRoot) ?? []).forEach((join) => { join.x += alignmentShift; });
+      const trunkX = upper.x;
+      const top = Math.min(from.y, to.y); const bottom = Math.max(from.y, to.y);
+      layoutNodes.forEach((node) => {
+        if (node.y + node.height / 2 <= top || node.y - node.height / 2 >= bottom) return;
+        const left = node.x - node.width / 2; const right = node.x + node.width / 2;
+        if (left >= trunkX + MIN_WIRE_LANE_SPACING || right <= trunkX - MIN_WIRE_LANE_SPACING) return;
+        const direction = node.x < trunkX ? -1 : 1;
+        const targetX = trunkX + direction * (node.width / 2 + MIN_WIRE_LANE_SPACING + GRID);
+        const shift = snap(targetX - node.x);
+        (macroMembers.get(node.device.id) ?? [node]).forEach((member) => { member.x += shift; });
+      });
+    });
+    nodes.forEach((node) => { node.x = snap(node.x); node.y = snap(node.y); });
+    orientAttachedJoinPorts(nodes, seeds);
+    return normalizeNodes(nodes, compactLeftMargin ? ROUTE_LEAD * 2 : LAYOUT_MARGIN);
+  }
   const columnHeights = columns.map((column) => column.reduce((total, node) => total + node.height, 0)
     + Math.max(0, column.length - 1) * JUNCTION_ROW_GAP);
   const contentHeight = Math.max(...columnHeights);
@@ -753,14 +1082,50 @@ function junctionOwner(deviceId: string) {
   return device?.placement.space === "junction" ? device.placement.junctionId : undefined;
 }
 
-/** An attached three-way splice points its single device arm toward its owner
- * and fans the other two arms diagonally away. Sides—not point coordinates—are
- * the only input, so every Y remains automatic after a layout rerun. */
-function orientAttachedJoinPorts(nodes: readonly DiagramNode[]) {
+/** An attached three-way splice points its single device arm toward its owner.
+ * Ordinary joins fan away; an orthogonal tee continues straight through and
+ * puts the branch on the perpendicular edge. */
+function orientAttachedJoinPorts(nodes: readonly DiagramNode[], seeds: readonly WireSeed[] = [],
+  boundaryPorts: readonly BoundaryPort[] = []) {
   const nodeById = new Map(nodes.map((node) => [node.device.id, node]));
+  const boundaryByEndpoint = new Map(boundaryPorts.map((port) => [port.endpointId, port.point]));
+  const peerPoint = (endpointId: string) => {
+    const seed = seeds.find((candidate) => (
+      candidate.fromEndpointId === endpointId || candidate.toEndpointId === endpointId
+    ));
+    if (!seed) return undefined;
+    const peerEndpoint = seed.fromEndpointId === endpointId ? seed.toEndpointId : seed.fromEndpointId;
+    const peer = nodeById.get(endpointDeviceId(peerEndpoint));
+    return peer ? { x: peer.x, y: peer.y } : boundaryByEndpoint.get(peerEndpoint);
+  };
   nodes.filter((node) => node.device.presentation === "wire-join" && node.device.attachment)
     .forEach((node) => {
       const owner = nodeById.get(endpointDeviceId(node.device.attachment!.endpoint));
+      if (node.device.diagramJoinGeometry === "orthogonal-t") {
+        const ownerIsVertical = owner && Math.abs(owner.y - node.y) > Math.abs(owner.x - node.x);
+        if (ownerIsVertical) {
+          const ownerAbove = owner!.y < node.y;
+          const branch = node.ports.find((port) => port.id === "branch");
+          const branchPeer = branch ? peerPoint(branch.endpointId) : undefined;
+          const branchSide: PortSide = branchPeer && branchPeer.x < node.x ? "input" : "output";
+          node.ports.forEach((port) => {
+            port.side = port.id === "device" ? ownerAbove ? "top" : "neutral"
+              : port.id === "through" ? ownerAbove ? "neutral" : "top"
+                : branchSide;
+          });
+        } else {
+          const towardOwner: PortSide = !owner || node.x < owner.x ? "output" : "input";
+          const branch = node.ports.find((port) => port.id === "branch");
+          const branchPeer = branch ? peerPoint(branch.endpointId) : undefined;
+          const branchSide: PortSide = branchPeer && branchPeer.y < node.y ? "top" : "neutral";
+          node.ports.forEach((port) => {
+            port.side = port.id === "device" ? towardOwner
+              : port.id === "through" ? towardOwner === "output" ? "input" : "output"
+                : branchSide;
+          });
+        }
+        return;
+      }
       const towardOwner: PortSide = !owner || node.x < owner.x ? "output" : "input";
       node.ports.forEach((port) => {
         port.side = port.id === "device" ? towardOwner : towardOwner === "output" ? "input" : "output";
@@ -771,6 +1136,51 @@ function orientAttachedJoinPorts(nodes: readonly DiagramNode[]) {
             - (second.id === "through" ? 0 : second.id === "branch" ? 1 : 2)
       ));
     });
+}
+
+/** When an attached tee moves beside its parent tee, put their structural
+ * terminal-join link on the parent arm that actually faces the child. Swap the
+ * displaced non-structural seed onto the vacated arm; the continuous
+ * conductor is unchanged, but the rendered tee-to-tee cylinder is straight. */
+function alignAttachedTerminalJoinArms(nodes: readonly DiagramNode[], seeds: readonly WireSeed[]) {
+  const nodeById = new Map(nodes.map((node) => [node.device.id, node]));
+  const aligned = seeds.map((seed) => ({ ...seed }));
+  nodes.filter((node) => node.device.presentation === "wire-join"
+    && node.device.diagramJoinGeometry === "orthogonal-t" && node.device.attachment)
+    .forEach((child) => {
+      const parent = nodeById.get(endpointDeviceId(child.device.attachment!.endpoint));
+      if (parent?.device.presentation !== "wire-join"
+        || parent.device.diagramJoinGeometry !== "orthogonal-t") return;
+      const childDeviceEndpoint = `${child.device.id}.device`;
+      const linkIndex = aligned.findIndex((seed) => seed.route.topologyRole === "terminal-join"
+        && (seed.fromEndpointId === childDeviceEndpoint || seed.toEndpointId === childDeviceEndpoint));
+      if (linkIndex < 0) return;
+      const link = aligned[linkIndex];
+      const currentParentEndpoint = link.fromEndpointId === childDeviceEndpoint
+        ? link.toEndpointId : link.fromEndpointId;
+      const delta = { x: child.x - parent.x, y: child.y - parent.y };
+      const magnitude = Math.max(1, Math.hypot(delta.x, delta.y));
+      const desiredPort = parent.ports.filter((port) => port.id !== "device")
+        .toSorted((first, second) => {
+          const firstVector = outwardVector(first.side); const secondVector = outwardVector(second.side);
+          const firstScore = (firstVector.x * delta.x + firstVector.y * delta.y) / magnitude;
+          const secondScore = (secondVector.x * delta.x + secondVector.y * delta.y) / magnitude;
+          return secondScore - firstScore || first.id.localeCompare(second.id);
+        })[0];
+      if (!desiredPort || desiredPort.endpointId === currentParentEndpoint) return;
+      const displacedIndex = aligned.findIndex((seed, index) => index !== linkIndex && (
+        seed.fromEndpointId === desiredPort.endpointId || seed.toEndpointId === desiredPort.endpointId
+      ));
+      if (displacedIndex < 0) throw new Error(`${desiredPort.endpointId}: no seed to exchange with terminal join.`);
+      const replaceEndpoint = (seed: WireSeed, from: string, to: string): WireSeed => (
+        seed.fromEndpointId === from ? { ...seed, fromEndpointId: to }
+          : seed.toEndpointId === from ? { ...seed, toEndpointId: to }
+            : (() => { throw new Error(`${seed.route.id}: endpoint ${from} is not attached.`); })()
+      );
+      aligned[linkIndex] = replaceEndpoint(link, currentParentEndpoint, desiredPort.endpointId);
+      aligned[displacedIndex] = replaceEndpoint(aligned[displacedIndex], desiredPort.endpointId, currentParentEndpoint);
+    });
+  return aligned;
 }
 
 /** Order each edge's conductors toward their peer device. This is the usual
@@ -792,7 +1202,7 @@ function orderPortsTowardPeers(nodes: readonly DiagramNode[], seeds: readonly Wi
     const owner = ownerByEndpoint.get(peer);
     return owner ? { x: owner.x, y: owner.y } : boundaryByEndpoint.get(peer);
   };
-  const sideOrder: Record<PortSide, number> = { input: 0, output: 1, neutral: 2 };
+  const sideOrder: Record<PortSide, number> = { input: 0, output: 1, top: 2, neutral: 3 };
   nodes.forEach((node) => node.ports.sort((first, second) => {
     if (first.side !== second.side) return sideOrder[first.side] - sideOrder[second.side];
     if (first.declaredOrder !== undefined || second.declaredOrder !== undefined) {
@@ -802,7 +1212,7 @@ function orderPortsTowardPeers(nodes: readonly DiagramNode[], seeds: readonly Wi
     }
     const firstTarget = targetPoint(first.endpointId); const secondTarget = targetPoint(second.endpointId);
     if (!firstTarget || !secondTarget) return first.id.localeCompare(second.id);
-    const coordinate = first.side === "neutral" ? "x" : "y";
+    const coordinate = first.side === "neutral" || first.side === "top" ? "x" : "y";
     return firstTarget[coordinate] - secondTarget[coordinate] || first.id.localeCompare(second.id);
   }));
 }
@@ -811,9 +1221,9 @@ function orderPortsTowardPeers(nodes: readonly DiagramNode[], seeds: readonly Wi
  * junction now lands near the top instead of taking a long vertical detour to
  * an arbitrarily centered terminal block. */
 function alignHubPortsTowardPeers(nodes: readonly DiagramNode[], seeds: readonly WireSeed[],
-  boundaryPorts: readonly BoundaryPort[] = []) {
-  const ownerByEndpoint = new Map<string, DiagramNode>();
-  nodes.forEach((node) => node.ports.forEach((port) => ownerByEndpoint.set(port.endpointId, node)));
+  boundaryPorts: readonly BoundaryPort[] = [], alignFlexibleDevices = false) {
+  const ownerByEndpoint = new Map<string, { node: DiagramNode; port: DiagramPort }>();
+  nodes.forEach((node) => node.ports.forEach((port) => ownerByEndpoint.set(port.endpointId, { node, port })));
   const boundaryByEndpoint = new Map(boundaryPorts.map((port) => [port.endpointId, port.point]));
   const peersByEndpoint = new Map<string, string[]>();
   seeds.forEach((seed) => {
@@ -822,23 +1232,36 @@ function alignHubPortsTowardPeers(nodes: readonly DiagramNode[], seeds: readonly
     const toPeers = peersByEndpoint.get(seed.toEndpointId) ?? [];
     toPeers.push(seed.fromEndpointId); peersByEndpoint.set(seed.toEndpointId, toPeers);
   });
-  const target = (endpointId: string) => {
+  const target = (endpointId: string, exactPort: boolean) => {
     const peers = peersByEndpoint.get(endpointId) ?? [];
     const points = peers.flatMap((peer) => {
-      const owner = ownerByEndpoint.get(peer); const point = owner ? { x: owner.x, y: owner.y } : boundaryByEndpoint.get(peer);
+      const owner = ownerByEndpoint.get(peer);
+      const point = owner
+        ? exactPort ? portPoint(owner.node, owner.port) : { x: owner.node.x, y: owner.node.y }
+        : boundaryByEndpoint.get(peer);
       return point ? [point] : [];
     });
     return points.length ? { x: mean(points.map((point) => point.x)), y: mean(points.map((point) => point.y)) } : undefined;
   };
-  nodes.filter((node) => node.abstractJunction || node.device.presentation === "wall-passthrough").forEach((node) => {
+  nodes.filter((node) => node.abstractJunction || node.device.presentation === "wall-passthrough"
+    || alignFlexibleDevices && !isDiagramJoin(node.device)).forEach((node) => {
+    const logicalHub = node.abstractJunction || node.device.presentation === "wall-passthrough";
     (["input", "output", "neutral"] as const).forEach((side) => {
       const ports = node.ports.filter((port) => port.side === side);
       if (!ports.length) return;
       const horizontal = side === "neutral";
-      const halfExtent = (horizontal ? node.width : node.height) / 2 - 48;
-      const pitch = nodePortPitch(node);
+      const ownExtent = horizontal ? node.width : node.height;
+      const peerExtents = ports.flatMap((port) => (peersByEndpoint.get(port.endpointId) ?? []).flatMap((peer) => {
+        const owner = ownerByEndpoint.get(peer);
+        if (!owner) return [];
+        return [horizontal ? owner.node.width : owner.node.height];
+      }));
+      const exactPort = !logicalHub && peerExtents.length > 0 && ownExtent > Math.max(...peerExtents);
+      if (!logicalHub && !exactPort) return;
+      const halfExtent = ownExtent / 2 - (logicalHub ? 48 : GRID);
+      const pitch = logicalHub ? nodePortPitch(node) : ABSTRACT_GLAND_PITCH;
       const desired = ports.map((port) => {
-        const point = target(port.endpointId);
+        const point = target(port.endpointId, exactPort);
         return snap(Math.max(-halfExtent, Math.min(halfExtent,
           (point ? (horizontal ? point.x - node.x : point.y - node.y) : 0))), ROUTE_GRID);
       });
@@ -1015,7 +1438,7 @@ function systemProjection(macroCenterOverrides: DiagramMacroCenterOverrides = {}
       || (first.connectionId ?? "").localeCompare(second.connectionId ?? "");
   }));
   const nodes = applyDiagramMacroCenterOverrides(
-    layoutWorldNodes(worldDevices.map((device) => prepareWorldNode(device, portSets.get(device.id)!))),
+    layoutWorldNodes(worldDevices.map((device) => prepareWorldNode(device, portSets.get(device.id)!)), seeds),
     macroCenterOverrides,
   );
   orderPortsTowardPeers(nodes, seeds);
@@ -1073,7 +1496,9 @@ function junctionProjection(junctionId: string) {
       toEndpointId: toInside ? route.to : boundary.endpointId }];
   });
   const nodes = layoutJunctionNodes(members, seeds);
-  orientAttachedJoinPorts(nodes);
+  orientAttachedJoinPorts(nodes, seeds, boundaryPorts);
+  const alignedSeeds = alignAttachedTerminalJoinArms(nodes, seeds);
+  orientAttachedJoinPorts(nodes, alignedSeeds, boundaryPorts);
   const nodeRight = nodes.length ? Math.max(...nodes.map((node) => node.x + node.width / 2)) : 720;
   const nodeBottom = nodes.length ? Math.max(...nodes.map((node) => node.y + node.height / 2)) : 540;
   const neutralCount = boundaryPorts.filter((port) => port.side === "neutral").length;
@@ -1103,9 +1528,9 @@ function junctionProjection(junctionId: string) {
           : { x: fitted[index], y: height };
     });
   });
-  orderPortsTowardPeers(nodes, seeds, boundaryPorts);
-  alignHubPortsTowardPeers(nodes, seeds, boundaryPorts);
-  return { junction, nodes, boundaryPorts, seeds, width, height };
+  orderPortsTowardPeers(nodes, alignedSeeds, boundaryPorts);
+  alignHubPortsTowardPeers(nodes, alignedSeeds, boundaryPorts);
+  return { junction, nodes, boundaryPorts, seeds: alignedSeeds, width, height };
 }
 
 function endpointPositions(nodes: readonly DiagramNode[], boundaryPorts: readonly BoundaryPort[]) {
@@ -1117,6 +1542,107 @@ function endpointPositions(nodes: readonly DiagramNode[], boundaryPorts: readonl
     point: port.point, side: port.side, selectionKey: port.selectionKey, boundary: true,
   }));
   return positions;
+}
+
+/** Keep unrelated routes out of the four short gaps in each external AC
+ * source/junction/load chain. Core fans reserve the complete inter-device
+ * opening; junction cable stubs reserve only their narrow white-sheath lane so
+ * the other AC-box ports can still turn toward the lower conversion row. */
+function externalAcCorridorRouteZones(nodes: readonly DiagramNode[], seeds: readonly WireSeed[]) {
+  const endpointRef = new Map(nodes.flatMap((node) => node.ports.map((port) => (
+    [port.endpointId, { node, port }] as const
+  ))));
+  const endpointOwner = (endpointId: string) => endpointRef.get(endpointId)?.node.device.id;
+  return externalAcCorridors(nodes, seeds).flatMap(({ junction, source, load }) => {
+    const deviceIds = new Set([
+      junction.device.id,
+      source.peer.device.id, source.breakout.device.id,
+      load.breakout.device.id, load.peer.device.id,
+    ]);
+    const protectedSeeds = seeds.filter((seed) => {
+      const from = endpointOwner(seed.fromEndpointId); const to = endpointOwner(seed.toEndpointId);
+      return Boolean(from && to && deviceIds.has(from) && deviceIds.has(to));
+    });
+    const corridorRouteIds = new Set(protectedSeeds.map((seed) => seed.route.id));
+    return [...Map.groupBy(protectedSeeds, (seed) => [
+      endpointOwner(seed.fromEndpointId)!, endpointOwner(seed.toEndpointId)!,
+    ].toSorted().join("|")).values()].flatMap((pairSeeds) => {
+      const first = endpointRef.get(pairSeeds[0].fromEndpointId)!.node;
+      const second = endpointRef.get(pairSeeds[0].toEndpointId)!.node;
+      const [leftNode, rightNode] = first.x <= second.x ? [first, second] : [second, first];
+      const points = pairSeeds.flatMap((seed) => [seed.fromEndpointId, seed.toEndpointId].map((endpointId) => {
+        const reference = endpointRef.get(endpointId)!;
+        return portPoint(reference.node, reference.port);
+      }));
+      const touchesJunction = first === junction || second === junction;
+      const junctionFacingSide: PortSide | undefined = !touchesJunction ? undefined
+        : junction === rightNode ? "input" : "output";
+      const junctionEdgeRouteIds = !junctionFacingSide ? [] : seeds.flatMap((seed) => {
+        const junctionEndpointId = [seed.fromEndpointId, seed.toEndpointId].find((endpointId) => (
+          endpointOwner(endpointId) === junction.device.id
+        ));
+        const reference = junctionEndpointId ? endpointRef.get(junctionEndpointId) : undefined;
+        return reference?.port.side === junctionFacingSide ? [seed.route.id] : [];
+      });
+      const allowedRouteIds = new Set([...corridorRouteIds, ...junctionEdgeRouteIds]);
+      const left = touchesJunction
+        ? leftNode.x + leftNode.width / 2
+        : leftNode.x - leftNode.width / 2;
+      const right = touchesJunction
+        ? rightNode.x - rightNode.width / 2
+        : rightNode.x + rightNode.width / 2;
+      if (right <= left) return [];
+      return [{
+        left,
+        right,
+        top: touchesJunction
+          ? Math.min(...points.map((point) => point.y)) - MIN_WIRE_LANE_SPACING
+          : Math.min(first.y - first.height / 2, second.y - second.height / 2) - ROUTE_LEAD,
+        bottom: touchesJunction
+          ? Math.max(...points.map((point) => point.y)) + MIN_WIRE_LANE_SPACING
+          : Math.max(first.y + first.height / 2, second.y + second.height / 2) + ROUTE_LEAD * 2,
+        allowedRouteIds,
+      }];
+    });
+  });
+}
+
+/** Route each complete AC assembly before unrelated system trunks. The set is
+ * topology-derived from both endpoint owners, so adding or moving an AC core,
+ * sheath, breakout, source, protector, inverter, or load automatically keeps
+ * the assembly's scarce shared corridors coherent. */
+function systemAcAssemblyRouteIds(nodes: readonly DiagramNode[], seeds: readonly WireSeed[]) {
+  const ownerByEndpoint = new Map(nodes.flatMap((node) => node.ports.map((port) => (
+    [port.endpointId, node] as const
+  ))));
+  return new Set(seeds.filter((seed) => {
+    const from = ownerByEndpoint.get(seed.fromEndpointId);
+    const to = ownerByEndpoint.get(seed.toEndpointId);
+    return Boolean(from && to && worldLane(from.device) === "ac" && worldLane(to.device) === "ac");
+  }).map((seed) => seed.route.id));
+}
+
+/** The SmartSolar VE.Direct run descends past the MultiPlus assembly. Keep its
+ * vertical trunk outside the AC-out breakout so the visual order remains
+ * MultiPlus, breakout, DC-negative trunk, data trunk from left to right. */
+function multiPlusBreakoutRouteExclusionZones(nodes: readonly DiagramNode[], seeds: readonly WireSeed[]) {
+  const nodeById = new Map(nodes.map((node) => [node.device.id, node]));
+  const dataSeed = seeds.find((seed) => (
+    seed.route.from === "smartSolar.veDirect" || seed.route.to === "smartSolar.veDirect"
+  ));
+  if (!dataSeed) return [];
+  return nodes.flatMap((breakout): DiagramRouteExclusionZone[] => {
+    const peer = exclusiveBreakoutCorePeer(breakout.device);
+    const inverter = peer?.kind === "inverter" ? nodeById.get(peer.id) : undefined;
+    if (!inverter || breakout.x <= inverter.x) return [];
+    return [{
+      left: 0,
+      right: breakout.x + breakout.width / 2 + MIN_WIRE_LANE_SPACING,
+      top: breakout.y - breakout.height / 2 - ROUTE_LEAD,
+      bottom: breakout.y + breakout.height / 2 + ROUTE_LEAD,
+      blockedRouteIds: new Set([dataSeed.route.id]),
+    }];
+  });
 }
 
 function pointInsideNode(point: Point, node: DiagramNode, padding = 9) {
@@ -1312,23 +1838,68 @@ const routeStrokeWidth = (route: RoutedConnection) => (
   Math.max(2.5, Math.min(8, route.diameterMm / 2.2))
 );
 
+type DiagramRouteOrdering = "diameter-short-first" | "short-first";
+const TAP_ROUTE_ORDERINGS: readonly DiagramRouteOrdering[] = [
+  "diameter-short-first", "short-first",
+];
+type DiagramTerminalLead = {
+  outward: Point;
+  point: Point;
+  terminalPath: Point[];
+};
+type DiagramExclusiveRouteZone = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  allowedRouteIds: ReadonlySet<string>;
+};
+type DiagramRouteExclusionZone = Omit<DiagramExclusiveRouteZone, "allowedRouteIds"> & {
+  blockedRouteIds: ReadonlySet<string>;
+};
+type DiagramRouteOptions = {
+  terminalLeadByRouteEndpoint?: ReadonlyMap<string, DiagramTerminalLead>;
+  exclusiveRouteZones?: readonly DiagramExclusiveRouteZone[];
+  routeExclusionZones?: readonly DiagramRouteExclusionZone[];
+  priorityRouteIds?: ReadonlySet<string>;
+};
+const terminalLeadKey = (routeId: string, endpointId: string) => `${routeId}|${endpointId}`;
+
 function wireJoinArmWidth(node: DiagramNode, port: DiagramPort) {
   const endpoint = `${node.device.id}.${port.id}`;
   const route = dseRuntime.routes.find((candidate) => candidate.from === endpoint || candidate.to === endpoint);
   return route ? routeStrokeWidth(route) : 4;
 }
 
-/**
- * Deterministic, build-time-only Manhattan routing. Short constrained runs
- * reserve their local channels first; equally short runs put thick conductors
- * first. Later routes can cross those lanes but cannot reuse a segment or
- * enter a parallel lane inside the minimum separation. A small turn cost
- * keeps every path legible without per-device routing exceptions.
- */
+/** Deterministic, build-time-only Manhattan routing. The ordinary pass keeps
+ * diameter priority; interchangeable-tap scopes also evaluate a short-first
+ * pass so an early long trunk cannot create crossings that only become visible
+ * after later local wires are laid. Every pass locks routes one at a time:
+ * later wires may cross a lane but cannot reuse it or violate separation. */
 function routeWires(nodes: readonly DiagramNode[], boundaryPorts: readonly BoundaryPort[], seeds: readonly WireSeed[],
-  bounds: { width: number; height: number }) {
+  bounds: { width: number; height: number }, ordering: DiagramRouteOrdering = "diameter-short-first",
+  options: DiagramRouteOptions = {}) {
   const started = performance.now();
   const endpoints = endpointPositions(nodes, boundaryPorts);
+  const endpointOutward = (endpoint: EndpointPosition) => endpoint.boundary
+    ? endpoint.side === "input" ? { x: 1, y: 0 }
+      : endpoint.side === "output" ? { x: -1, y: 0 }
+        : { x: 0, y: -1 }
+    : outwardVector(endpoint.side);
+  const shortFacingPath = (seed: WireSeed) => {
+    const from = endpoints.get(seed.fromEndpointId)!; const to = endpoints.get(seed.toEndpointId)!;
+    const delta = { x: to.point.x - from.point.x, y: to.point.y - from.point.y };
+    if (delta.x !== 0 && delta.y !== 0) return undefined;
+    const distance = Math.abs(delta.x) + Math.abs(delta.y);
+    if (distance === 0) return seed.route.topologyRole === "terminal-join"
+      ? [from.point, to.point] : undefined;
+    if (distance > ROUTE_LEAD * 2) return undefined;
+    const direction = { x: Math.sign(delta.x), y: Math.sign(delta.y) };
+    const fromOutward = endpointOutward(from); const toOutward = endpointOutward(to);
+    return fromOutward.x === direction.x && fromOutward.y === direction.y
+      && toOutward.x === -direction.x && toOutward.y === -direction.y
+      ? [from.point, to.point] : undefined;
+  };
   const attachmentRoutes = new Map<string, string[]>();
   seeds.forEach((seed) => [seed.fromEndpointId, seed.toEndpointId].forEach((endpointId) => {
     const ids = attachmentRoutes.get(endpointId) ?? []; ids.push(seed.route.id); attachmentRoutes.set(endpointId, ids);
@@ -1347,19 +1918,45 @@ function routeWires(nodes: readonly DiagramNode[], boundaryPorts: readonly Bound
     const from = endpoints.get(seed.fromEndpointId)!.point; const to = endpoints.get(seed.toEndpointId)!.point;
     return Math.abs(to.x - from.x) + Math.abs(to.y - from.y);
   };
-  const sortedSeeds = seeds.toSorted((first, second) => (
-    second.route.diameterMm - first.route.diameterMm
+  const sortedSeeds = seeds.toSorted((first, second) => {
+    const priorityDifference = Number(!options.priorityRouteIds?.has(first.route.id))
+      - Number(!options.priorityRouteIds?.has(second.route.id));
+    if (priorityDifference !== 0) return priorityDifference;
+    if (ordering === "short-first") return routeSpan(first) - routeSpan(second)
+      || second.route.diameterMm - first.route.diameterMm || first.route.id.localeCompare(second.route.id);
+    return second.route.diameterMm - first.route.diameterMm
       || routeSpan(first) - routeSpan(second)
-      || first.route.id.localeCompare(second.route.id)));
+      || first.route.id.localeCompare(second.route.id);
+  });
   const blocked = blockedRouteCells(nodes, bounds);
+  const exclusiveBlockedByRouteId = new Map<string, ReadonlySet<string>>();
+  const blockedForRoute = (routeId: string) => {
+    const cached = exclusiveBlockedByRouteId.get(routeId);
+    if (cached) return cached;
+    const zones = [
+      ...(options.exclusiveRouteZones ?? []).filter((zone) => !zone.allowedRouteIds.has(routeId)),
+      ...(options.routeExclusionZones ?? []).filter((zone) => zone.blockedRouteIds.has(routeId)),
+    ];
+    if (zones.length === 0) return blocked;
+    const routeBlocked = new Set(blocked);
+    zones.forEach((zone) => {
+      const firstX = Math.ceil(zone.left / ROUTE_GRID) * ROUTE_GRID;
+      const lastX = Math.floor(zone.right / ROUTE_GRID) * ROUTE_GRID;
+      const firstY = Math.ceil(zone.top / ROUTE_GRID) * ROUTE_GRID;
+      const lastY = Math.floor(zone.bottom / ROUTE_GRID) * ROUTE_GRID;
+      for (let x = firstX; x <= lastX; x += ROUTE_GRID) {
+        for (let y = firstY; y <= lastY; y += ROUTE_GRID) routeBlocked.add(cellKey(x, y));
+      }
+    });
+    exclusiveBlockedByRouteId.set(routeId, routeBlocked);
+    return routeBlocked;
+  };
   const usedEdges = new Map<string, number>(); const occupiedCells = new Map<string, number>();
   const endpointLead = (seed: WireSeed, endpointId: string, endpoint: EndpointPosition) => {
+    const prepared = options.terminalLeadByRouteEndpoint?.get(terminalLeadKey(seed.route.id, endpointId));
+    if (prepared) return prepared;
     const ids = attachmentRoutes.get(endpointId)!; const fanIndex = ids.indexOf(seed.route.id);
-    const outward = endpoint.boundary
-      ? endpoint.side === "input" ? { x: 1, y: 0 }
-        : endpoint.side === "output" ? { x: -1, y: 0 }
-          : { x: 0, y: -1 }
-      : outwardVector(endpoint.side);
+    const outward = endpointOutward(endpoint);
     const tangentBase = { x: -outward.y, y: outward.x };
     const peerPoint = (routeId: string) => {
       const candidate = seeds.find((entry) => entry.route.id === routeId)!;
@@ -1404,23 +2001,35 @@ function routeWires(nodes: readonly DiagramNode[], boundaryPorts: readonly Bound
   // section. This prevents an early cable from consuming the only legal
   // conductor approach needed by a later cable.
   seeds.forEach((seed) => {
+    const direct = shortFacingPath(seed);
+    const width = routeStrokeWidth(seed.route);
+    if (direct) {
+      reserveRoute(direct, width, usedEdges, occupiedCells);
+      return;
+    }
     const from = endpoints.get(seed.fromEndpointId)!; const to = endpoints.get(seed.toEndpointId)!;
     const fromLead = endpointLead(seed, seed.fromEndpointId, from);
     const toLead = endpointLead(seed, seed.toEndpointId, to);
-    const width = routeStrokeWidth(seed.route);
     reserveRoute(fromLead.terminalPath, width, usedEdges, occupiedCells);
     reserveRoute(toLead.terminalPath, width, usedEdges, occupiedCells);
   });
   const fallbackRouteIds: string[] = [];
   const routed = sortedSeeds.map((seed): RoutedWire => {
     const from = endpoints.get(seed.fromEndpointId)!; const to = endpoints.get(seed.toEndpointId)!;
+    const direct = shortFacingPath(seed);
+    const cable = dseRuntime.graph.cables.find((candidate) => candidate.id === seed.route.cableId)!;
+    const width = routeStrokeWidth(seed.route);
+    if (direct) return { ...seed, points: direct, bridges: [], fromNodeId: from.ownerDeviceId,
+      toNodeId: to.ownerDeviceId, color: cable.sheath === "white" ? "#f8fafc" : diagramConductorColor[seed.route.kind],
+      width };
     const fromLead = endpointLead(seed, seed.fromEndpointId, from);
     const toLead = endpointLead(seed, seed.toEndpointId, to);
-    const width = routeStrokeWidth(seed.route);
+    const routeBlocked = blockedForRoute(seed.route.id);
     let middle = orthogonalPath(fromLead.point, toLead.point, directionIndex(fromLead.outward),
-      directionIndex({ x: -toLead.outward.x, y: -toLead.outward.y }), blocked, usedEdges, occupiedCells, bounds, width);
+      directionIndex({ x: -toLead.outward.x, y: -toLead.outward.y }), routeBlocked,
+      usedEdges, occupiedCells, bounds, width);
     middle ??= orthogonalPath(fromLead.point, toLead.point, directionIndex(fromLead.outward),
-      undefined, blocked, usedEdges, occupiedCells, bounds, width);
+      undefined, routeBlocked, usedEdges, occupiedCells, bounds, width);
     if (!middle) {
       fallbackRouteIds.push(seed.route.id);
       const bend = { x: fromLead.point.x, y: toLead.point.y };
@@ -1432,7 +2041,6 @@ function routeWires(nodes: readonly DiagramNode[], boundaryPorts: readonly Bound
       ...middle,
       ...[...toLead.terminalPath].reverse(),
     ]);
-    const cable = dseRuntime.graph.cables.find((candidate) => candidate.id === seed.route.cableId)!;
     return { ...seed, points: selectedPoints, bridges: [], fromNodeId: from.ownerDeviceId, toNodeId: to.ownerDeviceId,
       color: cable.sheath === "white" ? "#f8fafc" : diagramConductorColor[seed.route.kind],
       width };
@@ -1586,13 +2194,20 @@ function annotateLocalBridges(wires: readonly RoutedWire[]) {
   return { wires: annotated, bridgedCrossings, unbridgedCrossings };
 }
 
-function conductorOverlapCount(nodes: readonly DiagramNode[], boundaryPorts: readonly BoundaryPort[]) {
-  const points = [...nodes.flatMap((node) => node.ports.map((port) => portPoint(node, port))),
-    ...boundaryPorts.map((port) => port.point)];
+function conductorOverlapCount(nodes: readonly DiagramNode[], boundaryPorts: readonly BoundaryPort[],
+  seeds: readonly WireSeed[] = []) {
+  const points = [...nodes.flatMap((node) => node.ports.map((port) => ({
+    endpointId: port.endpointId,
+    point: portPoint(node, port),
+  }))), ...boundaryPorts.map((port) => ({ endpointId: port.endpointId, point: port.point }))];
+  const structuralPairs = new Set(seeds.filter((seed) => seed.route.topologyRole === "terminal-join")
+    .map((seed) => [seed.fromEndpointId, seed.toEndpointId].toSorted().join("|")));
   let overlaps = 0;
   for (let first = 0; first < points.length; first += 1) {
     for (let second = first + 1; second < points.length; second += 1) {
-      if (Math.hypot(points[first].x - points[second].x, points[first].y - points[second].y) < PORT_RADIUS * 2 + 2) overlaps += 1;
+      if (structuralPairs.has([points[first].endpointId, points[second].endpointId].toSorted().join("|"))) continue;
+      if (Math.hypot(points[first].point.x - points[second].point.x,
+        points[first].point.y - points[second].point.y) < PORT_RADIUS * 2 + 2) overlaps += 1;
     }
   }
   return overlaps;
@@ -1610,6 +2225,11 @@ function nodeOverlapCount(nodes: readonly DiagramNode[]) {
   for (let firstIndex = 0; firstIndex < nodes.length; firstIndex += 1) {
     for (let secondIndex = firstIndex + 1; secondIndex < nodes.length; secondIndex += 1) {
       const first = nodes[firstIndex]; const second = nodes[secondIndex];
+      const directJoinAttachment = first.device.presentation === "wire-join"
+        && second.device.presentation === "wire-join"
+        && (endpointDeviceId(first.device.attachment?.endpoint ?? "") === second.device.id
+          || endpointDeviceId(second.device.attachment?.endpoint ?? "") === first.device.id);
+      if (directJoinAttachment) continue;
       const overlapX = (first.width + second.width) / 2 + GRID - Math.abs(first.x - second.x);
       const overlapY = (first.height + second.height) / 2 + GRID - Math.abs(first.y - second.y);
       if (overlapX > 0 && overlapY > 0) overlaps += 1;
@@ -1628,6 +2248,566 @@ function wireLength(wires: readonly RoutedWire[]) {
   ), 0), 0);
 }
 
+type BusbarSlotOrderPlan = {
+  busbarId: string;
+  portIds: string[];
+  movedConnections: number;
+};
+
+type Rectangle = { left: number; right: number; top: number; bottom: number };
+
+function busbarFanRectangle(node: DiagramNode): Rectangle {
+  return {
+    left: node.x - node.width * 1.5,
+    right: node.x + node.width * 1.5,
+    top: node.y - node.height * 1.5,
+    bottom: node.y + node.height * 1.5,
+  };
+}
+
+function pointInRectangle(point: Point, rectangle: Rectangle) {
+  return point.x >= rectangle.left && point.x <= rectangle.right
+    && point.y >= rectangle.top && point.y <= rectangle.bottom;
+}
+
+function segmentRectangleIntersections(first: Point, second: Point, rectangle: Rectangle) {
+  const intersections: Point[] = [];
+  if (first.y === second.y) {
+    for (const x of [rectangle.left, rectangle.right]) {
+      if (x >= Math.min(first.x, second.x) && x <= Math.max(first.x, second.x)
+        && first.y >= rectangle.top && first.y <= rectangle.bottom) {
+        intersections.push({ x, y: first.y });
+      }
+    }
+  } else if (first.x === second.x) {
+    for (const y of [rectangle.top, rectangle.bottom]) {
+      if (y >= Math.min(first.y, second.y) && y <= Math.max(first.y, second.y)
+        && first.x >= rectangle.left && first.x <= rectangle.right) {
+        intersections.push({ x: first.x, y });
+      }
+    }
+  }
+  return [...new Map(intersections.map((point) => [cellKey(point.x, point.y), point])).values()]
+    .toSorted((firstPoint, secondPoint) => (
+      Math.abs(firstPoint.x - first.x) + Math.abs(firstPoint.y - first.y)
+        - Math.abs(secondPoint.x - first.x) - Math.abs(secondPoint.y - first.y)
+    ));
+}
+
+/** Trace a routed conductor toward a busbar and record where it first enters
+ * a device-centred fan envelope. Ordering those entries around the envelope
+ * is the planar equivalent of routing to one virtual device target: physical
+ * endpoint identities and routing-group validity remain unchanged, while the
+ * schematic may choose whichever display slot lets the incoming trunks reach
+ * the equipotential bar without braiding at its edge. */
+function busbarApproachEntry(wire: RoutedWire, endpointId: string, rectangle: Rectangle) {
+  const points = wire.toEndpointId === endpointId ? wire.points : [...wire.points].reverse();
+  if (pointInRectangle(points[0], rectangle)) return points[0];
+  for (let index = 1; index < points.length; index += 1) {
+    const intersections = segmentRectangleIntersections(points[index - 1], points[index], rectangle);
+    if (intersections.length > 0) return intersections[0];
+  }
+  return undefined;
+}
+
+function rectanglePerimeterPosition(point: Point, rectangle: Rectangle) {
+  const width = rectangle.right - rectangle.left;
+  const height = rectangle.bottom - rectangle.top;
+  if (point.y === rectangle.top) return rectangle.right - point.x;
+  if (point.x === rectangle.left) return width + point.y - rectangle.top;
+  if (point.y === rectangle.bottom) return width + height + point.x - rectangle.left;
+  return width * 2 + height + rectangle.bottom - point.y;
+}
+
+function circularMedian(values: readonly number[], period: number) {
+  return values.toSorted((first, second) => {
+    const score = (candidate: number) => values.reduce((total, value) => {
+      const distance = Math.abs(candidate - value);
+      return total + Math.min(distance, period - distance);
+    }, 0);
+    return score(first) - score(second) || first - second;
+  })[0];
+}
+
+function virtualBusbarSlotOrderPlans(nodes: readonly DiagramNode[], seeds: readonly WireSeed[],
+  routedWires: readonly RoutedWire[]) {
+  const wiresByEndpoint = new Map<string, RoutedWire[]>();
+  routedWires.forEach((wire) => [wire.fromEndpointId, wire.toEndpointId].forEach((endpointId) => {
+    wiresByEndpoint.set(endpointId, [...(wiresByEndpoint.get(endpointId) ?? []), wire]);
+  }));
+  const seedCountByEndpoint = new Map<string, number>();
+  seeds.forEach((seed) => [seed.fromEndpointId, seed.toEndpointId].forEach((endpointId) => {
+    seedCountByEndpoint.set(endpointId, (seedCountByEndpoint.get(endpointId) ?? 0) + 1);
+  }));
+  const sideOrder: readonly PortSide[] = ["input", "output", "top", "neutral"];
+  return nodes.flatMap((node): BusbarSlotOrderPlan[] => {
+    const routingGroups = new Set(node.device.conductors.flatMap((conductor) => (
+      conductor.routingGroup ? [conductor.routingGroup] : []
+    )));
+    if (routingGroups.size === 0 || node.ports.length < 2) return [];
+    const rectangle = busbarFanRectangle(node);
+    const perimeter = 2 * ((rectangle.right - rectangle.left) + (rectangle.bottom - rectangle.top));
+    let movedConnections = 0;
+    const orderedBySide = new Map<PortSide, DiagramPort[]>();
+    sideOrder.forEach((side) => {
+      const original = node.ports.filter((port) => port.side === side);
+      const entries = original.flatMap((port) => {
+        const endpointId = port.endpointId;
+        const positions = (wiresByEndpoint.get(endpointId) ?? []).flatMap((wire) => {
+          const entry = busbarApproachEntry(wire, endpointId, rectangle);
+          return entry ? [rectanglePerimeterPosition(entry, rectangle)] : [];
+        });
+        return positions.length > 0 ? [{ port, position: circularMedian(positions, perimeter) }] : [];
+      });
+      const spare = original.filter((port) => !entries.some((entry) => entry.port.id === port.id));
+      if (entries.length < 2 || entries.length < 3 && spare.length === 0) {
+        orderedBySide.set(side, original);
+        return;
+      }
+      const ascending = side === "input" || side === "neutral";
+      const normalized = entries.map((entry) => ({
+        ...entry,
+        position: ascending ? entry.position : (perimeter - entry.position) % perimeter,
+      })).toSorted((first, second) => first.position - second.position || first.port.id.localeCompare(second.port.id));
+      let insertAfter = normalized.length - 1;
+      let largestGap = Number.NEGATIVE_INFINITY;
+      normalized.forEach((entry, index) => {
+        const next = normalized[(index + 1) % normalized.length];
+        const gap = (next.position - entry.position + perimeter) % perimeter;
+        if (gap > largestGap) {
+          largestGap = gap;
+          insertAfter = index;
+        }
+      });
+      const connected = normalized.map((entry) => entry.port);
+      const ordered = [
+        ...connected.slice(0, insertAfter + 1),
+        ...spare,
+        ...connected.slice(insertAfter + 1),
+      ];
+      const originalIndex = new Map(original.map((port, index) => [port.id, index]));
+      ordered.forEach((port, index) => {
+        if (index !== originalIndex.get(port.id)) {
+          movedConnections += seedCountByEndpoint.get(port.endpointId) ?? 0;
+        }
+      });
+      orderedBySide.set(side, ordered);
+    });
+    const portIds = sideOrder.flatMap((side) => orderedBySide.get(side) ?? []);
+    if (portIds.every((port, index) => port.id === node.ports[index].id)) return [];
+    return [{ busbarId: node.device.id, portIds: portIds.map((port) => port.id), movedConnections }];
+  }).toSorted((first, second) => first.busbarId.localeCompare(second.busbarId));
+}
+
+function applyBusbarSlotOrderPlans(nodes: readonly DiagramNode[], plans: readonly BusbarSlotOrderPlan[]) {
+  const planByBusbar = new Map(plans.map((plan) => [plan.busbarId, plan]));
+  return nodes.map((node): DiagramNode => {
+    const plan = planByBusbar.get(node.device.id);
+    if (!plan) return node;
+    const portById = new Map(node.ports.map((port) => [port.id, port]));
+    return {
+      ...node,
+      ports: plan.portIds.map((id) => ({ ...portById.get(id)!, offset: undefined })),
+    };
+  });
+}
+
+function baselineBusbarLane(wire: RoutedWire, endpointId: string, rectangle: Rectangle) {
+  const points = wire.toEndpointId === endpointId ? wire.points : [...wire.points].reverse();
+  for (let index = points.length - 1; index > 0; index -= 1) {
+    const first = points[index - 1]; const second = points[index];
+    if (first.y !== second.y || Math.abs(first.x - second.x) < ROUTE_LEAD) continue;
+    if (Math.max(first.x, second.x) < rectangle.left || Math.min(first.x, second.x) > rectangle.right) continue;
+    return first.y;
+  }
+  return rectangle.bottom;
+}
+
+/** Once the virtual target has established a planar cyclic slot order, build
+ * one generic, crossing-free terminal fan inside that target envelope. The
+ * ordinary A* router still owns everything outside the envelope and reserves
+ * these leads before any middle path, so unrelated wires cannot reuse them. */
+function virtualBusbarTerminalLeads(nodes: readonly DiagramNode[], plans: readonly BusbarSlotOrderPlan[],
+  baselineWires: readonly RoutedWire[]) {
+  const nodeById = new Map(nodes.map((node) => [node.device.id, node]));
+  const wiresByEndpoint = new Map<string, RoutedWire[]>();
+  baselineWires.forEach((wire) => [wire.fromEndpointId, wire.toEndpointId].forEach((endpointId) => {
+    wiresByEndpoint.set(endpointId, [...(wiresByEndpoint.get(endpointId) ?? []), wire]);
+  }));
+  const leads = new Map<string, DiagramTerminalLead>();
+  plans.forEach((plan) => {
+    const node = nodeById.get(plan.busbarId)!;
+    const rectangle = busbarFanRectangle(node);
+    const portById = new Map(node.ports.map((port) => [port.id, port]));
+    const connected = plan.portIds.flatMap((portId) => {
+      const port = portById.get(portId)!;
+      const endpointId = port.endpointId;
+      const wires = wiresByEndpoint.get(endpointId) ?? [];
+      if (port.side !== "neutral" || wires.length !== 1) return [];
+      const entry = busbarApproachEntry(wires[0], endpointId, rectangle);
+      if (!entry) return [];
+      const side = entry.y === rectangle.top ? "top"
+        : entry.x === rectangle.left ? "left"
+          : entry.y === rectangle.bottom ? "bottom" : "right";
+      return [{ port, endpointId, wire: wires[0], entry, side,
+        desiredLane: baselineBusbarLane(wires[0], endpointId, rectangle) }];
+    });
+    if (connected.length < 3) return;
+    const routedBelow = connected.filter((entry) => entry.side !== "right" && entry.side !== "bottom");
+    let previousLane = node.y + node.height / 2 + ROUTE_LEAD - MIN_WIRE_LANE_SPACING;
+    const laneByEndpoint = new Map(routedBelow.map((entry) => {
+      const lane = snap(Math.max(entry.desiredLane, previousLane + MIN_WIRE_LANE_SPACING), ROUTE_GRID);
+      previousLane = lane;
+      return [entry.endpointId, lane] as const;
+    }));
+    const leftEntries = routedBelow.filter((entry) => entry.side === "left");
+    const leftIndexByEndpoint = new Map(leftEntries.map((entry, index) => [entry.endpointId, index]));
+    connected.forEach((entry) => {
+      const terminal = portPoint(node, entry.port);
+      let terminalPath: Point[];
+      if (entry.side === "right") {
+        terminalPath = simplifyOrthogonal([
+          terminal,
+          { x: terminal.x, y: entry.entry.y },
+          entry.entry,
+        ]);
+      } else if (entry.side === "left") {
+        const lane = laneByEndpoint.get(entry.endpointId)!;
+        const leftIndex = leftIndexByEndpoint.get(entry.endpointId)!;
+        const stageX = rectangle.left + (leftEntries.length - leftIndex) * MIN_WIRE_LANE_SPACING;
+        terminalPath = simplifyOrthogonal([
+          terminal,
+          { x: terminal.x, y: lane },
+          { x: stageX, y: lane },
+          { x: stageX, y: entry.entry.y },
+          entry.entry,
+        ]);
+      } else if (entry.side === "top") {
+        const lane = laneByEndpoint.get(entry.endpointId)!;
+        terminalPath = simplifyOrthogonal([
+          terminal,
+          { x: terminal.x, y: lane },
+          { x: entry.entry.x, y: lane },
+          entry.entry,
+        ]);
+      } else {
+        return;
+      }
+      const beforeExit = terminalPath.at(-2)!;
+      const exit = terminalPath.at(-1)!;
+      const outward = { x: Math.sign(exit.x - beforeExit.x), y: Math.sign(exit.y - beforeExit.y) };
+      leads.set(terminalLeadKey(entry.wire.route.id, entry.endpointId), {
+        outward,
+        point: exit,
+        terminalPath,
+      });
+    });
+  });
+  return leads;
+}
+
+function diagramGeometryAudit(nodes: readonly DiagramNode[], boundaryPorts: readonly BoundaryPort[],
+  seeds: readonly WireSeed[], routed: RoutedWireResult) {
+  return {
+    coincidentSegments: coincidentSegmentCount(routed.routed),
+    nonOrthogonalSegments: nonOrthogonalSegmentCount(routed.routed),
+    conductorOverlaps: conductorOverlapCount(nodes, boundaryPorts, seeds),
+    parallelEnvelopeOverlaps: parallelEnvelopeOverlapCount(routed.routed),
+    minimumParallelWireSeparation: minimumParallelWireSeparation(routed.routed),
+    nodeBodyCrossings: nodeBodyCrossingCount(nodes, routed.routed),
+    nodeOverlaps: nodeOverlapCount(nodes),
+    wireTurns: wireTurnCount(routed.routed),
+    wireLength: wireLength(routed.routed),
+  };
+}
+
+type JunctionProjection = ReturnType<typeof junctionProjection>;
+type RoutedWireResult = ReturnType<typeof routeWires>;
+type TapAssignmentCandidate = {
+  key: string;
+  seeds: WireSeed[];
+};
+type DiagramAssignmentCandidate = TapAssignmentCandidate & {
+  tapKey: string;
+  tapReassignments: number;
+  busbarLandingReassignments: number;
+  peerOrderedBusbarIds: ReadonlySet<string>;
+};
+type EvaluatedTapAssignment = DiagramAssignmentCandidate & {
+  routeOrdering: DiagramRouteOrdering;
+  nodes: DiagramNode[];
+  boundaryPorts: BoundaryPort[];
+  routed: RoutedWireResult;
+  coincidentSegments: number;
+  nonOrthogonalSegments: number;
+  conductorOverlaps: number;
+  parallelEnvelopeOverlaps: number;
+  minimumParallelWireSeparation: number;
+  nodeBodyCrossings: number;
+  nodeOverlaps: number;
+  wireTurns: number;
+  wireLength: number;
+};
+
+const MAX_EXACT_TAP_ASSIGNMENTS = 720;
+const MAX_EXACT_BUSBAR_ORDER_CANDIDATES = 64;
+
+function permutations<T>(values: readonly T[]): T[][] {
+  if (values.length < 2) return [[...values]];
+  return values.flatMap((value, index) => permutations([
+    ...values.slice(0, index), ...values.slice(index + 1),
+  ]).map((tail) => [value, ...tail]));
+}
+
+/** A serial chain of attached orthogonal tees is one continuous conductor.
+ * Its uncommitted branch/terminal arms therefore have no intrinsic electrical
+ * identity: assigning a downstream connection to tee 1 or tee 2 is a
+ * diagram-layout decision. The arm that continues into another tee remains
+ * structural and is not part of the permutation.
+ * Enumerate those equivalent assignments before routing instead of forcing
+ * A* to detour around the arbitrary order produced by topology expansion. */
+function interchangeableTapAssignmentCandidates(
+  nodes: readonly DiagramNode[],
+  seeds: readonly WireSeed[],
+): TapAssignmentCandidate[] {
+  const joins = new Map(nodes.filter((node) => (
+    node.device.presentation === "wire-join"
+      && node.device.diagramJoinGeometry === "orthogonal-t"
+      && node.device.attachment
+  )).map((node) => [node.device.id, node]));
+  const rootEndpoint = (node: DiagramNode) => {
+    const visited = new Set<string>();
+    let endpoint = node.device.attachment!.endpoint;
+    while (true) {
+      const ownerId = endpointDeviceId(endpoint);
+      if (visited.has(ownerId)) throw new Error(`Orthogonal tap attachment cycle includes ${ownerId}.`);
+      visited.add(ownerId);
+      const owner = joins.get(ownerId);
+      if (!owner) return endpoint;
+      endpoint = owner.device.attachment!.endpoint;
+    }
+  };
+  const groups = Map.groupBy([...joins.values()], rootEndpoint);
+  const assignmentGroups = [...groups.entries()].flatMap(([root, group]) => {
+    const entries = group.flatMap((node) => node.ports.filter((port) => port.id !== "device").flatMap((port) => {
+      const attachedSeeds = seeds.filter((candidate) => (
+        candidate.fromEndpointId === port.endpointId || candidate.toEndpointId === port.endpointId
+      ));
+      if (attachedSeeds.length !== 1) {
+        throw new Error(`${node.device.id}.${port.id}: orthogonal tee arm must have exactly one route.`);
+      }
+      const seed = attachedSeeds[0];
+      return seed.route.topologyRole === "terminal-join"
+        ? [] : [{
+          tapEndpointId: port.endpointId,
+          routeId: seed.route.id,
+          side: seed.fromEndpointId === port.endpointId ? "from" as const : "to" as const,
+        }];
+    })).toSorted((first, second) => first.routeId.localeCompare(second.routeId) || first.side.localeCompare(second.side));
+    if (entries.length < 2) return [];
+    const kinds = new Set(entries.map(({ routeId }) => seeds.find((seed) => seed.route.id === routeId)!.route.kind));
+    if (kinds.size !== 1) throw new Error(`${root}: interchangeable tap chain mixes conductor kinds.`);
+    return [{ root, entries }];
+  }).toSorted((first, second) => first.root.localeCompare(second.root));
+
+  let assignments: Array<Map<string, string>> = [new Map()];
+  assignmentGroups.forEach(({ root, entries }) => {
+    const tapPermutations = permutations(entries.map((entry) => entry.tapEndpointId));
+    if (assignments.length * tapPermutations.length > MAX_EXACT_TAP_ASSIGNMENTS) {
+      throw new Error(`${root}: more than ${MAX_EXACT_TAP_ASSIGNMENTS} exact tap assignments; split the chain.`);
+    }
+    assignments = assignments.flatMap((existing) => tapPermutations.map((tapEndpoints) => {
+      const expanded = new Map(existing);
+      entries.forEach((entry, index) => expanded.set(`${entry.routeId}:${entry.side}`, tapEndpoints[index]));
+      return expanded;
+    }));
+  });
+
+  const candidates = assignments.map((assignment): TapAssignmentCandidate => {
+    const candidateSeeds = seeds.map((seed): WireSeed => {
+      const fromEndpointId = assignment.get(`${seed.route.id}:from`) ?? seed.fromEndpointId;
+      const toEndpointId = assignment.get(`${seed.route.id}:to`) ?? seed.toEndpointId;
+      return fromEndpointId === seed.fromEndpointId && toEndpointId === seed.toEndpointId
+        ? seed : { ...seed, fromEndpointId, toEndpointId };
+    });
+    const key = [...assignment.entries()].toSorted(([first], [second]) => first.localeCompare(second))
+      .map(([routeSide, endpointId]) => `${routeSide}=${endpointId}`).join("|");
+    return { key, seeds: candidateSeeds };
+  });
+  return [...new Map(candidates.map((candidate) => [candidate.key, candidate])).values()];
+}
+
+type BusbarLandingPlan = {
+  busbarId: string;
+  replacements: Array<{ routeId: string; endpointId: string }>;
+};
+
+/** A busbar is equipotential, so equally occupied diagram landings on one edge
+ * can be reassigned in peer order. This is the crossing-minimal matching for
+ * the fixed port and peer coordinates. One-wire landings move only among
+ * one-wire landings, while two-wire stacks move only as intact two-wire
+ * bundles, preserving every modeled stack count. Every subset of eligible
+ * busbars is still exact-routed and must dominate its canonical baseline. */
+function peerOrderedBusbarLandingCandidates(projection: JunctionProjection) {
+  const ownerByEndpoint = new Map(projection.nodes.flatMap((node) => node.ports.map((port) => (
+    [port.endpointId, node] as const
+  ))));
+  const boundaryByEndpoint = new Map(projection.boundaryPorts.map((port) => [port.endpointId, port.point]));
+  const seedsByEndpoint = new Map<string, WireSeed[]>();
+  projection.seeds.forEach((seed) => {
+    seedsByEndpoint.set(seed.fromEndpointId, [...(seedsByEndpoint.get(seed.fromEndpointId) ?? []), seed]);
+    seedsByEndpoint.set(seed.toEndpointId, [...(seedsByEndpoint.get(seed.toEndpointId) ?? []), seed]);
+  });
+  const peerPoint = (seed: WireSeed, busbarId: string) => {
+    const peer = endpointDeviceId(seed.fromEndpointId) === busbarId ? seed.toEndpointId : seed.fromEndpointId;
+    const owner = ownerByEndpoint.get(peer);
+    return owner ? { x: owner.x, y: owner.y } : boundaryByEndpoint.get(peer);
+  };
+  const plans = projection.nodes.flatMap((node): BusbarLandingPlan[] => {
+    if (node.device.kind !== "busbar") return [];
+    const replacements: BusbarLandingPlan["replacements"] = [];
+    (["input", "output", "top", "neutral"] as const).forEach((side) => {
+      const usedPorts = node.ports.filter((port) => (
+        port.side === side && (seedsByEndpoint.get(port.endpointId)?.length ?? 0) > 0
+      ));
+      const coordinate = side === "neutral" || side === "top" ? "x" : "y";
+      Object.values(Object.groupBy(usedPorts, (port) => seedsByEndpoint.get(port.endpointId)!.length))
+        .forEach((occupancyPeers) => {
+          if (!occupancyPeers || occupancyPeers.length < 2) return;
+          const ports = occupancyPeers.toSorted((first, second) => (
+            (first.declaredOrder ?? Number.MAX_SAFE_INTEGER) - (second.declaredOrder ?? Number.MAX_SAFE_INTEGER)
+              || first.id.localeCompare(second.id)
+          ));
+          const bundles = occupancyPeers.map((port) => ({
+            port,
+            seeds: seedsByEndpoint.get(port.endpointId)!.toSorted((first, second) => (
+              first.route.id.localeCompare(second.route.id)
+            )),
+          })).toSorted((first, second) => (
+            mean(first.seeds.map((seed) => peerPoint(seed, node.device.id)?.[coordinate] ?? 0))
+              - mean(second.seeds.map((seed) => peerPoint(seed, node.device.id)?.[coordinate] ?? 0))
+              || first.port.id.localeCompare(second.port.id)
+          ));
+          bundles.forEach((bundle, index) => bundle.seeds.forEach((seed) => {
+            const endpointId = ports[index].endpointId;
+            const currentEndpoint = endpointDeviceId(seed.fromEndpointId) === node.device.id
+              ? seed.fromEndpointId : seed.toEndpointId;
+            if (currentEndpoint !== endpointId) replacements.push({ routeId: seed.route.id, endpointId });
+          }));
+        });
+      });
+    return replacements.length === 0 ? [] : [{ busbarId: node.device.id, replacements }];
+  }).toSorted((first, second) => first.busbarId.localeCompare(second.busbarId));
+  const candidateCount = 2 ** plans.length;
+  if (candidateCount > MAX_EXACT_BUSBAR_ORDER_CANDIDATES) {
+    throw new Error(`Junction has ${candidateCount} busbar landing candidates; cap is ${MAX_EXACT_BUSBAR_ORDER_CANDIDATES}.`);
+  }
+  return Array.from({ length: candidateCount }, (_, mask) => {
+    const selectedPlans = plans.filter((_, index) => (mask & (1 << index)) !== 0);
+    return {
+      peerOrderedBusbarIds: new Set(selectedPlans.map((plan) => plan.busbarId)),
+      replacements: selectedPlans.flatMap((plan) => plan.replacements.map((replacement) => ({
+        ...replacement, busbarId: plan.busbarId,
+      }))),
+    };
+  });
+}
+
+function prepareTapAssignmentCandidate(projection: JunctionProjection, candidate: DiagramAssignmentCandidate,
+  alignFlexibleDevices: boolean) {
+  const nodes = projection.nodes.map((node): DiagramNode => ({
+    ...node,
+    ports: devicePorts(node.device).map((port) => ({ ...port })),
+  }));
+  const boundaryPorts = projection.boundaryPorts.map((port): BoundaryPort => ({
+    ...port, point: { ...port.point },
+  }));
+  orientAttachedJoinPorts(nodes, candidate.seeds, boundaryPorts);
+  const seedByRoute = new Map(candidate.seeds.map((seed) => [seed.route.id, seed]));
+  boundaryPorts.forEach((port) => {
+    const seed = seedByRoute.get(port.connectionId!);
+    if (!seed) return;
+    port.selectionKey = seed.fromEndpointId === port.endpointId ? seed.toEndpointId : seed.fromEndpointId;
+  });
+  const pointByInternalEndpoint = new Map(nodes.flatMap((node) => node.ports.map((port) => [
+    port.endpointId, portPoint(node, port),
+  ] as const)));
+  (["input", "output", "neutral"] as const).forEach((side) => {
+    const coordinate = side === "neutral" ? "x" : "y";
+    const ports = boundaryPorts.filter((port) => port.side === side).sort((first, second) => (
+      (pointByInternalEndpoint.get(first.selectionKey)?.[coordinate] ?? 0)
+        - (pointByInternalEndpoint.get(second.selectionKey)?.[coordinate] ?? 0)
+        || first.id.localeCompare(second.id)
+    ));
+    const fitted = fitCoordinates(ports.map((port) => (
+      pointByInternalEndpoint.get(port.selectionKey)?.[coordinate] ?? 0
+    )), 36, (side === "neutral" ? projection.width : projection.height) - 36, BOUNDARY_PORT_PITCH);
+    ports.forEach((port, index) => {
+      port.point = side === "input" ? { x: 0, y: fitted[index] }
+        : side === "output" ? { x: projection.width, y: fitted[index] }
+          : { x: fitted[index], y: projection.height };
+    });
+  });
+  orderPortsTowardPeers(nodes, candidate.seeds, boundaryPorts);
+  alignHubPortsTowardPeers(nodes, candidate.seeds, boundaryPorts, alignFlexibleDevices);
+  return { nodes, boundaryPorts };
+}
+
+function evaluateTapAssignment(projection: JunctionProjection, candidate: DiagramAssignmentCandidate,
+  routeOrdering: DiagramRouteOrdering, prepareCandidate: boolean,
+  alignFlexibleDevices: boolean): EvaluatedTapAssignment {
+  const prepared = prepareCandidate
+    ? prepareTapAssignmentCandidate(projection, candidate, alignFlexibleDevices)
+    : { nodes: projection.nodes, boundaryPorts: projection.boundaryPorts };
+  const routed = routeWires(prepared.nodes, prepared.boundaryPorts, candidate.seeds, {
+    width: projection.width, height: projection.height,
+  }, routeOrdering);
+  return {
+    ...candidate,
+    routeOrdering,
+    ...prepared,
+    routed,
+    ...diagramGeometryAudit(prepared.nodes, prepared.boundaryPorts, candidate.seeds, routed),
+  };
+}
+
+function diagramRoutingObjectives(routed: RoutedWireResult,
+  audit: ReturnType<typeof diagramGeometryAudit>) {
+  return [routed.routingFallbacks, audit.coincidentSegments, audit.nonOrthogonalSegments,
+    audit.conductorOverlaps, routed.unbridgedCrossings, audit.parallelEnvelopeOverlaps,
+    audit.nodeBodyCrossings, audit.nodeOverlaps,
+    Math.max(0, MIN_WIRE_LANE_SPACING - audit.minimumParallelWireSeparation),
+    routed.bridgedCrossings, audit.wireTurns, audit.wireLength];
+}
+
+const HARD_DIAGRAM_OBJECTIVE_COUNT = 9;
+
+/** A display-slot candidate may never buy a cleaner drawing by weakening a
+ * geometry or clearance audit. Once those invariants are no worse, compare
+ * the visible routing objectives in priority order: crossings, then turns,
+ * then length. */
+function isSafeDiagramRoutingImprovement(baseline: readonly number[], candidate: readonly number[]) {
+  if (!candidate.slice(0, HARD_DIAGRAM_OBJECTIVE_COUNT)
+    .every((objective, index) => objective <= baseline[index])) return false;
+  for (let index = HARD_DIAGRAM_OBJECTIVE_COUNT; index < candidate.length; index += 1) {
+    if (candidate[index] !== baseline[index]) return candidate[index] < baseline[index];
+  }
+  return false;
+}
+
+function diagramAssignmentObjectives(candidate: EvaluatedTapAssignment) {
+  return diagramRoutingObjectives(candidate.routed, candidate);
+}
+
+function compareTapAssignments(first: EvaluatedTapAssignment, second: EvaluatedTapAssignment) {
+  const firstObjectives = diagramAssignmentObjectives(first);
+  const secondObjectives = diagramAssignmentObjectives(second);
+  for (let index = 0; index < firstObjectives.length; index += 1) {
+    if (firstObjectives[index] !== secondObjectives[index]) return firstObjectives[index] - secondObjectives[index];
+  }
+  return first.key.localeCompare(second.key) || first.routeOrdering.localeCompare(second.routeOrdering);
+}
+
 export function buildDiagramLayout(
   activeJunctionId?: string,
   systemMacroCenterOverrides: DiagramMacroCenterOverrides = {},
@@ -1639,36 +2819,130 @@ export function buildDiagramLayout(
     }
     const projection = junctionProjection(activeJunctionId);
     const width = snapUp(projection.width); const height = snapUp(projection.height);
-    const routed = routeWires(projection.nodes, projection.boundaryPorts, projection.seeds, { width, height });
+    const canonicalEndpointByRoute = new Map(projection.seeds.map((seed) => [seed.route.id,
+      `${seed.fromEndpointId}->${seed.toEndpointId}`]));
+    const tapCandidates = interchangeableTapAssignmentCandidates(projection.nodes, projection.seeds);
+    const busbarLandingCandidates = peerOrderedBusbarLandingCandidates(projection);
+    const candidates: DiagramAssignmentCandidate[] = tapCandidates.flatMap((tapCandidate) => (
+      busbarLandingCandidates.map(({ peerOrderedBusbarIds, replacements }) => {
+        const replacementsByRoute = Map.groupBy(replacements, (replacement) => replacement.routeId);
+        const seeds = tapCandidate.seeds.map((seed) => (
+          (replacementsByRoute.get(seed.route.id) ?? []).reduce((updated, replacement): WireSeed => {
+            if (endpointDeviceId(updated.fromEndpointId) === replacement.busbarId) {
+              return { ...updated, fromEndpointId: replacement.endpointId };
+            }
+            if (endpointDeviceId(updated.toEndpointId) === replacement.busbarId) {
+              return { ...updated, toEndpointId: replacement.endpointId };
+            }
+            throw new Error(`${seed.route.id}: busbar replacement owner ${replacement.busbarId} is not an endpoint.`);
+          }, seed)
+        ));
+        const tapReassignments = tapCandidate.seeds.filter((seed) => (
+          canonicalEndpointByRoute.get(seed.route.id) !== `${seed.fromEndpointId}->${seed.toEndpointId}`
+        )).length;
+        return {
+          ...tapCandidate,
+          seeds,
+          tapKey: tapCandidate.key,
+          tapReassignments,
+          busbarLandingReassignments: replacements.length,
+          peerOrderedBusbarIds,
+          key: `tap=${tapCandidate.key}|bus=${replacements.map((replacement) => (
+            `${replacement.routeId}=${replacement.endpointId}`
+          )).join(",")}`,
+        };
+      })
+    ));
+    const routeOrderings = tapCandidates.length > 1 ? TAP_ROUTE_ORDERINGS : TAP_ROUTE_ORDERINGS.slice(0, 1);
+    const alignFlexibleDevices = tapCandidates.length > 1;
+    const evaluated = candidates.flatMap((candidate) => routeOrderings.map((routeOrdering) => (
+      evaluateTapAssignment(projection, candidate, routeOrdering,
+        alignFlexibleDevices || candidate.peerOrderedBusbarIds.size > 0, alignFlexibleDevices)
+    )));
+    const baselineByTapAndOrder = new Map(evaluated.filter((candidate) => (
+      candidate.peerOrderedBusbarIds.size === 0
+    )).map((candidate) => [`${candidate.tapKey}|${candidate.routeOrdering}`, candidate]));
+    const safeEvaluated = evaluated.filter((candidate) => {
+      if (candidate.peerOrderedBusbarIds.size === 0) return true;
+      const baseline = baselineByTapAndOrder.get(`${candidate.tapKey}|${candidate.routeOrdering}`)!;
+      const objectives = diagramAssignmentObjectives(candidate);
+      const baselineObjectives = diagramAssignmentObjectives(baseline);
+      return objectives.every((objective, index) => objective <= baselineObjectives[index])
+        && objectives.some((objective, index) => objective < baselineObjectives[index]);
+    });
+    const selected = safeEvaluated.toSorted(compareTapAssignments)[0];
+    const routed = selected.routed;
     return { key: `junction:${activeJunctionId}`, scope: "junction", junction: projection.junction,
-      nodes: projection.nodes, boundaryPorts: projection.boundaryPorts, wires: routed.routed, width, height,
-      routingMs: routed.routingMs, coincidentSegments: coincidentSegmentCount(routed.routed),
-      nonOrthogonalSegments: nonOrthogonalSegmentCount(routed.routed),
-      conductorOverlaps: conductorOverlapCount(projection.nodes, projection.boundaryPorts),
+      nodes: selected.nodes, boundaryPorts: selected.boundaryPorts, wires: routed.routed, width, height,
+      routingMs: evaluated.reduce((total, candidate) => total + candidate.routed.routingMs, 0),
+      coincidentSegments: selected.coincidentSegments,
+      nonOrthogonalSegments: selected.nonOrthogonalSegments,
+      conductorOverlaps: selected.conductorOverlaps,
       routingFallbacks: routed.routingFallbacks, fallbackRouteIds: routed.fallbackRouteIds,
       bridgedCrossings: routed.bridgedCrossings, unbridgedCrossings: routed.unbridgedCrossings,
-      parallelEnvelopeOverlaps: parallelEnvelopeOverlapCount(routed.routed),
-      minimumParallelWireSeparation: minimumParallelWireSeparation(routed.routed),
-      nodeBodyCrossings: nodeBodyCrossingCount(projection.nodes, routed.routed),
-      maskedNodeBodyCrossings: 0, nodeOverlaps: nodeOverlapCount(projection.nodes),
-      wireTurns: wireTurnCount(routed.routed), wireLength: wireLength(routed.routed),
+      parallelEnvelopeOverlaps: selected.parallelEnvelopeOverlaps,
+      minimumParallelWireSeparation: selected.minimumParallelWireSeparation,
+      nodeBodyCrossings: selected.nodeBodyCrossings,
+      maskedNodeBodyCrossings: 0, nodeOverlaps: selected.nodeOverlaps,
+      wireTurns: selected.wireTurns, wireLength: selected.wireLength,
+      interchangeableTapCandidates: tapCandidates.length,
+      interchangeableTapReassignments: selected.tapReassignments,
+      busbarLandingCandidates: busbarLandingCandidates.length,
+      busbarLandingReassignments: selected.busbarLandingReassignments,
+      peerOrderedBusbarIds: [...selected.peerOrderedBusbarIds].toSorted(),
+      tapRoutingOrderCandidates: routeOrderings.length, selectedRoutingOrder: selected.routeOrdering,
       layoutMs: performance.now() - layoutStarted };
   }
   const projection = systemProjection(systemMacroCenterOverrides);
   const width = snapUp(Math.max(...projection.nodes.map((node) => node.x + node.width / 2)) + LAYOUT_MARGIN);
   const height = snapUp(Math.max(...projection.nodes.map((node) => node.y + node.height / 2)) + LAYOUT_MARGIN);
-  const routed = routeWires(projection.nodes, [], projection.seeds, { width, height });
-  return { key: "system", scope: "system", nodes: projection.nodes, boundaryPorts: [], wires: routed.routed,
-    width, height, routingMs: routed.routingMs, coincidentSegments: coincidentSegmentCount(routed.routed),
-    nonOrthogonalSegments: nonOrthogonalSegmentCount(routed.routed),
-    conductorOverlaps: conductorOverlapCount(projection.nodes, []), routingFallbacks: routed.routingFallbacks,
+  const systemRouteOptions: DiagramRouteOptions = {
+    exclusiveRouteZones: externalAcCorridorRouteZones(projection.nodes, projection.seeds),
+    routeExclusionZones: multiPlusBreakoutRouteExclusionZones(projection.nodes, projection.seeds),
+    priorityRouteIds: systemAcAssemblyRouteIds(projection.nodes, projection.seeds),
+  };
+  const baselineRouted = routeWires(projection.nodes, [], projection.seeds, { width, height },
+    "diameter-short-first", systemRouteOptions);
+  const baselineAudit = diagramGeometryAudit(projection.nodes, [], projection.seeds, baselineRouted);
+  const busbarPlans = virtualBusbarSlotOrderPlans(projection.nodes, projection.seeds, baselineRouted.routed);
+  const candidateNodes = applyBusbarSlotOrderPlans(projection.nodes, busbarPlans);
+  const terminalLeadByRouteEndpoint = virtualBusbarTerminalLeads(
+    candidateNodes, busbarPlans, baselineRouted.routed,
+  );
+  const candidateRouted = busbarPlans.length > 0
+    ? routeWires(candidateNodes, [], projection.seeds, { width, height }, "diameter-short-first", {
+      ...systemRouteOptions,
+      terminalLeadByRouteEndpoint,
+    })
+    : baselineRouted;
+  const candidateAudit = busbarPlans.length > 0
+    ? diagramGeometryAudit(candidateNodes, [], projection.seeds, candidateRouted)
+    : baselineAudit;
+  const baselineObjectives = diagramRoutingObjectives(baselineRouted, baselineAudit);
+  const candidateObjectives = diagramRoutingObjectives(candidateRouted, candidateAudit);
+  const candidateIsStrictImprovement = busbarPlans.length > 0
+    && isSafeDiagramRoutingImprovement(baselineObjectives, candidateObjectives);
+  const nodes = candidateIsStrictImprovement ? candidateNodes : projection.nodes;
+  const routed = candidateIsStrictImprovement ? candidateRouted : baselineRouted;
+  const audit = candidateIsStrictImprovement ? candidateAudit : baselineAudit;
+  const selectedBusbarPlans = candidateIsStrictImprovement ? busbarPlans : [];
+  return { key: "system", scope: "system", nodes, boundaryPorts: [], wires: routed.routed,
+    width, height, routingMs: baselineRouted.routingMs + (busbarPlans.length > 0 ? candidateRouted.routingMs : 0),
+    coincidentSegments: audit.coincidentSegments,
+    nonOrthogonalSegments: audit.nonOrthogonalSegments,
+    conductorOverlaps: audit.conductorOverlaps, routingFallbacks: routed.routingFallbacks,
     fallbackRouteIds: routed.fallbackRouteIds, bridgedCrossings: routed.bridgedCrossings,
     unbridgedCrossings: routed.unbridgedCrossings,
-    parallelEnvelopeOverlaps: parallelEnvelopeOverlapCount(routed.routed),
-    minimumParallelWireSeparation: minimumParallelWireSeparation(routed.routed),
-    nodeBodyCrossings: nodeBodyCrossingCount(projection.nodes, routed.routed),
-    maskedNodeBodyCrossings: 0, nodeOverlaps: nodeOverlapCount(projection.nodes),
-    wireTurns: wireTurnCount(routed.routed), wireLength: wireLength(routed.routed),
+    parallelEnvelopeOverlaps: audit.parallelEnvelopeOverlaps,
+    minimumParallelWireSeparation: audit.minimumParallelWireSeparation,
+    nodeBodyCrossings: audit.nodeBodyCrossings,
+    maskedNodeBodyCrossings: 0, nodeOverlaps: audit.nodeOverlaps,
+    wireTurns: audit.wireTurns, wireLength: audit.wireLength,
+    interchangeableTapCandidates: 1, interchangeableTapReassignments: 0,
+    busbarLandingCandidates: busbarPlans.length > 0 ? 2 : 1,
+    busbarLandingReassignments: selectedBusbarPlans.reduce((total, plan) => total + plan.movedConnections, 0),
+    peerOrderedBusbarIds: selectedBusbarPlans.map((plan) => plan.busbarId).toSorted(),
+    tapRoutingOrderCandidates: 1, selectedRoutingOrder: "diameter-short-first",
     layoutMs: performance.now() - layoutStarted };
 }
 
@@ -1921,7 +3195,7 @@ function PortGraphic({ port, point, ownerLabel, viewScale, onSelect, boundary = 
   const inverseScale = 1 / Math.max(MIN_SCALE, viewScale);
   const labelX = (port.side === "input" ? boundary ? 12 : -textWidth - 12
     : port.side === "output" ? boundary ? -textWidth - 12 : 12 : -textWidth / 2) * inverseScale;
-  const labelY = (port.side === "neutral" ? boundary ? -40 : 15 : -14) * inverseScale;
+  const labelY = (port.side === "neutral" ? boundary ? -40 : 15 : port.side === "top" ? -40 : -14) * inverseScale;
   return (
     <g className="diagram-port-anchor" transform={`translate(${point.x} ${point.y})`}>
       <g className={`diagram-port diagram-port-${port.side}`}
@@ -2131,6 +3405,7 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
       data-junction-id={activeJunctionId ?? ""} data-device-count={dseRuntime.devices.length}
       data-wire-count={dseRuntime.routes.length} data-visible-device-count={layout.nodes.length}
       data-visible-wire-count={layout.wires.length} data-junctions-abstracted={layout.scope === "system" ? "true" : "false"}
+      data-orthogonal-t-join-count={layout.nodes.filter((node) => node.device.diagramJoinGeometry === "orthogonal-t").length}
       data-junction-internals-visible={layout.scope === "junction" ? "true" : "false"}
       data-coincident-wire-segments={layout.coincidentSegments} data-conductor-overlaps={layout.conductorOverlaps}
       data-non-orthogonal-wire-segments={layout.nonOrthogonalSegments}
@@ -2142,6 +3417,13 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
       data-masked-wire-node-body-crossings={layout.maskedNodeBodyCrossings}
       data-node-overlaps={layout.nodeOverlaps} data-wire-turns={layout.wireTurns}
       data-wire-length={layout.wireLength}
+      data-interchangeable-tap-candidates={layout.interchangeableTapCandidates}
+      data-interchangeable-tap-reassignments={layout.interchangeableTapReassignments}
+      data-busbar-landing-candidates={layout.busbarLandingCandidates}
+      data-busbar-landing-reassignments={layout.busbarLandingReassignments}
+      data-peer-ordered-busbars={layout.peerOrderedBusbarIds.join(",")}
+      data-tap-routing-order-candidates={layout.tapRoutingOrderCandidates}
+      data-selected-routing-order={layout.selectedRoutingOrder}
       data-routing-fallbacks={layout.routingFallbacks} data-layout-hydration="index-only"
       data-current-safety-status={dseRuntime.diagnostics.currentSafety.status}
       data-current-safety-errors={dseRuntime.diagnostics.currentSafety.errors.length}
@@ -2274,9 +3556,9 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
                 ? Object.values(Object.groupBy(node.ports, (port) => port.kind)).filter(Boolean)
                 : [];
               return <g key={node.device.id}
-                className={`diagram-device diagram-device-${node.device.kind}${node.abstractJunction ? " diagram-subpatch-node" : ""}${wireJoin ? " diagram-wire-join-node" : ""}${rigidRail ? " diagram-rigid-rail-node" : ""}${faded ? " faded" : ""}${node.device.status === "hold" ? " hold" : ""}`}
+                className={`diagram-device diagram-device-${node.device.kind}${node.abstractJunction ? " diagram-subpatch-node" : ""}${wireJoin ? " diagram-wire-join-node" : ""}${node.device.diagramJoinGeometry === "orthogonal-t" ? " diagram-wire-join-orthogonal-t" : ""}${rigidRail ? " diagram-rigid-rail-node" : ""}${faded ? " faded" : ""}${node.device.status === "hold" ? " hold" : ""}`}
                 transform={`translate(${node.x} ${node.y})`} role="button" tabIndex={0} aria-label={node.device.label}
-                data-device-id={node.device.id}
+                data-device-id={node.device.id} data-join-geometry={node.device.diagramJoinGeometry ?? ""}
                 onClick={(event) => { event.stopPropagation(); if (performance.now() < suppressClickUntil.current) return;
                   if (node.abstractJunction) { enterJunction(node.device.id); return; }
                   onSelect({ type: "device", deviceId: node.device.id }); }}

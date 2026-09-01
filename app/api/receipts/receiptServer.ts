@@ -1,6 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
+import receiptsRaw from "../../../data/dse-receipts.json";
 export { privateModeEnabled } from "./privateMode";
+
+export type ReceiptReference = { number: number; filename: string };
+const receiptReferences = (receiptsRaw as { invoices: ReceiptReference[] }).invoices;
 
 export function receiptAllowlist(privateRoot = path.resolve(process.cwd(), "private")) {
   const result = new Set<string>();
@@ -78,7 +82,25 @@ export function createStoredZip(files: ZipInput[]) {
   return Buffer.concat([...locals, ...centrals, end]);
 }
 
-export function loadReceiptArchive(privateRoot = path.resolve(process.cwd(), "private")) {
+export function receiptZipFilename(filename: string, references: readonly ReceiptReference[] = receiptReferences) {
+  const matchingReference = [...references]
+    .sort((first, second) => second.filename.length - first.filename.length)
+    .find((reference) => {
+      const stem = reference.filename.replace(/\.pdf$/i, "");
+      return filename === reference.filename || filename.startsWith(`${stem}-`);
+    });
+  if (!matchingReference) throw new Error(`No public receipt reference for archived PDF: ${filename}`);
+  if (!Number.isInteger(matchingReference.number) || matchingReference.number < 1) {
+    throw new Error(`Invalid public receipt reference for archived PDF: ${filename}`);
+  }
+  const referenceWidth = Math.max(2, ...references.map((reference) => String(reference.number).length));
+  return `${String(matchingReference.number).padStart(referenceWidth, "0")}-${filename}`;
+}
+
+export function loadReceiptArchive(
+  privateRoot = path.resolve(process.cwd(), "private"),
+  references: readonly ReceiptReference[] = receiptReferences,
+) {
   privateRoot = path.resolve(privateRoot);
   const allowlist = receiptAllowlist(privateRoot);
   const realPrivateRoot = fs.realpathSync(privateRoot);
@@ -90,7 +112,7 @@ export function loadReceiptArchive(privateRoot = path.resolve(process.cwd(), "pr
     if (!realCandidate.startsWith(`${realPrivateRoot}${path.sep}`)) throw new Error(`Receipt symlink escaped private root: ${filename}`);
     const stat = fs.statSync(realCandidate);
     if (!stat.isFile()) throw new Error(`Receipt is not a regular file: ${filename}`);
-    files.push({ name: filename, data: fs.readFileSync(realCandidate), modified: stat.mtime });
+    files.push({ name: receiptZipFilename(filename, references), data: fs.readFileSync(realCandidate), modified: stat.mtime });
   }
-  return createStoredZip(files);
+  return createStoredZip(files.sort((first, second) => first.name.localeCompare(second.name)));
 }

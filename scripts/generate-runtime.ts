@@ -11,7 +11,7 @@ import {
 import type { GraphRuntimeArtifact } from "../app/systemGraph";
 
 const SCHEMA_VERSION = 2 as const;
-const GENERATOR_VERSION = "dse-runtime-v4-route-targets";
+const GENERATOR_VERSION = "dse-runtime-v5-device-front-clearance";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const outputPath = path.join(root, "data", "generated", "dse-runtime.json");
