@@ -878,6 +878,31 @@
       45,
       46,
       47
+    ],
+    "dse-b125-chtaixi-unused-assumed-refund": [
+      28,
+      30
+    ],
+    "dse-extra-dihool-120a-breaker-assumed-refund": [
+      45
+    ],
+    "dse-extra-ac-rcbo-pair-assumed-refund": [
+      46
+    ],
+    "dse-kerwinn-shared-services-breaker-alternate-assumed-refund": [
+      47
+    ],
+    "dse-battery-string-breakers-midnite-unused-assumed-refund": [
+      10
+    ],
+    "dse-pv-breakers-32a-rejected-assumed-refund": [
+      18
+    ],
+    "dse-usb-output-breaker-assumed-refund": [
+      21
+    ],
+    "dse-starlink-portable-battery-cable-assumed-refund": [
+      14
     ]
   },
   "itemAsins": {

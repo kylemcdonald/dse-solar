@@ -62,6 +62,14 @@
 9. Regenerate `data/dse-receipts.json` after ingestion. It is the committed, PII-free bridge between public customs invoice footnotes and ignored private PDFs. Filenames may be public; PDF contents and extracted PII may not. In public checkouts, preserve the committed manifest when private reconciliation inputs are absent.
 10. Quotes and payment confirmations may support the same purchase. Track both as evidence for the same BOM rows; never count the quote and payment as separate spend. Public metadata may identify a document as a quote or payment confirmation, but bank confirmation numbers and account details remain private.
 
+## Return accounting policy (13 Sep 2026)
+
+- Owner directs treating all items marked for return as returned and refunded even before Amazon processes the refund. Eight pending return/return-decision entries now have explicit assumed credits totaling USD 315.01. This includes the uninstalled surplus DIHOOL and KERWINN entries already classified under returns; retained spares and negative-return busbars are not return merchandise.
+- Keep gross purchase rows and separately linked credits. Five existing Amazon-issued credits total USD 324.95 and are not duplicated. Refunds use explicit `refundStatus`, `refundForBomId` and `refundAllocations` metadata; confirmed credits replace matching assumed amounts, including partial refunds, on regeneration.
+- The MidNite assumed refund is its full USD 135.63 order (USD 111.96 goods + USD 11.61 shipping + USD 12.06 tax). Fully returned orders assume original shipping and tax refunded. Mixed-order tax/promotions are allocated proportionally to item subtotal, explicitly as an estimate. Original purchase receipts are evidence for the amount, not proof of a processed refund.
+- Net IYOIYO expenses are USD 15,647.14 after the USD 315.01 assumptions (USD 15,962.15 before them). Solar/shared costs are USD 12,224.64; outside scope remains USD 3,422.50. Gross positive costs remain USD 16,387.03; total credits/promotions are USD 739.89. Earlier figures below record the prior reconciliation and are superseded by these totals.
+- `npm run generate:receipts` first reconciles assumptions, including in public checkouts without private inputs. Do not describe an assumed refund as an Amazon-confirmed cash receipt or fabricate refund documentation.
+
 ## Current Fiji accounting facts
 
 - Three Bank of America confirmations (#51–53) pay for one installed MultiPlus: 20 Aug USD 273.28 / FJD 588.20; 21 Aug USD 942.33 / FJD 2,025.65; 25 Aug USD 167.11 / FJD 357.15. All name Wind Solar Battery Pacific Pte Ltd, total USD 1,382.72 / FJD 2,971.00 and state zero fees. The owner confirms all three were paid by IYOIYO for the MultiPlus: deposit, balance attempt, then final shortfall. Record it fully paid, using actual USD bank debits; do not infer a deposit percentage or apply the planning FX rate. The three evidence references support one BOM expense.

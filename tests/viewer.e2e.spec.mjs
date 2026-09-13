@@ -865,7 +865,7 @@ test("Costs treemap includes every positive-cost BOM line", async ({ page }) => 
   await expect(page.locator(".cost-tile")).toHaveCount(138);
   await expect(page.locator(".cost-total strong")).toHaveText("$16,387.03");
   await page.locator(".cost-reconciliation summary").click();
-  await expect(page.locator(".cost-reconciliation")).toContainText("$15,962.15");
+  await expect(page.locator(".cost-reconciliation")).toContainText("$15,647.14");
   await expect(page.locator(".cost-reconciliation")).toContainText("$424.88");
   await expect(page.locator(".cost-reconciliation li")).toHaveCount(0);
   await expect(page.locator(".cost-total")).toContainText("On-site Fiji purchases: FJD 15,193.00 · $6,938.18 · paid by IYOIYO");
@@ -882,11 +882,11 @@ test("Costs treemap includes every positive-cost BOM line", async ({ page }) => 
   await scope.selectOption("Additional purchases");
   await expect(page.locator(".cost-tile")).toHaveCount(13);
   await expect(page.locator(".cost-total strong")).toHaveText("$3,432.20");
-  await expect(page.locator(".cost-reconciliation")).toContainText("$15,962.15");
+  await expect(page.locator(".cost-reconciliation")).toContainText("$15,647.14");
   await scope.selectOption("Excluded / returns");
   await expect(page.locator(".cost-tile")).toHaveCount(14);
   await expect(page.locator(".cost-total strong")).toHaveText("$572.12");
-  await expect(page.locator(".cost-total")).toContainText("$324.95 across 5 credit rows stay");
+  await expect(page.locator(".cost-total")).toContainText("$639.96 across 13 credit rows stay");
   await scope.selectOption("All items");
   await expect(page.locator(".cost-tile")).toHaveCount(138);
 });

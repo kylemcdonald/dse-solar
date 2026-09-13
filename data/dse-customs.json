@@ -406,7 +406,7 @@
       "originNote": "Product listing was reviewed first, followed by available manufacturer/datasheet material; no reliable product-specific manufacturing origin was published. Display as N/A until the label or invoice confirms it.",
       "originReviewedOn": "2026-08-25",
       "excludedFromManifest": true,
-      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction.",
       "make": "SegurVelo",
       "additionalInfo": "16.4 ft"
     },
@@ -475,7 +475,7 @@
       "originNote": "TAIXI identifies its manufacturing operation and address in Zhejiang, China; verify the received product label before filing.",
       "originReviewedOn": "2026-08-25",
       "excludedFromManifest": true,
-      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction.",
       "make": "CHTAIXI",
       "additionalInfo": "12–110 VDC"
     },
@@ -607,7 +607,7 @@
       "originNote": "TAIXI identifies its manufacturing operation and address in Zhejiang, China; verify the received product label before filing.",
       "originReviewedOn": "2026-08-25",
       "excludedFromManifest": true,
-      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction.",
       "make": "CHTAIXI",
       "additionalInfo": "600 VDC · 32 A"
     },
@@ -620,7 +620,7 @@
       "originNote": "MidNite product documentation identifies the relevant breaker family as made in the USA; verify the received label.",
       "originReviewedOn": "2026-08-25",
       "excludedFromManifest": true,
-      "exclusionReason": "Return pending; item will not be imported into Fiji.",
+      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction.",
       "make": "MidNite Solar",
       "additionalInfo": "125 A · 80 VDC"
     },
@@ -1010,7 +1010,7 @@
       "additionalInfo": "125 A · return pending",
       "serialRequired": false,
       "excludedFromManifest": true,
-      "exclusionReason": "Superseded and return pending; item will not be imported into Fiji.",
+      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction.",
       "origin": "CN",
       "originBasis": "manufacturer",
       "originSourceUrl": "https://www.chtaixi.com/contact",
@@ -1115,7 +1115,7 @@
       "originNote": "Confirm manufacturing country from the received product and packaging before filing.",
       "originReviewedOn": "2026-08-26",
       "excludedFromManifest": true,
-      "exclusionReason": "Not in the canonical three-breaker design; return/spare decision pending."
+      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction."
     },
     "dse-extra-ac-rcbo-pair": {
       "make": "DIHOOL",
@@ -1129,7 +1129,7 @@
       "serialRequired": false,
       "defaultCondition": "New — duplicate purchase",
       "excludedFromManifest": true,
-      "exclusionReason": "Exact duplicate of the selected AC-in/out pair; return decision pending."
+      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction."
     },
     "dse-kerwinn-shared-services-breaker-alternate": {
       "make": "KERWINN",
@@ -1143,7 +1143,7 @@
       "serialRequired": false,
       "defaultCondition": "New — unselected alternate",
       "excludedFromManifest": true,
-      "exclusionReason": "Not selected for the canonical design; verification and return/selection decision pending."
+      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction."
     }
   },
   "sources": [

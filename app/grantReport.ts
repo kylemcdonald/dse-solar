@@ -28,6 +28,7 @@ export type GrantReportBomItem = {
   grantFundingAmountUsd?: number;
   grantFundingTreatment?: string;
   grantPaymentNote?: string;
+  refundStatus?: "confirmed" | "assumed";
 };
 
 export type GrantReportInvoice = {
@@ -85,6 +86,8 @@ export type GrantPurchaseReport = {
   iyoyioCheckAmountUsd: number;
   iyoyioCheckBalanceUsd: number;
   grandTotalUsd: number;
+  assumedRefundsUsd: number;
+  recordedNetExpensesUsd: number;
   costReconciliation: {
     positiveTotalUsd: number;
     omittedPositiveTotalUsd: number;
@@ -186,6 +189,8 @@ export function buildGrantPurchaseReport(
     .filter((allocation) => allocation.recipientOrganization === "Inowon")
     .reduce((sum, allocation) => sum + allocation.amountUsd, 0));
   const iyoyioCheckBalanceUsd = roundMoney(IYOIYO_CHECK_AMOUNT_USD - iyoyioPurchasesSubtotalUsd);
+  const assumedRefundsUsd = -subtotal(reportLines.filter((line) => line.costUsd < 0
+    && itemById.get(line.id)?.refundStatus === "assumed"));
   const reportedIds = new Set(reportLines.map((line) => line.id));
   const positiveItems = bom.filter((item) => Number.isFinite(item.totalUsd) && item.totalUsd > 0);
   const omittedLines = positiveItems.filter((item) => !reportedIds.has(item.id))
@@ -202,7 +207,8 @@ export function buildGrantPurchaseReport(
     generatedDateLabel: new Intl.DateTimeFormat("en-US", {
       year: "numeric", month: "long", day: "numeric",
     }).format(generatedAt),
-    explanation: "All documented purchase and customs costs in this report were paid by IYOIYO. The final summary separates solar-system costs from explicitly outside-scope purchases. Shared order-level charges and customs costs without item-level allocations remain with the solar-system total. One of two SSDs and one of two SD card readers are allocated to Inowon in Polowat at their documented item prices.",
+    explanation: `IYOIYO paid the documented purchases and customs costs. ${assumedRefundsUsd > 0
+      ? `Net expenses deduct ${usdMoney(assumedRefundsUsd)} in assumed refunds for items marked for return, as instructed by the owner; Amazon processing is not confirmed. ` : ""}Shared order charges and customs remain in solar-system costs unless allocated. One SSD and one SD card reader for Inowon in Polowat are included in outside scope.`,
     sections,
     fijiPurchasesSourceFjd: roundMoney(fijiLines.reduce((sum, line) => sum +
       (line.sourceCurrency === "FJD" ? line.sourceAmount : 0), 0)),
@@ -214,6 +220,8 @@ export function buildGrantPurchaseReport(
     iyoyioCheckAmountUsd: IYOIYO_CHECK_AMOUNT_USD,
     iyoyioCheckBalanceUsd,
     grandTotalUsd: iyoyioPurchasesSubtotalUsd,
+    assumedRefundsUsd,
+    recordedNetExpensesUsd: roundMoney(iyoyioPurchasesSubtotalUsd + assumedRefundsUsd),
     costReconciliation: {
       positiveTotalUsd: roundMoney(positiveItems.reduce((sum, item) => sum + item.totalUsd, 0)),
       omittedPositiveTotalUsd: roundMoney(omittedLines.reduce((sum, line) => sum + line.costUsd, 0)),
@@ -307,14 +315,14 @@ export function createGrantReportCsv(report: GrantPurchaseReport) {
 
   const checkBalanceNote = report.iyoyioCheckBalanceUsd >= 0
     ? `${usdMoney(report.iyoyioCheckBalanceUsd)} remains from the ${usdMoney(report.iyoyioCheckAmountUsd)} PTS advance`
-    : `${usdMoney(Math.abs(report.iyoyioCheckBalanceUsd))} paid by IYOIYO beyond the ${usdMoney(report.iyoyioCheckAmountUsd)} PTS advance`;
+    : `${usdMoney(Math.abs(report.iyoyioCheckBalanceUsd))} net expenses beyond the ${usdMoney(report.iyoyioCheckAmountUsd)} PTS advance`;
   rows.push(
     ["Source reconciliation", "Funding summary", "Verified on-site Fiji purchases", "", "",
       compactReceiptReferences(report.sections.filter((section) => section.id === "fiji")
         .flatMap((section) => section.lines.flatMap((line) => line.receiptRefs))),
       "FJD", report.fijiPurchasesSourceFjd.toFixed(2), report.fijiPurchasesSubtotalUsd.toFixed(2),
       "Original FJD amounts retained; USD uses documented bank debits where available, otherwise the retained 2.20 FJD/USD accounting rate"],
-    ["Purchase subtotal", "Funding summary", "All purchases paid by IYOIYO", "", "", "", "", "",
+    ["Purchase subtotal", "Funding summary", "Net IYOIYO expenses after refunds", "", "", "", "", "",
       report.iyoyioPurchasesSubtotalUsd.toFixed(2)],
     ["Funding advance", "Funding summary", "Pacific Traditions Society advance", "", "", "", "USD",
       report.iyoyioCheckAmountUsd.toFixed(2), report.iyoyioCheckAmountUsd.toFixed(2)],
@@ -338,8 +346,12 @@ export function createGrantReportCsv(report: GrantPurchaseReport) {
       (-line.costUsd).toFixed(2), line.reason]);
   }
   rows.push(
-    ["Reconciliation", "Cost chart to grant report", "Refunds and promotions included in report", "", "", "", "", "",
-      (-reconciliation.creditsUsd).toFixed(2)],
+    ["Reconciliation", "Cost chart to grant report", "Documented refunds and promotions", "", "", "", "", "",
+      (report.assumedRefundsUsd - reconciliation.creditsUsd).toFixed(2)],
+    ["Reconciliation", "Cost chart to grant report", "Net expenses before assumed refunds", "", "", "", "", "",
+      report.recordedNetExpensesUsd.toFixed(2)],
+    ["Reconciliation", "Cost chart to grant report", "Assumed refunds awaiting Amazon confirmation", "", "", "", "", "",
+      (-report.assumedRefundsUsd).toFixed(2)],
     ["Reconciliation", "Cost chart to grant report", "IYOIYO net expenses", "", "", "", "", "",
       report.grandTotalUsd.toFixed(2)],
   );
@@ -406,7 +418,7 @@ function reportPages(report: GrantPurchaseReport) {
         page.commands.push(pdfText(line, 48, 700 - index * 10, 8.2, false, "0.30 0.35 0.34")));
 
       const cards = [
-        ["IYOIYO PAID", usdMoney(report.iyoyioPurchasesSubtotalUsd)],
+        ["IYOIYO NET EXPENSES", usdMoney(report.iyoyioPurchasesSubtotalUsd)],
         ["PTS ADVANCE", usdMoney(report.iyoyioCheckAmountUsd)],
         [report.iyoyioCheckBalanceUsd < 0 ? "IYOIYO ABOVE ADVANCE" : "ADVANCE REMAINING",
           usdMoney(Math.abs(report.iyoyioCheckBalanceUsd))],
@@ -486,9 +498,9 @@ function reportPages(report: GrantPurchaseReport) {
   page.commands.push(pdfText("FUNDING RECONCILIATION", 48, y, 9, true, "0.08 0.28 0.29"));
   y -= 25;
   const fundingRows: Array<[string, string, string?]> = [
-    ["Purchases paid by IYOIYO", usdMoney(report.iyoyioPurchasesSubtotalUsd)],
+    ["Net IYOIYO expenses after refunds", usdMoney(report.iyoyioPurchasesSubtotalUsd)],
     ["Pacific Traditions Society advance", `(${usdMoney(report.iyoyioCheckAmountUsd)})`],
-    [report.iyoyioCheckBalanceUsd < 0 ? "IYOIYO paid beyond PTS advance" : "PTS advance remaining",
+    [report.iyoyioCheckBalanceUsd < 0 ? "Net expenses beyond PTS advance" : "PTS advance remaining",
       usdMoney(Math.abs(report.iyoyioCheckBalanceUsd)), report.iyoyioCheckBalanceUsd < 0 ? "overage" : "balance"],
   ];
   fundingRows.forEach(([label, value, detail], index) => {
@@ -527,7 +539,9 @@ function reportPages(report: GrantPurchaseReport) {
   const reconciliationRows: Array<[string, number]> = [
     ["All positive item value", reconciliation.positiveTotalUsd],
     ["Less items not recorded as supported purchases", -reconciliation.omittedPositiveTotalUsd],
-    ["Less refunds and promotions", -reconciliation.creditsUsd],
+    ["Less documented refunds and promotions", report.assumedRefundsUsd - reconciliation.creditsUsd],
+    ["Net expenses before assumed refunds", report.recordedNetExpensesUsd],
+    ["Less assumed refunds awaiting Amazon confirmation", -report.assumedRefundsUsd],
     ["IYOIYO net expenses", report.grandTotalUsd],
   ];
   for (const [label, amount] of reconciliationRows) {

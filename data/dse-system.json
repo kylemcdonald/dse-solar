@@ -17,7 +17,7 @@
     "targetBasis": "remaining",
     "donorFundedIncrementUsd": 607.11,
     "contingencyIncluded": false,
-    "note": "Purchases and transaction adjustments include the three August MultiPlus wires reconciled on 12 Sep 2026. IYOIYO paid Solar Fiji FJD 12,172.00 by wire against quote TP260901-V2 for the three AIKO panels, four Victron batteries, Schletter mounting hardware, cable, grounding materials, lugs and a used cutter; the system is now installed on Fulaga. IYOIYO also paid FJD 50.00 cash at R.C. Manubhai for eleven units across nine site-supply lines, including FJD 5.56 VAT. The retired Suntech and EverExceed rows were estimates only: no purchase occurred, their cost is zero, and they are excluded from all payer totals. Actual FJD values remain visible by item; MultiPlus reporting uses actual USD bank debits, while other Fiji purchases retain 2.20 FJD/USD. Imported equipment and customs clearance have reached Fiji, so the shipping and customs interfaces are archived from production while their source data and code remain retained. IYOIYO paid the Extreme Customs Clearance invoice totaling FJD 2,808.53, including import VAT, fiscal duty, clearance and agent charges, and service VAT. The grant ledger classifies $12,539.65 as solar-system/shared project costs and $3,422.50 as outside scope; together they remain $15,962.15. Within outside scope, one SSD and one SD card reader are allocated to Inowon in Polowat at $179.98 in documented item prices, while shared order-level tax, promotions and customs remain unallocated by recipient. IYOIYO's Ekrano GX purchase remains charged against the $8,000 Pacific Traditions Society check; Erik Godo's donation reimburses PTS and is attribution only. The Amazon audit retains $324.95 in issued or credited refunds and keeps incompatible/return-bound equipment out of the installed design. The MultiPlus is fully paid by IYOIYO: FJD 2,971.00 / USD 1,382.72 across three wires. All USD 631.86 of historical installation, freight and baggage allowances were removed from the active ledger after the owner confirmed the installation was complete. Baggage was handled elsewhere, outside this project. The USD 16,387.03 positive-value chart less USD 424.88 in documented refunds/promotions equals the USD 15,962.15 IYOIYO grant expense total."
+    "note": "Purchases and transaction adjustments include the three August MultiPlus wires reconciled on 12 Sep 2026. IYOIYO paid Solar Fiji FJD 12,172.00 by wire against quote TP260901-V2 for the three AIKO panels, four Victron batteries, Schletter mounting hardware, cable, grounding materials, lugs and a used cutter; the system is now installed on Fulaga. IYOIYO also paid FJD 50.00 cash at R.C. Manubhai for eleven units across nine site-supply lines, including FJD 5.56 VAT. The retired Suntech and EverExceed rows were estimates only: no purchase occurred, their cost is zero, and they are excluded from all payer totals. Actual FJD values remain visible by item; MultiPlus reporting uses actual USD bank debits, while other Fiji purchases retain 2.20 FJD/USD. Imported equipment and customs clearance have reached Fiji, so the shipping and customs interfaces are archived from production while their source data and code remain retained. IYOIYO paid the Extreme Customs Clearance invoice totaling FJD 2,808.53, including import VAT, fiscal duty, clearance and agent charges, and service VAT. After assumed return credits, the grant ledger classifies $12,224.64 as solar-system/shared project costs and $3,422.50 as outside scope, totaling $15,647.14. Within outside scope, one SSD and one SD card reader are allocated to Inowon in Polowat at $179.98 in documented item prices, while shared order-level tax, promotions and customs remain unallocated by recipient. IYOIYO's Ekrano GX purchase remains charged against the $8,000 Pacific Traditions Society check; Erik Godo's donation reimburses PTS and is attribution only. The Amazon audit retains $324.95 in issued or credited refunds and keeps incompatible/return-bound equipment out of the installed design. The MultiPlus is fully paid by IYOIYO: FJD 2,971.00 / USD 1,382.72 across three wires. All USD 631.86 of historical installation, freight and baggage allowances were removed from the active ledger after the owner confirmed the installation was complete. Baggage was handled elsewhere, outside this project. The USD 16,387.03 positive-value chart less USD 424.88 documented refunds/promotions and USD 315.01 assumed refunds equals USD 15,647.14 in net IYOIYO expenses. The owner instructed treating all items marked for return as returned and refunded. The eight assumed credits include tax, shipping where charged on fully returned orders, and proportional discounts/tax on mixed orders; Amazon processing and final refund amounts are not confirmed. Existing issued refunds remain separate, and later confirmed credits replace the corresponding assumptions."
   },
   "summary": "The installed Fulaga system has three roof-mounted solar panels on two transverse rails, white series power links and a white two-core PV downlead, a 24 V / 440 Ah GEL battery bank labeled A1, A2, B1 and B2, and equipment on the west and north walls. The PV cutoff box contains PV breaker 1, a disconnected PV breaker 2, a 40 A DC 600 V combiner breaker and a DC 600 V 40 kA surge protector. A three-gang wall switch controls Internet, Orion remote H and both indoor lights, top to bottom. Equipment is already installed; geometry is an illustrative record, not a purchase plan or measured cable schedule. Exact AC earth/neutral bridge terminals and the positive voltage-sense connection still need to be recorded.",
   "keyFacts": [
@@ -1845,7 +1845,7 @@
       "unitCost": 11.97,
       "currency": "USD",
       "location": "Return",
-      "procurement": "Purchased · return pending",
+      "procurement": "Purchased · treated as returned · refund assumed",
       "priority": "Not in design",
       "accountingGroup": "returns",
       "includedInTotal": false,
@@ -1855,7 +1855,9 @@
       "weightBasis": "estimate",
       "weightNote": "Estimated mass per single-pole breaker; items are return-pending.",
       "totalUsd": 35.91,
-      "totalWeightKg": 0.54
+      "totalWeightKg": 0.54,
+      "returnAccounting": "assumed",
+      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Includes proportional allocation of order-level tax and discounts. Original purchase evidence supports the amount, not a completed refund."
     },
     {
       "currency": "USD",
@@ -2043,7 +2045,7 @@
       "currency": "USD",
       "totalUsd": 11.99,
       "location": "Return",
-      "procurement": "Purchased · delivered · return decision pending",
+      "procurement": "Purchased · treated as returned · refund assumed",
       "priority": "Surplus · do not install",
       "accountingGroup": "returns",
       "includedInTotal": false,
@@ -2052,7 +2054,9 @@
       "unitWeightKg": 0.18,
       "totalWeightKg": 0.18,
       "weightBasis": "estimate",
-      "weightNote": "Estimated single-pole breaker mass; excluded from shipping pending the return/spare decision."
+      "weightNote": "Estimated single-pole breaker mass; excluded from shipping pending the return/spare decision.",
+      "returnAccounting": "assumed",
+      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     {
       "id": "dse-extra-ac-rcbo-pair",
@@ -2064,7 +2068,7 @@
       "currency": "USD",
       "totalUsd": 47.98,
       "location": "Return",
-      "procurement": "Purchased · delivered · return decision pending",
+      "procurement": "Purchased · treated as returned · refund assumed",
       "priority": "Exact duplicate · do not install",
       "accountingGroup": "returns",
       "includedInTotal": false,
@@ -2074,7 +2078,9 @@
       "totalWeightKg": 0.68,
       "weightBasis": "listing",
       "weightSourceUrl": "https://www.amazon.com/dp/B0CRKNJSRH",
-      "weightNote": "Product-family listing mass; excluded from shipping pending the return decision."
+      "weightNote": "Product-family listing mass; excluded from shipping pending the return decision.",
+      "returnAccounting": "assumed",
+      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     {
       "id": "dse-kerwinn-shared-services-breaker-alternate",
@@ -2086,7 +2092,7 @@
       "currency": "USD",
       "totalUsd": 8.99,
       "location": "Return",
-      "procurement": "Purchased · delivered · selection/return decision pending",
+      "procurement": "Purchased · treated as returned · refund assumed",
       "priority": "Alternate only · commissioning hold",
       "accountingGroup": "returns",
       "includedInTotal": false,
@@ -2096,7 +2102,9 @@
       "totalWeightKg": 0.1,
       "weightBasis": "estimate",
       "weightSourceUrl": "https://www.amazon.com/dp/B0BYSCXBH9",
-      "weightNote": "Estimated miniature-breaker mass; excluded from shipping until an explicit selection is made."
+      "weightNote": "Estimated miniature-breaker mass; excluded from shipping until an explicit selection is made.",
+      "returnAccounting": "assumed",
+      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     {
       "id": "dse-refund-igreely-1-0-cables",
@@ -2117,7 +2125,18 @@
       "unitWeightKg": 0,
       "totalWeightKg": 0,
       "weightBasis": "not-applicable",
-      "weightNote": "Refund adjustment, not a physical item."
+      "weightNote": "Refund adjustment, not a physical item.",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-1-0-battery-cables-1ft",
+          "amountUsd": 62.52
+        },
+        {
+          "bomId": "dse-1-0-battery-cables-2ft",
+          "amountUsd": 31.82
+        }
+      ]
     },
     {
       "id": "dse-refund-dihool-30a-ac-protection",
@@ -2138,7 +2157,14 @@
       "unitWeightKg": 0,
       "totalWeightKg": 0,
       "weightBasis": "not-applicable",
-      "weightNote": "Refund adjustment, not a physical item."
+      "weightNote": "Refund adjustment, not a physical item.",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-ac-30a-rejected",
+          "amountUsd": 57.04
+        }
+      ]
     },
     {
       "id": "dse-refund-amomd-600a-busbars",
@@ -2159,7 +2185,14 @@
       "unitWeightKg": 0,
       "totalWeightKg": 0,
       "weightBasis": "not-applicable",
-      "weightNote": "Refund adjustment, not a physical item."
+      "weightNote": "Refund adjustment, not a physical item.",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-amomd-600a-busbars-unused",
+          "amountUsd": 98.76
+        }
+      ]
     },
     {
       "id": "dse-refund-chtaixi-ac-rcbos",
@@ -2180,7 +2213,14 @@
       "unitWeightKg": 0,
       "totalWeightKg": 0,
       "weightBasis": "not-applicable",
-      "weightNote": "Refund adjustment, not a physical item."
+      "weightNote": "Refund adjustment, not a physical item.",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-chtai-ac-rcbos-rejected",
+          "amountUsd": 35.96
+        }
+      ]
     },
     {
       "id": "dse-refund-victron-wirebox-mc4",
@@ -2201,7 +2241,14 @@
       "unitWeightKg": 0,
       "totalWeightKg": 0,
       "weightBasis": "not-applicable",
-      "weightNote": "Refund adjustment, not a physical item."
+      "weightNote": "Refund adjustment, not a physical item.",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-mppt-wirebox-mc4-rejected",
+          "amountUsd": 38.85
+        }
+      ]
     },
     {
       "id": "dse-amazon-promotion",
@@ -2268,7 +2315,7 @@
       "currency": "USD",
       "totalUsd": 111.96,
       "location": "Return",
-      "procurement": "Purchased · return pending",
+      "procurement": "Purchased · treated as returned · refund assumed",
       "priority": "Not in design · return / alternate",
       "description": "Purchased 20 Aug 2026 and not selected for R32, which uses the purchased non-polarized 120 A disconnects. Marked for return; do not model or import them, and retain the row only for purchase/refund accounting.",
       "productUrl": "https://www.amazon.com/dp/B0CFX5PW79",
@@ -2278,7 +2325,10 @@
       "totalWeightKg": 0.908,
       "weightBasis": "datasheet",
       "weightSourceUrl": "https://www.midnitesolar.com/productPhoto.php?act=pc&productCat_ID=16&product_ID=729",
-      "weightNote": "Manufacturer product page lists one pound per breaker."
+      "weightNote": "Manufacturer product page lists one pound per breaker.",
+      "accountingGroup": "returns",
+      "returnAccounting": "assumed",
+      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     {
       "id": "dse-pv-string-breakers",
@@ -2311,7 +2361,7 @@
       "currency": "USD",
       "totalUsd": 28.24,
       "location": "Return",
-      "procurement": "Purchased · return pending",
+      "procurement": "Purchased · treated as returned · refund assumed",
       "priority": "Return / exchange",
       "includedInTotal": false,
       "description": "Purchased 23 Aug 2026. Their 32 A rating exceeds the AIKO-A490-MCE54Mw module's 25 A maximum series-fuse rating. Marked for return/exchange; do not install or import them.",
@@ -2321,7 +2371,10 @@
       "totalWeightKg": 0.374,
       "weightBasis": "listing",
       "weightSourceUrl": "https://www.amazon.com/dp/B0D4JPXT4T",
-      "weightNote": "Amazon listing item weight of 6.6 oz, converted to kilograms."
+      "weightNote": "Amazon listing item weight of 6.6 oz, converted to kilograms.",
+      "accountingGroup": "returns",
+      "returnAccounting": "assumed",
+      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     {
       "id": "dse-pv-protection",
@@ -2433,7 +2486,7 @@
       "currency": "USD",
       "totalUsd": 8.99,
       "location": "Return",
-      "procurement": "Purchased · return pending",
+      "procurement": "Purchased · treated as returned · refund assumed",
       "priority": "Not in design",
       "description": "Purchased 23 Aug 2026 and not selected in the R32 USB topology. Marked for return; keep it out of the installed circuit and exclude it from the Fiji import/customs manifest.",
       "productUrl": "https://www.amazon.com/dp/B09H4W8CLY",
@@ -2443,7 +2496,10 @@
       "totalWeightKg": 0.1,
       "weightBasis": "listing",
       "weightSourceUrl": "https://www.amazon.com/dp/B09H4W8CLY",
-      "weightNote": "Amazon listing item weight for the one-pole breaker body."
+      "weightNote": "Amazon listing item weight for the one-pole breaker body.",
+      "accountingGroup": "returns",
+      "returnAccounting": "assumed",
+      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     {
       "id": "dse-unifi-converter",
@@ -2793,7 +2849,7 @@
       "unitCost": 21.97,
       "currency": "USD",
       "location": "Return",
-      "procurement": "Purchased · return pending",
+      "procurement": "Purchased · treated as returned · refund assumed",
       "priority": "Return / do not use",
       "includedInTotal": false,
       "description": "Purchased portable Starlink Mini battery lead with an inline ATC/ATO holder. It conflicts with the remote-site breaker-first policy and is not part of the fixed system. Marked for return; do not import or connect it.",
@@ -2802,7 +2858,10 @@
       "unitWeightKg": 0.35,
       "totalWeightKg": 0.35,
       "weightBasis": "estimate",
-      "weightNote": "Estimated mass of 16.4 ft 18 AWG paired lead, lugs, fuse holder and DC plug."
+      "weightNote": "Estimated mass of 16.4 ft 18 AWG paired lead, lugs, fuse holder and DC plug.",
+      "accountingGroup": "returns",
+      "returnAccounting": "assumed",
+      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Includes proportional allocation of order-level tax and discounts. Original purchase evidence supports the amount, not a completed refund."
     },
     {
       "id": "dse-usb-c-cables-240w",
@@ -3705,6 +3764,254 @@
       "totalWeightKg": 0,
       "weightBasis": "not-applicable",
       "weightNote": "Donated labor service, not a physical item."
+    },
+    {
+      "id": "dse-b125-chtaixi-unused-assumed-refund",
+      "category": "Purchase adjustments",
+      "item": "Assumed Amazon refund · CHTAIXI DZ47NZ-125 B125 breakers · superseded by non-polarized DIHOOL devices",
+      "qty": 1,
+      "unit": "refund credit",
+      "currency": "USD",
+      "location": "Return",
+      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "priority": "Accounting assumption",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "assumed",
+      "refundForBomId": "dse-b125-chtaixi-unused",
+      "refundExpectedUsd": 39.42,
+      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Includes proportional allocation of order-level tax and discounts. Original purchase evidence supports the amount, not a completed refund.",
+      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Includes proportional allocation of order-level tax and discounts. Original purchase evidence supports the amount, not a completed refund.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item.",
+      "totalUsd": -39.42,
+      "unitCost": -39.42,
+      "refundAllocations": [
+        {
+          "bomId": "dse-b125-chtaixi-unused",
+          "amountUsd": 39.42
+        }
+      ]
+    },
+    {
+      "id": "dse-extra-dihool-120a-breaker-assumed-refund",
+      "category": "Purchase adjustments",
+      "item": "Assumed Amazon refund · Surplus fourth DIHOOL 120 A non-polarized breaker · not in design",
+      "qty": 1,
+      "unit": "refund credit",
+      "currency": "USD",
+      "location": "Return",
+      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "priority": "Accounting assumption",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "assumed",
+      "refundForBomId": "dse-extra-dihool-120a-breaker",
+      "refundExpectedUsd": 13.16,
+      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item.",
+      "totalUsd": -13.16,
+      "unitCost": -13.16,
+      "refundAllocations": [
+        {
+          "bomId": "dse-extra-dihool-120a-breaker",
+          "amountUsd": 13.16
+        }
+      ]
+    },
+    {
+      "id": "dse-extra-ac-rcbo-pair-assumed-refund",
+      "category": "Purchase adjustments",
+      "item": "Assumed Amazon refund · Duplicate DIHOOL 10 A two-pole ground-fault/surge units · not in design",
+      "qty": 1,
+      "unit": "refund credit",
+      "currency": "USD",
+      "location": "Return",
+      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "priority": "Accounting assumption",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "assumed",
+      "refundForBomId": "dse-extra-ac-rcbo-pair",
+      "refundExpectedUsd": 52.66,
+      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item.",
+      "totalUsd": -52.66,
+      "unitCost": -52.66,
+      "refundAllocations": [
+        {
+          "bomId": "dse-extra-ac-rcbo-pair",
+          "amountUsd": 52.66
+        }
+      ]
+    },
+    {
+      "id": "dse-kerwinn-shared-services-breaker-alternate-assumed-refund",
+      "category": "Purchase adjustments",
+      "item": "Assumed Amazon refund · KERWINN 10 A single-pole DC breaker · unselected alternate",
+      "qty": 1,
+      "unit": "refund credit",
+      "currency": "USD",
+      "location": "Return",
+      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "priority": "Accounting assumption",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "assumed",
+      "refundForBomId": "dse-kerwinn-shared-services-breaker-alternate",
+      "refundExpectedUsd": 9.87,
+      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item.",
+      "totalUsd": -9.87,
+      "unitCost": -9.87,
+      "refundAllocations": [
+        {
+          "bomId": "dse-kerwinn-shared-services-breaker-alternate",
+          "amountUsd": 9.87
+        }
+      ]
+    },
+    {
+      "id": "dse-battery-string-breakers-midnite-unused-assumed-refund",
+      "category": "Purchase adjustments",
+      "item": "Assumed Amazon refund · Owned MidNite MNEPV125 battery breakers · return item, not selected in R32",
+      "qty": 1,
+      "unit": "refund credit",
+      "currency": "USD",
+      "location": "Return",
+      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "priority": "Accounting assumption",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "assumed",
+      "refundForBomId": "dse-battery-string-breakers-midnite-unused",
+      "refundExpectedUsd": 135.63,
+      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item.",
+      "totalUsd": -135.63,
+      "unitCost": -135.63,
+      "refundAllocations": [
+        {
+          "bomId": "dse-battery-string-breakers-midnite-unused",
+          "amountUsd": 135.63
+        }
+      ]
+    },
+    {
+      "id": "dse-pv-breakers-32a-rejected-assumed-refund",
+      "category": "Purchase adjustments",
+      "item": "Assumed Amazon refund · CHTAIXI 2-pole 600 VDC 32 A PV breakers · above module limit",
+      "qty": 1,
+      "unit": "refund credit",
+      "currency": "USD",
+      "location": "Return",
+      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "priority": "Accounting assumption",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "assumed",
+      "refundForBomId": "dse-pv-breakers-32a-rejected",
+      "refundExpectedUsd": 31,
+      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item.",
+      "totalUsd": -31,
+      "unitCost": -31,
+      "refundAllocations": [
+        {
+          "bomId": "dse-pv-breakers-32a-rejected",
+          "amountUsd": 31
+        }
+      ]
+    },
+    {
+      "id": "dse-usb-output-breaker-assumed-refund",
+      "category": "Purchase adjustments",
+      "item": "Assumed Amazon refund · Owned CHTAIXI B60 breaker · removed from USB topology",
+      "qty": 1,
+      "unit": "refund credit",
+      "currency": "USD",
+      "location": "Return",
+      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "priority": "Accounting assumption",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "assumed",
+      "refundForBomId": "dse-usb-output-breaker",
+      "refundExpectedUsd": 9.87,
+      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item.",
+      "totalUsd": -9.87,
+      "unitCost": -9.87,
+      "refundAllocations": [
+        {
+          "bomId": "dse-usb-output-breaker",
+          "amountUsd": 9.87
+        }
+      ]
+    },
+    {
+      "id": "dse-starlink-portable-battery-cable-assumed-refund",
+      "category": "Purchase adjustments",
+      "item": "Assumed Amazon refund · Starlink Mini direct-battery portable power cable · 16.4 ft",
+      "qty": 1,
+      "unit": "refund credit",
+      "currency": "USD",
+      "location": "Return",
+      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "priority": "Accounting assumption",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "assumed",
+      "refundForBomId": "dse-starlink-portable-battery-cable",
+      "refundExpectedUsd": 23.4,
+      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Includes proportional allocation of order-level tax and discounts. Original purchase evidence supports the amount, not a completed refund.",
+      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Includes proportional allocation of order-level tax and discounts. Original purchase evidence supports the amount, not a completed refund.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item.",
+      "totalUsd": -23.4,
+      "unitCost": -23.4,
+      "refundAllocations": [
+        {
+          "bomId": "dse-starlink-portable-battery-cable",
+          "amountUsd": 23.4
+        }
+      ]
     }
   ],
   "operatingRules": [

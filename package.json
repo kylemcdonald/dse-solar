@@ -20,7 +20,7 @@
     "generate:wall-plan": "tsx scripts/generate-wall-plan.ts",
     "generate:runtime": "tsx scripts/generate-runtime.ts",
     "generate:diagram-layouts": "tsx scripts/generate-diagram-layouts.ts",
-    "generate:receipts": "node scripts/generate-public-receipt-manifest.mjs",
+    "generate:receipts": "node scripts/reconcile-return-refunds.mjs && node scripts/generate-public-receipt-manifest.mjs",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "test": "npm run build && tsx --test tests/*.test.ts",
     "test:e2e": "playwright test --config=playwright.config.mjs",

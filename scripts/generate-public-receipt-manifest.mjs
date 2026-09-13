@@ -237,6 +237,20 @@ const purchasedWithoutReceipt = system.bom
   .filter((row) => !itemInvoices[row.id])
   .map((row) => row.id);
 
+// Refund assumptions cite the original purchase; they are not bank/Amazon
+// confirmation documents and must not create fictitious receipt numbers.
+for (const row of system.bom) {
+  if (row.refundStatus && row.refundAllocations?.length) {
+    const refs = new Set(itemInvoices[row.id] ?? []);
+    for (const allocation of row.refundAllocations) {
+      const sourceRefs = itemInvoices[allocation.bomId];
+      if (!sourceRefs?.length) throw new Error(`Missing purchase evidence for ${row.id}`);
+      sourceRefs.forEach((number) => refs.add(number));
+    }
+    itemInvoices[row.id] = [...refs].sort((first, second) => first - second);
+  }
+}
+
 writeJson(outputPath, {
   schemaVersion: 1,
   generatedOn: invoices.reduce((latest, invoice) => invoice.date > latest ? invoice.date : latest, "2026-08-28"),

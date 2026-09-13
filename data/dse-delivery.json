@@ -396,12 +396,12 @@
       "note": "Two portable-use 100 W USB-C PD power leads; not installed in DSE fixed wiring."
     },
     "dse-starlink-portable-battery-cable": {
-      "amazonStatus": "return-pending",
+      "amazonStatus": "refund-assumed",
       "sourceLabel": "Amazon · purchased SegurVelo battery lead",
       "sourceUrl": "https://www.amazon.com/dp/B0F7LDGP2P",
-      "eta": "Aug 22",
-      "time": "Purchased Aug 21",
-      "note": "Marked for return and excluded from the Fiji import/customs manifest."
+      "eta": "Treated as returned for accounting",
+      "time": "Amazon refund not confirmed",
+      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Includes proportional allocation of order-level tax and discounts. Original purchase evidence supports the amount, not a completed refund."
     },
     "dse-cat6-blue-spare": {
       "amazonStatus": "purchased",
@@ -436,12 +436,12 @@
       "note": "All four modules are purchased."
     },
     "dse-usb-output-breaker": {
-      "amazonStatus": "return-pending",
+      "amazonStatus": "refund-assumed",
       "sourceLabel": "Amazon · CHTAIXI B60 B09H4W8CLY",
       "sourceUrl": "https://www.amazon.com/dp/B09H4W8CLY",
-      "eta": "Arriving Aug 24",
-      "time": "Purchased Aug 23 · $8.99",
-      "note": "Marked for return and excluded from the Fiji import/customs manifest."
+      "eta": "Treated as returned for accounting",
+      "time": "Amazon refund not confirmed",
+      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     "dse-mppt-wirebox-mc4-rejected": {
       "amazonStatus": "refund-issued",
@@ -547,20 +547,20 @@
       "note": "Both units remain excluded from the installation and Fiji manifest."
     },
     "dse-pv-breakers-32a-rejected": {
-      "amazonStatus": "return-pending",
+      "amazonStatus": "refund-assumed",
       "sourceLabel": "Amazon · CHTAIXI B0D4JPXT4T",
       "sourceUrl": "https://www.amazon.com/dp/B0D4JPXT4T",
-      "eta": "Arriving Aug 25",
-      "time": "2 purchased Aug 23 · $28.24",
-      "note": "Marked for return and excluded from the Fiji import/customs manifest."
+      "eta": "Treated as returned for accounting",
+      "time": "Amazon refund not confirmed",
+      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     "dse-battery-string-breakers-midnite-unused": {
-      "amazonStatus": "return-pending",
+      "amazonStatus": "refund-assumed",
       "sourceLabel": "Amazon · purchased exact MidNite model",
       "sourceUrl": "https://www.amazon.com/dp/B0CFX5PW79",
-      "eta": "Aug 26–28",
-      "time": "Purchased Aug 20",
-      "note": "Marked for return and excluded from the Fiji import/customs manifest."
+      "eta": "Treated as returned for accounting",
+      "time": "Amazon refund not confirmed",
+      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     "dse-earth-minibus": {
       "amazonStatus": "purchased",
@@ -892,12 +892,12 @@
       "note": "Purchased 32 A ChargeIT branch breaker allocated inside the R28 secondary-services enclosure; overnight ETA."
     },
     "dse-b125-chtaixi-unused": {
-      "amazonStatus": "return-pending",
+      "amazonStatus": "refund-assumed",
       "sourceLabel": "Amazon · CHTAIXI B0B1WC651R",
       "sourceUrl": "https://www.amazon.com/dp/B0B1WC651R",
-      "eta": "Return pending",
-      "time": "Three purchased Aug 24",
-      "note": "Superseded by non-polarized DIHOOL breakers; excluded from design and Fiji manifest."
+      "eta": "Treated as returned for accounting",
+      "time": "Amazon refund not confirmed",
+      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Includes proportional allocation of order-level tax and discounts. Original purchase evidence supports the amount, not a completed refund."
     },
     "dse-airic-npt-cable-glands": {
       "amazonStatus": "purchased",
@@ -948,28 +948,28 @@
       "note": "Excluded purchase/return history; replaced by the selected Joinfworld pair."
     },
     "dse-extra-dihool-120a-breaker": {
-      "amazonStatus": "purchased",
+      "amazonStatus": "refund-assumed",
       "sourceLabel": "Amazon · surplus fourth DIHOOL 120 A breaker",
       "sourceUrl": "https://www.amazon.com/dp/B0BFF7F46Y",
-      "eta": "Delivered Aug 28",
-      "time": "1 surplus unit · $11.99 before tax",
-      "note": "Not in the canonical three-breaker design; return/spare decision pending."
+      "eta": "Treated as returned for accounting",
+      "time": "Amazon refund not confirmed",
+      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     "dse-extra-ac-rcbo-pair": {
-      "amazonStatus": "purchased",
+      "amazonStatus": "refund-assumed",
       "sourceLabel": "Amazon · duplicate DIHOOL 10 A AC-protection pair",
       "sourceUrl": "https://www.amazon.com/dp/B0CRKNJSRH",
-      "eta": "Delivered Aug 28",
-      "time": "2 duplicate units · $47.98 before tax",
-      "note": "Exact duplicate of the two selected candidates; return decision pending."
+      "eta": "Treated as returned for accounting",
+      "time": "Amazon refund not confirmed",
+      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     "dse-kerwinn-shared-services-breaker-alternate": {
-      "amazonStatus": "purchased",
+      "amazonStatus": "refund-assumed",
       "sourceLabel": "Amazon · KERWINN 10 A DC-breaker alternate",
       "sourceUrl": "https://www.amazon.com/dp/B0BYSCXBH9",
-      "eta": "Delivered Aug 29",
-      "time": "1 alternate unit · $8.99 before tax",
-      "note": "Unselected alternate; do not substitute for the CHTAIXI unit without explicit electrical verification and selection."
+      "eta": "Treated as returned for accounting",
+      "time": "Amazon refund not confirmed",
+      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
     },
     "dse-refund-igreely-1-0-cables": {
       "amazonStatus": "refund-issued",

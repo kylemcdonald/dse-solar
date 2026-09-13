@@ -32,6 +32,7 @@ export type CostBomItem = {
   grantFundingSource?: string;
   grantFundingAmountUsd?: number;
   grantFundingTreatment?: string;
+  refundStatus?: "confirmed" | "assumed";
 };
 
 export type CostScope = "Solar + internet" | "Additional purchases" | "Excluded / returns";
@@ -198,11 +199,13 @@ export function CostView({ bom, project = "dse" }: { bom: CostBomItem[]; project
     </div>
     {grantReport && <details className="cost-reconciliation">
       <summary>IYOIYO net expenses: {money(grantReport.grandTotalUsd)} · reconcile with all positive item value</summary>
-      <p>This reconciliation covers the complete ledger, regardless of the chart filter. Installation and freight allowances have been removed. Baggage was handled outside this project.</p>
+      <p>This reconciliation covers the complete ledger, regardless of the chart filter. Returned-item purchases remain visible at their original value and are offset by refund credits. Pending returns are treated as refunded under your accounting instruction.</p>
       <dl>
         <div><dt>All positive item value</dt><dd>{money(grantReport.costReconciliation.positiveTotalUsd)}</dd></div>
         <div><dt>Less items without a supported purchase record</dt><dd>−{money(grantReport.costReconciliation.omittedPositiveTotalUsd)}</dd></div>
-        <div><dt>Less refunds and promotions</dt><dd>−{money(grantReport.costReconciliation.creditsUsd)}</dd></div>
+        <div><dt>Less documented refunds and promotions</dt><dd>−{money(grantReport.costReconciliation.creditsUsd - grantReport.assumedRefundsUsd)}</dd></div>
+        <div><dt>Net expenses before assumed refunds</dt><dd>{money(grantReport.recordedNetExpensesUsd)}</dd></div>
+        <div><dt>Less assumed refunds · Amazon confirmation pending</dt><dd>−{money(grantReport.assumedRefundsUsd)}</dd></div>
         <div><dt>IYOIYO net expenses · PDF and CSV</dt><dd>{money(grantReport.grandTotalUsd)}</dd></div>
       </dl>
       {grantReport.costReconciliation.omittedLines.length > 0 && <ul>
