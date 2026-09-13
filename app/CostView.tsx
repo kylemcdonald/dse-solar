@@ -159,12 +159,13 @@ export function CostView({ bom, project = "dse" }: { bom: CostBomItem[]; project
   const fijiUsdTotal = fijiItems.reduce((sum, item) => sum + item.totalUsd, 0);
   const importTotal = allItems.filter((item) => item.location === "Import to Chuuk").reduce((sum, item) => sum + item.totalUsd, 0);
   const localTotal = allItems.filter((item) => item.location === "Buy in Chuuk").reduce((sum, item) => sum + item.totalUsd, 0);
+  const grantReport = useMemo(() => isPolowat ? null : buildGrantPurchaseReport(bom, receipts), [bom, isPolowat]);
 
   return <section className="shipping-view cost-view" aria-label="Bill of materials cost treemap">
     <header className="shipping-heading cost-heading"><div><p className="eyebrow">{isPolowat ? "Inowon / Polowat planning estimate" : "DSE / Fiji purchase tracking"}</p>
       <h1>Cost by item</h1><p>{isPolowat
         ? "Planning prices for the compact deployment. Area represents estimated USD item cost; freight, duty, tax and Starlink service are not included."
-        : "Every positive-cost BOM row. Area uses the USD accounting equivalent; original FJD amounts and payer attribution remain attached to each Fiji purchase."}</p>
+        : "Every positive-cost purchase row. Area uses USD accounting values. Refunds and promotions reduce the grant report total; the reconciliation below explains the difference."}</p>
     </div><div className="shipping-total cost-total"><small>Positive item value</small>
       <strong>{money(positiveTotal)}</strong><span>{items.length} of {allItems.length} positive-cost rows · {credits.length > 0
         ? `${money(creditTotal)} across ${credits.length} credit ${credits.length === 1 ? "row stays" : "rows stay"} in accounting totals`
@@ -195,6 +196,21 @@ export function CostView({ bom, project = "dse" }: { bom: CostBomItem[]; project
       </a>}
       <span>{items.length} rows shown</span>
     </div>
+    {grantReport && <details className="cost-reconciliation">
+      <summary>IYOIYO net expenses: {money(grantReport.grandTotalUsd)} · reconcile with all positive item value</summary>
+      <p>This reconciliation covers the complete ledger, regardless of the chart filter. Installation and freight allowances have been removed. Baggage was handled outside this project.</p>
+      <dl>
+        <div><dt>All positive item value</dt><dd>{money(grantReport.costReconciliation.positiveTotalUsd)}</dd></div>
+        <div><dt>Less items without a supported purchase record</dt><dd>−{money(grantReport.costReconciliation.omittedPositiveTotalUsd)}</dd></div>
+        <div><dt>Less refunds and promotions</dt><dd>−{money(grantReport.costReconciliation.creditsUsd)}</dd></div>
+        <div><dt>IYOIYO net expenses · PDF and CSV</dt><dd>{money(grantReport.grandTotalUsd)}</dd></div>
+      </dl>
+      {grantReport.costReconciliation.omittedLines.length > 0 && <ul>
+        {grantReport.costReconciliation.omittedLines.map((line) => <li key={line.id}>
+          <strong>{money(line.costUsd)} · {line.item}</strong><span>{line.reason}</span>
+        </li>)}
+      </ul>}
+    </details>}
     <div className="shipping-legend cost-legend" aria-label="Cost categories">{groupTotals.map((group) => <span key={group.name}>
       <i style={{ backgroundColor: costColors[group.name] }} />{group.name}<b>{money(group.cost)}</b>
     </span>)}</div>

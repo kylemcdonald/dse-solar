@@ -17,6 +17,7 @@ const swappaPath = resolve("private/swappa-orders-through-2026-08-25.json");
 const customsAgentPath = resolve("private/extreme-customs-clearance-invoices-through-2026-08-28.json");
 const solarFijiPath = resolve("private/solar-fiji-purchases-through-2026-09-02.json");
 const rcManubhaiPath = resolve("private/rc-manubhai-purchases-through-2026-09-01.json");
+const bankWiresPath = resolve("private/bank-of-america-wires-through-2026-08-25.json");
 
 // The first two receipts predate the private, PII-free reconciliation JSON. This
 // public description intentionally contains only the evidence metadata needed by
@@ -55,6 +56,23 @@ const swappa = readJson("private/swappa-orders-through-2026-08-25.json");
 const customsAgent = readJson("private/extreme-customs-clearance-invoices-through-2026-08-28.json");
 const solarFiji = readJson("private/solar-fiji-purchases-through-2026-09-02.json");
 const rcManubhai = readJson("private/rc-manubhai-purchases-through-2026-09-01.json");
+// Preserve the complete public index if a checkout has only an older subset of
+// private inputs. Otherwise rebuilding would silently drop the later wire refs.
+if (!fs.existsSync(bankWiresPath) && fs.existsSync(resolve(outputPath))
+  && readJson(outputPath).invoices.some((invoice) => invoice.filename.includes("wire-wind-solar-battery-pacific"))) {
+  console.log("Private bank reconciliation unavailable; preserved the committed receipt manifest.");
+  process.exit(0);
+}
+const bankWireDocuments = fs.existsSync(bankWiresPath)
+  ? JSON.parse(fs.readFileSync(bankWiresPath, "utf8")).payments.map((payment) => ({
+    date: payment.date,
+    supplier: payment.bank,
+    receiptFile: payment.receiptFile,
+    documentKind: "Payment confirmation",
+    reference: "Wind Solar Battery Pacific wire",
+    bomIds: payment.bomIds ?? [],
+    items: [],
+  })) : [];
 const solarFijiDocuments = solarFiji.purchases.flatMap((purchase) => {
   const bomIds = [...purchase.items.map((item) => item.bomId), purchase.taxAllocation.bomId];
   return [
@@ -102,6 +120,7 @@ const orders = [
   })),
   ...solarFijiDocuments,
   ...rcManubhaiDocuments,
+  ...bankWireDocuments,
 ].sort((a, b) =>
   a.date.localeCompare(b.date) || a.supplier.localeCompare(b.supplier) || a.receiptFile.localeCompare(b.receiptFile));
 

@@ -42,18 +42,18 @@ test("costs page downloads grant PDF and CSV reports plus the receipt archive", 
   expect(pdf).toContain("Outside-scope purchases");
   expect(pdf).toContain("All documented purchase and customs costs in this report were paid by");
   expect(pdf).toContain("IYOIYO. The final summary separates");
-  expect(pdf).toContain("FJD 12,222.00");
+  expect(pdf).toContain("FJD 15,193.00");
   expect(pdf).toContain("IYOIYO paid beyond PTS advance");
-  expect(pdf).toContain("$6,579.43");
+  expect(pdf).toContain("$7,962.15");
   expect(pdf).toContain("Funding attribution: Erik Godo donation to Pacific Traditions");
   expect(pdf).toContain("\\(PTS\\); remains included in IYOIYO purchases");
   expect(pdf).toContain("PURCHASE SCOPE SUMMARY");
-  expect(pdf).toContain("$11,156.93");
+  expect(pdf).toContain("$12,539.65");
   expect(pdf).toContain("$3,422.50");
   expect(pdf).toContain("of which Inowon in Polowat");
   expect(pdf).toContain("$179.98");
   expect(pdf).toContain("COMBINED TOTAL");
-  expect(pdf).toContain("$14,579.43");
+  expect(pdf).toContain("$15,962.15");
   expect(pdf).not.toContain("PAID BY");
   expect(pdf).not.toContain("DSE PAID");
   expect(pdf).not.toContain("Costs paid directly by DSE");
@@ -73,14 +73,14 @@ test("costs page downloads grant PDF and CSV reports plus the receipt archive", 
   expect(csv).toContain('"Row type","Section","Item","Quantity","Unit","Evidence","Original currency","Original amount","USD equivalent","Note"');
   expect(csv).not.toContain('"Paid by"');
   expect(csv).not.toContain('"DSE"');
-  expect(csv.split("\r\n").filter((row) => row.startsWith('"Item",')).length).toBe(144);
-  expect(csv).toContain('"Section subtotal","On-site Fiji purchases","On-site Fiji purchases subtotal",,,,"FJD",12222.00,5555.46,');
-  expect(csv).toContain('"Source reconciliation","Funding summary","Verified on-site Fiji purchases",,,"#48-50","FJD",12222.00,5555.46,');
-  expect(csv).toContain('"Purchase subtotal","Funding summary","All purchases paid by IYOIYO",,,,,,14579.43,');
-  expect(csv).toContain('"Scope subtotal","Purchase scope summary","Solar system",,,,,,11156.93,');
+  expect(csv.split("\r\n").filter((row) => row.startsWith('"Item",')).length).toBe(145);
+  expect(csv).toContain('"Section subtotal","On-site Fiji purchases","On-site Fiji purchases subtotal",,,,"FJD",15193.00,6938.18,');
+  expect(csv).toContain('"Source reconciliation","Funding summary","Verified on-site Fiji purchases",,,"#48-53","FJD",15193.00,6938.18,');
+  expect(csv).toContain('"Purchase subtotal","Funding summary","All purchases paid by IYOIYO",,,,,,15962.15,');
+  expect(csv).toContain('"Scope subtotal","Purchase scope summary","Solar system",,,,,,12539.65,');
   expect(csv).toContain('"Scope subtotal","Purchase scope summary","Outside scope",,,,,,3422.50,');
   expect(csv).toContain('"Allocation detail","Purchase scope summary","Inowon in Polowat",,,,,,179.98,');
-  expect(csv).toContain('"Grand total","Purchase scope summary","COMBINED TOTAL",,,,,,14579.43,');
+  expect(csv).toContain('"Grand total","Purchase scope summary","COMBINED TOTAL",,,,,,15962.15,');
   expect(csv).toContain("Allocation: 1 of 2 SSDs ($164.99 item price) is for Inowon in Polowat");
   expect(csv).toContain("Allocation: 1 of 2 SD card readers ($14.99 item price) is for Inowon in Polowat");
   expect(csv).toContain("Erik Godo donation to Pacific Traditions Society (PTS); remains included in IYOIYO purchases");
@@ -89,7 +89,9 @@ test("costs page downloads grant PDF and CSV reports plus the receipt archive", 
 
   const receiptStatus = await page.request.get("/api/receipts/status");
   const receiptLink = page.getByRole("link", { name: "Download all receipts (.zip)" });
-  if (receiptStatus.ok()) {
+  const privateMode = receiptStatus.ok() && receiptStatus.headers()["content-type"]?.includes("application/json")
+    && (await receiptStatus.json()).privateMode;
+  if (privateMode) {
     await expect(receiptLink).toBeVisible();
     const receiptDownloadPromise = page.waitForEvent("download");
     await receiptLink.click();
@@ -104,6 +106,9 @@ test("costs page downloads grant PDF and CSV reports plus the receipt archive", 
     expect(entryNames).toContain("48-rc-manubhai-2026-09-01-invoice-12185922-site-supplies.pdf");
     expect(entryNames).toContain("49-solar-fiji-2026-09-01-quote-TP260901-V2-solar-system.pdf");
     expect(entryNames).toContain("50-bank-of-america-2026-09-02-wire-solar-fiji.pdf");
+    expect(entryNames).toContain("51-bank-of-america-2026-08-20-wire-wind-solar-battery-pacific.pdf");
+    expect(entryNames).toContain("52-bank-of-america-2026-08-21-wire-wind-solar-battery-pacific.pdf");
+    expect(entryNames).toContain("53-bank-of-america-2026-08-25-wire-wind-solar-battery-pacific.pdf");
     expect(entryNames.every((name) => /^\d{2}-[A-Za-z0-9][A-Za-z0-9._-]*\.pdf$/.test(name))).toBe(true);
   } else {
     await expect(receiptLink).toHaveCount(0);

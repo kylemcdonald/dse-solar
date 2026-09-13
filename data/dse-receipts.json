@@ -310,6 +310,30 @@
       "supplier": "Bank of America",
       "kind": "Payment confirmation",
       "reference": "Solar Fiji wire"
+    },
+    {
+      "number": 51,
+      "date": "2026-08-20",
+      "filename": "bank-of-america-2026-08-20-wire-wind-solar-battery-pacific.pdf",
+      "supplier": "Bank of America",
+      "kind": "Payment confirmation",
+      "reference": "Wind Solar Battery Pacific wire"
+    },
+    {
+      "number": 52,
+      "date": "2026-08-21",
+      "filename": "bank-of-america-2026-08-21-wire-wind-solar-battery-pacific.pdf",
+      "supplier": "Bank of America",
+      "kind": "Payment confirmation",
+      "reference": "Wind Solar Battery Pacific wire"
+    },
+    {
+      "number": 53,
+      "date": "2026-08-25",
+      "filename": "bank-of-america-2026-08-25-wire-wind-solar-battery-pacific.pdf",
+      "supplier": "Bank of America",
+      "kind": "Payment confirmation",
+      "reference": "Wind Solar Battery Pacific wire"
     }
   ],
   "itemInvoices": {
@@ -463,6 +487,11 @@
     ],
     "dse-mc4-dc-adapters": [
       13
+    ],
+    "dse-multiplus": [
+      51,
+      52,
+      53
     ],
     "dse-ekrano-gx": [
       9

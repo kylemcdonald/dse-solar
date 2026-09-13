@@ -838,7 +838,7 @@ test("3D model uses canonical router and has no removed controls", async ({ page
 
 test("BOM can show only items to purchase and sort by status, weight and cost", async ({ page }) => {
   await page.getByRole("button", { name: /Bill of materials/ }).click();
-  await expect(page.locator('[data-bom-total="design"]')).toContainText("$12,480.62");
+  await expect(page.locator('[data-bom-total="design"]')).toContainText("$12,292.48");
   await expect(page.locator('[data-bom-total="design"]')).toContainText("Solar + internet only");
   await expect(page.locator('[data-bom-total="additional"]')).toContainText("$3,422.50");
   await expect(page.locator('[data-bom-total="additional"]')).toContainText("14 rows");
@@ -862,28 +862,33 @@ test("BOM can show only items to purchase and sort by status, weight and cost", 
 test("Costs treemap includes every positive-cost BOM line", async ({ page }) => {
   await page.getByRole("button", { name: "Costs" }).click();
   await expect(page.getByRole("heading", { name: "Cost by item" })).toBeVisible();
-  await expect(page.locator(".cost-tile")).toHaveCount(148);
-  await expect(page.getByText("$16,575.17", { exact: true })).toBeVisible();
-  await expect(page.locator(".cost-total")).toContainText("On-site Fiji purchases: FJD 12,222.00 · $5,555.46 · paid by IYOIYO");
-  await expect(page.locator('[data-source-currency="FJD"]')).toHaveCount(41);
+  await expect(page.locator(".cost-tile")).toHaveCount(138);
+  await expect(page.locator(".cost-total strong")).toHaveText("$16,387.03");
+  await page.locator(".cost-reconciliation summary").click();
+  await expect(page.locator(".cost-reconciliation")).toContainText("$15,962.15");
+  await expect(page.locator(".cost-reconciliation")).toContainText("$424.88");
+  await expect(page.locator(".cost-reconciliation li")).toHaveCount(0);
+  await expect(page.locator(".cost-total")).toContainText("On-site Fiji purchases: FJD 15,193.00 · $6,938.18 · paid by IYOIYO");
+  await expect(page.locator('[data-source-currency="FJD"]')).toHaveCount(34);
   await expect(page.locator(".cost-legend")).toContainText("Power & generation");
   await expect(page.locator('.cost-tile[data-accounting-scope="Solar + internet"]')).not.toHaveCount(0);
   await expect(page.locator('.cost-tile[data-accounting-scope="Additional purchases"]')).not.toHaveCount(0);
   await expect(page.locator('.cost-tile[data-accounting-scope="Excluded / returns"]')).not.toHaveCount(0);
   const scope = page.getByLabel("Show costs for");
   await scope.selectOption("Solar + internet");
-  await expect(page.locator(".cost-tile")).toHaveCount(121);
-  await expect(page.locator(".cost-total strong")).toHaveText("$12,570.85");
+  await expect(page.locator(".cost-tile")).toHaveCount(111);
+  await expect(page.locator(".cost-total strong")).toHaveText("$12,382.71");
   await expect(page.locator(".cost-total")).toContainText("$90.23 across 1 credit row stays");
   await scope.selectOption("Additional purchases");
   await expect(page.locator(".cost-tile")).toHaveCount(13);
   await expect(page.locator(".cost-total strong")).toHaveText("$3,432.20");
+  await expect(page.locator(".cost-reconciliation")).toContainText("$15,962.15");
   await scope.selectOption("Excluded / returns");
   await expect(page.locator(".cost-tile")).toHaveCount(14);
   await expect(page.locator(".cost-total strong")).toHaveText("$572.12");
   await expect(page.locator(".cost-total")).toContainText("$324.95 across 5 credit rows stay");
   await scope.selectOption("All items");
-  await expect(page.locator(".cost-tile")).toHaveCount(148);
+  await expect(page.locator(".cost-tile")).toHaveCount(138);
 });
 
 test('installed wall controls and grouped operator diagram are usable on a phone', async ({ page }) => {

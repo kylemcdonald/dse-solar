@@ -136,7 +136,7 @@ const acBreakout = (
   placement,
   terminalPitchByFaceM: { [coreFace]: AC_CORE_PITCH_M },
   componentId: "acBoard",
-  bomIds: ["dse-terms"],
+  bomIds: [],
   status: "planned",
   conductors: [
     p("cable", "3-core cable sheath", "multicore", cableFace, {
@@ -826,7 +826,7 @@ const dseBaseDevices: readonly Device[] = [
   acBreakout("toolAcBreakout", "Trailing-tool cable breakout", inside("acJunction", "backplate", 3)),
   {
     id: "servicePenetration", label: "Inside / outside service penetration", kind: "connector", presentation: "wall-passthrough", size: [0.280, 0.180, 0.045], placement: west([1.33, 2.65, 0]),
-    componentId: "mounting", bomIds: ["dse-terms"], status: "planned", conductors: [
+    componentId: "mounting", bomIds: [], status: "planned", conductors: [
       p("pvCableOutside", "White PV cable · outside", "multicore", "back", { order: 2, terminal: "Sealed wall penetration", terminalSize: "Two-core PV cable gland", termination: "Continuous white PV cable", terminalDiameterMm: 10, internalMates: ["pvCableInside"] }),
       p("pvCableInside", "White PV cable · inside", "multicore", "front", { order: 2, terminal: "Sealed wall penetration", terminalSize: "Two-core PV cable gland", termination: "Continuous white PV cable", terminalDiameterMm: 10, internalMates: ["pvCableOutside"] }),
       p("frameOutside", "PV frame bond · outside", "earth", "back", { order: 4, gauge: "4 mm²", terminal: "Sealed wall penetration", terminalSize: "4 mm² bond-conductor gland", termination: "Continuous insulated copper bond", terminalDiameterMm: 5, internalMates: ["frameInside"] }),
@@ -875,7 +875,7 @@ const dseBaseDevices: readonly Device[] = [
     id: "toolOutlet", label: "Type I trailing tool outlet", kind: "load",
     size: [0.085, 0.060, 0.040], placement: wall([1.10, 0.91, 0.06]),
     terminalPitchByFaceM: { bottom: AC_CORE_PITCH_M },
-    componentId: "toolOutlet", bomIds: ["dse-tool-lead"], status: "planned",
+    componentId: "toolOutlet", bomIds: ["dse-fiji-10a-surface-socket"], status: "planned",
     power: {
       role: "variable-load", basis: "calculated", verified: true,
       readings: [
@@ -902,7 +902,7 @@ const dseBaseDevices: readonly Device[] = [
   },
   {
     id: "earthElectrode", label: "Earth electrode", kind: "earth", size: [0.035, 0.70, 0.035], placement: outside([0.16, -0.43, 0.12]),
-    componentId: "earth", bomIds: ["dse-earth"], status: "planned", conductors: [p("clamp", "Electrode clamp", "earth", "top", { gauge: "16 mm²", terminal: "Listed earth-electrode clamp", terminalSize: "Match received rod and 16 mm² conductor", termination: "Continuous insulated copper bond", terminalDiameterMm: 10 })],
+    componentId: "earth", bomIds: ["dse-solar-fiji-earth-rod"], status: "planned", conductors: [p("clamp", "Electrode clamp", "earth", "top", { gauge: "16 mm²", terminal: "Listed earth-electrode clamp", terminalSize: "Match received rod and 16 mm² conductor", termination: "Continuous insulated copper bond", terminalDiameterMm: 10 })],
   },
   {
     id: "ekrano", label: "Victron Ekrano GX", kind: "monitor", size: [0.187, 0.124, 0.030], placement: west([0.78, 1.48, 0.06]),

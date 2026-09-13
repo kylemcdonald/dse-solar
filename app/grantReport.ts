@@ -27,6 +27,7 @@ export type GrantReportBomItem = {
   grantFundingSource?: string;
   grantFundingAmountUsd?: number;
   grantFundingTreatment?: string;
+  grantPaymentNote?: string;
 };
 
 export type GrantReportInvoice = {
@@ -84,6 +85,12 @@ export type GrantPurchaseReport = {
   iyoyioCheckAmountUsd: number;
   iyoyioCheckBalanceUsd: number;
   grandTotalUsd: number;
+  costReconciliation: {
+    positiveTotalUsd: number;
+    omittedPositiveTotalUsd: number;
+    creditsUsd: number;
+    omittedLines: Array<{ id: string; item: string; costUsd: number; reason: string }>;
+  };
 };
 
 const CUSTOMS_IDS = new Set(["dse-customs-vat", "dse-customs-agent-costs"]);
@@ -119,7 +126,7 @@ function lineFor(
     ? `Funding attribution: ${item.grantFundingSource}; remains included in IYOIYO purchases.`
     : undefined;
   const allocations = item.grantAllocations ?? [];
-  const note = [fundingNote, ...allocations.map((allocation) => allocation.note)].filter(Boolean).join(" ") || undefined;
+  const note = [item.grantPaymentNote, fundingNote, ...allocations.map((allocation) => allocation.note)].filter(Boolean).join(" ") || undefined;
   const sortedEvidence = [...new Map(evidence.map((entry) => [entry.number, entry])).values()]
     .sort((first, second) => first.number - second.number);
   return {
@@ -179,6 +186,15 @@ export function buildGrantPurchaseReport(
     .filter((allocation) => allocation.recipientOrganization === "Inowon")
     .reduce((sum, allocation) => sum + allocation.amountUsd, 0));
   const iyoyioCheckBalanceUsd = roundMoney(IYOIYO_CHECK_AMOUNT_USD - iyoyioPurchasesSubtotalUsd);
+  const reportedIds = new Set(reportLines.map((line) => line.id));
+  const positiveItems = bom.filter((item) => Number.isFinite(item.totalUsd) && item.totalUsd > 0);
+  const omittedLines = positiveItems.filter((item) => !reportedIds.has(item.id))
+    .map((item) => ({
+      id: item.id, item: item.item, costUsd: item.totalUsd,
+      reason: !item.procurement.includes("Purchased")
+        ? `Not recorded as a completed purchase: ${item.procurement}`
+        : "Purchase recorded; supporting receipt is missing",
+    })).sort((first, second) => second.costUsd - first.costUsd || first.item.localeCompare(second.item));
 
   return {
     title: "DSE Grant Purchase Report",
@@ -198,6 +214,12 @@ export function buildGrantPurchaseReport(
     iyoyioCheckAmountUsd: IYOIYO_CHECK_AMOUNT_USD,
     iyoyioCheckBalanceUsd,
     grandTotalUsd: iyoyioPurchasesSubtotalUsd,
+    costReconciliation: {
+      positiveTotalUsd: roundMoney(positiveItems.reduce((sum, item) => sum + item.totalUsd, 0)),
+      omittedPositiveTotalUsd: roundMoney(omittedLines.reduce((sum, line) => sum + line.costUsd, 0)),
+      creditsUsd: -subtotal(reportLines.filter((line) => line.costUsd < 0)),
+      omittedLines,
+    },
   };
 }
 
@@ -287,9 +309,11 @@ export function createGrantReportCsv(report: GrantPurchaseReport) {
     ? `${usdMoney(report.iyoyioCheckBalanceUsd)} remains from the ${usdMoney(report.iyoyioCheckAmountUsd)} PTS advance`
     : `${usdMoney(Math.abs(report.iyoyioCheckBalanceUsd))} paid by IYOIYO beyond the ${usdMoney(report.iyoyioCheckAmountUsd)} PTS advance`;
   rows.push(
-    ["Source reconciliation", "Funding summary", "Verified on-site Fiji purchases", "", "", "#48-50",
+    ["Source reconciliation", "Funding summary", "Verified on-site Fiji purchases", "", "",
+      compactReceiptReferences(report.sections.filter((section) => section.id === "fiji")
+        .flatMap((section) => section.lines.flatMap((line) => line.receiptRefs))),
       "FJD", report.fijiPurchasesSourceFjd.toFixed(2), report.fijiPurchasesSubtotalUsd.toFixed(2),
-      "FJD 12,172 Solar Fiji wire plus FJD 50 cash hardware receipt"],
+      "Original FJD amounts retained; USD uses documented bank debits where available, otherwise the retained 2.20 FJD/USD accounting rate"],
     ["Purchase subtotal", "Funding summary", "All purchases paid by IYOIYO", "", "", "", "", "",
       report.iyoyioPurchasesSubtotalUsd.toFixed(2)],
     ["Funding advance", "Funding summary", "Pacific Traditions Society advance", "", "", "", "USD",
@@ -304,6 +328,19 @@ export function createGrantReportCsv(report: GrantPurchaseReport) {
     ["Allocation detail", "Purchase scope summary", "Inowon in Polowat", "", "", "", "", "",
       report.inowonAllocationUsd.toFixed(2), "Included in outside scope: one SSD and one SD card reader at documented item prices; shared charges remain unallocated"],
     ["Grand total", "Purchase scope summary", "COMBINED TOTAL", "", "", "", "", "",
+      report.grandTotalUsd.toFixed(2)],
+  );
+  const reconciliation = report.costReconciliation;
+  rows.push([], ["Reconciliation", "Cost chart to grant report", "All positive item value", "", "", "", "", "",
+    reconciliation.positiveTotalUsd.toFixed(2)]);
+  for (const line of reconciliation.omittedLines) {
+    rows.push(["Excluded from report", "Cost chart to grant report", line.item, "", "", "", "", "",
+      (-line.costUsd).toFixed(2), line.reason]);
+  }
+  rows.push(
+    ["Reconciliation", "Cost chart to grant report", "Refunds and promotions included in report", "", "", "", "", "",
+      (-reconciliation.creditsUsd).toFixed(2)],
+    ["Reconciliation", "Cost chart to grant report", "IYOIYO net expenses", "", "", "", "", "",
       report.grandTotalUsd.toFixed(2)],
   );
 
@@ -383,7 +420,8 @@ function reportPages(report: GrantPurchaseReport) {
       page.commands.push(pdfRect(48, 520, 516, 54, "0.96 0.92 0.82"));
       page.commands.push(pdfText("VERIFIED FIJI SOURCE TOTAL", 59, 555, 7.2, true, "0.43 0.35 0.18"));
       page.commands.push(pdfText(sourceMoney("FJD", report.fijiPurchasesSourceFjd), 59, 535, 13, true, "0.30 0.28 0.20"));
-      page.commands.push(pdfText(`${usdMoney(report.fijiPurchasesSubtotalUsd)} USD equivalent at the retained 2.20 FJD/USD accounting rate`, 250, 537, 8.2, false, "0.30 0.28 0.20"));
+      page.commands.push(pdfText(`${usdMoney(report.fijiPurchasesSubtotalUsd)} USD accounting total`, 250, 541, 8.2, false, "0.30 0.28 0.20"));
+      page.commands.push(pdfText("Actual bank debits where documented; otherwise 2.20 FJD/USD", 250, 529, 7, false, "0.30 0.28 0.20"));
       y = 496;
     } else {
       page.commands.push(pdfText(`${report.title} - purchase ledger`, 48, 748, 10, true, "0.08 0.28 0.29"));
@@ -480,6 +518,34 @@ function reportPages(report: GrantPurchaseReport) {
   page.commands.push(pdfText("COMBINED TOTAL", 58, y - 23, 10.5, true, "1 1 1"));
   const grandTotal = usdMoney(report.grandTotalUsd);
   page.commands.push(pdfText(grandTotal, 556 - grandTotal.length * 6, y - 23, 11.5, true, "1 1 1"));
+
+  y -= 62;
+  ensureSpace(90);
+  page.commands.push(pdfText("COST CHART TO GRANT REPORT", 48, y, 9, true, "0.08 0.28 0.29"));
+  y -= 22;
+  const reconciliation = report.costReconciliation;
+  const reconciliationRows: Array<[string, number]> = [
+    ["All positive item value", reconciliation.positiveTotalUsd],
+    ["Less items not recorded as supported purchases", -reconciliation.omittedPositiveTotalUsd],
+    ["Less refunds and promotions", -reconciliation.creditsUsd],
+    ["IYOIYO net expenses", report.grandTotalUsd],
+  ];
+  for (const [label, amount] of reconciliationRows) {
+    ensureSpace(22);
+    page.commands.push(pdfText(label, 54, y, 8));
+    const value = usdMoney(amount);
+    page.commands.push(pdfText(value, 558 - value.length * 4.3, y, 8, true));
+    y -= 22;
+  }
+  for (const line of reconciliation.omittedLines) {
+    const lines = wrapText(`${usdMoney(line.costUsd)} - ${line.item}. ${line.reason}.`, 108);
+    ensureSpace(lines.length * 10 + 6);
+    lines.forEach((text) => {
+      page.commands.push(pdfText(text, 54, y, 7, false, "0.42 0.46 0.44"));
+      y -= 10;
+    });
+    y -= 6;
+  }
 
   pages.forEach((currentPage, index) => {
     currentPage.commands.push(pdfLine(48, 40, 564, 40, "0.82 0.84 0.81", 0.4));

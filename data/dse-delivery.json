@@ -1,5 +1,5 @@
 {
-  "checkedOn": "2026-09-03",
+  "checkedOn": "2026-09-13",
   "destination": "Los Angeles, CA 90065",
   "items": {
     "dse-suntech-panels-superseded": {
@@ -52,13 +52,6 @@
       "time": "Final quantity after imported-cable allocation",
       "note": "Purchase correctly terminated red and black 1/0 AWG cable onsite, including both MultiPlus feeds and any route not safely served by the fixed imported assemblies. Price is unknown; the zero BOM value is not a quote."
     },
-    "dse-wall-board": {
-      "amazonStatus": "unavailable",
-      "sourceLabel": "Fabricate in Fiji",
-      "eta": "Buy locally",
-      "time": "No LA shipment",
-      "note": "This is a site-cut plywood, shield, duct and hardware lot rather than one shippable product."
-    },
     "dse-ac-rcbo": {
       "amazonStatus": "purchased",
       "sourceLabel": "Amazon · DIHOOL 10 A ground-fault/surge protection",
@@ -74,22 +67,6 @@
       "time": "Purchased Aug 23 · $17.99",
       "note": "Too small for the AC routing envelope. Retain this first HT-8 as an owned spare; the separately tracked second unit is the accepted verified-fit R28 three-breaker battery/MPPT cutoff enclosure.",
       "sourceUrl": "https://www.amazon.com/dp/B09XJZDRNM"
-    },
-    "dse-tool-lead": {
-      "amazonStatus": "unavailable",
-      "sourceLabel": "Bunnings Pacific Fiji · HPM 5 m workshop lead",
-      "sourceUrl": "https://bunningspacific.com.fj/collections/extension-cords-1",
-      "eta": "Buy in Fiji",
-      "time": "Local stock shown; confirm before travel",
-      "note": "The local HPM 5 m, 10 A, three-core lead was listed at FJD 56.86. Retain its molded Type I female trailing socket; a qualified electrical person removes only the source plug and hardwires the lead after the RCBO."
-    },
-    "dse-gen-input": {
-      "amazonStatus": "unavailable",
-      "sourceLabel": "Verify the actual G3200P, then assemble in Fiji",
-      "sourceUrl": "https://www.vinodpatel.com.fj/husqvarna-generator-g3200p-3-2kva-1-phase-petrol",
-      "eta": "Buy locally",
-      "time": "No LA shipment",
-      "note": "Inspect the actual G3200P outlet and source breaker, then make a field-matched three-core lead to the shared AC enclosure plus a second protected segment from the enclosure to MultiPlus AC-in. No male-to-male lead."
     },
     "dse-switch-array": {
       "amazonStatus": "purchased",
@@ -139,42 +116,12 @@
       "time": "Purchased Aug 17",
       "note": "Third identical fixture, carried as a direct spare rather than connected as another load."
     },
-    "dse-light-install": {
-      "amazonStatus": "not-applicable",
-      "sourceLabel": "Purchase in Fiji after measuring",
-      "eta": "Buy locally",
-      "time": "No LA shipment",
-      "note": "Site-measured cable and mounting consumables are intentionally local; confirm UV, moisture and corrosion suitability."
-    },
-    "dse-earth": {
-      "amazonStatus": "not-applicable",
-      "sourceLabel": "Local grounding materials and commissioning",
-      "eta": "Buy in Fiji",
-      "time": "Select on site",
-      "note": "This allowance covers the electrode, bonding conductors, lugs, corrosion protection and testing—not the busbar. The exact eight-position Blue Sea 2128 is a separate BOM row."
-    },
-    "dse-terms": {
-      "amazonStatus": "partial",
-      "sourceLabel": "Amazon · exact termination candidates itemized in BOM",
-      "sourceUrl": "https://www.amazon.com/s?k=KNIPEX+97+53+04+97+99+906+97+99+907+Ancor+320101",
-      "eta": "Verify after conductor schedule is frozen",
-      "time": "Candidate set · existing allowance not repriced",
-      "note": "Use the AC-tab termination matrix to count exact ferrules/rings/disconnects. Heavy 1/0 AWG cables remain custom preterminated; forks are conditional low-current parts only."
-    },
-    "dse-battery-rack": {
-      "amazonStatus": "partial",
-      "sourceLabel": "Amazon · restraint straps",
-      "sourceUrl": "https://www.amazon.com/dp/B0D46WHNXS",
-      "eta": "Aug 15",
-      "time": "Same-day to LA",
-      "note": "Stainless-hardware straps are available; the low rack/base and fitted terminal covers remain local fabrication."
-    },
     "dse-multiplus": {
-      "amazonStatus": "not-applicable",
-      "sourceLabel": "Fiji supplier · 20% deposit paid",
-      "eta": "Collect in Fiji",
-      "time": "80% balance due",
-      "note": "The exact 230 V non-GX PMP242305010 will be purchased in Fiji. Replace the current $939 USD planning value with the final Fiji invoice and actual deposit amount."
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Wind Solar Battery Pacific · paid in full by IYOIYO",
+      "eta": "Installed on Fulaga",
+      "time": "Final payment sent 25 Aug 2026",
+      "note": "IYOIYO paid USD 273.28 on 20 Aug, USD 942.33 on 21 Aug and USD 167.11 on 25 Aug 2026: USD 1,382.72 actual bank debits for FJD 2,971.00, with zero stated fees. All three wires pay for this one MultiPlus; the final payment settled the shortfall. No balance remains due."
     },
     "dse-ekrano-gx": {
       "amazonStatus": "purchased",
@@ -199,13 +146,6 @@
       "eta": "Aug 22",
       "time": "Purchased Aug 20",
       "note": "Permatex 22058, 3 oz purchased for $10.49."
-    },
-    "dse-supplier-freight": {
-      "amazonStatus": "not-applicable",
-      "sourceLabel": "Shipping allowance",
-      "eta": "Not applicable",
-      "time": "Replace with checkout quotes",
-      "note": "This row budgets inbound freight; it is not a purchasable item."
     },
     "dse-balancers": {
       "amazonStatus": "purchased",
@@ -332,14 +272,6 @@
       "eta": "Aug 22",
       "time": "Purchased Aug 20",
       "note": "10 ft red unshielded Cat6 cable purchased for $9.99 and assigned to Ekrano LAN ↔ UniFi LAN."
-    },
-    "dse-baggage": {
-      "amazonStatus": "not-applicable",
-      "sourceLabel": "Fiji Airways",
-      "sourceUrl": "https://www.fijiairways.com/en-us/manage/baggage-allowances",
-      "eta": "At booking/check-in",
-      "time": "No parcel delivery",
-      "note": "This is an airline fee, not an Amazon item."
     },
     "dse-customs-vat": {
       "amazonStatus": "not-applicable",
@@ -502,13 +434,6 @@
       "eta": "Per order tracking",
       "time": "4 purchased Aug 21 · $57.99 each",
       "note": "All four modules are purchased."
-    },
-    "dse-usb-station-wiring": {
-      "amazonStatus": "not-applicable",
-      "sourceLabel": "Fiji electrical/marine supplier",
-      "eta": "Source before installation",
-      "time": "FJD 165 allowance",
-      "note": "Measure every run on the full-size station mock-up before buying cable or terminating lugs."
     },
     "dse-usb-output-breaker": {
       "amazonStatus": "return-pending",

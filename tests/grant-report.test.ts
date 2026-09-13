@@ -24,6 +24,54 @@ const report = buildGrantPurchaseReport(
 const section = (id: GrantReportSectionId) => report.sections.find((candidate) => candidate.id === id)!;
 const cents = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
 
+test("chart reconciliation explains estimates, missing evidence, and documented credits", () => {
+  const row = (id: string, totalUsd: number, procurement = "Purchased"): GrantReportBomItem => ({
+    id, item: id, totalUsd, procurement, qty: 1, unit: "ea", unitCost: totalUsd, currency: "USD",
+  });
+  const example = buildGrantPurchaseReport([
+    row("paid", 100), row("refund", -20), row("allowance", 30, "Allowance"),
+    row("missing-receipt", 15), row("unknown-reference", 5), row("unverified-credit", -7),
+    row("zero", 0), row("invalid", Number.NaN),
+  ], {
+    invoices: [{ number: 1, date: "2026-08-21", supplier: "Supplier", filename: "receipt.pdf" }],
+    itemInvoices: { paid: [1, 1], refund: [1], "unknown-reference": [99] },
+  });
+  assert.equal(example.grandTotalUsd, 80);
+  assert.deepEqual(example.costReconciliation, {
+    positiveTotalUsd: 150, omittedPositiveTotalUsd: 50, creditsUsd: 20,
+    omittedLines: [
+      { id: "allowance", item: "allowance", costUsd: 30, reason: "Not recorded as a completed purchase: Allowance" },
+      { id: "missing-receipt", item: "missing-receipt", costUsd: 15, reason: "Purchase recorded; supporting receipt is missing" },
+      { id: "unknown-reference", item: "unknown-reference", costUsd: 5, reason: "Purchase recorded; supporting receipt is missing" },
+    ],
+  });
+  assert.match(createGrantReportCsv(example), /"IYOIYO net expenses",,,,,,80.00/);
+  assert.match(new TextDecoder().decode(createGrantReportPdf(example)), /COST CHART TO GRANT REPORT/);
+});
+
+test("the live chart and grant report reconcile to the cent", () => {
+  const { positiveTotalUsd, omittedPositiveTotalUsd, creditsUsd } = report.costReconciliation;
+  assert.equal(cents(positiveTotalUsd - omittedPositiveTotalUsd - creditsUsd), report.grandTotalUsd);
+  assert.equal(creditsUsd, 424.88);
+  assert.equal(positiveTotalUsd, 16_387.03);
+  assert.equal(omittedPositiveTotalUsd, 0);
+  assert.equal(system.bom.some((item) => item.procurement.includes("Allowance")), false);
+});
+
+test("all three MultiPlus payments are one fully paid IYOIYO expense using actual bank debits", () => {
+  const item = system.bom.find((row) => row.id === "dse-multiplus")!;
+  const lines = section("fiji").lines.filter((line) => line.id === item.id);
+  assert.equal(lines.length, 1);
+  assert.equal(item.grantPayer, "IYOIYO");
+  assert.match(item.procurement, /paid in full/);
+  assert.equal("paidFraction" in item, false);
+  assert.deepEqual(lines[0].receiptRefs, [51, 52, 53]);
+  assert.equal(lines[0].sourceAmount, 2_971);
+  assert.equal(lines[0].costUsd, cents(273.28 + 942.33 + 167.11));
+  assert.notEqual(lines[0].costUsd, cents(2_971 / 2.2));
+  assert.match(lines[0].note ?? "", /No balance remains due/);
+});
+
 test("new Fiji source documents reconcile without exposing bank details", () => {
   const invoiceByNumber = new Map(receipts.invoices.map((invoice) => [invoice.number, invoice]));
   assert.deepEqual(invoiceByNumber.get(48), {
@@ -55,10 +103,10 @@ test("grant report makes Fiji source currency, evidence, and IYOIYO funding expl
     "Fiji customs and clearance costs",
     "Outside-scope purchases",
   ]);
-  assert.equal(section("fiji").lines.length, 31);
+  assert.equal(section("fiji").lines.length, 32);
   assert.ok(section("fiji").lines.every((line) => line.sourceCurrency === "FJD"));
-  assert.equal(report.fijiPurchasesSourceFjd, 12_222);
-  assert.equal(report.fijiPurchasesSubtotalUsd, 5_555.46);
+  assert.equal(report.fijiPurchasesSourceFjd, 15_193);
+  assert.equal(report.fijiPurchasesSubtotalUsd, 6_938.18);
 
   const panels = section("fiji").lines.find((line) => line.id === "dse-panels")!;
   assert.equal(panels.sourceAmount, 1_650);
@@ -84,20 +132,20 @@ test("every supported purchase appears exactly once and IYOIYO total reconciles"
     .sort();
   const reportLines = report.sections.flatMap((candidate) => candidate.lines);
   assert.deepEqual(reportLines.map((line) => line.id).sort(), expectedReceiptBackedIds);
-  assert.equal(new Set(reportLines.map((line) => line.id)).size, 144);
+  assert.equal(new Set(reportLines.map((line) => line.id)).size, 145);
   assert.ok(reportLines.every((line) => line.receiptRefs.length > 0));
 
-  assert.equal(section("fiji").subtotalUsd, 5_555.46);
+  assert.equal(section("fiji").subtotalUsd, 6_938.18);
   assert.equal(section("solar").subtotalUsd, 4_324.87);
   assert.equal(section("customs").subtotalUsd, 1_276.60);
   assert.equal(section("outside").subtotalUsd, 3_422.50);
-  assert.equal(report.iyoyioPurchasesSubtotalUsd, 14_579.43);
-  assert.equal(report.solarSystemSubtotalUsd, 11_156.93);
+  assert.equal(report.iyoyioPurchasesSubtotalUsd, 15_962.15);
+  assert.equal(report.solarSystemSubtotalUsd, 12_539.65);
   assert.equal(report.outsideScopeSubtotalUsd, 3_422.50);
   assert.equal(report.inowonAllocationUsd, 179.98);
   assert.equal(report.iyoyioCheckAmountUsd, 8_000);
-  assert.equal(report.iyoyioCheckBalanceUsd, -6_579.43);
-  assert.equal(report.grandTotalUsd, 14_579.43);
+  assert.equal(report.iyoyioCheckBalanceUsd, -7_962.15);
+  assert.equal(report.grandTotalUsd, 15_962.15);
   assert.equal(report.grandTotalUsd, report.iyoyioPurchasesSubtotalUsd);
   assert.equal(report.grandTotalUsd, cents(report.solarSystemSubtotalUsd + report.outsideScopeSubtotalUsd));
   assert.equal(report.grandTotalUsd, cents(report.sections.reduce((sum, candidate) => sum + candidate.subtotalUsd, 0)));
@@ -150,18 +198,18 @@ test("grant PDF leads with the IYOIYO and source-currency reconciliation", () =>
   assert.match(pdf, /All documented purchase and customs costs in this report were paid by IYOIYO/);
   assert.match(pdf, /Fiji customs and clearance costs/);
   assert.match(pdf, /VERIFIED FIJI SOURCE TOTAL/);
-  assert.match(pdf, /FJD 12,222\.00/);
+  assert.match(pdf, /FJD 15,193\.00/);
   assert.match(pdf, /IYOIYO paid beyond PTS advance/);
-  assert.match(pdf, /\$6,579\.43/);
+  assert.match(pdf, /\$7,962\.15/);
   assert.match(pdf, /PURCHASE SCOPE SUMMARY/);
   assert.match(pdf, /Solar system/);
-  assert.match(pdf, /\$11,156\.93/);
+  assert.match(pdf, /\$12,539\.65/);
   assert.match(pdf, /Outside scope/);
   assert.match(pdf, /\$3,422\.50/);
   assert.match(pdf, /of which Inowon in Polowat/);
   assert.match(pdf, /\$179\.98/);
   assert.match(pdf, /COMBINED TOTAL/);
-  assert.match(pdf, /\$14,579\.43/);
+  assert.match(pdf, /\$15,962\.15/);
   assert.doesNotMatch(pdf, /PAID BY/);
   assert.doesNotMatch(pdf, /DSE PAID|Costs paid directly by DSE/);
   assert.ok(Number(pdf.match(/\/Type \/Pages .*\/Count (\d+)/)?.[1]) > 1);
@@ -174,16 +222,16 @@ test("grant CSV is an evidence-rich, dual-currency accounting ledger", () => {
   assert.ok(csv.startsWith("\uFEFF\"Report\",\"DSE Grant Purchase Report\""));
   assert.ok(csv.includes("\"Row type\",\"Section\",\"Item\",\"Quantity\",\"Unit\",\"Evidence\",\"Original currency\",\"Original amount\",\"USD equivalent\",\"Note\""));
   assert.doesNotMatch(csv, /"Paid by"|"DSE"/);
-  assert.equal(csv.split("\r\n").filter((row) => row.startsWith("\"Item\",")).length, 144);
+  assert.equal(csv.split("\r\n").filter((row) => row.startsWith("\"Item\",")).length, 145);
   assert.ok(csv.includes("\"Item\",\"On-site Fiji purchases\",\"AIKO Neostar 3P54 490 W panel · AIKO-A490-MCE54Mw\",3,\"ea\",\"#49 Quote TP260901-V2 (Solar Fiji); #50 Payment confirmation Solar Fiji wire (Bank of America)\",\"FJD\",1650.00,750.00,"));
-  assert.ok(csv.includes("\"Section subtotal\",\"On-site Fiji purchases\",\"On-site Fiji purchases subtotal\",,,,\"FJD\",12222.00,5555.46,"));
-  assert.ok(csv.includes("\"Source reconciliation\",\"Funding summary\",\"Verified on-site Fiji purchases\",,,\"#48-50\",\"FJD\",12222.00,5555.46,"));
-  assert.ok(csv.includes("\"Purchase subtotal\",\"Funding summary\",\"All purchases paid by IYOIYO\",,,,,,14579.43,"));
-  assert.ok(csv.includes("\"Funding balance\",\"Funding summary\",\"PTS advance less IYOIYO purchases\",,,,\"USD\",-6579.43,-6579.43,\"$6,579.43 paid by IYOIYO beyond the $8,000.00 PTS advance\""));
-  assert.ok(csv.includes("\"Scope subtotal\",\"Purchase scope summary\",\"Solar system\",,,,,,11156.93,"));
+  assert.ok(csv.includes("\"Section subtotal\",\"On-site Fiji purchases\",\"On-site Fiji purchases subtotal\",,,,\"FJD\",15193.00,6938.18,"));
+  assert.ok(csv.includes("\"Source reconciliation\",\"Funding summary\",\"Verified on-site Fiji purchases\",,,\"#48-53\",\"FJD\",15193.00,6938.18,"));
+  assert.ok(csv.includes("\"Purchase subtotal\",\"Funding summary\",\"All purchases paid by IYOIYO\",,,,,,15962.15,"));
+  assert.ok(csv.includes("\"Funding balance\",\"Funding summary\",\"PTS advance less IYOIYO purchases\",,,,\"USD\",-7962.15,-7962.15,\"$7,962.15 paid by IYOIYO beyond the $8,000.00 PTS advance\""));
+  assert.ok(csv.includes("\"Scope subtotal\",\"Purchase scope summary\",\"Solar system\",,,,,,12539.65,"));
   assert.ok(csv.includes("\"Scope subtotal\",\"Purchase scope summary\",\"Outside scope\",,,,,,3422.50,"));
   assert.ok(csv.includes("\"Allocation detail\",\"Purchase scope summary\",\"Inowon in Polowat\",,,,,,179.98,"));
-  assert.ok(csv.includes("\"Grand total\",\"Purchase scope summary\",\"COMBINED TOTAL\",,,,,,14579.43,"));
+  assert.ok(csv.includes("\"Grand total\",\"Purchase scope summary\",\"COMBINED TOTAL\",,,,,,15962.15,"));
   assert.match(csv, /Allocation: 1 of 2 SSDs \(\$164\.99 item price\) is for Inowon in Polowat/);
   assert.match(csv, /Allocation: 1 of 2 SD card readers \(\$14\.99 item price\) is for Inowon in Polowat/);
   assert.ok(csv.endsWith("\r\n"));
