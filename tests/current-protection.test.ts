@@ -651,7 +651,7 @@ test("automatic naming preserves channel and direction through multicore topolog
   const starlinkPositive = dseTopology.connections.find((candidate) => candidate.id === "internet-starlink-positive")!;
   assert.equal(
     graphConnectionDisplayLabel(dseTopology, starlinkPositive),
-    "Six-gang service switch panel → Starlink Mini · Positive",
+    "Top · Starlink / UniFi → Starlink Mini · Positive",
   );
 });
 
@@ -665,11 +665,11 @@ test("automatic naming expands approved stacks, remote join owners and coherent 
 
   assert.equal(
     graphEndpointDisplayLabel(dseTopology, "smartShunt.batteryMinus"),
-    "Connected to Battery 1 · string A lower / Battery 3 · string B lower",
+    "Connected to A1 / B1",
   );
   assert.equal(
-    graphEndpointDisplayLabel(dseTopology, "join-battery1-negative.device"),
-    "Battery 1 · string A lower → Victron SmartShunt IP65 500 A / Victron battery balancer A · Negative",
+    graphEndpointDisplayLabel(dseTopology, "join-battery1-negative-2.device"),
+    "A1 → Victron SmartShunt IP65 500 A · Negative",
   );
 
   for (const [endpointId, expected] of [
@@ -694,7 +694,7 @@ test("automatic naming expands approved stacks, remote join owners and coherent 
 test("automatic names preserve real owners, semantic fallbacks and distinct attached join arms", () => {
   assert.equal(graphEndpointDisplayLabel(dseTopology, "generator.line"), "To AC-in 10 A Type A RCBO + SPD");
   assert.equal(graphEndpointDisplayLabel(dseTopology, "toolOutlet.line"), "From AC-out 10 A Type A RCBO + SPD");
-  assert.equal(graphEndpointDisplayLabel(dseTopology, "serviceSplit.room"), "To Indoor-light wall switch");
+  assert.equal(graphEndpointDisplayLabel(dseTopology, "switchLights.loop"), "Loop · unused");
   assert.equal(
     graphEndpointDisplayLabel(dseTopology, "secondaryNegativeBus.post2"),
     "To Victron Orion-Tr Smart 24/12-30",
@@ -706,12 +706,12 @@ test("automatic names preserve real owners, semantic fallbacks and distinct atta
   assert.match(graphEndpointDisplayLabel(dseTopology, "ekrano.positive"), /Secondary 24 V positive bus/);
   assert.match(graphEndpointDisplayLabel(dseTopology, "usbOrion.positiveIn"), /Orion input/);
   assert.equal(
-    graphEndpointDisplayLabel(dseTopology, "join-battery1-negative.through"),
-    "Battery 1 · string A lower → Victron SmartShunt IP65 500 A · Negative",
+    graphEndpointDisplayLabel(dseTopology, "join-battery1-negative-2.through"),
+    "A1 → Victron SmartShunt IP65 500 A · Negative",
   );
   assert.equal(
     graphEndpointDisplayLabel(dseTopology, "join-battery3-negative.through"),
-    "Battery 3 · string B lower → Victron SmartShunt IP65 500 A · Negative",
+    "B1 → Victron SmartShunt IP65 500 A · Negative",
   );
   const unnamed = dseTopology.connections.find((candidate) => candidate.id === "ekrano-positive")!;
   assert.equal(unnamed.label, undefined);

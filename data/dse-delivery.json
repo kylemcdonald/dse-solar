@@ -1,44 +1,41 @@
 {
-  "checkedOn": "2026-08-30",
+  "checkedOn": "2026-09-03",
   "destination": "Los Angeles, CA 90065",
   "items": {
     "dse-suntech-panels-superseded": {
-      "amazonStatus": "unavailable",
-      "sourceLabel": "Purchased in Fiji",
-      "eta": "Already purchased",
-      "time": "No LA shipment needed",
-      "note": "The four purchased Suntech modules are superseded purchase history and are not installed in R30; disposition remains unresolved."
+      "amazonStatus": "not-purchased",
+      "sourceLabel": "Historical Fiji estimate",
+      "eta": "Never ordered",
+      "time": "Superseded before purchase",
+      "note": "Historical Fiji estimate for four Suntech panels from the retired design. No purchase occurred and neither DSE nor IYOIYO paid this amount; the active AIKO purchase is itemized separately."
     },
     "dse-panels": {
-      "amazonStatus": "unavailable",
-      "sourceLabel": "AIKO / Fiji distributor quote required",
-      "sourceUrl": "https://aikosolar.com/en/products/neostar-3p54-mono-glass/",
-      "eta": "Not ordered",
-      "time": "Three required · exact AIKO-A490-MCE54Mw suffix",
-      "note": "Active R30 array. Obtain a local quote and verify all three nameplates; the zero BOM cost is not a quote."
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
     },
     "dse-everexceed-batteries-superseded": {
-      "amazonStatus": "unavailable",
-      "sourceLabel": "Purchased in Fiji",
-      "eta": "Already purchased",
-      "time": "No LA shipment needed",
-      "note": "The four purchased EverExceed batteries are superseded purchase history and are not installed in R30; disposition remains unresolved."
+      "amazonStatus": "not-purchased",
+      "sourceLabel": "Historical Fiji estimate",
+      "eta": "Never ordered",
+      "time": "Superseded before purchase",
+      "note": "Historical Fiji estimate for four EverExceed batteries from the retired design. No purchase occurred and neither DSE nor IYOIYO paid this amount; the active Victron purchase is itemized separately."
     },
     "dse-batteries": {
-      "amazonStatus": "unavailable",
-      "sourceLabel": "Victron / Fiji distributor quote required",
-      "sourceUrl": "https://www.victronenergy.com/batteries/gel-and-agm-batteries",
-      "eta": "Not ordered",
-      "time": "Four matched BAT412201104 units required",
-      "note": "Active R30 bank. Obtain a local quote for four matched 12 V / 220 Ah GEL Deep Cycle batteries; the zero BOM cost is not a quote."
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
     },
     "dse-pv-cable": {
-      "amazonStatus": "substitute",
-      "sourceLabel": "Amazon · 6 mm² option",
-      "sourceUrl": "https://www.amazon.com/dp/B0FB8G62NG",
-      "eta": "Aug 15",
-      "time": "Same-day to LA",
-      "note": "Exact 4 mm² cable was not found. This 100 ft red + 100 ft black 6 mm² copper option is electrically suitable but heavier; Fiji purchase remains the plan."
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
     },
     "dse-battery-cable": {
       "amazonStatus": "purchased",
@@ -348,15 +345,15 @@
       "amazonStatus": "not-applicable",
       "sourceLabel": "Extreme Customs Clearance · invoice 00070037",
       "eta": "Paid in Fiji",
-      "time": "Invoice dated Aug 28 · paid directly by DSE",
-      "note": "FJD 1,736.65 import VAT paid directly by Seta on behalf of DSE; not an IYOIYO purchase."
+      "time": "Invoice dated Aug 28 · paid by IYOIYO",
+      "note": "FJD 1,736.65 import VAT paid by IYOIYO."
     },
     "dse-customs-agent-costs": {
       "amazonStatus": "not-applicable",
       "sourceLabel": "Extreme Customs Clearance · invoice 00070037",
       "eta": "Paid in Fiji",
-      "time": "Invoice dated Aug 28 · paid directly by DSE",
-      "note": "FJD 1,071.88 in fiscal duty, clearance/agent charges and service VAT paid directly by Seta on behalf of DSE; not an IYOIYO purchase."
+      "time": "Invoice dated Aug 28 · paid by IYOIYO",
+      "note": "FJD 1,071.88 in fiscal duty, clearance and agent charges, and service VAT paid by IYOIYO."
     },
     "dse-ex-starlink": {
       "amazonStatus": "not-applicable",
@@ -870,7 +867,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B0C5JQ68FY",
       "eta": "Delivered Jul 31",
       "time": "Delivered Jul 31",
-      "note": "Imported outside-scope storage; not in topology."
+      "note": "Outside scope: one of two SSDs is allocated to Inowon in Polowat; the other remains in the general outside-scope pool."
     },
     "dse-personal-flexsolar-panels": {
       "amazonStatus": "purchased",
@@ -886,7 +883,7 @@
       "sourceUrl": "https://www.amazon.com/dp/B0F1G2HRQ6",
       "eta": "Delivered Jul 31",
       "time": "Delivered Jul 31",
-      "note": "Imported outside-scope accessories; not in topology."
+      "note": "Outside scope: one of two SD card readers is allocated to Inowon in Polowat; the other remains in the general outside-scope pool."
     },
     "dse-personal-takoci-hx870-batteries": {
       "amazonStatus": "purchased",
@@ -1088,6 +1085,197 @@
       "eta": "Settlement expected by Sep 2",
       "time": "$38.85 credit",
       "note": "Tax-inclusive refund issued 26 Aug 2026 for B08LBWWV47; Amazon stated settlement to the original payment method was expected by 2 Sep 2026."
+    },
+    "dse-solar-fiji-installation-screws": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-schletter-roof-mount-kit": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-schletter-tin-feet": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-50mm-black-cable": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-50mm-red-cable": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-35mm-black-cable": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-35mm-red-cable": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-16mm-twin-battery-cable": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-earth-rod": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-6mm-earth-wire": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-6mm-twin-pv-cable": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-1-5mm-light-wire": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-1-5mm-switch-wire": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-1-5mm-twin-flex": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-used-cable-cutter": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-35mm-m8-lugs": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-50mm-m8-lugs": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-solar-fiji-16mm-m8-lugs": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "Solar Fiji · quote TP260901-V2",
+      "eta": "Payment sent 2 Sep 2026",
+      "time": "Delivery to Suva included · confirmation pending",
+      "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
+    },
+    "dse-fiji-cable-ties": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "R.C. Manubhai · invoice 12185922",
+      "eta": "Purchased 1 Sep 2026",
+      "time": "Collected in Suva · paid cash",
+      "note": "Paid by IYOIYO and reconciled to the FJD 50 receipt."
+    },
+    "dse-fiji-3m-extension-cords": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "R.C. Manubhai · invoice 12185922",
+      "eta": "Purchased 1 Sep 2026",
+      "time": "Collected in Suva · paid cash",
+      "note": "Paid by IYOIYO and reconciled to the FJD 50 receipt."
+    },
+    "dse-fiji-slotted-screwdriver": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "R.C. Manubhai · invoice 12185922",
+      "eta": "Purchased 1 Sep 2026",
+      "time": "Collected in Suva · paid cash",
+      "note": "Paid by IYOIYO and reconciled to the FJD 50 receipt."
+    },
+    "dse-fiji-phillips-screwdrivers": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "R.C. Manubhai · invoice 12185922",
+      "eta": "Purchased 1 Sep 2026",
+      "time": "Collected in Suva · paid cash",
+      "note": "Paid by IYOIYO and reconciled to the FJD 50 receipt."
+    },
+    "dse-fiji-15a-female-socket": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "R.C. Manubhai · invoice 12185922",
+      "eta": "Purchased 1 Sep 2026",
+      "time": "Collected in Suva · paid cash",
+      "note": "Paid by IYOIYO and reconciled to the FJD 50 receipt."
+    },
+    "dse-fiji-10a-surface-socket": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "R.C. Manubhai · invoice 12185922",
+      "eta": "Purchased 1 Sep 2026",
+      "time": "Collected in Suva · paid cash",
+      "note": "Paid by IYOIYO and reconciled to the FJD 50 receipt."
+    },
+    "dse-fiji-3-gang-switch": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "R.C. Manubhai · invoice 12185922",
+      "eta": "Purchased 1 Sep 2026",
+      "time": "Collected in Suva · paid cash",
+      "note": "Paid by IYOIYO and reconciled to the FJD 50 receipt."
+    },
+    "dse-fiji-2-gang-switch": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "R.C. Manubhai · invoice 12185922",
+      "eta": "Purchased 1 Sep 2026",
+      "time": "Collected in Suva · paid cash",
+      "note": "Paid by IYOIYO and reconciled to the FJD 50 receipt."
+    },
+    "dse-fiji-shopping-bag": {
+      "amazonStatus": "purchased-local",
+      "sourceLabel": "R.C. Manubhai · invoice 12185922",
+      "eta": "Purchased 1 Sep 2026",
+      "time": "Collected in Suva · paid cash",
+      "note": "Paid by IYOIYO and reconciled to the FJD 50 receipt."
     }
-  }
+  },
+  "archivedOn": "2026-09-03",
+  "archiveReason": "The imported shipment has arrived in Fiji; production shipping tracking is closed. Local purchase evidence remains in the BOM and grant report."
 }

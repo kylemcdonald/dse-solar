@@ -15,7 +15,7 @@ function storedZipEntryNames(archive) {
   return names;
 }
 
-test("costs page downloads payer-aware grant PDF and CSV reports plus the receipt archive", async ({ page }) => {
+test("costs page downloads grant PDF and CSV reports plus the receipt archive", async ({ page }) => {
   await page.goto("/", { timeout: 120_000 });
   await expect(page.locator(".app-shell")).toHaveAttribute("data-viewer-ready", "true");
   await page.getByRole("button", { name: /Bill of materials/ }).click();
@@ -35,15 +35,28 @@ test("costs page downloads payer-aware grant PDF and CSV reports plus the receip
   const pdf = fs.readFileSync(downloadPath, "latin1");
   expect(pdf.startsWith("%PDF-1.4")).toBe(true);
   expect(pdf).toContain("DSE Grant Purchase Report");
-  expect(pdf).toContain("Items purchased in Fiji");
-  expect(pdf).toContain("Items purchased for personal use");
-  expect(pdf).toContain("Items purchased for HVTA");
-  expect(pdf).toContain("Items purchased for DSE");
-  expect(pdf).toContain("Purchases made by IYOIYO");
-  expect(pdf).toContain("Purchases made by DSE");
-  expect(pdf).toContain("$252.63 remaining from $8,000.00 PTS check");
-  expect(pdf).toContain("Erik Godo donation to Pacific Traditions Society");
-  expect(pdf).toContain("GRAND TOTAL - DSE + IYOIYO");
+  expect(pdf).toContain("Funding reconciliation & purchase ledger");
+  expect(pdf).toContain("On-site Fiji purchases");
+  expect(pdf).toContain("Other solar-system purchases");
+  expect(pdf).toContain("Fiji customs and clearance costs");
+  expect(pdf).toContain("Outside-scope purchases");
+  expect(pdf).toContain("All documented purchase and customs costs in this report were paid by");
+  expect(pdf).toContain("IYOIYO. The final summary separates");
+  expect(pdf).toContain("FJD 12,222.00");
+  expect(pdf).toContain("IYOIYO paid beyond PTS advance");
+  expect(pdf).toContain("$6,579.43");
+  expect(pdf).toContain("Funding attribution: Erik Godo donation to Pacific Traditions");
+  expect(pdf).toContain("\\(PTS\\); remains included in IYOIYO purchases");
+  expect(pdf).toContain("PURCHASE SCOPE SUMMARY");
+  expect(pdf).toContain("$11,156.93");
+  expect(pdf).toContain("$3,422.50");
+  expect(pdf).toContain("of which Inowon in Polowat");
+  expect(pdf).toContain("$179.98");
+  expect(pdf).toContain("COMBINED TOTAL");
+  expect(pdf).toContain("$14,579.43");
+  expect(pdf).not.toContain("PAID BY");
+  expect(pdf).not.toContain("DSE PAID");
+  expect(pdf).not.toContain("Costs paid directly by DSE");
   expect(Number(pdf.match(/\/Type \/Pages .*\/Count (\d+)/)?.[1])).toBeGreaterThan(1);
   const xrefOffset = Number(pdf.match(/startxref\n(\d+)\n%%EOF/)?.[1]);
   expect(pdf.slice(xrefOffset, xrefOffset + 4)).toBe("xref");
@@ -57,15 +70,22 @@ test("costs page downloads payer-aware grant PDF and CSV reports plus the receip
   const csvDownloadPath = await csvDownload.path();
   expect(csvDownloadPath).toBeTruthy();
   const csv = fs.readFileSync(csvDownloadPath, "utf8").replace(/^\uFEFF/, "");
-  expect(csv).toContain('"Row type","Section","Item","Quantity","Unit","Receipt reference","Paid by","Amount (USD)","Note"');
-  expect(csv.split("\r\n").filter((row) => row.startsWith('"Item",')).length).toBe(115);
-  expect(csv).toContain('"Section subtotal","Items purchased in Fiji","Items purchased in Fiji subtotal",,,,,3252.72,');
-  expect(csv).toContain('"Payer subtotal","Payer summary","Purchases made by IYOIYO",,,,"IYOIYO",7747.37,');
-  expect(csv).toContain('"Payer subtotal","Payer summary","Purchases made by DSE",,,,"DSE",4529.32,');
-  expect(csv).toContain('"Grand total","Payer summary","GRAND TOTAL - DSE + IYOIYO",,,,,12276.69,');
+  expect(csv).toContain('"Row type","Section","Item","Quantity","Unit","Evidence","Original currency","Original amount","USD equivalent","Note"');
+  expect(csv).not.toContain('"Paid by"');
+  expect(csv).not.toContain('"DSE"');
+  expect(csv.split("\r\n").filter((row) => row.startsWith('"Item",')).length).toBe(144);
+  expect(csv).toContain('"Section subtotal","On-site Fiji purchases","On-site Fiji purchases subtotal",,,,"FJD",12222.00,5555.46,');
+  expect(csv).toContain('"Source reconciliation","Funding summary","Verified on-site Fiji purchases",,,"#48-50","FJD",12222.00,5555.46,');
+  expect(csv).toContain('"Purchase subtotal","Funding summary","All purchases paid by IYOIYO",,,,,,14579.43,');
+  expect(csv).toContain('"Scope subtotal","Purchase scope summary","Solar system",,,,,,11156.93,');
+  expect(csv).toContain('"Scope subtotal","Purchase scope summary","Outside scope",,,,,,3422.50,');
+  expect(csv).toContain('"Allocation detail","Purchase scope summary","Inowon in Polowat",,,,,,179.98,');
+  expect(csv).toContain('"Grand total","Purchase scope summary","COMBINED TOTAL",,,,,,14579.43,');
+  expect(csv).toContain("Allocation: 1 of 2 SSDs ($164.99 item price) is for Inowon in Polowat");
+  expect(csv).toContain("Allocation: 1 of 2 SD card readers ($14.99 item price) is for Inowon in Polowat");
   expect(csv).toContain("Erik Godo donation to Pacific Traditions Society (PTS); remains included in IYOIYO purchases");
-  expect(csv.indexOf("EverExceed 12 V 200 Ah GEL batteries · superseded by Victron design"))
-    .toBeLessThan(csv.indexOf("Suntech Ultra V Pro 565 W panels · superseded by AIKO design"));
+  expect(csv).toContain("#49 Quote TP260901-V2 (Solar Fiji); #50 Payment confirmation Solar Fiji wire (Bank of America)");
+  expect(csv).not.toContain("EverExceed 12 V 200 Ah GEL batteries · superseded by Victron design");
 
   const receiptStatus = await page.request.get("/api/receipts/status");
   const receiptLink = page.getByRole("link", { name: "Download all receipts (.zip)" });
@@ -81,6 +101,9 @@ test("costs page downloads payer-aware grant PDF and CSV reports plus the receip
     expect(entryNames.length).toBeGreaterThanOrEqual(44);
     expect(entryNames).toContain("01-amazon-2026-07-01-order-113-3097966-7412218-takoci-batteries.pdf");
     expect(entryNames).toContain("44-extreme-customs-clearance-2026-08-28-invoice-00070037-drua-sailing.pdf");
+    expect(entryNames).toContain("48-rc-manubhai-2026-09-01-invoice-12185922-site-supplies.pdf");
+    expect(entryNames).toContain("49-solar-fiji-2026-09-01-quote-TP260901-V2-solar-system.pdf");
+    expect(entryNames).toContain("50-bank-of-america-2026-09-02-wire-solar-fiji.pdf");
     expect(entryNames.every((name) => /^\d{2}-[A-Za-z0-9][A-Za-z0-9._-]*\.pdf$/.test(name))).toBe(true);
   } else {
     await expect(receiptLink).toHaveCount(0);

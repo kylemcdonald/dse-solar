@@ -2,18 +2,23 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildDiagramLayout } from "../app/UnifiedSystemDiagram";
+import { buildDiagramLayout } from "../app/diagramLayout";
 import { dseRuntime } from "../app/dseRuntime";
+import { diagramRuntimeSignature } from "../app/wallPlan";
 
 const SCHEMA_VERSION = 1 as const;
-const GENERATOR_VERSION = "dse-diagram-layout-v18-routing-derived-busbar-slots";
+const GENERATOR_VERSION = "dse-diagram-layout-v21-glands";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const outputPath = path.join(root, "data", "generated", "diagram-layouts.json");
 const sourcePaths = [
-  path.join(root, "app", "UnifiedSystemDiagram.tsx"),
+  path.join(root, "app", "diagramLayout.ts"),
+  path.join(root, "app", "diagramNodes.ts"),
+  path.join(root, "app", "diagramPlacement.ts"),
   path.join(root, "app", "dseTopology.ts"),
-  path.join(root, "data", "generated", "dse-runtime.json"),
+  path.join(root, "app", "wallPlan.ts"),
+  path.join(root, "app", "systemGraph.ts"),
+  path.join(root, "app", "dseRuntime.ts"),
   fileURLToPath(import.meta.url),
 ];
 const hash = createHash("sha256");
@@ -24,6 +29,11 @@ for (const sourcePath of sourcePaths) {
   hash.update(await readFile(sourcePath));
   hash.update("\0");
 }
+// The runtime feeds the diagram its graph, labels and glands, never geometry:
+// hash that signature so a re-solved wall layout does not force a new diagram.
+hash.update("runtime-signature\0");
+hash.update(diagramRuntimeSignature(JSON.parse(await readFile(path.join(root, "data", "generated", "dse-runtime.json"), "utf8"))));
+hash.update("\0");
 const sourceHash = hash.digest("hex");
 
 try {
@@ -33,6 +43,7 @@ try {
     sourceHash?: string;
     graphId?: string;
     graphRevision?: string;
+    layouts?: Record<string, { nodes: Array<{ deviceId: string; x: number; y: number }> }>;
   };
   if (existing.schemaVersion === SCHEMA_VERSION
     && existing.generatorVersion === GENERATOR_VERSION
@@ -46,8 +57,11 @@ try {
   // A missing, malformed, or old artifact triggers deterministic regeneration.
 }
 
-type SerializedNode = Omit<ReturnType<typeof buildDiagramLayout>["nodes"][number], "device"> & { deviceId: string };
-type SerializedWire = Omit<ReturnType<typeof buildDiagramLayout>["wires"][number], "route"> & { routeId: string };
+type LayoutNode = ReturnType<typeof buildDiagramLayout>["nodes"][number];
+type LayoutWire = ReturnType<typeof buildDiagramLayout>["wires"][number];
+/** Synthetic diagram-only devices and routes (pair sheaths) travel inline. */
+type SerializedNode = Omit<LayoutNode, "device"> & { deviceId: string; device?: LayoutNode["device"] };
+type SerializedWire = Omit<LayoutWire, "route"> & { routeId: string; route?: LayoutWire["route"] };
 
 const serializeLayout = (junctionId?: string) => {
   const layout = buildDiagramLayout(junctionId);
@@ -55,18 +69,6 @@ const serializeLayout = (junctionId?: string) => {
     || layout.unbridgedCrossings !== 0
     || layout.conductorOverlaps !== 0 || layout.parallelEnvelopeOverlaps !== 0 || layout.nodeBodyCrossings !== 0
     || layout.nodeOverlaps !== 0 || layout.minimumParallelWireSeparation < 12) {
-    const fallbackIds = new Set(layout.fallbackRouteIds);
-    if (fallbackIds.size > 0) console.error("Diagram fallback geometry:", JSON.stringify({
-      nodes: layout.nodes.filter((node) => [
-        "acJunction", "multiAcInBreakout", "multiPlus", "multiAcOutBreakout", "unifi",
-      ].includes(node.device.id)).map((node) => ({
-        id: node.device.id, x: node.x, y: node.y, width: node.width, height: node.height,
-        ports: node.ports.map((port) => ({ id: port.endpointId, side: port.side, offset: port.offset })),
-      })),
-      wires: layout.wires.filter((wire) => fallbackIds.has(wire.route.id)).map((wire) => ({
-        id: wire.route.id, from: wire.fromEndpointId, to: wire.toEndpointId, points: wire.points,
-      })),
-    }));
     throw new Error(`${layout.key}: invalid diagram geometry (${layout.routingFallbacks} fallbacks`
       + `${layout.fallbackRouteIds.length ? ` [${layout.fallbackRouteIds.join(", ")}]` : ""}, `
       + `${layout.coincidentSegments} coincident segments, ${layout.nonOrthogonalSegments} diagonal segments, `
@@ -79,10 +81,11 @@ const serializeLayout = (junctionId?: string) => {
     ...layout,
     routingMs: 0,
     layoutMs: 0,
+    compactionMs: 0,
     junction: undefined,
     junctionId: layout.junction?.id,
-    nodes: layout.nodes.map(({ device, ...node }): SerializedNode => ({ ...node, deviceId: device.id })),
-    wires: layout.wires.map(({ route, ...wire }): SerializedWire => ({ ...wire, routeId: route.id })),
+    nodes: layout.nodes.map(({ device, ...node }): SerializedNode => ({ ...node, deviceId: device.id, ...(dseRuntime.deviceById.has(device.id) ? {} : { device }) })),
+    wires: layout.wires.map(({ route, ...wire }): SerializedWire => ({ ...wire, routeId: route.id, ...(dseRuntime.routeById.has(route.id) ? {} : { route }) })),
   };
 };
 

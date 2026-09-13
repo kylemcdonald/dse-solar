@@ -10,7 +10,7 @@ import {
   grantReportFilename,
 } from "./grantReport";
 import type { GrantReportReceiptIndex } from "./grantReport";
-import { buildTreemap } from "./ShippingView";
+import { buildTreemap } from "./treemap";
 
 export type CostBomItem = {
   id: string;
@@ -18,12 +18,16 @@ export type CostBomItem = {
   item: string;
   qty: number;
   unit: string;
+  unitCost: number;
   totalUsd: number;
+  currency: "USD" | "FJD";
+  sourceTotal?: number;
   location: string;
   procurement: string;
   accountingGroup?: string;
   includedInTotal?: boolean;
   grantPayer?: "IYOIYO" | "DSE";
+  grantSection?: "fiji";
   grantPaymentNote?: string;
   grantFundingSource?: string;
   grantFundingAmountUsd?: number;
@@ -89,6 +93,12 @@ export function filterCostTreemapItems(items: readonly CostedItem[], scope: Cost
 const money = (value: number) => new Intl.NumberFormat("en-US", {
   style: "currency", currency: "USD",
 }).format(value);
+const sourceMoney = (item: Pick<CostBomItem, "currency" | "sourceTotal" | "unitCost" | "qty">) => {
+  const value = item.sourceTotal ?? item.unitCost * item.qty;
+  return item.currency === "FJD" ? `FJD ${value.toLocaleString("en-US", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2,
+  })}` : money(value);
+};
 const receipts = receiptsRaw as GrantReportReceiptIndex;
 
 function downloadGrantPurchaseReportPdf(bom: readonly CostBomItem[]) {
@@ -119,16 +129,18 @@ function downloadGrantPurchaseReportCsv(bom: readonly CostBomItem[]) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }
 
-export function CostView({ bom }: { bom: CostBomItem[] }) {
+export function CostView({ bom, project = "dse" }: { bom: CostBomItem[]; project?: "dse" | "polowat" }) {
+  const isPolowat = project === "polowat";
   const [privateMode, setPrivateMode] = useState(false);
   useEffect(() => {
+    if (isPolowat) return;
     let active = true;
     void fetch("/api/receipts/status", { cache: "no-store" })
       .then((response) => response.ok ? response.json() as Promise<{ privateMode?: boolean }> : null)
       .then((status) => { if (active) setPrivateMode(Boolean(status?.privateMode)); })
       .catch(() => undefined);
     return () => { active = false; };
-  }, []);
+  }, [isPolowat]);
   const allItems = useMemo(() => costTreemapItems(bom), [bom]);
   const [scope, setScope] = useState<CostScopeFilter>("All items");
   const items = useMemo(() => filterCostTreemapItems(allItems, scope), [allItems, scope]);
@@ -142,33 +154,42 @@ export function CostView({ bom }: { bom: CostBomItem[] }) {
     cost: items.filter((item) => item.costGroup === name).reduce((sum, item) => sum + item.totalUsd, 0),
   })).filter((group) => group.cost > 0), [items]);
   const [hovered, setHovered] = useState<CostedItem | null>(null);
+  const fijiItems = allItems.filter((item) => item.grantSection === "fiji");
+  const fijiSourceTotal = fijiItems.reduce((sum, item) => sum + (item.sourceTotal ?? item.unitCost * item.qty), 0);
+  const fijiUsdTotal = fijiItems.reduce((sum, item) => sum + item.totalUsd, 0);
+  const importTotal = allItems.filter((item) => item.location === "Import to Chuuk").reduce((sum, item) => sum + item.totalUsd, 0);
+  const localTotal = allItems.filter((item) => item.location === "Buy in Chuuk").reduce((sum, item) => sum + item.totalUsd, 0);
 
   return <section className="shipping-view cost-view" aria-label="Bill of materials cost treemap">
-    <header className="shipping-heading cost-heading"><div><p className="eyebrow">DSE / Fiji purchase tracking</p>
-      <h1>Cost by item</h1><p>Every positive-cost BOM row. Rectangle area is proportional to total item cost in USD.</p>
+    <header className="shipping-heading cost-heading"><div><p className="eyebrow">{isPolowat ? "Inowon / Polowat planning estimate" : "DSE / Fiji purchase tracking"}</p>
+      <h1>Cost by item</h1><p>{isPolowat
+        ? "Planning prices for the compact deployment. Area represents estimated USD item cost; freight, duty, tax and Starlink service are not included."
+        : "Every positive-cost BOM row. Area uses the USD accounting equivalent; original FJD amounts and payer attribution remain attached to each Fiji purchase."}</p>
     </div><div className="shipping-total cost-total"><small>Positive item value</small>
       <strong>{money(positiveTotal)}</strong><span>{items.length} of {allItems.length} positive-cost rows · {credits.length > 0
         ? `${money(creditTotal)} across ${credits.length} credit ${credits.length === 1 ? "row stays" : "rows stay"} in accounting totals`
-        : "no credit rows in this subset"}</span>
+        : "no credit rows in this subset"}</span>{isPolowat
+          ? <span>Import hardware: {money(importTotal)} · buy in Chuuk: {money(localTotal)}</span>
+          : <span>On-site Fiji purchases: FJD {fijiSourceTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · {money(fijiUsdTotal)} · paid by IYOIYO</span>}
     </div></header>
     <div className="cost-controls" aria-label="Cost treemap filters">
       <label htmlFor="cost-scope-filter">Show costs for</label>
       <select id="cost-scope-filter" value={scope}
         onChange={(event) => setScope(event.target.value as CostScopeFilter)}>
         <option value="All items">All positive-cost items</option>
-        <option value="Solar + internet">Solar + internet</option>
-        <option value="Additional purchases">Additional purchases</option>
-        <option value="Excluded / returns">Excluded / returns</option>
+        <option value="Solar + internet">{isPolowat ? "Compact solar + internet" : "Solar + internet"}</option>
+        {!isPolowat && <option value="Additional purchases">Additional purchases</option>}
+        {!isPolowat && <option value="Excluded / returns">Excluded / returns</option>}
       </select>
-      <button type="button" className="grant-report-export" onClick={() => downloadGrantPurchaseReportPdf(bom)}>
+      {!isPolowat && <button type="button" className="grant-report-export" onClick={() => downloadGrantPurchaseReportPdf(bom)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14" /></svg>
         Export grant report PDF
-      </button>
-      <button type="button" className="grant-report-export" onClick={() => downloadGrantPurchaseReportCsv(bom)}>
+      </button>}
+      {!isPolowat && <button type="button" className="grant-report-export" onClick={() => downloadGrantPurchaseReportCsv(bom)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14" /></svg>
         Export grant report CSV
-      </button>
-      {privateMode && <a className="receipt-archive-download" href="/api/receipts/download" download>
+      </button>}
+      {!isPolowat && privateMode && <a className="receipt-archive-download" href="/api/receipts/download" download>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14" /></svg>
         Download all receipts (.zip)
       </a>}
@@ -181,10 +202,12 @@ export function CostView({ bom }: { bom: CostBomItem[] }) {
       aria-label={`Treemap of ${items.length} positive-cost BOM items totaling ${money(positiveTotal)}`}>
       {tiles.map((tile) => {
         const area = tile.width * tile.height / 10_000;
-        const title = `${tile.item.item}\n${tile.item.qty} ${tile.item.unit} · ${money(tile.item.totalUsd)}\n${tile.item.costGroup} · ${tile.item.costScope}\n${tile.item.procurement}`;
+        const original = sourceMoney(tile.item);
+        const payer = tile.item.grantPayer ? ` · paid by ${tile.item.grantPayer}` : "";
+        const title = `${tile.item.item}\n${tile.item.qty} ${tile.item.unit} · ${original} source · ${money(tile.item.totalUsd)} USD equivalent${payer}\n${tile.item.costGroup} · ${tile.item.costScope}\n${tile.item.procurement}`;
         return <button key={tile.item.id} type="button" className="shipping-tile cost-tile"
           data-small={area < 0.007 ? "true" : "false"} data-accounting-scope={tile.item.costScope}
-          data-cost-usd={tile.item.totalUsd.toFixed(2)}
+          data-cost-usd={tile.item.totalUsd.toFixed(2)} data-source-currency={tile.item.currency}
           style={{ left: `${tile.x}%`, top: `${tile.y}%`, width: `${tile.width}%`, height: `${tile.height}%`,
             backgroundColor: costColors[tile.item.costGroup] }} title={title} aria-label={title.replaceAll("\n", ", ")}
           onMouseEnter={() => setHovered(tile.item)} onMouseLeave={() => setHovered(null)}
@@ -195,8 +218,8 @@ export function CostView({ bom }: { bom: CostBomItem[] }) {
     </div>
     <div className="shipping-hover cost-hover" aria-live="polite">{hovered ? <>
       <i style={{ backgroundColor: costColors[hovered.costGroup] }} /><strong>{hovered.item}</strong>
-      <span>{hovered.qty} {hovered.unit} · {money(hovered.totalUsd)} · {hovered.costGroup}</span>
-      <small>{hovered.costScope} · {hovered.procurement} · {hovered.location}</small>
+      <span>{hovered.qty} {hovered.unit} · {sourceMoney(hovered)} source · {money(hovered.totalUsd)} USD equivalent</span>
+      <small>{hovered.grantPayer ? `Paid by ${hovered.grantPayer} · ` : ""}{hovered.costScope} · {hovered.procurement} · {hovered.location}</small>
     </> : <span>Hover or focus a rectangle for item cost and accounting details.</span>}</div>
   </section>;
 }

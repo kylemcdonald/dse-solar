@@ -392,7 +392,7 @@ Object.assign(system.batteryCablePlan, {
   purchasedTotalLengthFt: 17,
   purchasedWeightLb: 9.72,
 });
-system.budget.note = "Purchased project equipment and reconciled transaction adjustments through 30 Aug 2026 are included. Thirty-eight Amazon project receipts and Extreme Customs Clearance invoice 00070037 are reconciled. The customs invoice totals FJD 2,808.53 and was paid directly by Seta on behalf of DSE. IYOIYO's Ekrano GX purchase remains charged against the $8,000 Pacific Traditions Society check; Erik Godo's donation reimburses PTS and is attribution only, so it does not reduce IYOIYO's recorded purchases. The Amazon return audit records $324.95 in issued or credited refunds across the iGreely 1/0 cable pairs, DIHOOL 30 A AC-protection pair, AMOMD busbars, CHTAIXI 120 V Type AC RCBOs and incompatible Victron MC4 WireBox; confirm the WireBox refund settles by 2 Sep 2026. The actual imported 1/0 AWG inventory is five Shirbly red/black pairs (ten individual cables and 17 conductor-feet); all four iGreely pairs are returned and excluded. Two Shirbly 2 AWG pairs and two selected DIHOOL 10 A AC-in/out protection units remain recorded at actual transaction value. A separately ordered fourth DIHOOL 120 A breaker and an exact duplicate pair of DIHOOL 10 A AC-protection units are excluded pending return/spare decisions. The delivered KERWINN B10 is an unselected alternate; the selected CHTAIXI B10 order was delayed and not yet shipped as of 30 Aug. The Joinfworld 250 A pair remains the selected main-bus purchase; its supplied covers and required main-positive lug stacking are accepted. The retained layout uses the verified HT-8 cutoff box, requires a larger secondary-services enclosure so its two buses and six-gang panel can share the rear mounting plane, uses exactly three secondary branch-breaker positions, omits a separate 80 A incomer, and records supplemental correctly terminated 1/0 AWG cable as an onsite Fiji purchase. The purchased 302 × 302 × 178 mm shell remains owned but is no longer the installed secondary enclosure. Selected AC and DC protection remain on received-device, AIC and installer-verification holds. The MultiPlus Fiji invoice/deposit, freight beyond Nadi, panel mounting and labor still require final reconciliation.";
+system.budget.note = "Purchased project equipment and reconciled transaction adjustments through 30 Aug 2026 are included. Thirty-eight Amazon project receipts and Extreme Customs Clearance invoice 00070037 are reconciled. IYOIYO paid the customs invoice totaling FJD 2,808.53. IYOIYO's Ekrano GX purchase remains charged against the $8,000 Pacific Traditions Society check; Erik Godo's donation reimburses PTS and is attribution only, so it does not reduce IYOIYO's recorded purchases. The Amazon return audit records $324.95 in issued or credited refunds across the iGreely 1/0 cable pairs, DIHOOL 30 A AC-protection pair, AMOMD busbars, CHTAIXI 120 V Type AC RCBOs and incompatible Victron MC4 WireBox; confirm the WireBox refund settles by 2 Sep 2026. The actual imported 1/0 AWG inventory is five Shirbly red/black pairs (ten individual cables and 17 conductor-feet); all four iGreely pairs are returned and excluded. Two Shirbly 2 AWG pairs and two selected DIHOOL 10 A AC-in/out protection units remain recorded at actual transaction value. A separately ordered fourth DIHOOL 120 A breaker and an exact duplicate pair of DIHOOL 10 A AC-protection units are excluded pending return/spare decisions. The delivered KERWINN B10 is an unselected alternate; the selected CHTAIXI B10 order was delayed and not yet shipped as of 30 Aug. The Joinfworld 250 A pair remains the selected main-bus purchase; its supplied covers and required main-positive lug stacking are accepted. The retained layout uses the verified HT-8 cutoff box, requires a larger secondary-services enclosure so its two buses and six-gang panel can share the rear mounting plane, uses exactly three secondary branch-breaker positions, omits a separate 80 A incomer, and records supplemental correctly terminated 1/0 AWG cable as an onsite Fiji purchase. The purchased 302 × 302 × 178 mm shell remains owned but is no longer the installed secondary enclosure. Selected AC and DC protection remain on received-device, AIC and installer-verification holds. The MultiPlus Fiji invoice/deposit, freight beyond Nadi, panel mounting and labor still require final reconciliation.";
 
 const baggage = findBom("dse-baggage");
 baggage.description = baggage.description.replace(
@@ -573,11 +573,30 @@ const bomIdByReturnedAsin = new Map([
   ["B08LBWWV47", "dse-mppt-wirebox-mc4-rejected"],
   ["B0DG4WLVT7", "dse-amomd-600a-busbars-unused"],
 ]);
+const recipientAllocationsByBomId = new Map([
+  ["dse-unused-sandisk-portable-ssd", {
+    disposition: "Outside scope; one of two units is allocated to Inowon in Polowat",
+    allocations: [{
+      recipientOrganization: "Inowon", location: "Polowat", qty: 1, unitCostUsd: 164.99,
+      basis: "Documented item price; shared order-level tax, promotions and customs are not allocated by recipient.",
+    }],
+  }],
+  ["dse-unused-acer-card-readers", {
+    disposition: "Outside scope; one of two units is allocated to Inowon in Polowat",
+    allocations: [{
+      recipientOrganization: "Inowon", location: "Polowat", qty: 1, unitCostUsd: 14.99,
+      basis: "Documented item price; shared order-level tax, promotions and customs are not allocated by recipient.",
+    }],
+  }],
+]);
 const auditedPriorOrders = priorAmazon.orders.map((order) => {
   const evidence = returnEvidence[order.orderNumber];
-  const items = order.items.map((item) => bomIdByReturnedAsin.has(item.asin)
-    ? { ...item, bomId: bomIdByReturnedAsin.get(item.asin), bomIds: undefined }
-    : item);
+  const items = order.items.map((item) => {
+    const normalized = bomIdByReturnedAsin.has(item.asin)
+      ? { ...item, bomId: bomIdByReturnedAsin.get(item.asin), bomIds: undefined }
+      : item;
+    return { ...normalized, ...(recipientAllocationsByBomId.get(normalized.bomId) ?? {}) };
+  });
   return { ...order, items, ...(evidence ?? {}) };
 });
 const allOrders = [...new Map(

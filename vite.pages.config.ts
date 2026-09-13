@@ -7,6 +7,8 @@ const pagesRoot = fileURLToPath(new URL("./static-site", import.meta.url));
 
 export default defineConfig({
   base: "./",
+  server: { host: "0.0.0.0", allowedHosts: ["vibecheck.local", "vibecheck.taildd340.ts.net"] },
+  preview: { host: "0.0.0.0", allowedHosts: ["vibecheck.local", "vibecheck.taildd340.ts.net"] },
   root: pagesRoot,
   publicDir: fileURLToPath(new URL("./public", import.meta.url)),
   plugins: [react()],
@@ -19,11 +21,5 @@ export default defineConfig({
     outDir: fileURLToPath(new URL("./dist-pages", import.meta.url)),
     emptyOutDir: true,
     sourcemap: true,
-    rolldownOptions: {
-      input: {
-        viewer: fileURLToPath(new URL("./static-site/index.html", import.meta.url)),
-        cablePlan: fileURLToPath(new URL("./static-site/cable-plan/index.html", import.meta.url)),
-      },
-    },
   },
 });

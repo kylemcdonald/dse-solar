@@ -44,7 +44,7 @@ export type DeviceKind =
 
 export type Face = "top" | "bottom" | "left" | "right" | "front" | "back";
 
-export type Surface = "wall" | "ceiling" | "floor" | "roof" | "outside-wall" | "outside";
+export type Surface = "shelf" | "wall" | "ceiling" | "floor" | "roof" | "outside-wall" | "outside";
 
 /**
  * Canonical finite equipment-wall volume shared by routing and rendering.
@@ -58,6 +58,8 @@ export const EQUIPMENT_WALL_VOLUME = {
 };
 
 export type Conductor = {
+  /** Observed jacket colour; electrical kind still defines the channel. */
+  insulationColor?: "white";
   id: string;
   label: string;
   kind: ConductorKind;
@@ -157,7 +159,7 @@ export type CircuitPowerBudget = {
   protectionDeviceId?: string;
   conductorAmpacityA?: number;
   normalStatus: "within-capacity" | "conditional" | "over-capacity" | "variable";
-  faultStatus: "verified" | "provisional" | "incomplete";
+  faultStatus: "verified" | "accepted" | "provisional" | "incomplete";
   note: string;
 };
 
@@ -225,6 +227,7 @@ export type Placement =
   | {
       space: "world";
       surface: Surface;
+      wallId?: string;
       /** Device centre in metres. The equipment wall is the x/y plane at z=0. */
       position: Vec3;
       /** Explicit Euler XYZ orientation; otherwise the surface supplies it. */
@@ -237,6 +240,10 @@ export type Placement =
        * low band; backplate is the compact low-current band at the top. */
       section: "din" | "power" | "backplate" | "sidewall";
       order: number;
+      /** Installed backplate centre, relative to the enclosure centre. */
+      offset?: readonly [number, number];
+      /** In-plane rotation of an installed backplate member. */
+      rotationZ?: number;
     };
 
 export type Device = {
@@ -343,6 +350,16 @@ export type Connection = {
   /** A deliberately short conductor between a source/bus and its first
    * protective device. It remains a structured warning, never a silent pass. */
   sourceLeadReason?: string;
+  /** A project-accepted installation basis for a conductor whose protection
+   * cannot be reduced to the verifier's per-source cut-set arithmetic. The
+   * calculated envelope remains visible; this records an explicit approval,
+   * never inferred protection credit. */
+  protectionApproval?: {
+    status: "accepted";
+    basis: "approved-upstream-scheme";
+    protectionDeviceIds: readonly string[];
+    note: string;
+  };
   /** A negative/neutral conductor borrows the upstream protective envelope of
    * this active connection. A multicore carrying both channels pairs itself
    * automatically. */
@@ -373,6 +390,8 @@ export type Junction = {
   dinGap: number;
   backplateGap: number;
   glandSpacing: number;
+  /** Most enclosures enter below; a split box follows the internal terminal face. */
+  glandFaces?: "bottom" | "top-and-bottom";
   /** A received enclosure whose external dimensions and internal fit were
    * physically verified. Its authored device size is the finished shell size;
    * routing/layout must fit that envelope instead of enlarging the rendering. */
@@ -382,13 +401,25 @@ export type Junction = {
   /** Optional vertical datum for the power-device band. */
   powerBandFractionFromBottom?: number;
   /** Keep the first declared backplate row against the enclosure top. */
+  backplateColumns?: number;
   backplatePosition?: "above-equipment" | "top";
 };
+
+export type WallVolume = { id: string; center: Vec3; size: Vec3; normal: Vec3 };
+export type SiteGeometry = {
+  walls: readonly WallVolume[];
+  roof: { center: Vec3; size: Vec3 };
+  shelf: { center: Vec3; size: Vec3 };
+  note: string;
+};
+export const graphWalls = (graph: Pick<SystemGraph, "site">): readonly WallVolume[] => graph.site?.walls
+  ?? [{ ...EQUIPMENT_WALL_VOLUME, id: "north", normal: [0, 0, 1] }];
 
 export type SystemGraph = {
   id: string;
   label: string;
   revision: string;
+  site?: SiteGeometry;
   devices: readonly Device[];
   cables: readonly Cable[];
   connections: readonly Connection[];
@@ -425,6 +456,7 @@ export type Gland = {
   bundleId: string;
   position: Vec3;
   connectionIds: readonly string[];
+  face?: "top" | "bottom";
 };
 
 export type CurrentSafetyIssue = {
@@ -434,6 +466,7 @@ export type CurrentSafetyIssue = {
     | "unverified-current-source"
     | "unverified-protective-element"
     | "unprotected-source-lead"
+    | "accepted-protection-scheme"
     | "untraced-active-conductor"
     | "unpaired-return-conductor"
     | "missing-device-rating"
@@ -472,7 +505,8 @@ export type CurrentSafetyConnectionCheck = {
   verifiedProtectionEnvelopeA: number | "unbounded";
   provisionalProtectionEnvelopeA: number | "unbounded";
   ampacityA?: number;
-  status: "verified" | "provisional" | "incomplete";
+  status: "verified" | "accepted" | "provisional" | "incomplete";
+  protectionApproval?: NonNullable<Connection["protectionApproval"]>;
   protectionBySource: readonly CurrentProtectionEvidence[];
 };
 

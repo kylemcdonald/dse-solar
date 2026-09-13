@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedOn": "2026-08-28",
-  "privacy": "Public PII-free receipt index. Receipt filenames may be committed; source PDFs remain ignored under private/.",
+  "generatedOn": "2026-09-02",
+  "privacy": "Public PII-free purchase-evidence index. Safe filenames and document kinds may be committed; source PDFs and sensitive payment details remain ignored under private/.",
   "invoices": [
     {
       "number": 1,
@@ -265,7 +265,9 @@
       "number": 44,
       "date": "2026-08-28",
       "filename": "extreme-customs-clearance-2026-08-28-invoice-00070037-drua-sailing.pdf",
-      "supplier": "Extreme Customs Clearance"
+      "supplier": "Extreme Customs Clearance",
+      "kind": "Tax invoice",
+      "reference": "00070037"
     },
     {
       "number": 45,
@@ -284,9 +286,148 @@
       "date": "2026-08-28",
       "filename": "amazon-2026-08-28-order-111-7441385-7705847-kerwinn-10a-shared-services-breaker.pdf",
       "supplier": "Amazon"
+    },
+    {
+      "number": 48,
+      "date": "2026-09-01",
+      "filename": "rc-manubhai-2026-09-01-invoice-12185922-site-supplies.pdf",
+      "supplier": "R.C. Manubhai",
+      "kind": "Tax invoice",
+      "reference": "12185922"
+    },
+    {
+      "number": 49,
+      "date": "2026-09-01",
+      "filename": "solar-fiji-2026-09-01-quote-TP260901-V2-solar-system.pdf",
+      "supplier": "Solar Fiji",
+      "kind": "Quote",
+      "reference": "TP260901-V2"
+    },
+    {
+      "number": 50,
+      "date": "2026-09-02",
+      "filename": "bank-of-america-2026-09-02-wire-solar-fiji.pdf",
+      "supplier": "Bank of America",
+      "kind": "Payment confirmation",
+      "reference": "Solar Fiji wire"
     }
   ],
   "itemInvoices": {
+    "dse-panels": [
+      49,
+      50
+    ],
+    "dse-batteries": [
+      49,
+      50
+    ],
+    "dse-pv-cable": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-installation-screws": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-schletter-roof-mount-kit": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-schletter-tin-feet": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-50mm-black-cable": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-50mm-red-cable": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-35mm-black-cable": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-35mm-red-cable": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-16mm-twin-battery-cable": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-earth-rod": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-6mm-earth-wire": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-6mm-twin-pv-cable": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-1-5mm-light-wire": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-1-5mm-switch-wire": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-1-5mm-twin-flex": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-used-cable-cutter": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-35mm-m8-lugs": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-50mm-m8-lugs": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-16mm-m8-lugs": [
+      49,
+      50
+    ],
+    "dse-solar-fiji-vat-and-rounding": [
+      49,
+      50
+    ],
+    "dse-fiji-cable-ties": [
+      48
+    ],
+    "dse-fiji-3m-extension-cords": [
+      48
+    ],
+    "dse-fiji-slotted-screwdriver": [
+      48
+    ],
+    "dse-fiji-phillips-screwdrivers": [
+      48
+    ],
+    "dse-fiji-15a-female-socket": [
+      48
+    ],
+    "dse-fiji-10a-surface-socket": [
+      48
+    ],
+    "dse-fiji-3-gang-switch": [
+      48
+    ],
+    "dse-fiji-2-gang-switch": [
+      48
+    ],
+    "dse-fiji-shopping-bag": [
+      48
+    ],
     "dse-battery-cable": [
       38
     ],
@@ -712,8 +853,7 @@
   },
   "itemAsins": {
     "dse-battery-cable": [
-      "B0F93TT9CW",
-      "B0CHS4JBQW"
+      "B0F93TT9CW"
     ],
     "dse-chtai-ac-rcbos-rejected": [
       "B0CSV93CTN"

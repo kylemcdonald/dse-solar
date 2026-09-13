@@ -12,7 +12,8 @@ import {
   roundedRoutePieces,
 } from "./renderedCableGeometry";
 import type { CableCurvePiece } from "./renderedCableGeometry";
-import { conductorColor, EQUIPMENT_WALL_VOLUME, isPurchasedDevice } from "./systemGraph";
+import { conductorColor, graphWalls, isPurchasedDevice } from "./systemGraph";
+import { worldHalfExtents } from "./physicalLayout";
 import type { GraphSelection, ResolvedConductor, ResolvedDevice, Vec3 } from "./systemGraph";
 
 type Props = {
@@ -22,7 +23,7 @@ type Props = {
   onClearSelection: () => void;
 };
 
-type CameraPreset = "whole" | "wall" | "dc" | "cutoff" | "services";
+type CameraPreset = "whole" | "wall" | "west" | "north" | "dc" | "cutoff" | "services";
 
 type CameraPose = {
   position: Vec3;
@@ -41,7 +42,9 @@ const DC_CLUSTER_COMPONENT_IDS = new Set([
 ]);
 const cameraPresets: readonly { key: CameraPreset; label: string }[] = [
   { key: "whole", label: "Whole system" },
-  { key: "wall", label: "Wall board" },
+  { key: "wall", label: "Northwest corner" },
+  { key: "west", label: "West wall" },
+  { key: "north", label: "North wall" },
   { key: "dc", label: "DC distribution" },
   { key: "cutoff", label: "Battery cutoffs" },
   { key: "services", label: "Secondary services" },
@@ -52,8 +55,8 @@ const DEVICE_SHADOW_CASTER_LAYER = 2;
 const WALL_DEVICE_SHADOW_RECEIVER_LAYER = 3;
 
 function deviceBounds(devices: readonly ResolvedDevice[]) {
-  const min = ([0, 1, 2] as const).map((axis) => Math.min(...devices.map((device) => device.position[axis] - device.size[axis] / 2))) as unknown as Vec3;
-  const max = ([0, 1, 2] as const).map((axis) => Math.max(...devices.map((device) => device.position[axis] + device.size[axis] / 2))) as unknown as Vec3;
+  const min = ([0, 1, 2] as const).map((axis) => Math.min(...devices.map((device) => device.position[axis] - worldHalfExtents(device)[axis]))) as unknown as Vec3;
+  const max = ([0, 1, 2] as const).map((axis) => Math.max(...devices.map((device) => device.position[axis] + worldHalfExtents(device)[axis]))) as unknown as Vec3;
   const target: Vec3 = [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2];
   const size: Vec3 = [max[0] - min[0], max[1] - min[1], max[2] - min[2]];
   return { target, size };
@@ -93,9 +96,6 @@ function frontCameraPose(
 }
 
 const wholeBounds = deviceBounds(dseRuntime.devices);
-const wallBounds = boundsWithWholeSystemFallback(dseRuntime.devices.filter((device) => (
-  device.placement.space === "world" && ["wall", "outside-wall"].includes(device.placement.surface)
-)));
 const batteryCutoffDevices = junctionDevices(BATTERY_CUTOFF_JUNCTION_ID);
 const secondaryServicesDevices = junctionDevices(SECONDARY_SERVICES_JUNCTION_ID);
 const dcDistributionDevices = dseRuntime.devices.filter((device) => (
@@ -113,14 +113,11 @@ const presetPose: Record<CameraPreset, CameraPose> = {
     position: [wholeBounds.target[0] + wholeSpan * 0.50, wholeBounds.target[1] + wholeSpan * 0.48, wholeBounds.target[2] + wholeSpan * 0.76],
     target: wholeBounds.target,
   },
-  wall: frontCameraPose(wallBounds, { widthScale: 0.98, heightScale: 1.9, minimumDistance: 2.4 }),
-  dc: frontCameraPose(dcDistributionBounds, {
-    widthScale: 1.02,
-    heightScale: 1.45,
-    minimumDistance: 1.2,
-    yOffset: 0.35,
-  }),
-  cutoff: frontCameraPose(batteryCutoffBounds, { widthScale: 1.65, heightScale: 2.1, minimumDistance: 0.45, xOffset: 0.04, yOffset: 0.20 }),
+  wall: { position: [4.5, 2.8, 4.8], target: [0.65, 1.45, 0.80] },
+  west: { position: [4.2, 1.65, 1.10], target: [0, 1.45, 1.10] },
+  north: { position: [1.0, 1.85, 4.2], target: [1.0, 1.50, 0] },
+  dc: { position: [3.2, 1.65, 3.4], target: dcDistributionBounds.target },
+  cutoff: { position: [batteryCutoffBounds.target[0] + 0.9, batteryCutoffBounds.target[1] + 0.1, batteryCutoffBounds.target[2]], target: batteryCutoffBounds.target },
   services: frontCameraPose(secondaryServicesBounds, {
     widthScale: 1.9,
     heightScale: 2.35,
@@ -130,11 +127,19 @@ const presetPose: Record<CameraPreset, CameraPose> = {
   }),
 };
 
+/** A distribution-bar stud is met by a short ring-lug lead from beside the
+ * bar rather than along the stud axis, so it is exempt from the tangent check. */
+const isBarStud = (conductorKey: string) => {
+  const port = dseRuntime.conductorByKey.get(conductorKey);
+  const owner = port ? dseRuntime.deviceById.get(port.deviceId) : undefined;
+  return Boolean(owner && (owner.kind === "busbar" || owner.kind === "earth") && port?.face === "front");
+};
 const terminalTangentErrors = dseRuntime.routes.filter((route) => {
   if (route.points.length < 2) return true;
   const from = dseRuntime.conductorByKey.get(route.from);
   const to = dseRuntime.conductorByKey.get(route.to);
   if (!from || !to) return true;
+  if (isBarStud(route.from) || isBarStud(route.to)) return false;
   const start = new THREE.Vector3(...route.points[0]);
   const startNext = new THREE.Vector3(...route.points[1]);
   const end = new THREE.Vector3(...route.points.at(-1)!);
@@ -155,8 +160,8 @@ const unusedConductorCount = dseRuntime.conductors.filter((port) => !connectedCo
 const routingTargetChangeCount = dseRuntime.diagnostics.routingTargetAssignments.filter((assignment) => (
   assignment.authoredEndpoint !== assignment.resolvedEndpoint
 )).length;
-const earthBusRouteLengthM = dseRuntime.routes.filter((route) => (
-  route.from.startsWith("earthBar.") || route.to.startsWith("earthBar.")
+const earthChainRouteLengthM = dseRuntime.routes.filter((route) => (
+  route.kind === "earth"
 )).reduce((sum, route) => sum + route.lengthM, 0);
 const semanticCables = renderedSemanticCables(dseRuntime.devices, dseRuntime.conductors, dseRuntime.routes);
 const semanticConductorKeys = new Set(semanticCables.flatMap((cable) => (
@@ -424,36 +429,23 @@ function addPanelDetails(group: THREE.Group, device: ResolvedDevice, opacity: nu
     ]);
     group.add(new THREE.Line(geometry, lineMaterial));
   }
-  const railMaterial = new THREE.MeshStandardMaterial({ color: "#8c9090", metalness: 0.58, roughness: 0.38 });
-  [-0.28, 0.28].forEach((fraction) => {
-    const rail = new THREE.Mesh(
-      new THREE.BoxGeometry(device.size[0] * 0.93, 0.032, 0.025),
-      railMaterial,
-    );
-    rail.position.set(0, device.size[1] * fraction, -device.size[2] / 2 - 0.020);
-    group.add(rail);
-  });
+
 }
 
-function addArraySupport(scene: THREE.Scene) {
-  const material = new THREE.MeshStandardMaterial({ color: "#777c7a", metalness: 0.56, roughness: 0.42 });
-  const addRod = (from: Vec3, to: Vec3, radius = 0.025) => {
-    const rod = cylinderBetween(new THREE.Vector3(...from), new THREE.Vector3(...to), radius, material, 12);
-    if (rod) {
-      rod.castShadow = true;
-      scene.add(rod);
-    }
-  };
-  // Same two-rail, three-bay rack geometry as the original array view, shifted
-  // with the canonical panel coordinates. It is environmental structure, not
-  // an electrical device, so it intentionally has no inspector/diagram node.
-  [-2.28, 0, 2.28].forEach((z) => {
-    addRod([-2.67, 0.19, z], [-0.43, 0.92, z], 0.027);
-    addRod([-2.67, 0.03, z], [-2.67, 0.19, z]);
-    addRod([-0.43, 0.03, z], [-0.43, 0.92, z]);
-  });
-  addRod([-2.67, 0.05, -2.28], [-2.67, 0.05, 2.28]);
-  addRod([-0.43, 0.05, -2.28], [-0.43, 0.05, 2.28]);
+function addSiteStructure(scene: THREE.Scene) {
+  const site = dseRuntime.graph.site;
+  if (!site) return;
+  const shelf = new THREE.Mesh(new THREE.BoxGeometry(...site.shelf.size),
+    new THREE.MeshStandardMaterial({ color: "#a57b50", roughness: 0.9 }));
+  shelf.position.set(...site.shelf.center);
+  shelf.receiveShadow = true;
+  scene.add(shelf);
+  // A cutaway roof outline keeps the equipment visible from inside the room.
+  const roof = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(...site.roof.size)),
+    new THREE.LineBasicMaterial({ color: "#777f83", transparent: true, opacity: 0.45 }));
+  roof.position.set(...site.roof.center);
+  scene.add(roof);
+
 }
 
 function deviceBody(device: ResolvedDevice) {
@@ -643,53 +635,29 @@ function deviceBody(device: ResolvedDevice) {
 
     if (device.kind === "panel") addPanelDetails(group, device, opacity);
 
-    if (device.kind === "generator") {
-      const face = new THREE.Mesh(
-        new THREE.BoxGeometry(device.size[0] * 0.72, device.size[1] * 0.42, 0.012),
-        new THREE.MeshStandardMaterial({ color: "#3f4443", roughness: 0.66 }),
-      );
-      face.position.z = device.size[2] / 2 + 0.007;
-      group.add(face);
+    if (device.kind === "switch") {
+      const rocker = new THREE.Mesh(new THREE.BoxGeometry(device.size[0] * 0.65, device.size[1] * 0.65, 0.008),
+        new THREE.MeshStandardMaterial({ color: "#eeeae0", roughness: 0.48 }));
+      rocker.position.z = device.size[2] / 2 + 0.005; rocker.rotation.x = -0.08; group.add(rocker);
     }
 
-    if (device.id === "switchPanel") {
-      const faceplate = new THREE.Mesh(
-        new THREE.BoxGeometry(device.size[0] * 0.94, device.size[1] * 0.82, 0.006),
-        new THREE.MeshStandardMaterial({ color: "#3e4545", roughness: 0.58, metalness: 0.04 }),
-      );
-      faceplate.position.z = device.size[2] / 2 + 0.004;
-      group.add(faceplate);
-      const gangPitch = device.size[0] * 0.145;
-      for (let gang = 0; gang < 6; gang += 1) {
-        const rocker = new THREE.Mesh(
-          new THREE.BoxGeometry(gangPitch * 0.68, device.size[1] * 0.56, 0.009),
-          new THREE.MeshStandardMaterial({ color: "#171a1b", roughness: 0.46 }),
-        );
-        rocker.position.set(
-          (gang - 2.5) * gangPitch,
-          0,
-          device.size[2] / 2 + 0.011,
-        );
-        rocker.rotation.x = -0.08;
-        group.add(rocker);
-      }
-    }
-
-    if (device.id === "toolOutlet") {
-      const slotMaterial = new THREE.MeshBasicMaterial({ color: "#252728" });
-      const slotGeometry = new THREE.BoxGeometry(0.007, 0.022, 0.004);
+    if (device.id === "toolOutlet" || device.id === "generator") {
+      const male = device.id === "generator";
+      const slotMaterial = new THREE.MeshBasicMaterial({ color: male ? "#c8c4ac" : "#252728" });
+      const pinDepth = male ? 0.018 : 0.004;
+      const slotGeometry = new THREE.BoxGeometry(0.007, 0.022, pinDepth);
       const active = new THREE.Mesh(slotGeometry, slotMaterial);
-      active.position.set(-0.013, 0.006, device.size[2] / 2 + 0.003);
+      active.position.set(-0.013, 0.006, device.size[2] / 2 + pinDepth / 2);
       active.rotation.z = -0.48;
       const neutral = new THREE.Mesh(slotGeometry, slotMaterial);
-      neutral.position.set(0.013, 0.006, device.size[2] / 2 + 0.003);
+      neutral.position.set(0.013, 0.006, device.size[2] / 2 + pinDepth / 2);
       neutral.rotation.z = 0.48;
-      const earth = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.020, 0.004), slotMaterial);
-      earth.position.set(0, -0.018, device.size[2] / 2 + 0.003);
+      const earth = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.020, pinDepth), slotMaterial);
+      earth.position.set(0, -0.018, device.size[2] / 2 + pinDepth / 2);
       group.add(active, neutral, earth);
     }
 
-    if (device.id === "indoorLight" || device.id === "outdoorLight") {
+    if (device.id === "indoorLight" || device.id === "indoorLight2") {
       const lens = new THREE.Mesh(
         new THREE.BoxGeometry(device.size[0] * 0.78, device.size[1] * 0.72, 0.006),
         new THREE.MeshStandardMaterial({ color: "#fff0bd", emissive: "#ffc45c", emissiveIntensity: 0.34, roughness: 0.35 }),
@@ -771,26 +739,22 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
     fillLight.position.set(-4, 3, -5);
     scene.add(fillLight);
 
-    const wall = new THREE.Mesh(
-      new THREE.BoxGeometry(...EQUIPMENT_WALL_VOLUME.size),
-      new THREE.MeshStandardMaterial({ color: "#d8cfbd", roughness: 0.94 }),
-    );
-    wall.position.set(...EQUIPMENT_WALL_VOLUME.center);
-    wall.layers.enable(WALL_SHADOW_CASTER_LAYER);
-    wall.layers.enable(WALL_DEVICE_SHADOW_RECEIVER_LAYER);
-    wall.castShadow = true;
-    wall.receiveShadow = true;
-    wall.userData.cameraSurface = true;
-    scene.add(wall);
+    graphWalls(dseRuntime.graph).forEach(volume => {
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(...volume.size),
+        new THREE.MeshStandardMaterial({ color: "#d8cfbd", roughness: 0.94 }));
+      wall.position.set(...volume.center);
+      wall.layers.enable(WALL_SHADOW_CASTER_LAYER); wall.layers.enable(WALL_DEVICE_SHADOW_RECEIVER_LAYER);
+      wall.castShadow = true; wall.receiveShadow = true; wall.userData.cameraSurface = true; scene.add(wall);
+    });
     const floor = new THREE.Mesh(
-      new THREE.BoxGeometry(12.5, 0.035, 5.5),
+      new THREE.BoxGeometry(5.0, 0.035, 4.5),
       new THREE.MeshStandardMaterial({ color: "#e3d7c1", roughness: 0.97 }),
     );
-    floor.position.set(0.5, -0.025, 0.15);
+    floor.position.set(1.6, -0.025, 1.45);
     floor.receiveShadow = true;
     floor.userData.cameraSurface = true;
     scene.add(floor);
-    addArraySupport(scene);
+    addSiteStructure(scene);
 
     const interactive: THREE.Object3D[] = [];
     const deviceObjects = new Map<string, THREE.Object3D>();
@@ -1110,7 +1074,12 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
     });
     controlsSlot.current = controls;
     controlsRef.current = controls;
-    const pose = presetPose.whole;
+    // A `?camera=px,py,pz,tx,ty,tz` query parameter frames an arbitrary
+    // subsection for review screenshots; otherwise start on the whole system.
+    const requested = new URLSearchParams(window.location.search).get("camera")?.split(",").map(Number) ?? [];
+    const pose = requested.length === 6 && requested.every(Number.isFinite)
+      ? { position: [requested[0], requested[1], requested[2]] as Vec3, target: [requested[3], requested[4], requested[5]] as Vec3 }
+      : presetPose.whole;
     controls.setPose(new THREE.Vector3(...pose.position), new THREE.Vector3(...pose.target));
     controls.writeDiagnostics(renderer.domElement);
 
@@ -1212,7 +1181,7 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
       data-route-turns={dseRuntime.diagnostics.totalTurns}
       data-routing-target-assignments={dseRuntime.diagnostics.routingTargetAssignments.length}
       data-routing-target-changes={routingTargetChangeCount}
-      data-earth-bus-route-length-m={earthBusRouteLengthM.toFixed(2)}
+      data-earth-chain-route-length-m={earthChainRouteLengthM.toFixed(2)}
       data-route-solve-ms={dseRuntime.diagnostics.buildMs.toFixed(1)}
       data-runtime-source={dseRuntime.diagnostics.source}
       data-runtime-hydrate-ms={dseRuntime.diagnostics.hydrateMs.toFixed(3)}
@@ -1224,7 +1193,7 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
       data-wire-terminal-tangent-errors={terminalTangentErrors}
       data-unused-terminal-opacity="0.5"
       data-unused-terminal-count={unusedConductorCount}
-      data-pe-bus-rendering="rectangular-busbar"
+      data-earth-topology="pv-spd-chassis-rod"
       data-breakout-rendering="true-y-two-way-plus-minus-45-three-way-red-45-black-0-green-minus-45"
       data-cable-breakout-count={cableBreakoutCount}
       data-integrated-cable-breakout-count={integratedCableBreakoutCount}
@@ -1244,7 +1213,7 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
       data-smart-shunt-rendering="uncovered-monitor-body"
       data-wall-shadow="casts-and-receives"
       data-device-shadow-floor="excluded-by-light-layer"
-      data-wall-penetrations="1"
+      data-wall-penetrations={dseRuntime.devices.filter(device => device.presentation === "wall-passthrough").length}
       data-battery-cutoff-breaker-order={batteryCutoffBreakerOrder}
       data-secondary-services-breaker-order={secondaryServicesBreakerOrder}
       data-current-safety-status={dseRuntime.diagnostics.currentSafety.status}
@@ -1268,6 +1237,7 @@ export function UnifiedSystemModel3D({ fadePurchased, onFadePurchasedChange, onS
           {dseRuntime.devices.length} devices · {dseRuntime.routes.length} cables · precomputed · {dseRuntime.diagnostics.hydrateMs.toFixed(2)} ms hydrate
         </span>
       </div>
+      <p className="model-site-note">Northwest corner · panels on the roof · batteries north to south: A1, A2, B1, B2. Positions and routing envelopes are illustrative; installed cable lengths are not measured.</p>
       <div className="unified-model-stage">
         <div className="unified-model-canvas" ref={canvasHostRef} />
         <div ref={tooltipRef} className="model-hover-tooltip" role="tooltip" hidden />

@@ -19,9 +19,9 @@ const localBindingConfig = {
   // variables must be forwarded explicitly as Worker bindings. Keep private
   // mode opt-in: the trusted local service supplies this flag, public builds
   // and deployments do not.
-  vars: process.env.DSE_PRIVATE_MODE
-    ? { DSE_PRIVATE_MODE: process.env.DSE_PRIVATE_MODE }
-    : {},
+  vars: Object.fromEntries(process.env.DSE_PRIVATE_MODE
+    ? [["DSE_PRIVATE_MODE", process.env.DSE_PRIVATE_MODE]]
+    : []),
   d1_databases: d1
     ? [
         {
@@ -91,6 +91,7 @@ export default defineConfig(async () => {
 
   return {
     server: {
+      host: "0.0.0.0",
       allowedHosts: ["vibecheck.local", "vibecheck.taildd340.ts.net"],
       ...(isCodexSeatbeltSandbox
         ? { watch: { useFsEvents: false, usePolling: true } }

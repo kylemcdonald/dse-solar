@@ -14,6 +14,7 @@ export function CurrentSafetySummary() {
   )).length;
   const faultHolds = circuits.filter((circuit) => circuit.faultStatus === "incomplete").length;
   const faultChecks = circuits.filter((circuit) => circuit.faultStatus === "provisional").length;
+  const faultAccepted = circuits.filter((circuit) => circuit.faultStatus === "accepted").length;
   const detail = report.limitations.length > 0
     ? report.limitations.join(" ")
     : "Every energized active conductor and explicitly paired return was traversed from its declared supply.";
@@ -21,7 +22,7 @@ export function CurrentSafetySummary() {
     <span
       className={`current-safety-summary current-safety-${report.status}`}
       role="status"
-      aria-label={`Normal power audit: ${withinCapacity} circuits within capacity, ${conditionalCapacity} conditional or variable, and ${overCapacity} over capacity. Circuit-level fault audit: ${faultHolds} design holds and ${faultChecks} verification items. Detailed conductor audit ${report.status}.`}
+      aria-label={`Normal power audit: ${withinCapacity} circuits within capacity, ${conditionalCapacity} conditional or variable, and ${overCapacity} over capacity. Circuit-level fault audit: ${faultHolds} design holds, ${faultChecks} verification items, and ${faultAccepted} accepted installations. Detailed conductor audit ${report.status}.`}
       title={`Normal load and fault protection are separate. ${detail}`}
       data-current-safety-status={report.status}
       data-current-safety-errors={report.errors.length}
@@ -32,9 +33,10 @@ export function CurrentSafetySummary() {
       data-power-conditional-capacity={conditionalCapacity}
       data-fault-circuit-holds={faultHolds}
       data-fault-circuit-checks={faultChecks}
+      data-fault-circuit-accepted={faultAccepted}
     >
       <span className="current-safety-dot" aria-hidden="true" />
-      Normal {withinCapacity} clear / {conditionalCapacity} conditional / {overCapacity} over · Fault {faultHolds} holds / {faultChecks} verify
+      Normal {withinCapacity} clear / {conditionalCapacity} conditional / {overCapacity} over · Fault {faultHolds} holds / {faultChecks} verify / {faultAccepted} accepted
     </span>
   );
 }

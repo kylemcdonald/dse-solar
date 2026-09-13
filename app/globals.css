@@ -225,8 +225,7 @@ main {
   height: 100%;
 }
 
-.mode-tabs button,
-.mode-tabs .wire-cut-link {
+.mode-tabs button {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -247,15 +246,9 @@ main {
   content: none;
 }
 
-.mode-tabs button:hover,
-.mode-tabs .wire-cut-link:hover {
+.mode-tabs button:hover {
   color: #fff;
   background: rgb(255 255 255 / 0.07);
-}
-
-.mode-tabs .wire-cut-link {
-  border-color: rgb(233 149 47 / 0.35);
-  color: #f0b66e;
 }
 
 .mode-tabs button.active {
@@ -298,6 +291,24 @@ main {
 .persisted-dse-model {
   width: 100%;
 }
+
+/* The page is server-rendered; until the client has hydrated, nothing responds.
+   Say so rather than showing a dead diagram. */
+.app-shell[data-viewer-ready="false"] main { position: relative; pointer-events: none; }
+.hydration-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  place-items: center;
+  background: rgba(10, 18, 22, 0.72);
+  color: #e6ecea;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.hydration-overlay span { padding: 10px 18px; border-radius: 999px; background: #1a262c; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4); }
+.app-shell[data-viewer-ready="false"] .hydration-overlay { display: grid; }
 
 .model-loading {
   display: grid;
@@ -4190,8 +4201,7 @@ main {
     display: none;
   }
 
-  .mode-tabs button,
-  .mode-tabs .wire-cut-link {
+  .mode-tabs button {
     width: 38px;
     min-width: 38px;
     height: 40px;
@@ -4963,6 +4973,59 @@ main {
   font-size: 12px;
 }
 
+.project-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 9px;
+  background: rgb(255 255 255 / 0.055);
+}
+
+.project-switcher button {
+  display: inline-grid;
+  height: 36px;
+  padding: 0 10px;
+  grid-template-columns: auto auto;
+  gap: 5px;
+  align-items: center;
+  border: 0;
+  border-radius: 6px;
+  color: #aebcba;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.project-switcher button:hover {
+  color: #fff;
+  background: rgb(255 255 255 / 0.07);
+}
+
+.project-switcher button.active {
+  color: #fff;
+  background: #176d69;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+}
+
+.project-switcher span {
+  color: var(--orange);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.project-switcher button.active span {
+  color: #ffd18d;
+}
+
+.project-switcher strong {
+  font-size: 11px;
+  font-weight: 750;
+}
+
 .unified-diagram,
 .unified-model {
   height: calc(100vh - 52px);
@@ -5044,6 +5107,8 @@ main {
 }
 
 .unified-diagram {
+  display: flex;
+  flex-direction: column;
   --diagram-canvas: #858b90;
   overflow: hidden;
   background: var(--diagram-canvas);
@@ -5086,8 +5151,9 @@ main {
 
 .unified-diagram-viewport {
   position: relative;
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  height: calc(100% - 58px);
   overflow: hidden;
   background: var(--diagram-canvas);
   cursor: grab;
@@ -5768,6 +5834,489 @@ main {
   font-size: 11px;
 }
 
+/* Compact Inowon / Polowat planning mode ---------------------------------- */
+
+.polowat-diagram {
+  min-height: calc(100vh - 52px);
+  padding: 28px 30px 38px;
+  background:
+    radial-gradient(circle at 87% 0%, rgb(43 112 110 / 0.10), transparent 34rem),
+    var(--paper);
+}
+
+.polowat-view-heading {
+  display: flex;
+  max-width: 1680px;
+  gap: 28px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin: 0 auto 16px;
+}
+
+.polowat-view-heading h1 {
+  margin: 4px 0 8px;
+  color: var(--ink-strong);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 36px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+
+.polowat-view-heading p {
+  margin: 0;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.polowat-design-badges {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.polowat-design-badges span {
+  display: grid;
+  min-width: 132px;
+  gap: 4px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.78);
+  box-shadow: var(--shadow-sm);
+}
+
+.polowat-design-badges small {
+  color: var(--ink-muted);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.polowat-design-badges strong {
+  color: var(--ink-strong);
+  font-size: 13px;
+}
+
+.polowat-diagram-frame {
+  max-width: 1680px;
+  margin: 0 auto;
+  overflow: auto;
+  border: 1px solid #c8cec9;
+  border-radius: 14px;
+  background: #e8ece7;
+  box-shadow: var(--shadow-md);
+}
+
+.polowat-diagram-frame svg {
+  display: block;
+  width: 100%;
+  min-width: 1120px;
+  height: auto;
+  shape-rendering: geometricPrecision;
+}
+
+.polowat-region {
+  stroke: #aebbb6;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.polowat-region-array { fill: #e6eef3; }
+.polowat-region-core { fill: #eef0e9; }
+.polowat-region-loads { fill: #e8efea; }
+.polowat-region-battery { fill: #eee9df; }
+
+.polowat-region-label {
+  fill: #536762;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+}
+
+.polowat-wire path {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.polowat-wire-series path { stroke: #d89724; }
+.polowat-wire-pv path { stroke: #d45f3b; }
+.polowat-wire-positive path { stroke: #c83f38; }
+.polowat-wire-negative path { stroke: #283033; }
+.polowat-wire-regulated path { stroke: #3b6ea8; }
+.polowat-wire-usb path { stroke: #646bb0; }
+
+.polowat-wire-label rect {
+  fill: rgb(252 251 247 / 0.96);
+  stroke: #c4ccc7;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.polowat-wire-label text {
+  fill: #354744;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.015em;
+}
+
+.polowat-diagram-device {
+  cursor: pointer;
+  outline: none;
+}
+
+.polowat-diagram-device > rect {
+  fill: #fbfcf9;
+  stroke: #8b9a96;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  transition: filter 140ms ease, stroke 140ms ease;
+}
+
+.polowat-diagram-device:hover > rect,
+.polowat-diagram-device:focus-visible > rect {
+  stroke: #176d69;
+  filter: brightness(1.035);
+}
+
+.polowat-diagram-device.selected > rect {
+  stroke: var(--orange);
+  stroke-width: 4;
+}
+
+.polowat-device-panel > rect {
+  fill: #234f7e;
+  stroke: #6f99c4;
+}
+
+.polowat-device-battery > rect {
+  fill: #3e4749;
+  stroke: #8e999a;
+}
+
+.polowat-device-controller > rect {
+  fill: #2479ad;
+  stroke: #65a4ca;
+}
+
+.polowat-device-converter > rect {
+  fill: #426d93;
+  stroke: #7ea2bd;
+}
+
+.polowat-device-bus > rect {
+  fill: #a77a3f;
+  stroke: #d1ad76;
+}
+
+.polowat-device-distribution > rect {
+  fill: #667a77;
+  stroke: #9bb0aa;
+}
+
+.polowat-device-load > rect {
+  fill: #f6f6ef;
+  stroke: #879792;
+}
+
+.polowat-device-kicker,
+.polowat-device-label,
+.polowat-device-subtitle {
+  fill: #27413e;
+  pointer-events: none;
+}
+
+.polowat-device-kicker {
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: 0.075em;
+}
+
+.polowat-device-label {
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.polowat-device-subtitle {
+  font-size: 8.7px;
+  font-weight: 650;
+}
+
+.polowat-device-panel .polowat-device-kicker,
+.polowat-device-panel .polowat-device-label,
+.polowat-device-panel .polowat-device-subtitle,
+.polowat-device-battery .polowat-device-kicker,
+.polowat-device-battery .polowat-device-label,
+.polowat-device-battery .polowat-device-subtitle,
+.polowat-device-controller .polowat-device-kicker,
+.polowat-device-controller .polowat-device-label,
+.polowat-device-controller .polowat-device-subtitle,
+.polowat-device-converter .polowat-device-kicker,
+.polowat-device-converter .polowat-device-label,
+.polowat-device-converter .polowat-device-subtitle,
+.polowat-device-bus .polowat-device-kicker,
+.polowat-device-bus .polowat-device-label,
+.polowat-device-bus .polowat-device-subtitle,
+.polowat-device-distribution .polowat-device-kicker,
+.polowat-device-distribution .polowat-device-label,
+.polowat-device-distribution .polowat-device-subtitle {
+  fill: #f8fbfa;
+}
+
+.polowat-device-panel .polowat-device-subtitle,
+.polowat-device-battery .polowat-device-subtitle,
+.polowat-device-controller .polowat-device-subtitle,
+.polowat-device-converter .polowat-device-subtitle,
+.polowat-device-bus .polowat-device-subtitle,
+.polowat-device-distribution .polowat-device-subtitle {
+  fill: #d7e2e1;
+}
+
+.polowat-panel-grid {
+  opacity: 0.18;
+  stroke: #d9efff;
+  stroke-width: 1;
+}
+
+.polowat-diagram-footer {
+  display: grid;
+  max-width: 1680px;
+  grid-template-columns: minmax(380px, 0.8fr) minmax(500px, 1.2fr);
+  gap: 12px;
+  margin: 13px auto 0;
+}
+
+.polowat-wire-legend,
+.polowat-selected-device {
+  min-height: 78px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--card);
+}
+
+.polowat-wire-legend {
+  display: flex;
+  gap: 9px 17px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.polowat-wire-legend span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.polowat-wire-legend i {
+  display: block;
+  width: 18px;
+  height: 4px;
+  border-radius: 4px;
+}
+
+.polowat-wire-legend i.positive { background: #c83f38; }
+.polowat-wire-legend i.negative { background: #283033; }
+.polowat-wire-legend i.regulated { background: #3b6ea8; }
+.polowat-wire-legend b { color: var(--ink); }
+
+.polowat-selected-device {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.45fr) minmax(300px, 1fr);
+  gap: 18px;
+  align-items: center;
+}
+
+.polowat-selected-device > div {
+  display: grid;
+  gap: 3px;
+}
+
+.polowat-selected-device small {
+  color: var(--teal);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+}
+
+.polowat-selected-device strong {
+  color: var(--ink-strong);
+}
+
+.polowat-selected-device span,
+.polowat-selected-device p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.polowat-design-note {
+  display: flex;
+  max-width: 1680px;
+  gap: 16px;
+  align-items: baseline;
+  margin: 12px auto 0;
+  padding: 12px 15px;
+  border: 1px solid #e0c992;
+  border-left: 4px solid #c08b23;
+  border-radius: 9px;
+  color: #654d23;
+  background: #fbf2db;
+}
+
+.polowat-design-note strong {
+  white-space: nowrap;
+}
+
+.polowat-design-note p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.polowat-model-rating {
+  padding: 6px 9px;
+  border: 1px solid #c4b8a4;
+  border-radius: 999px;
+  color: #3e594b;
+  background: #fffaf0;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.polowat-model-selection {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 4;
+  display: grid;
+  min-width: 220px;
+  max-width: 310px;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid rgb(91 101 87 / 0.34);
+  border-radius: 8px;
+  color: #283029;
+  background: rgb(255 252 244 / 0.96);
+  box-shadow: 0 5px 18px rgb(58 52 41 / 0.18);
+  pointer-events: none;
+}
+
+.polowat-model-selection small {
+  color: #657166;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.polowat-model-selection span {
+  color: #657166;
+  font-size: 10px;
+}
+
+.polowat-model .model-hover-tooltip {
+  top: 14px;
+  bottom: auto;
+}
+
+.polowat-planning-grid {
+  display: grid;
+  grid-template-columns: minmax(620px, 1.55fr) minmax(300px, 0.75fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.polowat-load-budget,
+.polowat-shipping-summary {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.polowat-section-heading h2 {
+  margin: 3px 0 14px;
+  color: var(--ink-strong);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.polowat-load-budget table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.polowat-load-budget th,
+.polowat-load-budget td {
+  padding: 9px 10px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-size: 11px;
+  text-align: left;
+}
+
+.polowat-load-budget thead th {
+  color: #667572;
+  background: #f0f1ed;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.polowat-load-budget tbody th,
+.polowat-load-budget tfoot th,
+.polowat-load-budget tfoot td {
+  color: var(--ink-strong);
+  font-weight: 800;
+}
+
+.polowat-load-budget tfoot tr {
+  background: #edf4f1;
+}
+
+.polowat-shipping-summary dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.polowat-shipping-summary dl div {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+
+.polowat-shipping-summary dt {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.polowat-shipping-summary dd {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.polowat-shipping-summary > p {
+  margin: 13px 0 0;
+  color: var(--ink-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
 .system-overview-v2,
 .bom-v2,
 .notes-v2 {
@@ -5974,7 +6523,8 @@ main {
 }
 
 .power-evidence-documented,
-.fault-status-verified {
+.fault-status-verified,
+.fault-status-accepted {
   color: #245438;
   background: #dfefe4;
 }
@@ -6229,6 +6779,17 @@ main {
 .bom-weight-cell {
   min-width: 96px;
   white-space: nowrap;
+}
+
+.bom-cost-cell {
+  min-width: 125px;
+  white-space: nowrap;
+}
+
+.bom-cost-cell small {
+  color: var(--teal-dark) !important;
+  font-size: 9.5px !important;
+  font-weight: 700;
 }
 
 .bom-weight-cell > span,
@@ -6618,6 +7179,45 @@ main {
 }
 
 @media (max-width: 820px) {
+  .unified-diagram { height: calc(100dvh - 52px); min-height: 0; }
+  .diagram-unified-toolbar { flex-shrink: 0; }
+  .diagram-unified-toolbar,
+  .unified-model .model-toolbar { align-items: stretch; flex-direction: column; gap: 8px; }
+  .diagram-zoom-controls,
+  .unified-model .model-preset-buttons { flex-wrap: wrap; min-width: 0; }
+  .diagram-zoom-controls .current-safety-summary,
+  .unified-model .current-safety-summary { flex-basis: 100%; min-width: 0; white-space: normal; border-radius: 8px; padding-block: 5px; }
+  .current-safety-dot { flex-shrink: 0; }
+  .diagram-breadcrumbs { flex-wrap: wrap; }
+  .diagram-zoom-controls button { min-width: 40px; min-height: 40px; }
+
+  .project-switcher { flex: 0 0 auto; padding: 2px; }
+  .project-switcher button { height: 36px; padding: 0 7px; grid-template-columns: auto; }
+  .project-switcher span { display: none; }
+  .project-switcher strong { font-size: 10px; }
+  .polowat-diagram { padding: 20px 12px 30px; }
+  .polowat-view-heading { align-items: stretch; flex-direction: column; }
+  .polowat-view-heading h1 { font-size: 30px; }
+  .polowat-design-badges { overflow-x: auto; }
+  .polowat-design-badges span { min-width: 124px; }
+  .polowat-diagram-frame { border-radius: 9px; }
+  .polowat-diagram-frame svg { min-width: 1000px; }
+  .polowat-diagram-footer { grid-template-columns: 1fr; }
+  .polowat-selected-device { grid-template-columns: 1fr; }
+  .polowat-design-note { align-items: flex-start; flex-direction: column; }
+  .system-overview-v2,
+  .bom-v2,
+  .notes-v2 { padding: 20px 14px; }
+  .system-hero-v2 { align-items: flex-start; flex-direction: column; }
+  .system-fact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .system-columns-v2,
+  .polowat-planning-grid { grid-template-columns: 1fr; }
+  .polowat-load-budget { overflow-x: auto; }
+  .polowat-load-budget table { min-width: 620px; }
+  .polowat-model .model-toolbar { min-height: 0; align-items: stretch; flex-direction: column; }
+  .polowat-model-rating,
+  .polowat-model .route-runtime { display: none; }
+  .polowat-model-selection { right: 8px; bottom: 8px; max-width: calc(100% - 16px); }
   .shipping-view { padding: 20px 14px; }
   .shipping-heading { flex-direction: column; }
   .shipping-total { width: 100%; }
@@ -6679,3 +7279,28 @@ main {
     animation-iteration-count: 1 !important;
   }
 }
+
+.operator-guide { max-width: 1200px; margin: 0 auto; padding: 28px 24px 48px; color: #243b36; }
+.operator-intro { display: flex; justify-content: space-between; gap: 24px; align-items: center; margin-bottom: 24px; }
+.operator-intro h1 { font-size: clamp(26px, 4vw, 38px); letter-spacing: -.04em; margin: 6px 0 12px; }
+.operator-intro p, .operator-switch-note { font-size: 14px; line-height: 1.6; }
+.operator-key { color: #557068; flex-shrink: 0; }
+.operator-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.operator-controls button { display: flex; gap: 16px; align-items: center; text-align: left; padding: 18px; border: 1px solid #c7d3cd; background: #f9faf5; border-radius: 12px; color: inherit; cursor: pointer; }
+.operator-controls button[aria-pressed="true"] { background: #dcebe6; border-color: #1c6458; }
+.operator-controls small, .operator-controls strong, .operator-controls button span span { display: block; }
+.operator-controls small { text-transform: uppercase; letter-spacing: .06em; font-size: 10px; color: #59736a; }
+.operator-controls strong { font-size: 17px; margin: 5px 0; }
+.operator-controls button span span { font-size: 12px; line-height: 1.5; }
+.operator-rocker { flex: 0 0 30px; height: 42px; border: 1px solid #b8bdb2; border-radius: 6px; background: linear-gradient(#fff 48%, #b8bdb2 50%, #e5e4d9 53%); box-shadow: 0 2px 3px #243b3620; }
+.operator-switch-note { max-width: 860px; color: #59736a; margin: 18px 0; }
+.operator-canvas { overflow-x: auto; border: 1px solid #d8e0d9; border-radius: 16px; background: #f1f5ef; }
+.operator-canvas svg { display: block; width: 100%; min-width: 850px; }
+.operator-block { cursor: pointer; fill: #243b36; }
+.operator-block:focus-visible rect { stroke: #1524d1; stroke-width: 3; }
+.operator-block-detail { font-size: 12px; line-height: 1.4; color: #60776f; }
+.operator-reference { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 28px; }
+.operator-reference h2 { font-size: 16px; margin: 0 0 8px; }
+.operator-reference p { font-size: 13px; line-height: 1.7; margin: 0; }
+.model-site-note { padding: 4px 16px; margin: 0; color: #60776f; font-size: 12px; }
+@media (max-width: 700px) { .operator-guide { padding: 20px 12px; } .operator-intro { display: block; } .operator-key { font-size: 11px !important; } .operator-controls, .operator-reference { grid-template-columns: 1fr; } }

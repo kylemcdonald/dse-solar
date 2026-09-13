@@ -15,10 +15,12 @@ const homeDepotPath = resolve("private/home-depot-orders-through-2026-08-23.json
 const ebayPath = resolve("private/ebay-orders-through-2026-08-25.json");
 const swappaPath = resolve("private/swappa-orders-through-2026-08-25.json");
 const customsAgentPath = resolve("private/extreme-customs-clearance-invoices-through-2026-08-28.json");
+const solarFijiPath = resolve("private/solar-fiji-purchases-through-2026-09-02.json");
+const rcManubhaiPath = resolve("private/rc-manubhai-purchases-through-2026-09-01.json");
 
 // The first two receipts predate the private, PII-free reconciliation JSON. This
-// public description intentionally contains only the invoice metadata needed by
-// the customs manifest; names, addresses, payment details and order totals stay
+// public description intentionally contains only the evidence metadata needed by
+// accounting reports; names, addresses, payment details and order totals stay
 // in the ignored private source PDFs.
 const initialOrders = [
   {
@@ -37,7 +39,8 @@ const initialOrders = [
   },
 ];
 
-if (![amazonPath, homeDepotPath, ebayPath, swappaPath, customsAgentPath].every((candidate) => fs.existsSync(candidate))) {
+if (![amazonPath, homeDepotPath, ebayPath, swappaPath, customsAgentPath, solarFijiPath, rcManubhaiPath]
+  .every((candidate) => fs.existsSync(candidate))) {
   if (!fs.existsSync(resolve(outputPath))) {
     throw new Error("Private reconciliation inputs are unavailable and no committed public receipt manifest exists");
   }
@@ -50,6 +53,40 @@ const homeDepot = readJson("private/home-depot-orders-through-2026-08-23.json");
 const ebay = readJson("private/ebay-orders-through-2026-08-25.json");
 const swappa = readJson("private/swappa-orders-through-2026-08-25.json");
 const customsAgent = readJson("private/extreme-customs-clearance-invoices-through-2026-08-28.json");
+const solarFiji = readJson("private/solar-fiji-purchases-through-2026-09-02.json");
+const rcManubhai = readJson("private/rc-manubhai-purchases-through-2026-09-01.json");
+const solarFijiDocuments = solarFiji.purchases.flatMap((purchase) => {
+  const bomIds = [...purchase.items.map((item) => item.bomId), purchase.taxAllocation.bomId];
+  return [
+    {
+      date: purchase.quoteDate,
+      supplier: purchase.supplier,
+      receiptFile: purchase.quoteFile,
+      documentKind: "Quote",
+      reference: purchase.quoteNumber,
+      bomIds,
+      items: [],
+    },
+    {
+      date: purchase.paidDate,
+      supplier: "Bank of America",
+      receiptFile: purchase.paymentFile,
+      documentKind: "Payment confirmation",
+      reference: "Solar Fiji wire",
+      bomIds,
+      items: [],
+    },
+  ];
+});
+const rcManubhaiDocuments = rcManubhai.orders.map((order) => ({
+  date: order.date,
+  supplier: order.supplier,
+  receiptFile: order.receiptFile,
+  documentKind: "Tax invoice",
+  reference: order.invoiceNumber,
+  bomIds: order.items.map((item) => item.bomId),
+  items: [],
+}));
 const orders = [
   ...initialOrders,
   ...amazon.orders.map((order) => ({ ...order, supplier: "Amazon" })),
@@ -58,15 +95,19 @@ const orders = [
   ...swappa.orders.map((order) => ({ ...order, supplier: "Swappa" })),
   ...customsAgent.invoices.map((invoice) => ({
     ...invoice,
+    documentKind: "Tax invoice",
+    reference: invoice.invoiceNumber,
     bomIds: invoice.bomAllocations.map((allocation) => allocation.bomId),
     items: [],
   })),
+  ...solarFijiDocuments,
+  ...rcManubhaiDocuments,
 ].sort((a, b) =>
   a.date.localeCompare(b.date) || a.supplier.localeCompare(b.supplier) || a.receiptFile.localeCompare(b.receiptFile));
 
-// Receipt references are durable document identifiers used by the grant report
-// and customs filing. Preserve every existing filename-to-number allocation and
-// append newly discovered receipts, even when an older purchase is reconciled
+// Evidence references are durable document identifiers used by the grant report
+// and archived customs filing. Preserve every existing filename-to-number allocation and
+// append newly discovered documents, even when an older purchase is reconciled
 // after a newer invoice. This prevents a late Amazon audit from renumbering the
 // already-issued receipt archive.
 const priorManifest = fs.existsSync(resolve(outputPath)) ? readJson(outputPath) : { invoices: [] };
@@ -78,6 +119,8 @@ const invoices = orders.map((order) => ({
   date: order.date,
   filename: order.receiptFile,
   supplier: order.supplier,
+  ...(order.documentKind ? { kind: order.documentKind } : {}),
+  ...(order.reference ? { reference: order.reference } : {}),
 })).sort((a, b) => a.number - b.number);
 if (new Set(invoices.map((invoice) => invoice.number)).size !== invoices.length) {
   throw new Error("Duplicate receipt numbers in the public manifest");
@@ -178,7 +221,7 @@ const purchasedWithoutReceipt = system.bom
 writeJson(outputPath, {
   schemaVersion: 1,
   generatedOn: invoices.reduce((latest, invoice) => invoice.date > latest ? invoice.date : latest, "2026-08-28"),
-  privacy: "Public PII-free receipt index. Receipt filenames may be committed; source PDFs remain ignored under private/.",
+  privacy: "Public PII-free purchase-evidence index. Safe filenames and document kinds may be committed; source PDFs and sensitive payment details remain ignored under private/.",
   invoices,
   itemInvoices,
   itemAsins,

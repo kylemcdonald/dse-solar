@@ -84,7 +84,11 @@ const amazonOrders = [
         item: "SanDisk 1 TB Portable SSD, updated-firmware model",
         asin: "B0C5JQ68FY",
         unitCostUsd: 164.99,
-        disposition: "Imported storage; not used in the solar system",
+        disposition: "Outside scope; one of two units is allocated to Inowon in Polowat",
+        allocations: [{
+          recipientOrganization: "Inowon", location: "Polowat", qty: 1, unitCostUsd: 164.99,
+          basis: "Documented item price; shared order-level tax, promotions and customs are not allocated by recipient.",
+        }],
       },
       {
         bomId: "dse-personal-flexsolar-panels",
@@ -100,7 +104,11 @@ const amazonOrders = [
         item: "Acer three-in-one USB-C SD card reader",
         asin: "B0F1G2HRQ6",
         unitCostUsd: 14.99,
-        disposition: "Imported accessory; not used in the solar system",
+        disposition: "Outside scope; one of two units is allocated to Inowon in Polowat",
+        allocations: [{
+          recipientOrganization: "Inowon", location: "Polowat", qty: 1, unitCostUsd: 14.99,
+          basis: "Documented item price; shared order-level tax, promotions and customs are not allocated by recipient.",
+        }],
       },
     ],
   },
@@ -245,6 +253,7 @@ const outsideScope = {
   priority: "Not used in solar system",
   accountingGroup: "additional",
   includedInTotal: false,
+  grantScope: "outside-scope",
 };
 const personalUse = {
   category: "Personal items",
@@ -254,6 +263,7 @@ const personalUse = {
   priority: "Personal use · not part of solar system",
   accountingGroup: "additional",
   includedInTotal: false,
+  grantScope: "outside-scope",
 };
 
 const physicalRows = [
@@ -287,7 +297,11 @@ const physicalRows = [
     id: "dse-unused-sandisk-portable-ssd",
     item: "SanDisk 1 TB Portable SSD",
     qty: 2, unit: "ea", unitCost: 164.99,
-    description: "Purchased on Amazon on 31 Jul 2026. Additional imported data storage only; neither drive is used by the fixed solar system or canonical topology.",
+    description: "Purchased on Amazon on 31 Jul 2026. Both drives are outside the solar-system scope. One is allocated to Inowon in Polowat and the other remains in the general outside-scope pool.",
+    grantAllocations: [{
+      recipientOrganization: "Inowon", location: "Polowat", qty: 1, amountUsd: 164.99,
+      note: "Allocation: 1 of 2 SSDs ($164.99 item price) is for Inowon in Polowat. Documented item price only; shared order-level tax, promotions and customs costs remain unallocated by recipient.",
+    }],
     productUrl: "https://www.amazon.com/dp/B0C5JQ68FY",
     specUrl: "https://www.sandisk.com/en-il/products/ssd/external-ssd/sandisk-usb-3-2-ssd?sku=SDSSDE30-1T00-G26",
     unitWeightKg: 0.04,
@@ -312,7 +326,11 @@ const physicalRows = [
     id: "dse-unused-acer-card-readers",
     item: "Acer three-in-one USB-C SD card readers",
     qty: 2, unit: "ea", unitCost: 14.99,
-    description: "Purchased on Amazon on 31 Jul 2026. Additional imported computer accessories only; they are not used by the fixed solar system or canonical topology.",
+    description: "Purchased on Amazon on 31 Jul 2026. Both readers are outside the solar-system scope. One is allocated to Inowon in Polowat and the other remains in the general outside-scope pool.",
+    grantAllocations: [{
+      recipientOrganization: "Inowon", location: "Polowat", qty: 1, amountUsd: 14.99,
+      note: "Allocation: 1 of 2 SD card readers ($14.99 item price) is for Inowon in Polowat. Documented item price only; shared order-level tax, promotions and customs costs remain unallocated by recipient.",
+    }],
     productUrl: "https://www.amazon.com/dp/B0F1G2HRQ6",
     unitWeightKg: 0.059,
     weightBasis: "listing",
@@ -368,21 +386,21 @@ const adjustmentRows = [
   {
     id: "dse-unused-swappa-sales-tax", category: "Purchase adjustments", item: "Swappa sales tax on outside-scope electronics",
     qty: 1, unit: "lot", unitCost: 173.22, currency: "USD", location: "Import", procurement: "Purchased · outside scope",
-    priority: "Reference", accountingGroup: "additional", includedInTotal: false,
+    priority: "Reference", accountingGroup: "additional", includedInTotal: false, grantScope: "outside-scope",
     description: "Actual sales tax across the three 31 Jul 2026 Swappa invoices. The associated electronics are not part of the solar system.",
     unitWeightKg: 0, weightBasis: "not-applicable", weightNote: "Tax adjustment, not a physical item.",
   },
   {
     id: "dse-personal-amazon-promotions", category: "Purchase adjustments", item: "Amazon promotions on personal/outside-scope items",
     qty: 1, unit: "lot", unitCost: -9.7, currency: "USD", location: "Personal baggage", procurement: "Purchased · personal use",
-    priority: "Reference", accountingGroup: "additional", includedInTotal: false,
+    priority: "Reference", accountingGroup: "additional", includedInTotal: false, grantScope: "outside-scope",
     description: "Two order-level promotions on the 31 Jul 2026 mixed personal/outside-scope Amazon order.",
     unitWeightKg: 0, weightBasis: "not-applicable", weightNote: "Monetary adjustment, not a physical item.",
   },
   {
     id: "dse-personal-amazon-sales-tax", category: "Purchase adjustments", item: "Amazon sales tax on personal/outside-scope items",
     qty: 1, unit: "lot", unitCost: 123.36, currency: "USD", location: "Personal baggage", procurement: "Purchased · personal use",
-    priority: "Reference", accountingGroup: "additional", includedInTotal: false,
+    priority: "Reference", accountingGroup: "additional", includedInTotal: false, grantScope: "outside-scope",
     description: "Actual sales tax across the three newly ingested Amazon orders, whose goods are personal or outside the solar-system scope.",
     unitWeightKg: 0, weightBasis: "not-applicable", weightNote: "Tax adjustment, not a physical item.",
   },

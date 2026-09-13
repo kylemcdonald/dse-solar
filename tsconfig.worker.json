@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "esnext"
+    ],
+    "tsBuildInfoFile": ".wrangler/worker.tsbuildinfo"
+  },
+  "include": [
+    "worker/**/*.ts",
+    "db/**/*.ts",
+    "examples/**/*.ts",
+    ".wrangler/worker-runtime.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

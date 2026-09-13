@@ -1,3 +1,4 @@
+import { graphWalls } from "../app/systemGraph";
 import { performance } from "node:perf_hooks";
 import { dseTopology } from "../app/dseTopology";
 import {
@@ -12,10 +13,10 @@ import {
 } from "../app/systemGraphRuntime";
 
 const started = performance.now();
-const last = buildSystemRuntime(dseTopology);
+const last = buildSystemRuntime(dseTopology, { renderedAudit: process.argv.includes("--audit") });
 const elapsedMs = performance.now() - started;
 console.log(JSON.stringify({
-  algorithm: "serial radius-aware weighted voxel A* with route-aware virtual-device terminal targets and turn penalty",
+  algorithm: "20 mm lattice A* (cell × heading) with exact turn cost, interchangeable bar landings, gland doors, rip-up passes and negotiated rerouting",
   devices: last.devices.length,
   conductors: last.conductors.length,
   routes: last.routes.length,
@@ -26,14 +27,14 @@ console.log(JSON.stringify({
   deviceConflicts: last.diagnostics.deviceConflicts,
   renderedGeometryConflicts: last.diagnostics.renderedGeometryConflicts,
   resolvedDeviceOverlaps: sampledResolvedDeviceOverlaps(last.devices).length,
-  wallVolumeCrossings: sampledRouteWallPlaneCrossings(last.routes, last.devices).length,
+  wallVolumeCrossings: sampledRouteWallPlaneCrossings(last.routes, last.devices, graphWalls(dseTopology)).length,
   conflictDetails: {
     centerline: sampledRouteCenterlineConflicts(last.routes, 0.0005),
     swept: sampledRouteSweptCableConflicts(last.routes, dseTopology),
     self: sampledRouteSelfIntersections(last.routes),
     device: sampledRouteDeviceConflicts(last.routes, last.devices),
     resolvedDevices: sampledResolvedDeviceOverlaps(last.devices),
-    wallVolume: sampledRouteWallPlaneCrossings(last.routes, last.devices),
+    wallVolume: sampledRouteWallPlaneCrossings(last.routes, last.devices, graphWalls(dseTopology)),
     renderedGeometry: renderedGeometryFailureDiagnostics,
   },
   totalLengthM: Number(last.diagnostics.totalLengthM.toFixed(3)),
@@ -58,6 +59,6 @@ if (
   || last.diagnostics.deviceConflicts !== 0
   || last.diagnostics.renderedGeometryConflicts !== 0
   || sampledResolvedDeviceOverlaps(last.devices).length !== 0
-  || sampledRouteWallPlaneCrossings(last.routes, last.devices).length !== 0
+  || sampledRouteWallPlaneCrossings(last.routes, last.devices, graphWalls(dseTopology)).length !== 0
   || last.diagnostics.buildMs > 60_000
 ) process.exitCode = 1;

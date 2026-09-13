@@ -1,5 +1,5 @@
 {
-  "checkedOn": "2026-08-30",
+  "checkedOn": "2026-09-03",
   "manifestTitle": "Drua Sailing Experience solar-system equipment",
   "declaredPurpose": "Permanent donated equipment for a remote Fiji school teaching Polynesian voyaging; not for resale.",
   "defaultConsignee": "Drua Sailing Experiences Pte Limited",
@@ -936,7 +936,8 @@
       "originBasis": "unresolved",
       "originSourceUrl": "https://www.sandisk.com/en-il/products/ssd/external-ssd/sandisk-usb-3-2-ssd?sku=SDSSDE30-1T00-G26",
       "originNote": "Confirm manufacturing country from the received label or packaging before filing.",
-      "originReviewedOn": "2026-08-25"
+      "originReviewedOn": "2026-08-25",
+      "recipientAllocation": "One of two units is for Inowon in Polowat."
     },
     "dse-unused-acer-card-readers": {
       "make": "Acer",
@@ -948,7 +949,8 @@
       "originBasis": "unresolved",
       "originSourceUrl": "https://www.amazon.com/dp/B0F1G2HRQ6",
       "originNote": "Confirm manufacturing country from the received label or packaging before filing.",
-      "originReviewedOn": "2026-08-25"
+      "originReviewedOn": "2026-08-25",
+      "recipientAllocation": "One of two units is for Inowon in Polowat."
     },
     "dse-unused-galaxy-s24-pair": {
       "make": "Samsung",
@@ -1215,5 +1217,7 @@
   "defaultBusinessRegistrationNumber": "2020RC000914",
   "defaultTraveler": "Kyle McDonald",
   "defaultFlight": "FJ811",
-  "defaultArrivalDate": "2026-08-30"
+  "defaultArrivalDate": "2026-08-30",
+  "archivedOn": "2026-09-03",
+  "archiveReason": "Customs clearance is complete and the imported goods are in Fiji; this filing dataset is retained as an archive and is no longer exposed in production navigation."
 }

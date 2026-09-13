@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { SystemViewer } from "./SystemViewer";
 
 export const metadata: Metadata = {
-  title: "DSE Fiji Solar System",
+  title: "DSE Fiji + Inowon Polowat Solar Systems",
   description:
-    "Canonical wiring diagram, routed 3D installation model, and bill of materials for the DSE Fiji solar system.",
+    "Wiring diagrams, 3D installation models, bills of materials, and cost plans for the DSE Fiji and Inowon Polowat solar systems.",
   other: {
     "codex-preview": "development",
   },

@@ -3,15 +3,15 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import customs from "../data/dse-customs.json";
-import receipts from "../data/dse-receipts.json";
-import system from "../data/dse-system.json";
-import { buildCostTreemap, costTreemapItems, filterCostTreemapItems, type CostBomItem } from "../app/CostView";
-import { buildCustomsCsv, buildCustomsLines, hasDistinctModel, isCustomsManifestItem, sortCustomsItems, stripAsinFromDescription, unitCostInput, type CustomsBomItem } from "../app/CustomsView";
-import { buildWeightTreemap, shippingGroupFor, type ShippingBomItem } from "../app/ShippingView";
-import { createStoredZip, loadReceiptArchive, privateModeEnabled, receiptAllowlist, receiptZipFilename } from "../app/api/receipts/receiptServer";
-import { GET as getReceiptStatus } from "../app/api/receipts/status/route";
-import { GET as downloadReceipts } from "../app/api/receipts/download/route";
+import customs from "../../data/dse-customs.json";
+import receipts from "../../data/dse-receipts.json";
+import system from "../../data/dse-system.json";
+import { buildCostTreemap, costTreemapItems, filterCostTreemapItems, type CostBomItem } from "../../app/CostView";
+import { buildCustomsCsv, buildCustomsLines, hasDistinctModel, isCustomsManifestItem, sortCustomsItems, stripAsinFromDescription, unitCostInput, type CustomsBomItem } from "./CustomsView";
+import { buildWeightTreemap, shippingGroupFor, type ShippingBomItem } from "./ShippingView";
+import { createStoredZip, loadReceiptArchive, privateModeEnabled, receiptAllowlist, receiptZipFilename } from "../../app/api/receipts/receiptServer";
+import { GET as getReceiptStatus } from "../../app/api/receipts/status/route";
+import { GET as downloadReceipts } from "../../app/api/receipts/download/route";
 
 const imports = system.bom.filter((item) => isCustomsManifestItem(item as CustomsBomItem)) as CustomsBomItem[];
 const itemMeta = customs.itemMeta as Record<string, {
@@ -134,7 +134,7 @@ test("new purchases retain receipt status while the larger secondary shell super
     "dse-mollom-8-way-enclosure-second": "Must · verified cutoff enclosure",
     "dse-shirbly-2awg-cable-pairs": "Integration pending",
   });
-  assert.ok(purchasedRows.every((row) => row.location === "Import" && row.totalWeightKg > 0));
+  assert.ok(purchasedRows.every((row) => row.location === "Import" && (row.totalWeightKg ?? 0) > 0));
   assert.equal(Math.round(purchasedRows.reduce((sum, row) => sum + row.totalUsd, 0) * 100) / 100, 136.34);
   assert.ok(purchasedIds.every((id) => itemMeta[id] && itemInvoices[id]?.length >= 1));
   const topology = fs.readFileSync("app/dseTopology.ts", "utf8");
@@ -402,7 +402,7 @@ test("private receipt endpoint includes every archived PDF", { skip: !fs.existsS
 });
 
 test("customs presentation has no mass, bag/case or condition columns", () => {
-  const source = fs.readFileSync("app/CustomsView.tsx", "utf8");
+  const source = fs.readFileSync("archive/arrival/CustomsView.tsx", "utf8");
   const css = fs.readFileSync("app/globals.css", "utf8");
   const headings = [...source.matchAll(/<th>(.*?)<\/th>/g)].map((match) => match[1]);
   assert.ok(!headings.some((heading) => /weight|bag|case|condition/i.test(heading)));

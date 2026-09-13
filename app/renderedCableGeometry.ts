@@ -338,7 +338,7 @@ export function renderedSemanticCables(
           rendered.push({
             id: `${device.id}:${mate.id}`, deviceId: device.id, conductorKey: mate.key,
             radiusM: Math.max(0.0017, (mate.terminalDiameterMm ?? 4) / 2400),
-            color: mate.kind, routedCableEndpoint: integrated ? resolved.key : undefined,
+            color: mate.insulationColor ?? mate.kind, routedCableEndpoint: integrated ? resolved.key : undefined,
             splitPoint: split, branchAngleDegrees: angleDegrees,
             pieces,
           });

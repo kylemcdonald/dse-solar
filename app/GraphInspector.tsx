@@ -56,7 +56,7 @@ function CurrentSafetyDetails({
   if (checks.length === 0 && issues.length === 0) return null;
   const status = checks.some((check) => check.status === "incomplete") || issues.some((issue) => issue.severity === "error")
     ? "incomplete"
-    : checks.some((check) => check.status === "provisional") || issues.length > 0 ? "provisional" : "verified";
+    : checks.some((check) => check.status === "provisional" || check.status === "accepted") || issues.length > 0 ? "provisional" : "verified";
   return (
     <div className={`graph-current-safety graph-current-safety-${status}`} data-current-safety-status={status}>
       <strong>Fault-clearing / OCP audit · {status}</strong>
@@ -71,7 +71,9 @@ function CurrentSafetyDetails({
             : <small>{check.ratingA === undefined ? "Device/input rating missing" : `${check.ratingA} A declared device/input rating`}</small>}
           <small>Aggregate protection envelope · verified {check.verifiedProtectionEnvelopeA === "unbounded" ? "unbounded" : `${check.verifiedProtectionEnvelopeA} A`}
             {` · including provisional ${check.provisionalProtectionEnvelopeA === "unbounded" ? "unbounded" : `${check.provisionalProtectionEnvelopeA} A`}`}</small>
-          {check.protectionBySource.map((evidence) => {
+          {"protectionApproval" in check && check.protectionApproval
+            ? <small><b>Accepted installation basis</b> · {check.protectionApproval.note}</small>
+            : check.protectionBySource.map((evidence) => {
             const source = currentSourceLabelById.get(evidence.sourceId) ?? titleCase(evidence.sourceId);
             const protection = evidence.verifiedBy.length > 0
               ? `verified current-envelope coordination via ${evidence.verifiedBy.map(protectionEvidenceLabel).join(" / ")}`
