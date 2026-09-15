@@ -18,10 +18,10 @@ function storedZipEntryNames(archive) {
 test("costs page downloads grant PDF and CSV reports plus the receipt archive", async ({ page }) => {
   await page.goto("/", { timeout: 120_000 });
   await expect(page.locator(".app-shell")).toHaveAttribute("data-viewer-ready", "true");
-  await page.getByRole("button", { name: /Bill of materials/ }).click();
+  await page.getByRole("link", { name: /Bill of materials/ }).click();
   await expect(page.getByRole("button", { name: "Export grant report PDF" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Export grant report CSV" })).toHaveCount(0);
-  await page.getByRole("button", { name: "Costs" }).click();
+  await page.getByRole("link", { name: "Costs" }).click();
 
   const exportButton = page.getByRole("button", { name: "Export grant report PDF" });
   await expect(exportButton).toBeVisible();

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SystemViewer } from "./SystemViewer";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "DSE Fiji + Inowon Polowat Solar Systems",
@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return <SystemViewer />;
+  redirect("/fiji/diagram");
 }

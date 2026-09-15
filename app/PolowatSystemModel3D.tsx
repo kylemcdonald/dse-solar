@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { PolowatSystemDiagram } from "./PolowatSystemDiagram";
+import { PolowatAssemblyModel } from "./PolowatAssemblyModel";
 import { GrabPointCameraControls } from "./GrabPointCameraControls";
 import {
   polowatDeviceById,
@@ -192,7 +194,8 @@ function routePoints(from: PolowatDevice, to: PolowatDevice, routeLift: number) 
   ];
 }
 
-export function PolowatSystemModel3D() {
+function WholeSystemModel3D() {
+  const [unavailable, setUnavailable] = useState(false);
   const hostRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<GrabPointCameraControls | null>(null);
@@ -208,7 +211,13 @@ export function PolowatSystemModel3D() {
     scene.background = new THREE.Color("#efe8d8");
     scene.fog = new THREE.Fog("#efe8d8", 8, 18);
     const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 35);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("webgl2", { antialias: true });
+    if (!context) {
+      const frame = requestAnimationFrame(() => setUnavailable(true));
+      return () => cancelAnimationFrame(frame);
+    }
+    const renderer = new THREE.WebGLRenderer({ canvas, context, antialias: true });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
@@ -407,6 +416,7 @@ export function PolowatSystemModel3D() {
     controlsRef.current?.setPose(new THREE.Vector3(...pose.position), new THREE.Vector3(...pose.target));
   };
   const selected = polowatDeviceById.get(selectedId) ?? polowatTopology.devices[0];
+  if (unavailable) return <><p>This browser cannot render the whole-system WebGL scene. The detailed assembly remains available in interactive software 3D; the complete wiring diagram is shown below.</p><PolowatSystemDiagram /></>;
 
   return (
     <section className="unified-model polowat-model" data-model="polowat-planning-topology"
@@ -415,8 +425,8 @@ export function PolowatSystemModel3D() {
         <div className="model-preset-buttons">{presets.map(({ id, label }) => (
           <button key={id} type="button" className={preset === id ? "active" : ""} onClick={() => choosePreset(id)}>{label}</button>
         ))}</div>
-        <span className="polowat-model-rating">300 W PV · 12 V / 300 Ah · 150 W peak design load</span>
-        <span className="route-runtime">Planning geometry · site dimensions pending</span>
+        <span className="polowat-model-rating">300 W PV · 12 V / 300 Ah · 165 W design envelope</span>
+        <span className="route-runtime">Bench arrangement · enclosure fit and order deferred</span>
       </div>
       <div className="unified-model-stage">
         <div className="unified-model-canvas" ref={hostRef} />
@@ -431,4 +441,9 @@ export function PolowatSystemModel3D() {
       </div>
     </section>
   );
+}
+
+export function PolowatSystemModel3D() {
+  const [assembly,setAssembly]=useState(true);
+  return <><div className="model-toolbar"><button onClick={()=>setAssembly(true)} aria-pressed={assembly}>Detailed assembly</button><button onClick={()=>setAssembly(false)} aria-pressed={!assembly}>Whole system</button></div>{assembly?<PolowatAssemblyModel/>:<WholeSystemModel3D/>}</>;
 }

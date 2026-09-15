@@ -4,13 +4,19 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import dseRaw from "@/data/dse-system.json";
 import polowatRaw from "@/data/polowat-system.json";
 import { CostView } from "./CostView";
+import { planningEstimate, type PlanningTax } from "./planningEstimate";
+import { ReceiptInbox } from "./ReceiptInbox";
+import { receiptBomPurchases, type ReceiptRecord } from "./receiptLedger";
 import { dseRuntime } from "./dseRuntime";
 import { GraphInspector } from "./GraphInspector";
 import { PolowatSystemDiagram } from "./PolowatSystemDiagram";
+import { PolowatElectricalAudit } from "./PolowatElectricalAudit";
 import { titleCase } from "./systemGraph";
 import type { DevicePowerReading, GraphSelection } from "./systemGraph";
 import { OperatorDiagram } from "./OperatorDiagram";
 import { UnifiedSystemDiagram } from "./UnifiedSystemDiagram";
+import { defaultViewerRoute, tabsForProject, viewerHref, type ProjectMode, type ViewerMode, type ViewerRoute } from "./viewerRoutes";
+import { navigateViewer, useViewerRoute } from "./viewerNavigation";
 
 const Model3D = lazy(() => import("./UnifiedSystemModel3D")
   .then((module) => ({ default: module.UnifiedSystemModel3D })));
@@ -19,9 +25,6 @@ const CablePlan = lazy(() => import("./CablePlanView")
 const PolowatModel3D = lazy(() => import("./PolowatSystemModel3D")
   .then((module) => ({ default: module.PolowatSystemModel3D })));
 
-type ViewerMode = "simple" | "diagram" | "model" | "system" | "bom" | "cost" | "cables" | "notes";
-type ProjectMode = "dse" | "polowat";
-
 export type BomItem = {
   id: string;
   category: string;
@@ -29,6 +32,9 @@ export type BomItem = {
   qty: number;
   unit: string;
   unitCost: number;
+  priceStatus?: string;
+  priceCheckedDate?: string;
+  priceBasis?: string;
   currency: "USD" | "FJD";
   totalUsd: number;
   sourceTotal?: number;
@@ -81,6 +87,7 @@ type SystemData = {
   summary: string;
   currency: { base: string; fjdPerUsd: number; note: string };
   budget: { targetUsd: number; targetBasis?: "total" | "remaining"; donorFundedIncrementUsd?: number; contingencyIncluded: boolean; note: string };
+  taxEstimate?: PlanningTax;
   keyFacts: Array<{ label: string; value: string; detail: string }>;
   powerModel: { nominalBatteryKwh: number; usableBatteryKwh: number; averageSolarKwhDay: number | null; peakLoadWatts?: number; assumptions: string };
   deploymentModel?: {
@@ -239,6 +246,7 @@ function ModeIcon({ mode }: { mode: ViewerMode }) {
 function SystemOverview({ system }: { system: SystemData }) {
   const accounting = getBomAccountingTotals(system.bom);
   const isPolowat = system.id === "polowat";
+  const estimate = planningEstimate(system.bom, system.taxEstimate);
   return (
     <section className="system-overview-v2">
       <article className="system-hero-v2">
@@ -247,8 +255,8 @@ function SystemOverview({ system }: { system: SystemData }) {
       </article>
       <div className="system-fact-grid">
         {system.keyFacts.map((fact) => <article key={fact.label}><small>{fact.label}</small><strong>{fact.value}</strong><p>{fact.detail}</p></article>)}
-        <article data-system-total="solar-internet"><small>{isPolowat ? "Estimated hardware" : "Solar + internet BOM"}</small><strong>{money(accounting.systemTotal)}</strong><p>{isPolowat
-          ? `Before freight, duty, tax, or Starlink service. ${money(system.budget.targetUsd)} working ceiling.`
+        <article data-system-total="solar-internet"><small>{isPolowat ? "Estimate incl. California tax" : "Solar + internet BOM"}</small><strong>{money(isPolowat ? estimate.totalUsd : accounting.systemTotal)}</strong><p>{isPolowat
+          ? `Includes ${money(estimate.taxUsd)} estimated Los Angeles sales tax (${system.taxEstimate?.ratePercent}%) on imported equipment. Before freight, duty, unpriced scopes or Starlink service. ${money(system.budget.targetUsd)} working ceiling.`
           : `${money(accounting.systemPaid)} paid or committed. ${money(accounting.additionalTotal)} in additional purchases is tracked separately.`}</p></article>
       </div>
       {system.deploymentModel && <div className="polowat-planning-grid">
@@ -278,12 +286,14 @@ function SystemOverview({ system }: { system: SystemData }) {
         <article><h2>Operating rules</h2><ol>{system.operatingRules.map((rule) => <li key={rule}>{rule}</li>)}</ol></article>
         <article><h2>{system.id === "dse" ? "Installation record" : "Commissioning"}</h2><ol>{system.commissioning.map((rule) => <li key={rule}>{rule}</li>)}</ol></article>
       </div>
-      {!isPolowat && <PowerAudit />}
+      {isPolowat ? <PolowatElectricalAudit /> : <PowerAudit />}
     </section>
   );
 }
 
 function BomView({ system }: { system: SystemData }) {
+  const [receiptRecords, setReceiptRecords] = useState<ReceiptRecord[]>([]);
+  const purchases = useMemo(() => receiptBomPurchases(receiptRecords), [receiptRecords]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [unpurchasedOnly, setUnpurchasedOnly] = useState(false);
@@ -292,11 +302,11 @@ function BomView({ system }: { system: SystemData }) {
   const items = useMemo(() => {
     const filtered = system.bom.filter((item) => (
     (category === "All" || item.category === category) &&
-    (!unpurchasedOnly || isItemToPurchase(item)) &&
+    (!unpurchasedOnly || (isItemToPurchase(item) && (purchases[item.id]?.quantity ?? 0) < item.qty)) &&
     `${item.item} ${item.description} ${item.procurement}`.toLowerCase().includes(query.trim().toLowerCase())
     ));
     return sort ? sortBomItems(filtered, sort.key, sort.direction) : filtered;
-  }, [category, query, sort, system.bom, unpurchasedOnly]);
+  }, [category, query, sort, system.bom, unpurchasedOnly, purchases]);
   const changeSort = (key: BomSortKey) => setSort((current) => current?.key === key
     ? { key, direction: current.direction === "asc" ? "desc" : "asc" }
     : { key, direction: key === "status" ? "asc" : "desc" });
@@ -307,15 +317,18 @@ function BomView({ system }: { system: SystemData }) {
   const isPolowat = system.id === "polowat";
   const importedCost = system.bom.filter((item) => item.location === "Import to Chuuk").reduce((sum, item) => sum + item.totalUsd, 0);
   const localCost = system.bom.filter((item) => item.location === "Buy in Chuuk").reduce((sum, item) => sum + item.totalUsd, 0);
+  const estimate = planningEstimate(system.bom, system.taxEstimate);
   return (
     <section className="bom-v2">
+      <ReceiptInbox key={system.id} project={system.id === "dse" ? "fiji" : "polowat"} bom={system.bom} onRecords={setReceiptRecords} />
       <header className="bom-summary-v2">
         <div><p className="eyebrow">{isPolowat ? "Inowon / Polowat deployment plan" : "DSE / Fiji purchase tracking"}</p><h1>Bill of materials</h1><p>{isPolowat
-          ? `${system.bom.length} planning rows. Batteries and 4 mm² cable are local to Chuuk; all other hardware is assigned to the imported shipment.`
+          ? `${system.bom.length} rows. Battery boxes are excluded. The reference junction box is included in this estimate but deferred: order it after hand assembly, and keep it out of the current cart. The Amazon cart was reconciled 15 Sep 2026 with every staged price and quantity verified, including shared PV/controller wire, MC4 kit, unified DK10N distribution and both round USB extensions. DIHOOL's photo, listing text and family-page specifications still need reconciliation. The detailed 3D assembly study exposes unresolved enclosure fit and installation checks. Three scopes are unpriced. Staging does not mean purchased.`
           : `${system.bom.length} tracked rows. Solar/internet materials and additional managed purchases are accounted for separately.`}</p></div>
         <div className="bom-totals-v2">
-          <span data-bom-total="design"><small>{isPolowat ? "Equipment estimate" : "Design total"}</small><strong>{money(accounting.systemTotal)}</strong><small className="bom-total-detail">{isPolowat ? "Before freight, duty and tax" : `Solar + internet only · ${accounting.systemRows} rows`}</small></span>
+          <span data-bom-total="design"><small>{isPolowat ? "Estimate incl. California tax" : "Design total"}</small><strong>{money(isPolowat ? estimate.totalUsd : accounting.systemTotal)}</strong><small className="bom-total-detail">{isPolowat ? "Before freight, duty and unpriced scopes" : `Solar + internet only · ${accounting.systemRows} rows`}</small></span>
           {isPolowat ? <>
+            <span data-bom-total="tax"><small>Los Angeles tax · {system.taxEstimate?.ratePercent}%</small><strong>{money(estimate.taxUsd)}</strong><small className="bom-total-detail">Estimated on {money(estimate.taxableSubtotalUsd)} imported equipment</small></span>
             <span><small>Import hardware</small><strong>{money(importedCost)}</strong></span>
             <span><small>Buy in Chuuk</small><strong>{money(localCost)}</strong></span>
             <span><small>Imported net weight</small><strong>{system.deploymentModel?.shipping.importedNetKg.toFixed(1)} kg</strong><small className="bom-total-detail">About {system.deploymentModel?.shipping.importedPackedKg.toFixed(1)} kg packed</small></span>
@@ -328,6 +341,7 @@ function BomView({ system }: { system: SystemData }) {
           </>}
         </div>
       </header>
+      {isPolowat && system.taxEstimate && <p className="bom-tax-note">Item prices below are before tax. {system.taxEstimate.note} <a href={system.taxEstimate.sourceUrl} target="_blank" rel="noreferrer">CDTFA rate source</a>.</p>}
       <div className="bom-filters-v2">
         <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search equipment, status, or notes" aria-label="Search bill of materials" />
         <select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Filter bill of materials by category">
@@ -344,12 +358,12 @@ function BomView({ system }: { system: SystemData }) {
           <tbody>{items.map((item) => (
             <tr key={item.id} data-bom-id={item.id}>
               <td><strong>{item.item}</strong><small>{item.description}</small></td><td>{item.qty} {item.unit}</td>
-              <td><span className={`procurement-pill procurement-${item.procurement.toLowerCase().replace(/[^a-z]+/g, "-")}`}>{item.procurement}</span></td>
+              <td>{(purchases[item.id]?.quantity ?? 0) >= item.qty ? <span className="procurement-pill">Purchased · receipt reconciled</span> : <span className={`procurement-pill procurement-${item.procurement.toLowerCase().replace(/[^a-z]+/g, "-")}`}>{item.procurement}</span>}{purchases[item.id] && <small>{purchases[item.id].quantity} {item.unit} net on receipts · {money(purchases[item.id].itemCostUsd)} item cost before order adjustments</small>}</td>
               <td>{item.location}</td>
               <td className="bom-weight-cell">{Number.isFinite(item.totalWeightKg)
                 ? <><strong>{item.totalWeightKg!.toFixed(2)} kg</strong>{item.qty > 1 && Number.isFinite(item.unitWeightKg) && <small>{item.unitWeightKg!.toFixed(2)} kg each</small>}</>
                 : <span aria-label="Weight pending">Pending</span>}</td>
-              <td className="bom-cost-cell"><strong>{money(item.totalUsd)}</strong>{item.currency === "FJD" && (item.sourceTotal !== undefined || item.totalUsd !== 0) && <small>FJD {(item.sourceTotal ?? item.unitCost * item.qty).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} source{item.grantPayer ? ` · ${item.grantPayer}` : ""}</small>}</td>
+              <td className="bom-cost-cell"><strong>{item.priceStatus === "unpriced" ? "Unpriced" : money(item.totalUsd)}</strong>{item.priceCheckedDate && <small>Amazon · {item.priceCheckedDate}</small>}{item.priceStatus === "estimate" && <small>Planning allowance</small>}{item.currency === "FJD" && (item.sourceTotal !== undefined || item.totalUsd !== 0) && <small>FJD {(item.sourceTotal ?? item.unitCost * item.qty).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} source{item.grantPayer ? ` · ${item.grantPayer}` : ""}</small>}</td>
               <td><div className="bom-source-links">{item.productUrl && <a href={item.productUrl} target="_blank" rel="noreferrer">Buy</a>}{item.specUrl && <a href={item.specUrl} target="_blank" rel="noreferrer">Technical</a>}{item.weightSourceUrl && <a href={item.weightSourceUrl} target="_blank" rel="noreferrer" title={item.weightNote ?? item.weightBasis}>Weight</a>}</div>{(item.weightNote || item.weightBasis) && <small className="bom-weight-note" title={item.weightNote}>{item.weightNote ?? item.weightBasis}</small>}</td>
             </tr>
           ))}</tbody>
@@ -375,15 +389,27 @@ function FieldNotes({ system }: { system: SystemData }) {
   );
 }
 
-export function SystemViewer() {
+export function SystemViewer({ initialRoute = defaultViewerRoute }: { initialRoute?: ViewerRoute }) {
   const shellRef = useRef<HTMLDivElement>(null);
-  const [project, setProject] = useState<ProjectMode>("dse");
-  const [mode, setMode] = useState<ViewerMode>("diagram");
-  const [modelMounted, setModelMounted] = useState(false);
+  const route = useViewerRoute(initialRoute);
+  const { project, mode } = route ?? initialRoute;
+  const [modelMounted, setModelMounted] = useState(mode === "model");
   const [fadePurchased, setFadePurchased] = useState(false);
   const [selection, setSelection] = useState<GraphSelection | null>(null);
+  const [renderedRoute, setRenderedRoute] = useState({ project, mode });
+
+  // Reset transient inspection before rendering a different route, including Back/Forward.
+  if (renderedRoute.project !== project || renderedRoute.mode !== mode) {
+    setRenderedRoute({ project, mode });
+    setSelection(null);
+    if (mode === "model") setModelMounted(true);
+  }
 
   useEffect(() => { shellRef.current?.setAttribute("data-viewer-ready", "true"); }, []);
+  useEffect(() => {
+    const tab = tabsForProject(project).find(tab => tab.id === mode)!;
+    document.title = `${project === "dse" ? "DSE Fiji" : "Inowon Polowat"} · ${tab.label}`;
+  }, [project, mode]);
   useEffect(() => {
     if (!selection) return;
     const closeInspector = (event: KeyboardEvent) => {
@@ -397,42 +423,22 @@ export function SystemViewer() {
 
   const activeSystem = project === "dse" ? dseSystem : polowatSystem;
 
-  const changeMode = (nextMode: ViewerMode) => {
-    if (nextMode === "model") setModelMounted(true);
-    setMode(nextMode);
-    setSelection(null);
-    window.scrollTo({ top: 0 });
-  };
-
-  const changeProject = (nextProject: ProjectMode) => {
-    if (nextProject === project) return;
-    setProject(nextProject);
-    setSelection(null);
-    if ((mode === "cables" || mode === "simple") && nextProject === "polowat") setMode("diagram");
-    window.scrollTo({ top: 0 });
-  };
-
-  const tabs: Array<{ id: ViewerMode; label: string }> = [
-    ...(project === "dse" ? [{ id: "simple" as const, label: "Simple diagram" }] : []),
-    { id: "diagram", label: project === "dse" ? "Detailed diagram" : "Wiring diagram" }, { id: "model", label: "3D model" },
-    { id: "system", label: "System" }, { id: "bom", label: "Bill of materials" },
-    { id: "cost", label: "Costs" }, ...(project === "dse" ? [{ id: "cables" as const, label: "Wire cut list" }] : []),
-    { id: "notes", label: "Field notes" },
-  ];
+  const tabs = tabsForProject(project);
+  if (!route) return <main className="notes-v2"><h1>Page not found</h1><a href={viewerHref("dse")}>Open the Fiji viewer</a></main>;
 
   return (
-    <div className="app-shell" data-viewer-ready="false" data-project={project === "dse" ? "dse-fiji" : "inowon-polowat"} ref={shellRef}>
+    <div className="app-shell" data-viewer-ready="false" data-project={project === "dse" ? "dse-fiji" : "inowon-polowat"} data-view={mode} ref={shellRef}>
       <header className="app-header">
-        <nav className="mode-tabs" aria-label="Viewer mode">{tabs.map((tab) => <button key={tab.id} type="button" className={mode === tab.id ? "active" : ""} onClick={() => changeMode(tab.id)}>
+        <nav className="mode-tabs" aria-label="Viewer mode">{tabs.map((tab) => <a key={tab.id} href={viewerHref(project, tab.id)} aria-current={mode === tab.id ? "page" : undefined} className={mode === tab.id ? "active" : ""} onClick={navigateViewer}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><ModeIcon mode={tab.id} /></svg>{tab.label}{tab.id === "bom" && <span>{activeSystem.bom.length}</span>}
-        </button>)}</nav>
+        </a>)}</nav>
         <div className="project-switcher" aria-label="System design">
-          <button type="button" aria-pressed={project === "dse"} className={project === "dse" ? "active" : ""} onClick={() => changeProject("dse")}>
+          <a href={viewerHref("dse", mode)} aria-current={project === "dse" ? "page" : undefined} className={project === "dse" ? "active" : ""} onClick={navigateViewer}>
             <span>DSE</span><strong>Fiji</strong>
-          </button>
-          <button type="button" aria-pressed={project === "polowat"} className={project === "polowat" ? "active" : ""} onClick={() => changeProject("polowat")}>
+          </a>
+          <a href={viewerHref("polowat", mode)} aria-current={project === "polowat" ? "page" : undefined} className={project === "polowat" ? "active" : ""} onClick={navigateViewer}>
             <span>Inowon</span><strong>Polowat</strong>
-          </button>
+          </a>
         </div>
       </header>
       <main>
@@ -450,7 +456,7 @@ export function SystemViewer() {
           <Suspense fallback={<div className="model-loading">Loading compact Polowat scene…</div>}><PolowatModel3D /></Suspense>
         </div>}
         {mode === "system" && <SystemOverview key={project} system={activeSystem} />}{mode === "bom" && <BomView key={project} system={activeSystem} />}
-        {mode === "cost" && <CostView key={project} bom={activeSystem.bom} project={project} />}
+        {mode === "cost" && <CostView key={project} bom={activeSystem.bom} project={project} taxEstimate={activeSystem.taxEstimate} />}
         {project === "dse" && mode === "cables" && <Suspense fallback={<div className="model-loading">Loading wire cut list…</div>}><CablePlan /></Suspense>}
         {mode === "notes" && <FieldNotes key={project} system={activeSystem} />}
       </main>

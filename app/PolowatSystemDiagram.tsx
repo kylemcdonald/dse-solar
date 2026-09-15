@@ -71,14 +71,14 @@ export function PolowatSystemDiagram() {
       data-connection-count={polowatTopology.connections.length} aria-labelledby="polowat-diagram-title">
       <header className="polowat-view-heading">
         <div>
-          <p className="eyebrow">Polowat P1 · direct DC · no inverter</p>
+          <p className="eyebrow">Polowat P5 · direct DC · protection model on hold</p>
           <h1 id="polowat-diagram-title">Compact system wiring</h1>
           <p>Three panels in series, two independently protected batteries, and two controlled load branches.</p>
         </div>
         <div className="polowat-design-badges" aria-label="Design ratings">
           <span><small>PV</small><strong>300 W · 3S</strong></span>
           <span><small>Bank</small><strong>12 V · 300 Ah</strong></span>
-          <span><small>Peak load</small><strong>150 W</strong></span>
+          <span><small>Peak load</small><strong>165 W</strong></span>
         </div>
       </header>
 
@@ -149,7 +149,7 @@ export function PolowatSystemDiagram() {
           <span><i className="positive" />Positive / PV+</span>
           <span><i className="negative" />Negative / PV−</span>
           <span><i className="regulated" />Regulated 24 V / USB</span>
-          <span><b>All field power wire: 4 mm²</b></span>
+          <span><b>Battery 8 AWG · controller 10 AWG · LOAD 12 AWG · PV 4 mm²</b></span>
         </div>
         <article className="polowat-selected-device" aria-live="polite">
           <div><small>{kindLabel(selected)}</small><strong>{selected.label}</strong><span>{selected.subtitle}</span></div>

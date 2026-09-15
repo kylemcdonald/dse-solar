@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import receiptsRaw from "../../../data/dse-receipts.json";
+import receiptsRaw from "../../../data/dse-receipts.json" with { type: "json" };
 export { privateModeEnabled } from "./privateMode";
 
 export type ReceiptReference = { number: number; filename: string };

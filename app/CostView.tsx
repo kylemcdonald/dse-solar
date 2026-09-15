@@ -11,6 +11,7 @@ import {
 } from "./grantReport";
 import type { GrantReportReceiptIndex } from "./grantReport";
 import { buildTreemap } from "./treemap";
+import { planningEstimate, type PlanningTax } from "./planningEstimate";
 
 export type CostBomItem = {
   id: string;
@@ -130,7 +131,7 @@ function downloadGrantPurchaseReportCsv(bom: readonly CostBomItem[]) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }
 
-export function CostView({ bom, project = "dse" }: { bom: CostBomItem[]; project?: "dse" | "polowat" }) {
+export function CostView({ bom, project = "dse", taxEstimate }: { bom: CostBomItem[]; project?: "dse" | "polowat"; taxEstimate?: PlanningTax }) {
   const isPolowat = project === "polowat";
   const [privateMode, setPrivateMode] = useState(false);
   useEffect(() => {
@@ -147,6 +148,7 @@ export function CostView({ bom, project = "dse" }: { bom: CostBomItem[]; project
   const items = useMemo(() => filterCostTreemapItems(allItems, scope), [allItems, scope]);
   const tiles = useMemo(() => buildCostTreemap(items), [items]);
   const positiveTotal = items.reduce((sum, item) => sum + item.totalUsd, 0);
+  const estimate = planningEstimate(items, isPolowat ? taxEstimate : undefined);
   const credits = bom.filter((item) => Number.isFinite(item.totalUsd) && item.totalUsd < 0
     && (scope === "All items" || costScopeFor(item) === scope));
   const creditTotal = Math.abs(credits.reduce((sum, item) => sum + item.totalUsd, 0));
@@ -165,10 +167,10 @@ export function CostView({ bom, project = "dse" }: { bom: CostBomItem[]; project
   return <section className="shipping-view cost-view" aria-label="Bill of materials cost treemap">
     <header className="shipping-heading cost-heading"><div><p className="eyebrow">{isPolowat ? "Inowon / Polowat planning estimate" : "DSE / Fiji purchase tracking"}</p>
       <h1>Cost by item</h1><p>{isPolowat
-        ? "Planning prices for the compact deployment. Area represents estimated USD item cost; freight, duty, tax and Starlink service are not included."
+        ? "Area represents item prices before tax. The total includes estimated Los Angeles sales tax on imported equipment; freight, duty, unpriced scopes and Starlink service are excluded."
         : "Every positive-cost purchase row. Area uses USD accounting values. Refunds and promotions reduce the grant report total; the reconciliation below explains the difference."}</p>
-    </div><div className="shipping-total cost-total"><small>Positive item value</small>
-      <strong>{money(positiveTotal)}</strong><span>{items.length} of {allItems.length} positive-cost rows · {credits.length > 0
+    </div><div className="shipping-total cost-total"><small>{isPolowat ? "Estimate incl. California tax" : "Positive item value"}</small>
+      <strong>{money(isPolowat ? estimate.totalUsd : positiveTotal)}</strong>{isPolowat && <span>Items: {money(estimate.subtotalUsd)} · estimated Los Angeles tax ({taxEstimate?.ratePercent}%): {money(estimate.taxUsd)}</span>}<span>{items.length} of {allItems.length} positive-cost rows · {credits.length > 0
         ? `${money(creditTotal)} across ${credits.length} credit ${credits.length === 1 ? "row stays" : "rows stay"} in accounting totals`
         : "no credit rows in this subset"}</span>{isPolowat
           ? <span>Import hardware: {money(importTotal)} · buy in Chuuk: {money(localTotal)}</span>

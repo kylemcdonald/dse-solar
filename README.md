@@ -26,6 +26,15 @@ npm run build
 npm start -- --host 0.0.0.0
 ```
 
+## Page URLs
+
+Every project and tab has a URL that can be refreshed, bookmarked or opened in a new tab:
+
+- Fiji: `/fiji/simple`, `/fiji/diagram`, `/fiji/model`, `/fiji/system`, `/fiji/bom`, `/fiji/costs`, `/fiji/cables`, `/fiji/notes`.
+- Polowat: `/polowat/diagram`, `/polowat/model`, `/polowat/system`, `/polowat/bom`, `/polowat/costs`, `/polowat/notes`.
+
+`/` opens Fiji's detailed diagram; `/fiji` and `/polowat` open their respective diagrams. Browser Back/Forward follows tab and project navigation. Switching projects preserves a shared tab; Fiji-only tabs switch to Polowat's diagram. `app/viewerRoutes.ts` defines valid routes for both server entry pages and client navigation. The static Pages build uses root-relative assets so deep links can reload through the host's SPA fallback.
+
 ## Maintain the system
 
 DSE is fully installed on Fulaga as of 11 Sep 2026. The latest owner report defines the installed wiring and northwest-corner arrangement. Equipment is fixed; historical procurement and cut-schedule notes are not new purchasing or fabrication instructions. `app/dseTopology.ts` remains the authority. Run `npm test` after changes.
@@ -54,9 +63,13 @@ Both checked artifacts carry a source hash and are regenerated only when their i
 
 ## Compact Polowat design
 
-P1 is deliberately direct DC: 3 × 100 W flexible panels in series feed a SmartSolar 100/20; two matched 12 V / 150 Ah deep-cycle batteries sit in parallel behind independent 25 A positive breakers; the controller's protected 20 A load output feeds only a regulated Starlink Mini branch and a 75 W USB charging branch. The modeled load is 520 Wh/day at a 150 W simultaneous peak. Storage is 3.6 kWh nominal, 1.8 kWh at the provisional 50% depth-of-discharge limit, and 0.9 kWh with one battery isolated.
+P9 uses direct DC: 3 × 100 W flexible panels in series feed a SmartSolar 100/20; two matched 12 V / 150 Ah batteries sit in parallel and require independent 30 A protection. The controller's 20 A LOAD output supplies regulated Starlink Mini and 75 W USB branches. The load allowance is 520 Wh/day and 165 W simultaneous input. Storage is 3.6 kWh nominal, 1.8 kWh at the provisional 50% depth-of-discharge limit. CHTAIXI is used for polarized positions; non-polarized DIHOOL candidates are held to reconcile the photographed 12–500 VDC / 6 kA / C-curve variant with conflicting listing text and generic family data.
 
-The Polowat BOM assigns only the batteries, 20 conductor-metres of UV-rated 4 mm² PV cable, and 12 conductor-metres of flexible 4 mm² DC cable to local Chuuk purchase. Everything else—including the battery boxes—is an import. P1 estimates USD 2,096.87 in hardware before freight, duty, tax, and subscription; the imported equipment is 21.48 kg net / about 24.7 kg packed, while local equipment is provisionally 85.7 kg. The estimate uses Starlink's current USD 260 Micronesia hardware starting price and excludes recurring service. These figures are planning values until the exact batteries, account/plan, site distances, roof attachment, and final packed cartons are known.
+Battery boxes are excluded; only batteries remain local. 31 BOM rows: $2,033.09 equipment ($1,333.09 imports / $700 local), plus $129.98 estimated LA tax: **$2,163.07 total**. Includes the deferred box and held DIHOOL allowances. Three unpriced scopes, freight, duty and service excluded. Imported mass 22.54 kg net / 25.9 kg packed is provisional.
+
+The owner’s ANIMACYN B0CT5LRGRF reference enclosure is 13.8 × 9.7 × 5.9 inches, with a clear cover and ventilation. Keep its $59.99 allowance in the full estimate, but exclude it from cart staging: the owner will hand-assemble the other components, measure the layout, and then order the box. The System page shows a reference outline; the 3D view places the shell beside unpacked components. Aluminum sheet remains cuttable assembly stock. No separate QWORK vent is needed. Charging connections remain sheltered. The approved BATIGE USB-A and QIANRENON PD 60 W round USB-C are staged; received charging and sealing remain bench checks.
+
+Authenticated cart verified: **21 listings / 24 units / $907.15 before tax**, plus **$88.45 estimated LA tax = $995.60 before delivery**. This revision saves $57.73 in staged merchandise. Nothing purchased. P9 uses one $35.99 DK10N kit for all four isolated BATT+/BATT−/LOAD+/LOAD− groups: eight blocks, four bridges and two unbridged spare blocks. All ten blocks stay contiguous on one rail so the supplied single end cover and two stops suffice. One bare stranded conductor per clamp, 12–14 mm strip and 1.3 Nm. Six bus-end eyelets are eliminated; only four battery-post lugs remain. Both Blue Sea buses, DK4N kit and unneeded 22–10 AWG eyelet assortment are removed from the cart. The new terminal-level 3D study shows individual cages, screws, jumpers, rail stops/end cover, device envelopes, controller cooling, cable endpoints, bottom glands and capped USB ports. It is a dimensioned assembly study, not a fabrication release. The 325 × 424 mm workspace exceeds the reference enclosure’s 246.4 × 350.5 mm outside footprint. Converter bodies, final cable bends/collision clearance and compact layout need received measurements; do not claim the reference box fits or order it yet. DIHOOL pole wiring/fault coordination, battery-post size, PV connector family and full-load thermal/weather tests remain unresolved.
 
 ## Installed DSE layout
 
@@ -96,6 +109,16 @@ Private receipts go in `private/to-process/`. Extract only non-PII accounting da
 Every BOM row records unit and extended mass plus a provenance basis: retailer listing first, manufacturer datasheet second, documented estimate third, or explicit `not-applicable` for non-physical cost rows. These are planning/net weights, not guaranteed airline packed weights; weigh the final packed cases before travel.
 
 BOM accounting keeps solar/internet design costs separate from other managed purchases. Rows tagged `accountingGroup: "additional"`—including phones, laptops, their portable accessories, personal equipment and their dedicated tax or promotion adjustments—appear in the additional-purchases total, never the design total. Return-pending, research and otherwise excluded rows remain visible for tracking but contribute to neither total.
+
+## Private receipt drop zone
+
+With `DSE_PRIVATE_MODE=1`, `/fiji/bom` and `/polowat/bom` start with a receipt drop zone. Drop PDF, PNG or JPEG files (20 MB maximum each), then review each receipt: enter vendor/date/order, actual line prices and quantities, tax/shipping/discounts, and match items to the project BOM. Unmatched lines remain explicitly unallocated. Uploading saves evidence; it does not automatically extract or approve purchase data.
+
+Originals are copied under `private/receipts/<project>/to-process/<sha256>.<extension>` and archived into that project folder after validated review. `ledger.json` preserves BOM allocations, disposition, totals, evidence links and every correction. Duplicate content/order spend is checked, stale edits are rejected, and linked refunds cannot exceed their purchase. File changes are atomic and serialized across local servers. If a crashed writer leaves `.ledger.lock`, confirm the server has no active writer before removing that lock and retrying.
+
+The BOM displays net purchased quantities from this private ledger and excludes fully covered rows from its purchase filter. Its planning estimate remains separate from actual receipt totals. Existing Fiji paid items require evidence-only treatment; the legacy Fiji grant/delivery/customs ledgers remain authoritative. Download the purchase CSV or ZIP (originals plus ledger/history) for later grant reporting. Quotes and payment confirmations do not add duplicate spend. These records are private supplements; existing grant allocations are not automatically rewritten.
+
+All new inbox API operations return 404 in public mode before opening private storage; mutations require same-origin requests. Both the production Node server and private local development support this workflow. Keep backups of `private/` including the new per-project folders. The existing legacy Fiji receipt archive below remains available separately on Costs.
 
 ## Public and private checkouts
 

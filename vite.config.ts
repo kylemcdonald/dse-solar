@@ -3,6 +3,8 @@ import { defineConfig, type Plugin } from "vite";
 import hostingConfig from "./.openai/hosting.json";
 import { loadReceiptArchive, privateModeEnabled, receiptAllowlist } from "./app/api/receipts/receiptServer";
 import { sites } from "./build/sites-vite-plugin";
+import { Readable } from "node:stream";
+import { handleReceiptInbox } from "./app/api/receipts/inboxHandler";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   "00000000-0000-4000-8000-000000000000";
@@ -48,8 +50,24 @@ function privateReceiptsDevPlugin(): Plugin {
     configureServer(server) {
       if (!privateModeEnabled()) return;
       server.middlewares.use((request, response, next) => {
-        if (request.method !== "GET") return next();
         const pathname = new URL(request.url ?? "/", "http://localhost").pathname;
+        if (pathname === "/api/receipts/inbox") {
+          void (async () => {
+            const headers = new Headers();
+            for (const [name, value] of Object.entries(request.headers)) {
+              if (Array.isArray(value)) value.forEach(part => headers.append(name, part));
+              else if (value !== undefined) headers.set(name, value);
+            }
+            const init = { method: request.method, headers, ...(!["GET", "HEAD"].includes(request.method ?? "GET")
+              ? { body: Readable.toWeb(request) as ReadableStream<Uint8Array>, duplex: "half" } : {}) };
+            const result = await handleReceiptInbox(new Request(`http://${request.headers.host}${request.url}`, init));
+            response.statusCode = result.status;
+            result.headers.forEach((value, name) => response.setHeader(name, value));
+            response.end(Buffer.from(await result.arrayBuffer()));
+          })().catch(() => { response.statusCode = 500; response.end("Receipt request failed."); });
+          return;
+        }
+        if (request.method !== "GET") return next();
         if (pathname === "/api/receipts/status") {
           response.statusCode = 200;
           response.setHeader("Cache-Control", "no-store");

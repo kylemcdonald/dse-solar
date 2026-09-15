@@ -13,17 +13,17 @@ test.beforeEach(async ({ page }) => {
 test("shell starts in DSE mode and exposes the explicit project switch", async ({ page }) => {
   await expect(page.locator(".app-shell")).toHaveAttribute("data-project", "dse-fiji");
   await expect(page.getByLabel("System design")).toContainText("DSEFiji");
-  await expect(page.getByRole("button", { name: /DSE.*Fiji/ })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("button", { name: /Inowon.*Polowat/ })).toHaveAttribute("aria-pressed", "false");
-  await expect(page.getByRole("button", { name: "Detailed diagram" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "3D model" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Wire cut list" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Shipping" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Customs" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /DSE.*Fiji/ })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("link", { name: /Inowon.*Polowat/ })).not.toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("link", { name: "Detailed diagram" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "3D model" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Wire cut list" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Shipping" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Customs" })).toHaveCount(0);
   await expect(page.getByRole("checkbox", { name: "Fade purchased" })).not.toBeChecked();
   const navigation = page.getByRole("navigation", { name: "Viewer mode" });
-  await expect(navigation.getByRole("button", { name: /Junction box/i })).toHaveCount(0);
-  await expect(navigation.getByRole("button", { name: /AC Junction/i })).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: /Junction box/i })).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: /AC Junction/i })).toHaveCount(0);
   await expect(page.getByText(/Pasana|PNG|PG solar/i)).toHaveCount(0);
 });
 
@@ -54,11 +54,11 @@ test("phone toolbar stays reachable and Fit shows the whole wiring diagram", asy
 });
 
 test("Polowat mode exposes its independent wiring, model, energy, BOM, shipping, and cost plan", async ({ page }) => {
-  await page.getByRole("button", { name: /Inowon.*Polowat/ }).click();
+  await page.getByRole("link", { name: /Inowon.*Polowat/ }).click();
   await expect(page.locator(".app-shell")).toHaveAttribute("data-project", "inowon-polowat");
-  await expect(page.getByRole("button", { name: /Inowon.*Polowat/ })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("button", { name: "Wiring diagram" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Wire cut list" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Inowon.*Polowat/ })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("link", { name: "Wiring diagram" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Wire cut list" })).toHaveCount(0);
 
   const diagram = page.locator(".polowat-diagram");
   await expect(diagram).toHaveAttribute("data-system", "inowon-polowat");
@@ -70,30 +70,47 @@ test("Polowat mode exposes its independent wiring, model, energy, BOM, shipping,
   await expect(page.getByText("300 W · 3S", { exact: true })).toBeVisible();
   await expect(page.getByText("12 V · 300 Ah", { exact: true })).toBeVisible();
 
-  await page.getByRole("button", { name: "System", exact: true }).click();
+  await page.getByRole("link", { name: "System", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Inowon Sailing School compact solar network" })).toBeVisible();
   await expect(page.getByText("0.52 kWh/day", { exact: true })).toBeVisible();
   await expect(page.getByText("0.90 kWh/day", { exact: true })).toBeVisible();
   await expect(page.getByText("520 Wh/day", { exact: true })).toBeVisible();
-  await expect(page.getByText("21.5 kg", { exact: true })).toBeVisible();
-  await expect(page.getByText("24.7 kg", { exact: true })).toBeVisible();
+  await expect(page.getByText("25.9 kg", { exact: true })).toBeVisible();
+  await expect(page.getByText("29.8 kg", { exact: true })).toBeVisible();
+  await expect(page.locator('[data-system-total="solar-internet"]')).toContainText("$2,354.54");
+  const audit = page.locator(".polowat-electrical-audit");
+  await expect(audit.getByRole("heading", { name: "Current limits and wire sizes" })).toBeVisible();
+  await expect(audit.locator('.polowat-enclosure-sizing')).toHaveAttribute('data-layout-status', 'bench-assembly-pending');
+  await expect(audit).toContainText('Do not stage or order the enclosure yet.');
+  await expect(audit).toContainText("$992.52");
+  const selectedDrop = audit.locator("tr").filter({ hasText: "Selected 8 AWG battery + 10 AWG controller" });
+  await expect(selectedDrop).toContainText("2.41%");
+  await page.getByLabel(/Battery → busbars/).fill("3");
+  await expect(selectedDrop).toContainText("3.27% · exceeds 3% target");
 
-  await page.getByRole("button", { name: /Bill of materials/ }).click();
-  await expect(page.locator("[data-bom-id]")).toHaveCount(21);
-  await expect(page.locator('[data-bom-total="design"]')).toContainText("$2,096.87");
-  await expect(page.locator(".bom-summary-v2")).toContainText("$1,326.87");
-  await expect(page.locator(".bom-summary-v2")).toContainText("$770.00");
+
+  await page.getByRole("link", { name: /Bill of materials/ }).click();
+  await expect(page.locator("[data-bom-id]")).toHaveCount(38);
+  await expect(page.locator('[data-bom-id="polowat-enclosure"]')).toContainText('Deferred · order after bench assembly');
+  await expect(page.locator('[data-bom-id="polowat-enclosure"] a[href="https://www.amazon.com/dp/B0CT5LRGRF"]').first()).toBeVisible();
+  await expect(page.locator('[data-bom-total="design"]')).toContainText("$2,354.54");
+  await expect(page.locator('[data-bom-total="tax"]')).toContainText("9.75%");
+  await expect(page.locator('[data-bom-total="tax"]')).toContainText("$143.43");
+  await expect(page.locator(".bom-tax-note")).toContainText("California tax is not applied to purchases made locally in Chuuk");
+  await expect(page.locator(".bom-summary-v2")).toContainText("$1,471.11");
+  await expect(page.locator(".bom-summary-v2")).toContainText("$740.00");
   await expect(page.locator('[data-bom-id="polowat-batteries"]')).toContainText("Buy in Chuuk");
   await expect(page.locator('[data-bom-id="polowat-pv-cable"]')).toContainText("Buy in Chuuk");
 
-  await page.getByRole("button", { name: "Costs" }).click();
-  await expect(page.locator(".cost-tile")).toHaveCount(21);
-  await expect(page.locator(".cost-total strong")).toHaveText("$2,096.87");
-  await expect(page.locator(".cost-total")).toContainText("Import hardware: $1,326.87 · buy in Chuuk: $770.00");
+  await page.getByRole("link", { name: "Costs" }).click();
+  await expect(page.locator(".cost-tile")).toHaveCount(34);
+  await expect(page.locator(".cost-total strong")).toHaveText("$2,354.54");
+  await expect(page.locator(".cost-total")).toContainText("Items: $2,211.11 · estimated Los Angeles tax (9.75%): $143.43");
+  await expect(page.locator(".cost-total")).toContainText("Import hardware: $1,471.11 · buy in Chuuk: $740.00");
   await expect(page.getByRole("button", { name: /Export grant report/ })).toHaveCount(0);
   await expect(page.getByLabel("Show costs for").locator("option")).toHaveCount(2);
 
-  await page.getByRole("button", { name: "3D model" }).click();
+  await page.getByRole("link", { name: "3D model" }).click();
   const model = page.locator('.polowat-model[data-model="polowat-planning-topology"]');
   await expect(model).toHaveAttribute("data-device-count", "20", { timeout: 45_000 });
   await expect(model).toHaveAttribute("data-connection-count", "25");
@@ -104,8 +121,8 @@ test("Polowat mode exposes its independent wiring, model, energy, BOM, shipping,
 });
 
 test("wire-cut tab opens the consolidated R32 schedule in the viewer", async ({ page }) => {
-  await page.getByRole("button", { name: "Wire cut list" }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await page.getByRole("link", { name: "Wire cut list" }).click();
+  await expect(page).toHaveURL(/\/fiji\/cables$/);
   await expect(page.getByRole("heading", { name: "Wire cut list", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Field wire by size and construction" })).toBeVisible();
   await expect(page.getByText("1/0 AWG · 53.5 mm²", { exact: true }).first()).toBeVisible();
@@ -531,7 +548,7 @@ test("device and conductor inspection use graph data", async ({ page }) => {
 });
 
 test("BOM reflects purchased protection and cables, selected busbars and current architecture rows", async ({ page }) => {
-  await page.getByRole("button", { name: /Bill of materials/ }).click();
+  await page.getByRole("link", { name: /Bill of materials/ }).click();
   await expect(page.getByText("DIHOOL DZ47X-125-frame non-polarized 120 A battery-string disconnect breakers", { exact: true })).toBeVisible();
   await expect(page.getByText("DIHOOL DZ47X-125-frame non-polarized 120 A SmartSolar 24 V disconnect breaker", { exact: true })).toBeVisible();
   await expect(page.getByText("CHTAIXI 32 A single-pole Orion input branch breaker", { exact: true })).toBeVisible();
@@ -578,7 +595,7 @@ test("BOM reflects purchased protection and cables, selected busbars and current
 });
 
 test("3D model uses canonical router and has no removed controls", async ({ page }) => {
-  await page.getByRole("button", { name: "3D model" }).click();
+  await page.getByRole("link", { name: "3D model" }).click();
   const model = page.locator(".unified-model");
   await expect(model).toHaveAttribute("data-route-fallbacks", "0", { timeout: 45_000 });
   await expect(model).toHaveAttribute("data-route-centerline-conflicts", "0");
@@ -837,7 +854,7 @@ test("3D model uses canonical router and has no removed controls", async ({ page
 });
 
 test("BOM can show only items to purchase and sort by status, weight and cost", async ({ page }) => {
-  await page.getByRole("button", { name: /Bill of materials/ }).click();
+  await page.getByRole("link", { name: /Bill of materials/ }).click();
   await expect(page.locator('[data-bom-total="design"]')).toContainText("$12,292.48");
   await expect(page.locator('[data-bom-total="design"]')).toContainText("Solar + internet only");
   await expect(page.locator('[data-bom-total="additional"]')).toContainText("$3,422.50");
@@ -860,7 +877,7 @@ test("BOM can show only items to purchase and sort by status, weight and cost", 
 });
 
 test("Costs treemap includes every positive-cost BOM line", async ({ page }) => {
-  await page.getByRole("button", { name: "Costs" }).click();
+  await page.getByRole("link", { name: "Costs" }).click();
   await expect(page.getByRole("heading", { name: "Cost by item" })).toBeVisible();
   await expect(page.locator(".cost-tile")).toHaveCount(138);
   await expect(page.locator(".cost-total strong")).toHaveText("$16,387.03");
@@ -893,7 +910,7 @@ test("Costs treemap includes every positive-cost BOM line", async ({ page }) => 
 
 test('installed wall controls and grouped operator diagram are usable on a phone', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole('button', { name: 'Simple diagram', exact: true }).click();
+  await page.getByRole('link', { name: 'Simple diagram', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Power at a glance' })).toBeVisible();
   await expect(page.locator('.operator-controls button')).toHaveCount(3);
   const middle = page.locator('.operator-controls button').nth(1);
@@ -901,7 +918,7 @@ test('installed wall controls and grouped operator diagram are usable on a phone
   await expect(page.locator('.operator-canvas path[data-connections]')).toHaveCount(14);
   await expect(page.locator('.operator-canvas path[stroke-dasharray]')).toHaveCount(1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-  await page.getByRole('button', { name: 'Detailed diagram', exact: true }).click();
+  await page.getByRole('link', { name: 'Detailed diagram', exact: true }).click();
   await page.locator('[data-device-id="wallSwitchJunction"]').click();
   await expect(page.locator('.unified-diagram')).toHaveAttribute('data-junction-id', 'wallSwitchJunction');
   const ys = [];
