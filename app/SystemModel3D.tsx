@@ -10,7 +10,7 @@ import {
   renderedSemanticCables,
 } from "./renderedCableGeometry";
 import { roundedRouteCurve, tessellatedCableCurve } from "./cableCurve3D";
-import { conductorColor, graphWalls, isPurchasedDevice } from "./systemGraph";
+import { conductorColor, graphFloor, graphWalls, isPurchasedDevice } from "./systemGraph";
 import { entryPanelGeometry, glandSleeveGeometry, glandDimensions } from "./glandGeometry";
 import { deviceLocalPoint, worldHalfExtents } from "./physicalLayout";
 import type { GraphRuntime, GraphSelection, ResolvedConductor, ResolvedDevice, Vec3 } from "./systemGraph";
@@ -623,11 +623,12 @@ function SystemModel3D({ fadePurchased, onFadePurchasedChange, onSelect, onClear
       wall.layers.enable(WALL_SHADOW_CASTER_LAYER); wall.layers.enable(WALL_DEVICE_SHADOW_RECEIVER_LAYER);
       wall.castShadow = true; wall.receiveShadow = true; wall.userData.cameraSurface = true; scene.add(wall);
     });
+    const floorVolume=graphFloor(runtime.graph);
     const floor = new THREE.Mesh(
-      new THREE.BoxGeometry(5.0, 0.035, 4.5, gpu ? 1 : 32, 1, gpu ? 1 : 32),
+      new THREE.BoxGeometry(...floorVolume.size, gpu ? 1 : 32, 1, gpu ? 1 : 32),
       new THREE.MeshStandardMaterial({ color: "#e3d7c1", roughness: 0.97 }),
     );
-    floor.position.set(1.6, -0.025, 1.45);
+    floor.position.set(...floorVolume.center);
     floor.receiveShadow = true;
     floor.userData.cameraSurface = true;
     scene.add(floor);

@@ -419,11 +419,16 @@ export type Junction = {
 
 export type WallVolume = { id: string; center: Vec3; size: Vec3; normal: Vec3 };
 export type SiteGeometry = {
+  /** Explicit ground slab; floor-mounted devices rest on its top surface. */
+  floor?: { center: Vec3; size: Vec3 };
   walls: readonly WallVolume[];
   roof?: { center: Vec3; size: Vec3 };
   shelf?: { center: Vec3; size: Vec3 };
   note: string;
 };
+export const graphFloor = (graph: Pick<SystemGraph, "site">): {center:Vec3;size:Vec3} => graph.site?.floor
+  ?? {center:[1.6,-0.025,1.45],size:[5,0.035,4.5]};
+
 export const graphWalls = (graph: Pick<SystemGraph, "site">): readonly WallVolume[] => graph.site?.walls
   ?? [{ ...EQUIPMENT_WALL_VOLUME, id: "north", normal: [0, 0, 1] }];
 

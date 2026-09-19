@@ -180,3 +180,7 @@ Battery A, Battery B and controller 30 A non-polarized breakers permit either to
 ## Orthogonal Polowat routing
 
 Polowat sets `orthogonalRoutes`: generation and candidate comparisons must reject any skeleton segment changing more than one coordinate. Rounded orthogonal elbows are allowed; straight diagonal leads are not. Centered terminal rows determine mounting phase for contiguous DIN rows and centered backplate devices. Preserve Fiji’s installed geometry and its existing tilted-device behavior.
+
+## Polowat ground plane
+
+Polowat declares its own `site.floor`; do not reuse Fiji’s offset floor slab. Its top is y=0, its width and x-center match the equipment wall, and its rear edge meets the wall’s front face. Floor-mounted devices rest on the slab using their resolved body height; all terminal coordinates and cable routes follow that resolved placement. Keep the floor solid to routing. Projects without an explicit floor retain their legacy geometry, including Fiji.

@@ -321,6 +321,12 @@ export function buildVoxelGrid(graph: SystemGraph, devices: readonly ResolvedDev
     planes.set(junctionIndex.get(junction.deviceId)!, { axis, coordinate: point[axis] });
   });
   const grid = new VoxelGrid([snapDown(lo[0]), snapDown(lo[1]), snapDown(lo[2])], [snapUp(hi[0]), snapUp(hi[1]), snapUp(hi[2])], planes, walls);
+  // Explicit ground slabs are physical obstacles, with cable-radius clearance.
+  if(graph.site?.floor){
+    const {center,size}=graph.site.floor;
+    const clearance=Math.max(BODY_MARGIN,...graph.cables.map(c=>c.outsideDiameterMm/2000));
+    forEachCellInBox(grid,pad(subtract(center,scale(size,.5)),-clearance),pad(add(center,scale(size,.5)),clearance),index=>{grid.flags[index]|=FLAG_BLOCKED;});
+  }
   // The charging shelf is solid equipment, including the cable's radius.
   if (graph.site?.shelf) {
     const { center, size } = graph.site.shelf;

@@ -148,7 +148,7 @@ const devices: PolowatDevice[] = ([
     subtitle: "12 V · 150 Ah deep cycle",
     kind: "battery",
     bomId: "polowat-batteries",
-    position: [-0.22, 0.42, 0.18],
+    position: [-0.22, 0.125, 0.18],
     size: [0.48, 0.25, 0.24],
   },
   {
@@ -157,7 +157,7 @@ const devices: PolowatDevice[] = ([
     subtitle: "12 V · 150 Ah deep cycle",
     kind: "battery",
     bomId: "polowat-batteries",
-    position: [0.42, 0.42, 0.18],
+    position: [0.42, 0.125, 0.18],
     size: [0.48, 0.25, 0.24],
   },
   ...["loadPositiveBus", "loadNegativeBus"].map((id, index) => ({

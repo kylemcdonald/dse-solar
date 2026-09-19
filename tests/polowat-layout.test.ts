@@ -83,3 +83,28 @@ test('Polowat terminal columns align with the voxel grid and every route segment
  assert.deepEqual(nonOrthogonalRouteSegments([{id:'bad',points:[[0,0,0],[.01,.02,0]]}]),['bad: segment 0']);
  assert.deepEqual(nonOrthogonalRouteSegments([{id:'elbow',points:[[0,0,0],[0,.02,0],[.02,.02,0]]}]),[]);
 });
+
+test('Polowat batteries rest on the same ground plane that meets the equipment wall',async()=>{
+ const {graphFloor,graphWalls}=await import('../app/systemGraph');
+ const floor=graphFloor(runtime.graph),wall=graphWalls(runtime.graph)[0];
+ const top=floor.center[1]+floor.size[1]/2;
+ assert.equal(top,0);
+ assert.equal(wall.center[1]-wall.size[1]/2,top);
+ assert.equal(floor.center[0],wall.center[0]);
+ assert.equal(floor.size[0],wall.size[0]);
+ assert.ok(Math.abs(floor.center[2]-floor.size[2]/2-(wall.center[2]+wall.size[2]/2))<1e-8);
+ for(const id of ['batteryA','batteryB']){
+  const battery=runtime.deviceById.get(id)!;
+  assert.ok(Math.abs(battery.position[1]-battery.size[1]/2-top)<1e-8,id+' floats above ground');
+  for(const axis of [0,2])assert.ok(Math.abs(battery.position[axis]-floor.center[axis])+battery.size[axis]/2<=floor.size[axis]/2+1e-8,id+' extends past floor');
+ }
+ for(const route of runtime.routes){
+  const points=sampleCableCurve(roundedRoutePieces(route.points,Math.max(.009,route.diameterMm/2000*4.25)));
+  assert.ok(points.every(p=>p[1]-route.diameterMm/2000>=top-1e-8),route.id+' enters ground');
+ }
+ const {sampledRouteSiteConflicts}=await import('../app/routeAudits');
+ const crossing={...runtime.routes[0],id:'floor-crossing',points:[[0,-.1,.2],[0,.1,.2]] as Vec3[]};
+ assert.deepEqual(sampledRouteSiteConflicts([crossing],runtime.graph),['floor-crossing ↔ floor']);
+ assert.equal(dseTopology.site?.floor,undefined);
+ assert.deepEqual(graphFloor(dseTopology),{center:[1.6,-.025,1.45],size:[5,.035,4.5]});
+});

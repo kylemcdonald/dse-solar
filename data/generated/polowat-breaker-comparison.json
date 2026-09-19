@@ -19,10 +19,10 @@
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 29.311,
-      "batterySourceLeadM": 1.979,
-      "turns": 194,
-      "score": 0.6447
+      "totalLengthM": 30.524,
+      "batterySourceLeadM": 2.523,
+      "turns": 198,
+      "score": 0.66771
     },
     {
       "mask": 1,
@@ -43,10 +43,10 @@
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 28.974,
-      "batterySourceLeadM": 1.83,
-      "turns": 193,
-      "score": 0.63835
+      "totalLengthM": 30.187,
+      "batterySourceLeadM": 2.375,
+      "turns": 197,
+      "score": 0.66136
     },
     {
       "mask": 2,
@@ -67,10 +67,10 @@
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 29.313,
-      "batterySourceLeadM": 1.687,
-      "turns": 193,
-      "score": 0.63887
+      "totalLengthM": 30.526,
+      "batterySourceLeadM": 2.231,
+      "turns": 197,
+      "score": 0.66188
     },
     {
       "mask": 3,
@@ -92,10 +92,10 @@
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 28.84,
-      "batterySourceLeadM": 1.499,
-      "turns": 193,
-      "score": 0.63038
+      "totalLengthM": 30.052,
+      "batterySourceLeadM": 2.043,
+      "turns": 197,
+      "score": 0.65339
     },
     {
       "mask": 4,
@@ -116,10 +116,10 @@
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 29.741,
-      "batterySourceLeadM": 1.979,
-      "turns": 196,
-      "score": 0.64899
+      "totalLengthM": 30.954,
+      "batterySourceLeadM": 2.523,
+      "turns": 200,
+      "score": 0.672
     },
     {
       "mask": 5,
@@ -141,10 +141,10 @@
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 29.027,
-      "batterySourceLeadM": 1.789,
-      "turns": 196,
-      "score": 0.63806
+      "totalLengthM": 30.24,
+      "batterySourceLeadM": 2.334,
+      "turns": 200,
+      "score": 0.66107
     },
     {
       "mask": 6,
@@ -166,10 +166,10 @@
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 29.699,
-      "batterySourceLeadM": 1.687,
-      "turns": 196,
-      "score": 0.64273
+      "totalLengthM": 30.912,
+      "batterySourceLeadM": 2.231,
+      "turns": 200,
+      "score": 0.66574
     },
     {
       "mask": 7,
@@ -192,10 +192,10 @@
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 28.894,
-      "batterySourceLeadM": 1.499,
-      "turns": 192,
-      "score": 0.63093
+      "totalLengthM": 30.107,
+      "batterySourceLeadM": 2.043,
+      "turns": 196,
+      "score": 0.65394
     }
   ]
 }

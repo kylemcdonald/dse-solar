@@ -1429,7 +1429,7 @@
       "loadAreaMm2": 3.31
     },
     "holds": [
-      "Routed cut allowances give 2.92% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give 1.99%, before terminal/contact resistance. Modeled cut allowances meet the 3% target before terminal/contact resistance; verify the remaining margin on the physical assembly.",
+      "Routed cut allowances give 3.22% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give 2.27%, before terminal/contact resistance. Cut allowances exceed the 3% target; shorten the physical layout or revise the conductor plan before fabrication.",
       "Klein 11061 is rated for 12–22 AWG stranded; 8 AWG battery and 10 AWG PV/controller cutting/stripping capability remains unresolved. The 10 AWG rating applies to solid wire.",
       "Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream.",
       "The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection.",
@@ -4374,11 +4374,11 @@
     "allowance": "15% plus 50 mm per end, each cut rounded up to 50 mm; corresponding parallel battery branch lengths equalized",
     "totals": {
       "8 AWG DC": {
-        "red": 3.2,
-        "black": 3.1
+        "red": 3.8,
+        "black": 3.9
       },
       "10 AWG PV": {
-        "red": 5.15,
+        "red": 5.2,
         "black": 6.35
       },
       "10 AWG DC": {
@@ -4390,9 +4390,9 @@
         "black": 2.25
       }
     },
-    "modelBatteryControllerDropV": 0.235,
-    "allowanceBatteryControllerDropV": 0.344,
-    "allowanceBatteryControllerDropPercent": 2.92,
+    "modelBatteryControllerDropV": 0.268,
+    "allowanceBatteryControllerDropV": 0.38,
+    "allowanceBatteryControllerDropPercent": 3.22,
     "limits": "Planning geometry, not surveyed site distances or a fabrication release. All modeled routes pass the shared device, cable, wall, self-intersection and rounded-geometry checks. Received hardware and installation clearances still require physical verification. PV span in scene is illustrative, not a surveyed roof run. Check the remaining shared 10 AWG stock after controller cuts before installation.",
     "includesShuntResistanceOhms": 0.0001,
     "method": "Shared 20 mm physical layout and turn-aware A*; device-front exclusion, negotiated cable clearance and exact rounded-geometry audits; lengths measured on the rendered curves"

@@ -6,33 +6,33 @@ Planning geometry, not surveyed site distances or a fabrication release. All mod
 
 | Gauge / use | Red cuts | Black cuts | Stock per colour |
 |---|---:|---:|---:|
-| 8 AWG DC | 3.20 m | 3.10 m | 7.620 m |
-| 10 AWG PV | 5.15 m | 6.35 m | 9.144 m shared PV/controller |
+| 8 AWG DC | 3.80 m | 3.90 m | 7.620 m |
+| 10 AWG PV | 5.20 m | 6.35 m | 9.144 m shared PV/controller |
 | 10 AWG DC | 1.40 m | 0.85 m | 9.144 m shared PV/controller |
 | 12 AWG DC | 3.15 m | 2.25 m | 7.620 m |
 
-The shared 10 AWG stock must cover PV, controller and both shunt legs together: 6.55 m red and 7.20 m black in this illustrative layout. Measure the actual roof run before cutting. The BMV kit supplies its 2 m fused positive lead and 10 m RJ12 cable; these are not extra field-wire purchases. Add two 10 AWG × M10 closed lugs for the shunt studs.
+The shared 10 AWG stock must cover PV, controller and both shunt legs together: 6.60 m red and 7.20 m black in this illustrative layout. Measure the actual roof run before cutting. The BMV kit supplies its 2 m fused positive lead and 10 m RJ12 cable; these are not extra field-wire purchases. Add two 10 AWG × M10 closed lugs for the shunt studs.
 
 ## Electrical limits
 
-At 20 A, 11.8 V and 75°C copper, modeled battery/controller drop is 0.235 V (1.99%); cut allowances give 0.344 V (2.92%). Both include the 500 A / 50 mV shunt's 2 mV drop at 20 A; terminal/contact resistance is additional. Modeled cut allowances meet the 3% target before terminal/contact resistance; verify the remaining margin on the physical assembly. Battery-to-box positives remain upstream of their in-box isolators; source-end protection remains unresolved.
+At 20 A, 11.8 V and 75°C copper, modeled battery/controller drop is 0.268 V (2.27%); cut allowances give 0.380 V (3.22%). Both include the 500 A / 50 mV shunt's 2 mV drop at 20 A; terminal/contact resistance is additional. Cut allowances exceed the 3% target; shorten the physical layout or revise the conductor plan before fabrication. Battery-to-box positives remain upstream of their in-box isolators; source-end protection remains unresolved.
 
 | Circuit | Gauge / colour | Model length | Cut with allowance |
 |---|---|---:|---:|
-| 3S home run + · 4.84 A | 10 AWG PV / red | 3.478 m | 4.10 m |
-| 3S home run − | 10 AWG PV / black | 4.530 m | 5.35 m |
+| 3S home run + · 4.84 A | 10 AWG PV / red | 3.508 m | 4.15 m |
+| 3S home run − | 10 AWG PV / black | 4.528 m | 5.35 m |
 | PV + | 10 AWG PV / red | 0.784 m | 1.05 m |
 | PV − | 10 AWG PV / black | 0.754 m | 1.00 m |
 | BATT + · 20 A / 30 A OCP | 10 AWG DC / red | 0.742 m | 1.00 m |
 | Protected charge path | 10 AWG DC / red | 0.226 m | 0.40 m |
 | BATT − via shunt SYSTEM side | 10 AWG DC / black | 0.174 m | 0.35 m |
 | Combined bank − → shunt BATTERY MINUS | 10 AWG DC / black | 0.334 m | 0.50 m |
-| Battery A + | 8 AWG DC / red | 0.790 m | 1.25 m |
+| Battery A + | 8 AWG DC / red | 1.080 m | 1.55 m |
 | 30 A protected + | 8 AWG DC / red | 0.206 m | 0.35 m |
-| Battery A − | 8 AWG DC / black | 1.230 m | 1.55 m |
-| Battery B + | 8 AWG DC / red | 0.709 m | 0.95 m |
+| Battery A − | 8 AWG DC / black | 1.587 m | 1.95 m |
+| Battery B + | 8 AWG DC / red | 0.963 m | 1.25 m |
 | 30 A protected + | 8 AWG DC / red | 0.458 m | 0.65 m |
-| Battery B − | 8 AWG DC / black | 0.631 m | 1.55 m |
+| Battery B − | 8 AWG DC / black | 0.920 m | 1.95 m |
 | LOAD + · 20 A max | 12 AWG DC / red | 0.419 m | 0.60 m |
 | LOAD − · 11.8 V disconnect | 12 AWG DC / black | 0.357 m | 0.55 m |
 | Starlink + | 12 AWG DC / red | 0.457 m | 0.65 m |

@@ -399,11 +399,13 @@ export function sampledRouteSweptCableConflicts(
   return [...conflicts];
 }
 
-/** Swept cable clearance against the solid charging shelf. */
+/** Swept cable clearance against declared solid site fixtures. */
 export function sampledRouteSiteConflicts(routes: readonly RoutedConnection[], graph: Pick<SystemGraph, "site">) {
-  if (!graph.site?.shelf) return [];
-  const { center, size } = graph.site.shelf;
-  return routes.filter(route => route.points.slice(1).some((end, index) => {
+  const obstacles=[
+    ...(graph.site?.shelf?[{...graph.site.shelf,label:"charging shelf"}]:[]),
+    ...(graph.site?.floor?[{...graph.site.floor,label:"floor"}]:[]),
+  ];
+  return obstacles.flatMap(({center,size,label})=>routes.filter(route => route.points.slice(1).some((end, index) => {
     const start = route.points[index];
     const radius = route.diameterMm / 2000;
     let near = 0, far = 1;
@@ -420,7 +422,7 @@ export function sampledRouteSiteConflicts(routes: readonly RoutedConnection[], g
       }
     }
     return true;
-  })).map(route => `${route.id} ↔ charging shelf`);
+  })).map(route => `${route.id} ↔ ${label}`));
 }
 
 export function sampledRouteDeviceConflicts(

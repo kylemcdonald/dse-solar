@@ -1,5 +1,9 @@
 # Polowat terminal-level assembly review — P9, 15 September 2026
 
+## Ground plane
+
+The equipment wall meets Polowat’s floor at y=0. Both battery bases sit on that plane; their cable routes and cut estimates follow the grounded positions. The floor spans the wall’s full width and extends forward from its front face. Fiji’s floor and installed geometry remain unchanged.
+
 ## Terminal-grid alignment
 
 The DIN row and centered fuse terminals now align with the main 20 mm routing grid. Components remain contiguous; terminal leads leave square to their device faces. Diagonal lead adapters are removed. Every Polowat route segment, including terminal leads, must be axis-aligned before smooth elbows are rendered. Fiji is unchanged. The breaker direction comparison and cable schedule are regenerated for this alignment.

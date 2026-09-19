@@ -50,7 +50,7 @@ for(const group of terminalGroups){
  device.conductors=device.conductors.map(port=>peers.includes(port.id)?{...port,internalMates:peers.filter(id=>id!==port.id)}:port);
 }
 const baseGraph:SystemGraph={orthogonalRoutes:true,id:polowatTopology.id,label:'Inowon Polowat',revision:polowatTopology.revision+'-compact-1',
- site:{walls:[{id:'equipment-wall',center:[0,1.8,-.04],size:[5,3.6,.04],normal:[0,0,1]}],note:'Provisional equipment wall; final mounting and enclosure selection require hand assembly.'},
+ site:{floor:{center:[0,-.0175,2.23],size:[5,.035,4.5]},walls:[{id:'equipment-wall',center:[0,1.8,-.04],size:[5,3.6,.04],normal:[0,0,1]}],note:'Provisional equipment wall; final mounting and enclosure selection require hand assembly.'},
  devices,cables:polowatTopology.connections.map(c=>({id:c.id,label:c.label,cores:c.kind==='data'?6:c.kind==='usb'||c.kind==='regulated'?2:1,outsideDiameterMm:assemblyWires.find(w=>w.id===c.id)?.diameter??5,conductorSize:c.gauge,sheath:'single'})),connections:routes,
  junctions:devices.filter(d=>d.kind==='junction').map(d=>({id:d.id,deviceId:d.id,label:d.label,minimumSize:[.5,.24,.24] as Vec3,padding:.02,dinGap:0,backplateGap:0,glandSpacing:.04,sizePolicy:'auto',backplateColumns:3,dinPosition:'bottom',contiguousDin:true,centeredGlands:true})),currentSources:[]};
 

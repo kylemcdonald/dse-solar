@@ -698,7 +698,12 @@ export function resolveDevices(graph: SystemGraph): ResolvedDevice[] {
     const position: Vec3 = plan
       ? [snapCell(device.placement.position[0]), snapCell(plan.bottomY + plan.size[1] / 2), snapCell(device.placement.position[2])]
       : snapCellVec(device.placement.position);
-    resolved.set(device.id, { ...device, position, size: device.size, rotation: rotationForDevice(device) });
+    const rotation=rotationForDevice(device);
+    const floor=graph.site?.floor;
+    const groundedPosition:Vec3=floor && device.placement.surface==="floor"
+      ? [position[0],floor.center[1]+floor.size[1]/2+worldHalfExtents({...device,position,rotation})[1],position[2]]
+      : position;
+    resolved.set(device.id, { ...device, position:groundedPosition, size: device.size, rotation });
   });
 
   // 3. Enclosure members from their plan offsets.
