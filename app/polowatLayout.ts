@@ -17,3 +17,7 @@ export const polowatLayoutCandidates:readonly PolowatLayout[]=[
  {id:'bottom-wide-monitor-3',dinPosition:'bottom',columns:3,minimumWidth:.6,dinOrder:batteries,backplateOrder:monitorFirst},
 ];
 export const selectedPolowatLayout=polowatLayoutCandidates.find(p=>p.id==='bottom-wide-monitor-3')!;
+
+/** Non-polarized positions may exchange top/bottom connections without rotating the body. */
+export const reversiblePolowatBreakers=["batteryBreakerA","batteryBreakerB","controllerBreaker"] as const;
+export const selectedPolowatBreakerRouting:readonly string[]=["batteryBreakerA", "controllerBreaker"];

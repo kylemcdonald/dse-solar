@@ -337,25 +337,25 @@ export const polowatPorts = [
   {
     "id": "controllerBreaker-top-0",
     "owner": "controllerBreaker",
-    "label": "Source clamp 1",
+    "label": "Top clamp 1",
     "face": "top"
   },
   {
     "id": "controllerBreaker-bottom-0",
     "owner": "controllerBreaker",
-    "label": "Load clamp 1",
+    "label": "Bottom clamp 1",
     "face": "bottom"
   },
   {
     "id": "controllerBreaker-top-1",
     "owner": "controllerBreaker",
-    "label": "Source clamp 2",
+    "label": "Top clamp 2",
     "face": "top"
   },
   {
     "id": "controllerBreaker-bottom-1",
     "owner": "controllerBreaker",
-    "label": "Load clamp 2",
+    "label": "Bottom clamp 2",
     "face": "bottom"
   },
   {
@@ -385,49 +385,49 @@ export const polowatPorts = [
   {
     "id": "batteryBreakerA-top-0",
     "owner": "batteryBreakerA",
-    "label": "Source clamp 1",
+    "label": "Top clamp 1",
     "face": "top"
   },
   {
     "id": "batteryBreakerA-bottom-0",
     "owner": "batteryBreakerA",
-    "label": "Load clamp 1",
+    "label": "Bottom clamp 1",
     "face": "bottom"
   },
   {
     "id": "batteryBreakerA-top-1",
     "owner": "batteryBreakerA",
-    "label": "Source clamp 2",
+    "label": "Top clamp 2",
     "face": "top"
   },
   {
     "id": "batteryBreakerA-bottom-1",
     "owner": "batteryBreakerA",
-    "label": "Load clamp 2",
+    "label": "Bottom clamp 2",
     "face": "bottom"
   },
   {
     "id": "batteryBreakerB-top-0",
     "owner": "batteryBreakerB",
-    "label": "Source clamp 1",
+    "label": "Top clamp 1",
     "face": "top"
   },
   {
     "id": "batteryBreakerB-bottom-0",
     "owner": "batteryBreakerB",
-    "label": "Load clamp 1",
+    "label": "Bottom clamp 1",
     "face": "bottom"
   },
   {
     "id": "batteryBreakerB-top-1",
     "owner": "batteryBreakerB",
-    "label": "Source clamp 2",
+    "label": "Top clamp 2",
     "face": "top"
   },
   {
     "id": "batteryBreakerB-bottom-1",
     "owner": "batteryBreakerB",
-    "label": "Load clamp 2",
+    "label": "Bottom clamp 2",
     "face": "bottom"
   },
   {

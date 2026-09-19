@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {polowatDiagramRuntime as runtime} from '../app/polowatDiagramRuntime';
+import {selectedPolowatBreakerRouting} from '../app/polowatLayout';
 import {polowatTopology} from '../app/polowatTopology';
 import {polowatParts as assemblyParts,terminalGroups} from '../app/polowatHardware';
 import layouts from '../data/generated/polowat-diagram-layouts.json';
@@ -21,8 +22,8 @@ test('Polowat shared schematic represents every canonical device and circuit wit
   assert.ok(assemblyParts.some(p=>p.id===id));
  }
  for(const [letter,id] of [['a','batteryBreakerA'],['b','batteryBreakerB']]){
-  assert.equal(runtime.routes.find(r=>r.id===`battery-${letter}-positive`)!.to,`${id}.top-0`);
-  assert.equal(runtime.routes.find(r=>r.id===`battery-${letter}-positive-bus`)!.from,`${id}.bottom-0`);
+  assert.equal(runtime.routes.find(r=>r.id===`battery-${letter}-positive`)!.to,`${id}.${selectedPolowatBreakerRouting.includes(id)?"bottom":"top"}-0`);
+  assert.equal(runtime.routes.find(r=>r.id===`battery-${letter}-positive-bus`)!.from,`${id}.${selectedPolowatBreakerRouting.includes(id)?"top":"bottom"}-0`);
  }
 });
 

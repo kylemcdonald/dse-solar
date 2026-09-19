@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import fiji from '../data/generated/dse-runtime.json';
 import baseline from './fixtures/fiji-physical-layout.json';
 import comparison from '../data/generated/polowat-layout-comparison.json';
+import breakerComparison from '../data/generated/polowat-breaker-comparison.json';
 import {selectedPolowatLayout} from '../app/polowatLayout';
 import {polowatRuntime as runtime} from '../app/polowatRuntime';
 import {dseTopology} from '../app/dseTopology';
@@ -68,6 +69,6 @@ test('selected Polowat configuration has the best score among eight tested valid
  assert.ok(selected);
  assert.equal(selected.score,Math.min(...valid.map(r=>r.score!)));
  assert.deepEqual(selected.sizeMm,runtime.deviceById.get('equipmentEnclosure')!.size.map(n=>Math.round(n*1000)));
- const length=runtime.routes.reduce((sum,r)=>sum+roundedRoutePieces(r.points,Math.max(.009,r.diameterMm/2000*4.25)).reduce((n,p)=>n+p.lengthM,0),0);
- assert.equal(selected.totalLengthM,Number(length.toFixed(3)));
+ // The layout sweep precedes the separate terminal-direction optimization.
+ assert.equal(selected.totalLengthM,breakerComparison.results.find(r=>r.mask===0)!.totalLengthM);
 });

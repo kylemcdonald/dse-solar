@@ -31,7 +31,8 @@
     "generate:polowat-diagram": "tsx scripts/generate-polowat-diagram.ts",
     "generate:polowat-cables": "tsx scripts/generate-polowat-cables.ts",
     "generate:polowat-runtime": "tsx scripts/generate-polowat-runtime.ts",
-    "compare:polowat-layouts": "tsx scripts/compare-polowat-layouts.ts"
+    "compare:polowat-layouts": "tsx scripts/compare-polowat-layouts.ts",
+    "compare:polowat-breakers": "tsx scripts/compare-polowat-breakers.ts"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

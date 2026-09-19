@@ -1,0 +1,193 @@
+{
+  "objective": "Same enclosure and device positions; minimize the existing layout score: area m² + 0.01 × total rounded cable m + 0.02 × upstream battery-positive lead m. This is a routing score, not a dollar price. Reject every geometry or routing failure.",
+  "layout": "bottom-wide-monitor-3",
+  "results": [
+    {
+      "mask": 0,
+      "reversed": [],
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0,
+        "wallCrossings": 0,
+        "reversals": 0
+      },
+      "totalLengthM": 31.406,
+      "batterySourceLeadM": 2.254,
+      "turns": 245,
+      "score": 0.67113
+    },
+    {
+      "mask": 1,
+      "reversed": [
+        "batteryBreakerA"
+      ],
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0,
+        "wallCrossings": 0,
+        "reversals": 0
+      },
+      "totalLengthM": 30.881,
+      "batterySourceLeadM": 2.018,
+      "turns": 243,
+      "score": 0.66117
+    },
+    {
+      "mask": 2,
+      "reversed": [
+        "batteryBreakerB"
+      ],
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0,
+        "wallCrossings": 0,
+        "reversals": 0
+      },
+      "totalLengthM": 31.468,
+      "batterySourceLeadM": 1.913,
+      "turns": 239,
+      "score": 0.66495
+    },
+    {
+      "mask": 3,
+      "reversed": [
+        "batteryBreakerA",
+        "batteryBreakerB"
+      ],
+      "valid": false,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 1,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 1,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0,
+        "wallCrossings": 0,
+        "reversals": 0
+      },
+      "totalLengthM": 30.999,
+      "batterySourceLeadM": 1.642,
+      "turns": 243,
+      "score": 0.65482
+    },
+    {
+      "mask": 4,
+      "reversed": [
+        "controllerBreaker"
+      ],
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0,
+        "wallCrossings": 0,
+        "reversals": 0
+      },
+      "totalLengthM": 31.14,
+      "batterySourceLeadM": 2.254,
+      "turns": 244,
+      "score": 0.66847
+    },
+    {
+      "mask": 5,
+      "reversed": [
+        "batteryBreakerA",
+        "controllerBreaker"
+      ],
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0,
+        "wallCrossings": 0,
+        "reversals": 0
+      },
+      "totalLengthM": 30.812,
+      "batterySourceLeadM": 2.018,
+      "turns": 242,
+      "score": 0.66048
+    },
+    {
+      "mask": 6,
+      "reversed": [
+        "batteryBreakerB",
+        "controllerBreaker"
+      ],
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0,
+        "wallCrossings": 0,
+        "reversals": 0
+      },
+      "totalLengthM": 31.354,
+      "batterySourceLeadM": 1.913,
+      "turns": 239,
+      "score": 0.6638
+    },
+    {
+      "mask": 7,
+      "reversed": [
+        "batteryBreakerA",
+        "batteryBreakerB",
+        "controllerBreaker"
+      ],
+      "valid": false,
+      "failures": {
+        "fallbacks": 2,
+        "centerlineConflicts": 1,
+        "sweptCableConflicts": 2,
+        "selfIntersections": 0,
+        "deviceConflicts": 3,
+        "renderedGeometryConflicts": 5,
+        "glandBoreConflicts": 1,
+        "deviceOverlaps": 0,
+        "wallCrossings": 0,
+        "reversals": 0
+      },
+      "totalLengthM": 29.057,
+      "batterySourceLeadM": 1.642,
+      "turns": 215,
+      "score": 0.63541
+    }
+  ]
+}

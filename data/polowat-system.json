@@ -545,7 +545,7 @@
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must",
-      "description": "Owner-selected B09BYGJGTB supplies 30 ft / 9.144 m EACH red and black, bare-ended. Listing claims tinned copper, UV-resistant PV insulation, −40 to 90°C and 1.5 kV DC / 1.0 kV AC; suitable in principle for outdoor PV and short DC controller wiring. Title says 6 mm², but 84 strands × 0.285 mm implies about 5.36 mm²: calculate conservatively as 10 AWG / 5.26 mm², not certified 6 mm². Offcuts replace both separate Ancor 10 AWG rolls; retain 8 AWG batteries and 12 AWG LOAD. Require ≥30 A ampacity after installation derating for the BATT cuts; verify received conductor/temperature markings, actual jacket OD, gland/MC4 seal fit, crimp contact and controller clamp fit. One lead per controller terminal, max 6 mm²; never trim strands. PV cable temperature rating alone does not establish derated ampacity. Shared 9.144 m per colour: reserve 1.75 m for controller/shunt, 7.15 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site.",
+      "description": "Owner-selected B09BYGJGTB supplies 30 ft / 9.144 m EACH red and black, bare-ended. Listing claims tinned copper, UV-resistant PV insulation, −40 to 90°C and 1.5 kV DC / 1.0 kV AC; suitable in principle for outdoor PV and short DC controller wiring. Title says 6 mm², but 84 strands × 0.285 mm implies about 5.36 mm²: calculate conservatively as 10 AWG / 5.26 mm², not certified 6 mm². Offcuts replace both separate Ancor 10 AWG rolls; retain 8 AWG batteries and 12 AWG LOAD. Require ≥30 A ampacity after installation derating for the BATT cuts; verify received conductor/temperature markings, actual jacket OD, gland/MC4 seal fit, crimp contact and controller clamp fit. One lead per controller terminal, max 6 mm²; never trim strands. PV cable temperature rating alone does not establish derated ampacity. Shared 9.144 m per colour: reserve 1.65 m for controller/shunt, 7.25 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site.",
       "accountingGroup": "system",
       "unitWeightKg": 1.3,
       "totalWeightKg": 1.3,
@@ -1429,7 +1429,7 @@
       "loadAreaMm2": 3.31
     },
     "holds": [
-      "Routed cut allowances give 3.57% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give 2.66%, before terminal/contact resistance. Shorten the actual layout or revise the conductor plan before fabrication; older compact-route assumptions are not a pass.",
+      "Routed cut allowances give 3.29% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give 2.39%, before terminal/contact resistance. Shorten the actual layout or revise the conductor plan before fabrication; older compact-route assumptions are not a pass.",
       "Klein 11061 is rated for 12–22 AWG stranded; 8 AWG battery and 10 AWG PV/controller cutting/stripping capability remains unresolved. The 10 AWG rating applies to solid wire.",
       "Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream.",
       "The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection.",
@@ -4321,13 +4321,13 @@
   "cableStockPlan": {
     "bomId": "polowat-pv-cable",
     "lengthPerColourM": 9.144,
-    "pvRoutePerColourM": 7.15,
-    "controllerRoutePerColourM": 1.75,
+    "pvRoutePerColourM": 7.25,
+    "controllerRoutePerColourM": 1.65,
     "reservePerColourM": 0.244,
     "areaForCalculationsMm2": 5.26,
     "claimedAreaMm2": 6,
     "strandCalculatedAreaMm2": 5.3587,
-    "note": "Shared 9.144 m per colour: reserve 1.75 m for controller/shunt, 7.15 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site."
+    "note": "Shared 9.144 m per colour: reserve 1.65 m for controller/shunt, 7.25 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site."
   },
   "assemblyReview": {
     "revision": "P16",
@@ -4374,7 +4374,7 @@
     "allowance": "15% plus 50 mm per end, each cut rounded up to 50 mm; corresponding parallel battery branch lengths equalized",
     "totals": {
       "8 AWG DC": {
-        "red": 4.5,
+        "red": 3.5,
         "black": 3.4
       },
       "10 AWG PV": {
@@ -4382,17 +4382,17 @@
         "black": 6.55
       },
       "10 AWG DC": {
-        "red": 1.75,
+        "red": 1.65,
         "black": 0.95
       },
       "12 AWG DC": {
         "red": 3.8,
-        "black": 2.3
+        "black": 2.35
       }
     },
-    "modelBatteryControllerDropV": 0.314,
-    "allowanceBatteryControllerDropV": 0.421,
-    "allowanceBatteryControllerDropPercent": 3.57,
+    "modelBatteryControllerDropV": 0.282,
+    "allowanceBatteryControllerDropV": 0.388,
+    "allowanceBatteryControllerDropPercent": 3.29,
     "limits": "Planning geometry, not surveyed site distances or a fabrication release. All modeled routes pass the shared device, cable, wall, self-intersection and rounded-geometry checks. Received hardware and installation clearances still require physical verification. PV span in scene is illustrative, not a surveyed roof run. Check the remaining shared 10 AWG stock after controller cuts before installation.",
     "includesShuntResistanceOhms": 0.0001,
     "method": "Shared 20 mm physical layout and turn-aware A*; device-front exclusion, negotiated cable clearance and exact rounded-geometry audits; lengths measured on the rendered curves"

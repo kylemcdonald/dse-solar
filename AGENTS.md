@@ -172,3 +172,7 @@ Polowat's electrical inventory remains `polowatTopology.ts`; `polowatHardware.ts
 - Gland sleeves have open bores, matching panel holes and straight cable approaches. Generation audits the exact rounded centerline through the full sleeve.
 - `polowatLayout.ts` declares tested arrangements; `compare:polowat-layouts` records rejected and valid candidates plus the selected layout in the public comparison. Keep all runtime collision gates enabled.
 - Fiji must remain unchanged by this Polowat work. Preserve the saved device/terminal/gland/route geometry fixture from commit `1f971eb`; do not update that fixture to accommodate a Polowat edit.
+
+## Polowat non-polarized breaker direction
+
+Battery A, Battery B and controller 30 A non-polarized breakers permit either top/bottom connection assignment. Preserve physical terminal IDs and pole identities: exchange connection endpoints, not terminal faces or body orientation. The PV, Starlink and USB breakers remain polarized and cannot be reversed. `compare:polowat-breakers` tests all eight combinations on the selected layout and rejects every failed routing, gland or geometry audit. Select by the existing layout score; retain the comparison and keep Fiji unchanged.

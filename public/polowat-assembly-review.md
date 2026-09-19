@@ -1,5 +1,9 @@
 # Polowat terminal-level assembly review — P9, 15 September 2026
 
+## Non-polarized breaker direction
+
+The three 30 A Battery A, Battery B and controller breakers may exchange top/bottom connection assignments. All eight combinations are compared on the same physical layout in the [breaker-routing comparison](polowat-breaker-comparison.md). The lowest-cost valid assignment drives the diagram, model and generated cable schedule. Polarized PV/load breakers keep their existing directions; terminal IDs and pole identities remain physical.
+
 ## Compact lower-rail layout · 19 September 2026
 
 The Polowat layout no longer enforces the previous 100 mm controller separation or declared inter-device gaps. All six DIN breakers and four terminal-pair devices touch side-by-side on one lower rail; wires route around the row. Functional space for terminal exits and cable bends remains.

@@ -1,4 +1,4 @@
-import { selectedPolowatLayout, type PolowatLayout } from "./polowatLayout";
+import { selectedPolowatLayout, reversiblePolowatBreakers, selectedPolowatBreakerRouting, type PolowatLayout } from "./polowatLayout";
 import { polowatTopology, type PolowatConductorKind } from './polowatTopology';
 import { polowatParts as assemblyParts, polowatPorts as assemblyPorts, polowatLandings as assemblyWires, terminalGroups } from './polowatHardware';
 import type { Conductor, ConductorKind, DeviceKind, Device, Connection, SystemGraph, Vec3 } from './systemGraph';
@@ -54,8 +54,10 @@ const baseGraph:SystemGraph={id:polowatTopology.id,label:'Inowon Polowat',revisi
  devices,cables:polowatTopology.connections.map(c=>({id:c.id,label:c.label,cores:c.kind==='data'?6:c.kind==='usb'||c.kind==='regulated'?2:1,outsideDiameterMm:assemblyWires.find(w=>w.id===c.id)?.diameter??5,conductorSize:c.gauge,sheath:'single'})),connections:routes,
  junctions:devices.filter(d=>d.kind==='junction').map(d=>({id:d.id,deviceId:d.id,label:d.label,minimumSize:[.5,.24,.24] as Vec3,padding:.02,dinGap:0,backplateGap:0,glandSpacing:.04,sizePolicy:'auto',backplateColumns:3,dinPosition:'bottom',contiguousDin:true,centeredGlands:true})),currentSources:[]};
 
-export function buildPolowatGraph(layout:PolowatLayout):SystemGraph {
- return {...baseGraph,devices:baseGraph.devices.map(device=>{
+export function buildPolowatGraph(layout:PolowatLayout, reversedBreakers:readonly string[]=[]):SystemGraph {
+ for(const id of reversedBreakers)if(!(reversiblePolowatBreakers as readonly string[]).includes(id))throw Error(`Breaker cannot reverse: ${id}`);
+ const endpoint=(key:string)=>{const [id,port]=key.split(".");return reversedBreakers.includes(id)?`${id}.${port.replace(/^(top|bottom)-/,side=>side==="top-"?"bottom-":"top-")}`:key;};
+ return {...baseGraph,connections:baseGraph.connections.map(c=>({...c,from:endpoint(c.from),to:endpoint(c.to)})),devices:baseGraph.devices.map(device=>{
   if(device.placement.space!=="junction")return device;
   const ids=device.placement.section==='din'?layout.dinOrder:layout.backplateOrder;
   const order=ids.indexOf(device.id);
@@ -63,4 +65,4 @@ export function buildPolowatGraph(layout:PolowatLayout):SystemGraph {
   return {...device,placement:{...device.placement,order}};
  }),junctions:baseGraph.junctions.map(j=>({...j,dinPosition:layout.dinPosition,backplateColumns:layout.columns,minimumSize:[layout.minimumWidth,j.minimumSize[1],j.minimumSize[2]]}))};
 }
-export const polowatGraph=buildPolowatGraph(selectedPolowatLayout);
+export const polowatGraph=buildPolowatGraph(selectedPolowatLayout,selectedPolowatBreakerRouting);
