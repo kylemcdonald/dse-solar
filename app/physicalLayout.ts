@@ -448,13 +448,15 @@ function planEnclosure(
   const reach = (device: SizedDevice, face: Face) => Math.max(
     device.conductors.some((port) => facesOf(device, face).includes(port.face) && connected.has(`${device.id}.${port.id}`)) ? cell * 1.5 : 0,
     extraReach.get(device.id)?.[face] ?? 0,
+    device.installationClearanceM?.[face] ?? 0,
   );
   // Facing terminal rows need their two launch rows plus one shared lane row.
   const channel = (below: number, above: number) => (
     below > 0 && above > 0 ? below + above + cell : below + above > 0 ? below + above + cell / 2 : cell
   );
   const horizontalGap = (a: SizedDevice, b: SizedDevice) => {
-    const declared = sectionOf(a) === "din" && sectionOf(b) === "din" ? junction.dinGap : junction.backplateGap;
+    const contiguous = a.layoutGroup?.contiguous && a.layoutGroup.id === b.layoutGroup?.id;
+    const declared = contiguous ? 0 : sectionOf(a) === "din" && sectionOf(b) === "din" ? junction.dinGap : junction.backplateGap;
     const facing = reach(a, "right") + reach(b, "left");
     return Math.max(declared, facing > 0 ? channel(reach(a, "right"), reach(b, "left")) : 0);
   };
@@ -521,6 +523,7 @@ function planEnclosure(
     rows.forEach((row, rowIndex) => {
       const below = rowIndex > 0 ? rows[rowIndex - 1] : undefined;
       const bottomReach = rowReach(row, "bottom");
+      if (!below) floor = Math.max(floor, padding + Math.max(0, ...row.map(d=>d.installationClearanceM?.bottom ?? 0)));
       if (below) {
         const declared = Math.max(junction.backplateGap, cell);
         floor = Math.max(floor, floor - cell / 2 + Math.max(declared, channel(rowReach(below, "top"), bottomReach)));
@@ -541,7 +544,7 @@ function planEnclosure(
         cursor = dx + device.size[0] / 2;
       });
       floor = rowTop + cell / 2;
-      topLaunch = Math.max(topLaunch, rowTop + Math.max(rowReach(row, "top") > 0 ? cell : 0, ...row.map(device => extraReach.get(device.id)?.top ?? 0)));
+      topLaunch = Math.max(topLaunch, rowTop + Math.max(rowReach(row, "top") > 0 ? cell : 0, ...row.map(d=>d.installationClearanceM?.top ?? 0), ...row.map(device => extraReach.get(device.id)?.top ?? 0)));
     });
     return { members, height: topLaunch + cell / 2 + padding };
   };

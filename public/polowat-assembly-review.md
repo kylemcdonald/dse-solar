@@ -1,5 +1,12 @@
 # Polowat terminal-level assembly review — P9, 15 September 2026
 
+## Shared physical layout · 19 September 2026
+
+The current model replaces the earlier bench arrangement and front service loops below. It now uses Fiji's enclosure packing, 20 mm routing lattice, device-front exclusion, smooth bend rendering and collision audits. Data cables are blue. The BMV shunt, display and fused lead remain one purchased kit; USB-A and USB-C are separate modeled leads. Controller cooling clearances and the four isolated contiguous terminal pairs are declared in the shared graph.
+
+The automatically sized enclosure is a routing study, not the deferred retail box or a drilling template. See the live enclosure study and [generated cable schedule](polowat-cable-routing.md) for current dimensions, cut allowances and stock demand. The current black 10 AWG allowance exceeds listed stock by 0.306 m; verify the real roof run and final layout before cutting. Procurement is unchanged. Earlier revisions below are historical and their cable lengths and placement sketches are superseded.
+
+
 ## P16 · BMV-700 ordered, 19 September 2026
 
 The owner ordered one Victron BMV-700 kit (Amazon B01BVQR0V8), item price $88.40. Invoice and actual tax/payment reconciliation are archived in the private Polowat receipt ledger; the public BOM records the kit once. It includes the display, 500 A / 50 mV shunt, 10 m RJ12 cable and 2 m positive lead with a supplied 1 A slow-blow fuse. No separate SmartShunt or Bluetooth accessory is ordered.

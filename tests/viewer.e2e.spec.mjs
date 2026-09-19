@@ -62,7 +62,7 @@ test("Polowat mode exposes its independent wiring, model, energy, BOM, shipping,
 
   const diagram = page.locator(".polowat-diagram-workspace .unified-diagram");
   await expect(diagram).toHaveAttribute("data-diagram-scope", "system");
-  await expect(diagram).toHaveAttribute("data-wire-count", "29");
+  await expect(diagram).toHaveAttribute("data-wire-count", "30");
   await expect(diagram).toHaveAttribute("data-layout-source", "build-generated-artifact");
 
   await page.getByRole("link", { name: "System", exact: true }).click();
@@ -108,10 +108,10 @@ test("Polowat mode exposes its independent wiring, model, energy, BOM, shipping,
   await page.getByRole("link", { name: "3D model" }).click();
   const model = page.locator('.polowat-model[data-model="polowat-planning-topology"]');
   await expect(model).toHaveAttribute("data-device-count", "24", { timeout: 45_000 });
-  await expect(model).toHaveAttribute("data-connection-count", "29");
+  await expect(model).toHaveAttribute("data-connection-count", "30");
   const canvas = model.locator("canvas");
   await expect(canvas).toBeVisible();
-  await expect(canvas).toHaveAttribute("data-system", "inowon-polowat");
+  await expect(canvas).toHaveAttribute("data-system", "inowon-polowat-compact-12v");
   await expect(canvas).toHaveAttribute("data-model-status", "planning-site-inputs-pending");
 });
 

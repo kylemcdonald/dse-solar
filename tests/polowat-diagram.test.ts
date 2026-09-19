@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {polowatDiagramRuntime as runtime} from '../app/polowatDiagramRuntime';
 import {polowatTopology} from '../app/polowatTopology';
-import {assemblyParts,terminalGroups} from '../app/polowatAssembly';
+import {polowatParts as assemblyParts,terminalGroups} from '../app/polowatHardware';
 import layouts from '../data/generated/polowat-diagram-layouts.json';
 
 test('Polowat shared schematic represents every canonical device and circuit without combining rail groups',()=>{
@@ -12,7 +12,7 @@ test('Polowat shared schematic represents every canonical device and circuit wit
  const endpoints=runtime.routes.flatMap(r=>[r.from,r.to]);assert.equal(new Set(endpoints).size,endpoints.length);
  for(const group of terminalGroups){
   const ports=runtime.deviceById.get(group.part)!.conductors.filter(p=>p.id.startsWith(group.id+'-'));
-  assert.equal(ports.length,group.id==='main-positive'?4:3);for(const port of ports)assert.ok(port.internalMates!.every(id=>id.startsWith(group.id+'-')));
+  assert.equal(ports.length,4);for(const port of ports)assert.ok(port.internalMates!.every(id=>id.startsWith(group.id+'-')));
  }
  assert.equal(runtime.graph.junctions.length,1);
  assert.deepEqual(runtime.devices.filter(d=>d.kind==='busbar').map(d=>d.id),['positiveBus','negativeBus','loadPositiveBus','loadNegativeBus']);
@@ -28,7 +28,7 @@ test('Polowat shared schematic represents every canonical device and circuit wit
 
 test('both generated Polowat scopes use the shared orthogonal router without geometry violations',()=>{
  assert.equal(layouts.graphId,runtime.graph.id);assert.equal(layouts.graphRevision,runtime.graph.revision);
- const inside=new Set(assemblyParts.map(p=>p.id));
+ const inside=new Set<string>(assemblyParts.map(p=>p.id));
  assert.ok(layouts.layouts.system.nodes.some(n=>n.deviceId==='equipmentEnclosure'&&n.abstractJunction));
  assert.ok(layouts.layouts.system.nodes.every(n=>!inside.has(n.deviceId)));
  assert.deepEqual(layouts.layouts.equipmentEnclosure.nodes.map(n=>n.deviceId).sort(),[...inside].sort());
@@ -36,7 +36,7 @@ test('both generated Polowat scopes use the shared orthogonal router without geo
   for(const key of ['routingFallbacks','coincidentSegments','nonOrthogonalSegments','unbridgedCrossings','conductorOverlaps','parallelEnvelopeOverlaps','nodeBodyCrossings','nodeOverlaps'] as const)assert.equal(layout[key],0,key);
   for(const wire of layout.wires)assert.ok(wire.points.slice(1).every((p,i)=>p.x===wire.points[i].x||p.y===wire.points[i].y));
  }
- assert.equal(layouts.layouts.equipmentEnclosure.wires.length,27);
+ assert.equal(layouts.layouts.equipmentEnclosure.wires.length,28);
 });
 
 

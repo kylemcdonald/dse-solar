@@ -16,7 +16,7 @@
     "benchmark:routing": "tsx scripts/benchmark-routing.ts",
     "benchmark:diagram": "tsx scripts/benchmark-diagram.ts",
     "update:cable-plan": "tsx scripts/update-cable-plan.ts",
-    "generate:all": "npm run generate:runtime && npm run generate:diagram-layouts && npm run generate:polowat-diagram && npm run generate:polowat-cables && npm run generate:wall-plan",
+    "generate:all": "npm run generate:runtime && npm run generate:diagram-layouts && npm run generate:polowat-runtime && npm run generate:polowat-diagram && npm run generate:polowat-cables && npm run generate:wall-plan",
     "generate:wall-plan": "tsx scripts/generate-wall-plan.ts",
     "generate:runtime": "tsx scripts/generate-runtime.ts",
     "generate:diagram-layouts": "tsx scripts/generate-diagram-layouts.ts",
@@ -29,7 +29,8 @@
     "db:generate": "drizzle-kit generate",
     "typecheck": "wrangler types .wrangler/worker-runtime.d.ts --config worker/types.wrangler.jsonc --include-env false && tsc --noEmit && tsc --noEmit -p tsconfig.worker.json",
     "generate:polowat-diagram": "tsx scripts/generate-polowat-diagram.ts",
-    "generate:polowat-cables": "tsx scripts/generate-polowat-cables.ts"
+    "generate:polowat-cables": "tsx scripts/generate-polowat-cables.ts",
+    "generate:polowat-runtime": "tsx scripts/generate-polowat-runtime.ts"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

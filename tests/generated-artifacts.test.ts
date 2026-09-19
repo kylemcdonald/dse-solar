@@ -65,20 +65,11 @@ test("precomputed 3D runtime artifact is current, complete and conflict-free", a
   assert.equal(artifact.schemaVersion, 2);
   assert.equal(artifact.graphId, dseTopology.id);
   assert.equal(artifact.graphRevision, dseTopology.revision);
-  assert.equal(artifact.sourceHash, await sourceHash(artifact, [
-    "app/dseTopology.ts",
-    "app/systemGraph.ts",
-    "app/systemGraphRuntime.ts",
-    "app/physicalLayout.ts",
-    "app/voxelRouter.ts",
-    "app/routeAudits.ts",
-    "app/currentSafety.ts",
-    "app/renderedCableGeometry.ts",
-    "app/wallPlan.ts",
-    "scripts/generate-runtime.ts",
-  ], [["wall-plan", (artifact as { wallPlanSourceHash?: string | null }).wallPlanSourceHash
-    ? await readJson<{ positions: unknown; floorShiftX: number }>("data/generated/wall-plan.json").then((plan) => JSON.stringify({ positions: plan.positions, floorShiftX: plan.floorShiftX }))
-    : "none"]]), "runtime artifact must be regenerated whenever its inputs change");
+  const { runtimeSourceHash } = await import("../scripts/runtimeArtifact");
+  const { applyWallPlan } = await import("../app/wallPlan");
+  const planHash=(artifact as GraphRuntimeArtifact & {wallPlanSourceHash?:string|null}).wallPlanSourceHash;
+  const plan=planHash ? await readJson<import("../app/wallPlan").WallPlan>("data/generated/wall-plan.json") : undefined;
+  assert.equal(artifact.sourceHash,await runtimeSourceHash(applyWallPlan(dseTopology,plan),["app/dseTopology.ts","app/wallPlan.ts"],planHash??null),"runtime artifact must be regenerated whenever its inputs change");
 
   // Completeness: every device, conductor and connection is represented once.
   assert.equal(artifact.devices.length, dseTopology.devices.length);

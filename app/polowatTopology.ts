@@ -1,4 +1,4 @@
-import { benchDevicePlacement, polowatPlanningShell } from "./polowatEnclosure";
+import { polowatParts } from "./polowatHardware";
 
 export type PolowatDeviceKind =
   | "panel"
@@ -34,7 +34,6 @@ export type PolowatConnection = {
   kind: PolowatConductorKind;
   label: string;
   gauge: string;
-  routeLift?: number;
 };
 
 const devices: PolowatDevice[] = ([
@@ -230,41 +229,42 @@ const devices: PolowatDevice[] = ([
     subtitle: "Planning enclosure sized to layout · final box order deferred",
     kind: "enclosure",
     bomId: "polowat-enclosure",
-    position: polowatPlanningShell.position,
-    size: polowatPlanningShell.size,
+    position: [.3,1.2,.13],
+    size: [.5,.8,.24],
   },
-] as PolowatDevice[]).map(device => ({ ...device, ...benchDevicePlacement(device.id) }));
+] as PolowatDevice[]).map(device => ({ ...device, size: polowatParts.find(p=>p.id===device.id)?.size ?? device.size }));
 
 const connections: PolowatConnection[] = [
-  { id: "panel-series-1", from: "panel1", to: "panel2", kind: "series", label: "MC4 series link", gauge: "Panel leads", routeLift: 0.39 },
-  { id: "panel-series-2", from: "panel2", to: "panel3", kind: "series", label: "MC4 series link", gauge: "Panel leads", routeLift: 0.41 },
-  { id: "pv-home-positive", from: "panel3", to: "pvBreaker", kind: "pv", label: "3S home run + · 4.84 A", gauge: "10 AWG PV", routeLift: 0.46 },
-  { id: "pv-home-negative", from: "panel1", to: "pvBreaker", kind: "negative", label: "3S home run −", gauge: "10 AWG PV", routeLift: 0.49 },
-  { id: "pv-breaker-positive", from: "pvBreaker", to: "mppt", kind: "pv", label: "PV +", gauge: "10 AWG PV", routeLift: 0.34 },
-  { id: "pv-breaker-negative", from: "pvBreaker", to: "mppt", kind: "negative", label: "PV −", gauge: "10 AWG PV", routeLift: 0.37 },
-  { id: "mppt-battery-positive", from: "mppt", to: "controllerBreaker", kind: "positive", label: "BATT + · 20 A / 30 A OCP", gauge: "10 AWG DC", routeLift: 0.30 },
-  { id: "controller-positive-bus", from: "controllerBreaker", to: "positiveBus", kind: "positive", label: "Protected charge path", gauge: "10 AWG DC", routeLift: 0.32 },
-  { id: "mppt-battery-negative", from: "mppt", to: "batteryShunt", kind: "negative", label: "BATT − via shunt SYSTEM side", gauge: "10 AWG DC", routeLift: 0.34 },
+  { id: "panel-series-1", from: "panel1", to: "panel2", kind: "series", label: "MC4 series link", gauge: "Panel leads" },
+  { id: "panel-series-2", from: "panel2", to: "panel3", kind: "series", label: "MC4 series link", gauge: "Panel leads" },
+  { id: "pv-home-positive", from: "panel3", to: "pvBreaker", kind: "pv", label: "3S home run + · 4.84 A", gauge: "10 AWG PV" },
+  { id: "pv-home-negative", from: "panel1", to: "pvBreaker", kind: "negative", label: "3S home run −", gauge: "10 AWG PV" },
+  { id: "pv-breaker-positive", from: "pvBreaker", to: "mppt", kind: "pv", label: "PV +", gauge: "10 AWG PV" },
+  { id: "pv-breaker-negative", from: "pvBreaker", to: "mppt", kind: "negative", label: "PV −", gauge: "10 AWG PV" },
+  { id: "mppt-battery-positive", from: "mppt", to: "controllerBreaker", kind: "positive", label: "BATT + · 20 A / 30 A OCP", gauge: "10 AWG DC" },
+  { id: "controller-positive-bus", from: "controllerBreaker", to: "positiveBus", kind: "positive", label: "Protected charge path", gauge: "10 AWG DC" },
+  { id: "mppt-battery-negative", from: "mppt", to: "batteryShunt", kind: "negative", label: "BATT − via shunt SYSTEM side", gauge: "10 AWG DC" },
   { id: "battery-bus-shunt", from: "negativeBus", to: "batteryShunt", kind: "negative", label: "Combined bank − → shunt BATTERY MINUS", gauge: "10 AWG DC" },
   { id: "monitor-positive-fuse", from: "positiveBus", to: "monitorFuse", kind: "positive", label: "BMV positive sense/power · supplied 1 A fuse", gauge: "Factory fused lead" },
   { id: "monitor-fuse-shunt", from: "monitorFuse", to: "batteryShunt", kind: "positive", label: "Fused supply → shunt +B1", gauge: "Factory fused lead" },
   { id: "monitor-rj12", from: "batteryShunt", to: "batteryMonitor", kind: "data", label: "BMV display · RJ12 power/data", gauge: "Factory RJ12 cable" },
-  { id: "battery-a-positive", from: "batteryA", to: "batteryBreakerA", kind: "positive", label: "Battery A +", gauge: "8 AWG DC", routeLift: 0.28 },
-  { id: "battery-a-positive-bus", from: "batteryBreakerA", to: "positiveBus", kind: "positive", label: "30 A protected +", gauge: "8 AWG DC", routeLift: 0.30 },
-  { id: "battery-a-negative", from: "batteryA", to: "negativeBus", kind: "negative", label: "Battery A −", gauge: "8 AWG DC", routeLift: 0.33 },
-  { id: "battery-b-positive", from: "batteryB", to: "batteryBreakerB", kind: "positive", label: "Battery B +", gauge: "8 AWG DC", routeLift: 0.36 },
-  { id: "battery-b-positive-bus", from: "batteryBreakerB", to: "positiveBus", kind: "positive", label: "30 A protected +", gauge: "8 AWG DC", routeLift: 0.38 },
-  { id: "battery-b-negative", from: "batteryB", to: "negativeBus", kind: "negative", label: "Battery B −", gauge: "8 AWG DC", routeLift: 0.41 },
-  { id: "mppt-load-positive", from: "mppt", to: "loadPositiveBus", kind: "positive", label: "LOAD + · 20 A max", gauge: "12 AWG DC", routeLift: 0.36 },
-  { id: "mppt-load-negative", from: "mppt", to: "loadNegativeBus", kind: "negative", label: "LOAD − · 11.8 V disconnect", gauge: "12 AWG DC", routeLift: 0.39 },
-  { id: "load-starlink-positive", from: "loadPositiveBus", to: "starlinkBreaker", kind: "positive", label: "Starlink +", gauge: "12 AWG DC", routeLift: 0.42 },
-  { id: "starlink-breaker-converter", from: "starlinkBreaker", to: "starlinkConverter", kind: "positive", label: "10 A switched 12 V", gauge: "12 AWG DC", routeLift: 0.45 },
-  { id: "load-starlink-negative", from: "loadNegativeBus", to: "starlinkConverter", kind: "negative", label: "Starlink return", gauge: "12 AWG DC", routeLift: 0.48 },
-  { id: "starlink-regulated", from: "starlinkConverter", to: "starlink", kind: "regulated", label: "Regulated 24 V · OEM cable", gauge: "Factory lead", routeLift: 0.51 },
-  { id: "load-usb-positive", from: "loadPositiveBus", to: "usbBreaker", kind: "positive", label: "USB +", gauge: "12 AWG DC", routeLift: 0.54 },
-  { id: "usb-breaker-charger", from: "usbBreaker", to: "usbCharger", kind: "positive", label: "10 A switched 12 V", gauge: "12 AWG DC", routeLift: 0.57 },
-  { id: "load-usb-negative", from: "loadNegativeBus", to: "usbCharger", kind: "negative", label: "USB return", gauge: "12 AWG DC", routeLift: 0.60 },
-  { id: "usb-device-leads", from: "usbCharger", to: "devices", kind: "usb", label: "Capped USB-C + USB-A ports", gauge: "Factory USB leads", routeLift: 0.63 },
+  { id: "battery-a-positive", from: "batteryA", to: "batteryBreakerA", kind: "positive", label: "Battery A +", gauge: "8 AWG DC" },
+  { id: "battery-a-positive-bus", from: "batteryBreakerA", to: "positiveBus", kind: "positive", label: "30 A protected +", gauge: "8 AWG DC" },
+  { id: "battery-a-negative", from: "batteryA", to: "negativeBus", kind: "negative", label: "Battery A −", gauge: "8 AWG DC" },
+  { id: "battery-b-positive", from: "batteryB", to: "batteryBreakerB", kind: "positive", label: "Battery B +", gauge: "8 AWG DC" },
+  { id: "battery-b-positive-bus", from: "batteryBreakerB", to: "positiveBus", kind: "positive", label: "30 A protected +", gauge: "8 AWG DC" },
+  { id: "battery-b-negative", from: "batteryB", to: "negativeBus", kind: "negative", label: "Battery B −", gauge: "8 AWG DC" },
+  { id: "mppt-load-positive", from: "mppt", to: "loadPositiveBus", kind: "positive", label: "LOAD + · 20 A max", gauge: "12 AWG DC" },
+  { id: "mppt-load-negative", from: "mppt", to: "loadNegativeBus", kind: "negative", label: "LOAD − · 11.8 V disconnect", gauge: "12 AWG DC" },
+  { id: "load-starlink-positive", from: "loadPositiveBus", to: "starlinkBreaker", kind: "positive", label: "Starlink +", gauge: "12 AWG DC" },
+  { id: "starlink-breaker-converter", from: "starlinkBreaker", to: "starlinkConverter", kind: "positive", label: "10 A switched 12 V", gauge: "12 AWG DC" },
+  { id: "load-starlink-negative", from: "loadNegativeBus", to: "starlinkConverter", kind: "negative", label: "Starlink return", gauge: "12 AWG DC" },
+  { id: "starlink-regulated", from: "starlinkConverter", to: "starlink", kind: "regulated", label: "Regulated 24 V · OEM cable", gauge: "Factory lead" },
+  { id: "load-usb-positive", from: "loadPositiveBus", to: "usbBreaker", kind: "positive", label: "USB +", gauge: "12 AWG DC" },
+  { id: "usb-breaker-charger", from: "usbBreaker", to: "usbCharger", kind: "positive", label: "10 A switched 12 V", gauge: "12 AWG DC" },
+  { id: "load-usb-negative", from: "loadNegativeBus", to: "usbCharger", kind: "negative", label: "USB return", gauge: "12 AWG DC" },
+  { id: "usb-device-leads", from: "usbCharger", to: "devices", kind: "usb", label: "Capped USB-C port", gauge: "Factory USB-C lead" },
+  {id:"usb-a-device-lead",from:"usbCharger",to:"devices",kind:"usb",label:"Capped USB-A port",gauge:"Factory USB-A lead"},
 ];
 
 export const polowatTopology = {

@@ -4,7 +4,8 @@ import {createDiagramLayoutBuilder} from '../app/diagramLayout';
 import {polowatDiagramRuntime as runtime} from '../app/polowatDiagramRuntime';
 const output=new URL('../data/generated/polowat-diagram-layouts.json',import.meta.url);
 const hash=createHash('sha256');
-for(const name of ['diagramLayout.ts','diagramPlacement.ts','diagramNodes.ts','polowatDiagramRuntime.ts','polowatTopology.ts','polowatAssembly.ts','polowatEnclosure.ts'])hash.update(readFileSync(new URL('../app/'+name,import.meta.url)));
+for(const name of ['diagramLayout.ts','diagramPlacement.ts','diagramNodes.ts','polowatDiagramRuntime.ts','polowatGraph.ts','polowatTopology.ts','polowatHardware.ts'])hash.update(readFileSync(new URL('../app/'+name,import.meta.url)));
+hash.update(readFileSync(new URL('../data/generated/polowat-runtime.json',import.meta.url)));
 hash.update(readFileSync(new URL(import.meta.url)));
 const sourceHash=hash.digest('hex');
 if(existsSync(output)&&JSON.parse(readFileSync(output,'utf8')).sourceHash===sourceHash){console.log('Polowat diagram is current.');process.exit(0);}

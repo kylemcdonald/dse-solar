@@ -271,6 +271,10 @@ export type Device = {
   holdReason?: string;
   poles?: 1 | 2 | 3 | 4;
   color?: string;
+  /** Hardware shape, independent of project or device ID. */
+  appearance?: "round-display" | "current-shunt" | "terminal-pair" | "inline-fuse" | "earth-bar" | "ac-socket" | "ac-plug" | "light";
+  /** Required free space around the body (e.g. controller cooling). */
+  installationClearanceM?: Partial<Record<Face, number>>;
   /** View-independent grouping hint for repeated physical families. Consumers
    * may arrange members in this declared column count without inferring IDs. */
   layoutGroup?: {
@@ -278,6 +282,8 @@ export type Device = {
     label: string;
     columns: number;
     order: number;
+    /** Adjacent members share a continuous rail; no inter-device gap. */
+    contiguous?: boolean;
   };
   /** Optional maker-derived pitch for terminals on a face. It must be an
    * integer multiple of the global route cell; this keeps large hardware such
@@ -408,8 +414,8 @@ export type Junction = {
 export type WallVolume = { id: string; center: Vec3; size: Vec3; normal: Vec3 };
 export type SiteGeometry = {
   walls: readonly WallVolume[];
-  roof: { center: Vec3; size: Vec3 };
-  shelf: { center: Vec3; size: Vec3 };
+  roof?: { center: Vec3; size: Vec3 };
+  shelf?: { center: Vec3; size: Vec3 };
   note: string;
 };
 export const graphWalls = (graph: Pick<SystemGraph, "site">): readonly WallVolume[] => graph.site?.walls

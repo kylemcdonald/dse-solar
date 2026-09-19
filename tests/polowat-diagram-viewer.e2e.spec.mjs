@@ -6,7 +6,7 @@ test('Polowat uses Fiji schematic navigation, inspection, zoom and enclosure sub
  const diagram=page.locator('.unified-diagram');
  await expect(diagram).toHaveAttribute('data-diagram-scope','system');
  await expect(diagram).toHaveAttribute('data-layout-source','build-generated-artifact');
- await expect(diagram).toHaveAttribute('data-wire-count','29');
+ await expect(diagram).toHaveAttribute('data-wire-count','30');
  await expect(diagram).toHaveAttribute('data-node-overlaps','0');
  await page.getByRole('button',{name:'Main junction box',exact:true}).click();
  await expect(diagram).toHaveAttribute('data-junction-id','equipmentEnclosure');

@@ -1,12 +1,8 @@
-import * as THREE from 'three';
 import artifact from '../data/generated/polowat-cable-routes.json';
+import { roundedRouteCurve } from './cableCurve3D';
+import type { Vec3 } from './systemGraph';
 export const polowatCableRoutes=artifact;
-/** The measurement and both rendering paths use the same piecewise-linear centreline. */
-export function cableCurve(points:readonly (readonly number[])[]){
- const curve=new THREE.CurvePath<THREE.Vector3>();
- for(let i=1;i<points.length;i++){
-  const a=new THREE.Vector3(...points[i-1] as [number,number,number]),b=new THREE.Vector3(...points[i] as [number,number,number]);
-  if(a.distanceTo(b)>1e-9)curve.add(new THREE.LineCurve3(a,b));
- }
- return curve;
+/** Shared rounded centreline; callers must supply the actual cable diameter. */
+export function cableCurve(points:readonly (readonly number[])[], diameterMm=5){
+ return roundedRouteCurve(points as readonly Vec3[], Math.max(.009,diameterMm/2000*4.25));
 }

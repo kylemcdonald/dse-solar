@@ -1,16 +1,18 @@
+import { polowatRuntime } from './polowatRuntime';
 import {polowatCableRoutes} from './polowatCableRoutes';
 import polowatSystem from '../data/polowat-system.json';
 import { polowatDeviceById, polowatTopology } from './polowatTopology';
 import { polowatEnclosure } from './polowatEnclosure';
-import { assemblyParts, assemblyWires } from './polowatAssembly';
+import { polowatParts as assemblyParts } from './polowatHardware';
 
 export type PolowatModelSelection = { deviceId?: string; connectionId?: string; info?: string };
 
 export function PolowatModelInspector({selection,onClose,onSelect}:{selection:PolowatModelSelection;onClose:()=>void;onSelect:(selection:PolowatModelSelection)=>void}) {
   const device = polowatDeviceById.get(selection.deviceId ?? '');
   const connection = polowatTopology.connections.find(item => item.id === selection.connectionId);
+  const resolved = polowatRuntime.deviceById.get(selection.deviceId ?? '');
   const part = assemblyParts.find(item => item.id === device?.id);
-  const wire = assemblyWires.find(item => item.id === connection?.id);
+  const wire = polowatRuntime.routeById.get(connection?.id ?? '');
   const routed = polowatCableRoutes.routes.find(r=>r.id===connection?.id);
   const bom = polowatSystem.bom.find(item => item.id === device?.bomId);
   const connections = device ? polowatTopology.connections.filter(item => item.from === device.id || item.to === device.id) : [];
@@ -21,7 +23,7 @@ export function PolowatModelInspector({selection,onClose,onSelect}:{selection:Po
     {device && <p>{device.subtitle}</p>}
     {selection.info && <p>{selection.info}</p>}
     <dl className="graph-detail-list">
-      {device && <div><dt>Size</dt><dd>{device.size.map(value => `${Math.round(value * 1000)} mm`).join(' × ')}</dd></div>}
+      {device && <div><dt>Routing envelope</dt><dd>{(resolved?.size ?? device.size).map(value => `${Math.round(value * 1000)} mm`).join(' × ')}</dd></div>}
       {connection && <><div><dt>Wire</dt><dd>{connection.gauge}</dd></div><div><dt>From</dt><dd><button onClick={()=>onSelect({deviceId:connection.from})}>{polowatDeviceById.get(connection.from)?.label}</button></dd></div><div><dt>To</dt><dd><button onClick={()=>onSelect({deviceId:connection.to})}>{polowatDeviceById.get(connection.to)?.label}</button></dd></div></>}
       {routed && <><div><dt>Modeled route</dt><dd>{routed.modelLengthM.toFixed(2)} m</dd></div>{routed.fieldCut && <div><dt>Planning cut with allowance</dt><dd>{routed.cutLengthM.toFixed(2)} m</dd></div>}</>}
       {wire && <div><dt>Landings</dt><dd>{wire.from} → {wire.to}</dd></div>}

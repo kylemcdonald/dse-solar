@@ -838,7 +838,7 @@ const dseBaseDevices: readonly Device[] = [
     ],
   },
   {
-    id: "generator", label: "Generator input · Type I male plug", kind: "connector",
+    id: "generator", appearance: "ac-plug", label: "Generator input · Type I male plug", kind: "connector",
     size: [0.065, 0.065, 0.045], placement: wall([1.28, 0.91, 0.06]),
     terminalPitchByFaceM: { bottom: AC_CORE_PITCH_M },
     componentId: "generator", bomIds: ["dse-existing-generator"], status: "purchased", procurementStatus: "existing", technicalUrl: HUSQVARNA_G3200P,
@@ -872,7 +872,7 @@ const dseBaseDevices: readonly Device[] = [
     "bottom",
   ),
   {
-    id: "toolOutlet", label: "Type I trailing tool outlet", kind: "load",
+    id: "toolOutlet", appearance: "ac-socket", label: "Type I trailing tool outlet", kind: "load",
     size: [0.085, 0.060, 0.040], placement: wall([1.10, 0.91, 0.06]),
     terminalPitchByFaceM: { bottom: AC_CORE_PITCH_M },
     componentId: "toolOutlet", bomIds: ["dse-fiji-10a-surface-socket"], status: "planned",
@@ -1050,13 +1050,13 @@ const dseBaseDevices: readonly Device[] = [
   twoCoreBreakout("indoorLightBreakout", "Indoor-light two-core breakout", wall([1.28, 1.85, 0.05])),
 
   {
-    id: "indoorLight", label: "Indoor light 1", kind: "load", size: [0.127, 0.055, 0.055], placement: ceiling([1.4, 3.05, 1.3]),
+    id: "indoorLight", appearance: "light", label: "Indoor light 1", kind: "load", size: [0.127, 0.055, 0.055], placement: ceiling([1.4, 3.05, 1.3]),
     componentId: "indoorLight", bomIds: ["dse-indoor-light"], status: "purchased",
     power: { role: "load", basis: "user-confirmed", verified: true, readings: [{ label: "Input", watts: 5, voltage: "12–28 VDC" }], note: "5 W value confirmed by the system owner; verify received label/current during bench commissioning." },
     conductors: [p("power", "Factory two-core light lead", "multicore", "left", { terminal: "Factory light pigtail", terminalSize: "Two-core 24 V lead", termination: "Sealed two-core cable splice", terminalDiameterMm: 6.4, internalMates: ["positive", "negative"] })],
   },
   {
-    id: "indoorLight2", label: "Indoor light 2", kind: "load", size: [0.127, 0.055, 0.055], placement: ceiling([2.6, 3.05, 1.3]),
+    id: "indoorLight2", appearance: "light", label: "Indoor light 2", kind: "load", size: [0.127, 0.055, 0.055], placement: ceiling([2.6, 3.05, 1.3]),
     componentId: "indoorLight2", bomIds: ["dse-outdoor-light"], status: "purchased",
     power: { role: "load", basis: "user-confirmed", verified: true, readings: [{ label: "Input", watts: 5, voltage: "12–28 VDC" }], note: "5 W value confirmed by the system owner; verify received label/current during bench commissioning." },
     conductors: [p("power", "Factory two-core light lead", "multicore", "front", { terminal: "Factory light pigtail", terminalSize: "Two-core 24 V lead", termination: "Sealed two-core cable splice", terminalDiameterMm: 6.4, internalMates: ["positive", "negative"] })],

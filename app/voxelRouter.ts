@@ -531,7 +531,9 @@ export function routeConnections(
       index, connection, diameterMm: cableById.get(connection.cableId)?.outsideDiameterMm ?? 4,
       fromCandidates: groupMembers(from), toCandidates: groupMembers(to),
       regions, glands: glandSet, stubCells: new Set(),
-      deviceIndices: new Set([deviceIndexById.get(from.device.id)!, deviceIndexById.get(to.device.id)!]),
+      // Only actual front-face terminals need the short face-approach exception.
+      // A cable ending at a top/bottom/side clamp must not cross that device's front.
+      deviceIndices: new Set([from,to].filter(endpoint=>endpoint.conductor.face==='front').map(endpoint=>deviceIndexById.get(endpoint.device.id)!)),
       cells: [], points: [], cost: Infinity, routed: false, direct: false,
     };
   });
@@ -697,8 +699,10 @@ export function routeConnections(
     const goalSet = firstWire(goals);
     if (startSet.length === 0 || goalSet.length === 0) return undefined;
     const jobId = job.index + 1;
-    // A bend radius of 1.1 × cable radius needs a leg of at least one cell.
-    const thick = job.diameterMm >= 8;
+    // A half-cell terminal stub leaves at most 0.48 × 10 mm for a
+    // fillet (with a small cubic approximation margin). Include the swept
+    // clearance used by the rendered audit, rather than rounding OD to 8 mm.
+    const thick = job.diameterMm / 2000 * 1.1 + 0.0005 > ROUTE_CELL_M * 0.235;
     const own = (index: number) => grid.occupant[index] === jobId || grid.reserved[index] === jobId;
     const launchFree = (launch: Launch) => grid.postGroup.has(launch.cell) || grid.reserved[launch.cell] === jobId;
 

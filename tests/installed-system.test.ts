@@ -80,8 +80,8 @@ test('the installed model has a real northwest corner and the reported battery o
     assert.ok(placement.space === 'world' && placement.wallId === 'north', id);
   }
   const y = (id: string) => dseRuntime.deviceById.get(id)!.position[1];
-  assert.ok(y('acJunction') < dseTopology.site!.shelf.center[1]);
-  assert.ok(dseTopology.site!.shelf.center[1] < y('usbMiniA'));
+  assert.ok(y('acJunction') < dseTopology.site!.shelf!.center[1]);
+  assert.ok(dseTopology.site!.shelf!.center[1] < y('usbMiniA'));
   assert.ok(y('usbMiniA') < y('usbOrion') && y('usbOrion') < y('secondaryJunction'));
 });
 
@@ -169,7 +169,7 @@ test('installed geometry corrections keep panel direction, entries, shelf and te
   assert.equal(glands.filter(gland => gland.face === 'top').length, 3);
   assert.equal(glands.filter(gland => gland.face === 'bottom').length, 3);
   assert.deepEqual(sampledRouteSiteConflicts(dseRuntime.routes, dseTopology), []);
-  const shelf = dseTopology.site!.shelf;
+  const shelf = dseTopology.site!.shelf!;
   const collision = { ...dseRuntime.routes[0], points: [[shelf.center[0], shelf.center[1] - .1, shelf.center[2]], [shelf.center[0], shelf.center[1] + .1, shelf.center[2]]] as const };
   assert.ok(sampledRouteSiteConflicts([collision], dseTopology).length > 0, 'shelf audit detects a wire through the shelf');
 });
