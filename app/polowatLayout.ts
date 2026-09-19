@@ -20,4 +20,4 @@ export const selectedPolowatLayout=polowatLayoutCandidates.find(p=>p.id==='botto
 
 /** Non-polarized positions may exchange top/bottom connections without rotating the body. */
 export const reversiblePolowatBreakers=["batteryBreakerA","batteryBreakerB","controllerBreaker"] as const;
-export const selectedPolowatBreakerRouting:readonly string[]=["batteryBreakerA", "controllerBreaker"];
+export const selectedPolowatBreakerRouting:readonly string[]=["batteryBreakerA", "batteryBreakerB"];

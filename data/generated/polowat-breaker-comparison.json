@@ -13,15 +13,16 @@
         "selfIntersections": 0,
         "deviceConflicts": 0,
         "renderedGeometryConflicts": 0,
+        "diagonalSegments": 0,
         "glandBoreConflicts": 0,
         "deviceOverlaps": 0,
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 31.406,
-      "batterySourceLeadM": 2.254,
-      "turns": 245,
-      "score": 0.67113
+      "totalLengthM": 29.311,
+      "batterySourceLeadM": 1.979,
+      "turns": 194,
+      "score": 0.6447
     },
     {
       "mask": 1,
@@ -36,15 +37,16 @@
         "selfIntersections": 0,
         "deviceConflicts": 0,
         "renderedGeometryConflicts": 0,
+        "diagonalSegments": 0,
         "glandBoreConflicts": 0,
         "deviceOverlaps": 0,
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 30.881,
-      "batterySourceLeadM": 2.018,
-      "turns": 243,
-      "score": 0.66117
+      "totalLengthM": 28.974,
+      "batterySourceLeadM": 1.83,
+      "turns": 193,
+      "score": 0.63835
     },
     {
       "mask": 2,
@@ -59,15 +61,16 @@
         "selfIntersections": 0,
         "deviceConflicts": 0,
         "renderedGeometryConflicts": 0,
+        "diagonalSegments": 0,
         "glandBoreConflicts": 0,
         "deviceOverlaps": 0,
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 31.468,
-      "batterySourceLeadM": 1.913,
-      "turns": 239,
-      "score": 0.66495
+      "totalLengthM": 29.313,
+      "batterySourceLeadM": 1.687,
+      "turns": 193,
+      "score": 0.63887
     },
     {
       "mask": 3,
@@ -75,23 +78,24 @@
         "batteryBreakerA",
         "batteryBreakerB"
       ],
-      "valid": false,
+      "valid": true,
       "failures": {
         "fallbacks": 0,
         "centerlineConflicts": 0,
         "sweptCableConflicts": 0,
-        "selfIntersections": 1,
+        "selfIntersections": 0,
         "deviceConflicts": 0,
-        "renderedGeometryConflicts": 1,
+        "renderedGeometryConflicts": 0,
+        "diagonalSegments": 0,
         "glandBoreConflicts": 0,
         "deviceOverlaps": 0,
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 30.999,
-      "batterySourceLeadM": 1.642,
-      "turns": 243,
-      "score": 0.65482
+      "totalLengthM": 28.84,
+      "batterySourceLeadM": 1.499,
+      "turns": 193,
+      "score": 0.63038
     },
     {
       "mask": 4,
@@ -106,15 +110,16 @@
         "selfIntersections": 0,
         "deviceConflicts": 0,
         "renderedGeometryConflicts": 0,
+        "diagonalSegments": 0,
         "glandBoreConflicts": 0,
         "deviceOverlaps": 0,
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 31.14,
-      "batterySourceLeadM": 2.254,
-      "turns": 244,
-      "score": 0.66847
+      "totalLengthM": 29.741,
+      "batterySourceLeadM": 1.979,
+      "turns": 196,
+      "score": 0.64899
     },
     {
       "mask": 5,
@@ -130,15 +135,16 @@
         "selfIntersections": 0,
         "deviceConflicts": 0,
         "renderedGeometryConflicts": 0,
+        "diagonalSegments": 0,
         "glandBoreConflicts": 0,
         "deviceOverlaps": 0,
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 30.812,
-      "batterySourceLeadM": 2.018,
-      "turns": 242,
-      "score": 0.66048
+      "totalLengthM": 29.027,
+      "batterySourceLeadM": 1.789,
+      "turns": 196,
+      "score": 0.63806
     },
     {
       "mask": 6,
@@ -154,15 +160,16 @@
         "selfIntersections": 0,
         "deviceConflicts": 0,
         "renderedGeometryConflicts": 0,
+        "diagonalSegments": 0,
         "glandBoreConflicts": 0,
         "deviceOverlaps": 0,
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 31.354,
-      "batterySourceLeadM": 1.913,
-      "turns": 239,
-      "score": 0.6638
+      "totalLengthM": 29.699,
+      "batterySourceLeadM": 1.687,
+      "turns": 196,
+      "score": 0.64273
     },
     {
       "mask": 7,
@@ -171,23 +178,24 @@
         "batteryBreakerB",
         "controllerBreaker"
       ],
-      "valid": false,
+      "valid": true,
       "failures": {
-        "fallbacks": 2,
-        "centerlineConflicts": 1,
-        "sweptCableConflicts": 2,
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
         "selfIntersections": 0,
-        "deviceConflicts": 3,
-        "renderedGeometryConflicts": 5,
-        "glandBoreConflicts": 1,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "diagonalSegments": 0,
+        "glandBoreConflicts": 0,
         "deviceOverlaps": 0,
         "wallCrossings": 0,
         "reversals": 0
       },
-      "totalLengthM": 29.057,
-      "batterySourceLeadM": 1.642,
-      "turns": 215,
-      "score": 0.63541
+      "totalLengthM": 28.894,
+      "batterySourceLeadM": 1.499,
+      "turns": 192,
+      "score": 0.63093
     }
   ]
 }

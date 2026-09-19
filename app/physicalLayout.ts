@@ -535,10 +535,24 @@ function planEnclosure(
       const rowSpan = rowWidth(row);
       const centered = rowIndex === 0 || row.every((device) => sectionOf(device) === "din");
       let cursor = padding + sideChannel + (centered ? (usable - rowSpan) / 2 : 0) + reach(row[0], "left");
+      // Align the first terminal column, then preserve the contiguous module pitch.
+      // Centring the body alone puts symmetric two-pole terminals half a cell off-grid.
+      const terminalOffsetX=(device:SizedDevice)=>{
+        const port=device.conductors.find(p=>p.face==="top"||p.face==="bottom");
+        return port?terminalLocalPosition(device,port.id)[0]:0;
+      };
+      if(junction.contiguousDin && row.every(d=>sectionOf(d)==="din")){
+        const terminalX=cursor+row[0].size[0]/2+terminalOffsetX(row[0]);
+        cursor+=snapCell(terminalX)-terminalX;
+      }
       let rowTop = faceY;
       row.forEach((device, index) => {
         if (index > 0) cursor += horizontalGap(row[index - 1], device);
-        const dx = junction.contiguousDin && sectionOf(device) === "din" ? snapHalf(cursor + device.size[0] / 2) : geometryMetres(Math.ceil((cursor + device.size[0] / 2) / cell - 1e-9) * 2);
+        let dx = junction.contiguousDin && sectionOf(device) === "din" ? snapHalf(cursor + device.size[0] / 2) : geometryMetres(Math.ceil((cursor + device.size[0] / 2) / cell - 1e-9) * 2);
+        if(junction.contiguousDin && device.centeredTerminals && sectionOf(device)!=="din"){
+          const offset=terminalOffsetX(device);
+          dx=Math.ceil((cursor+device.size[0]/2+offset)/cell-1e-9)*cell-offset;
+        }
         const rowHeight=junction.contiguousDin && sectionOf(device)==="din" ? Math.max(...row.map(d=>d.size[1])) : device.size[1];
         const dy = geometryMetres(Math.ceil((faceY + rowHeight / 2) / cell - 1e-9) * 2);
         members.set(device.id, { dx, dy });
@@ -701,7 +715,7 @@ export function resolveDevices(graph: SystemGraph): ResolvedDevice[] {
       if (z - device.size[2] / 2 < shellBack + 0.010 - 1e-9) z += ROUTE_CELL_M;
       if (z + device.size[2] / 2 > container.size[2] / 2 + 1e-9) z -= ROUTE_CELL_M;
       if (z - device.size[2] / 2 < shellBack + 0.010 - 1e-9) throw new Error(`${id}: no lattice mounting depth fits ${container.id}`);
-      const position = (junction.contiguousDin && device.placement.space === "junction" && device.placement.section === "din" ? (p:Vec3)=>p.map(snapHalf) as unknown as Vec3 : snapCellVec)(worldPoint(container, [left + dx, bottom + dy, z]));
+      const position = (junction.contiguousDin && device.placement.space === "junction" && (device.placement.section === "din" || device.centeredTerminals) ? (p:Vec3)=>p.map(snapHalf) as unknown as Vec3 : snapCellVec)(worldPoint(container, [left + dx, bottom + dy, z]));
       const angle = device.placement.space === "junction" ? device.placement.rotationZ ?? 0 : 0;
       resolved.set(id, { ...device, position, size: device.size, rotation: [container.rotation[0], container.rotation[1], container.rotation[2] + angle] });
     });

@@ -37,8 +37,9 @@ const pathDrop=(field:'modelLengthM'|'cutLengthM')=>{
 };
 const modelDrop=pathDrop('modelLengthM'),cutDrop=pathDrop('cutLengthM');
 const dropPercent=Number((cutDrop/11.8*100).toFixed(2));
+const dropAssessment=dropPercent>3?"Cut allowances exceed the 3% target; shorten the physical layout or revise the conductor plan before fabrication.":"Modeled cut allowances meet the 3% target before terminal/contact resistance; verify the remaining margin on the physical assembly.";
 system.routedCablePlan={...system.routedCablePlan,method:result.method,limits:result.limits,totals,modelBatteryControllerDropV:Number(modelDrop.toFixed(3)),allowanceBatteryControllerDropV:Number(cutDrop.toFixed(3)),allowanceBatteryControllerDropPercent:dropPercent,includesShuntResistanceOhms:.0001};
-system.electricalAudit.holds=system.electricalAudit.holds.map((note:string)=>note.startsWith('Routed cut allowances give')?`Routed cut allowances give ${dropPercent}% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give ${(modelDrop/11.8*100).toFixed(2)}%, before terminal/contact resistance. Shorten the actual layout or revise the conductor plan before fabrication; older compact-route assumptions are not a pass.`:note);
+system.electricalAudit.holds=system.electricalAudit.holds.map((note:string)=>note.startsWith('Routed cut allowances give')?`Routed cut allowances give ${dropPercent}% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give ${(modelDrop/11.8*100).toFixed(2)}%, before terminal/contact resistance. ${dropAssessment}`:note);
 const controllerReserve=Math.max(totals['10 AWG DC'].red,totals['10 AWG DC'].black);
 const pvReserve=Number((system.cableStockPlan.lengthPerColourM-controllerReserve-system.cableStockPlan.reservePerColourM).toFixed(3));
 system.cableStockPlan.controllerRoutePerColourM=controllerReserve;
@@ -64,7 +65,7 @@ The shared 10 AWG stock must cover PV, controller and both shunt legs together: 
 
 ## Electrical limits
 
-At 20 A, 11.8 V and 75°C copper, modeled battery/controller drop is ${modelDrop.toFixed(3)} V (${(modelDrop/11.8*100).toFixed(2)}%); cut allowances give ${cutDrop.toFixed(3)} V (${dropPercent}%). Both include the 500 A / 50 mV shunt's 2 mV drop at 20 A; terminal/contact resistance is additional. The 3% target remains unresolved. Shorten and measure the physical arrangement or revise the conductor plan before fabrication. Battery-to-box positives remain upstream of their in-box isolators; source-end protection remains unresolved.
+At 20 A, 11.8 V and 75°C copper, modeled battery/controller drop is ${modelDrop.toFixed(3)} V (${(modelDrop/11.8*100).toFixed(2)}%); cut allowances give ${cutDrop.toFixed(3)} V (${dropPercent}%). Both include the 500 A / 50 mV shunt's 2 mV drop at 20 A; terminal/contact resistance is additional. ${dropAssessment} Battery-to-box positives remain upstream of their in-box isolators; source-end protection remains unresolved.
 
 | Circuit | Gauge / colour | Model length | Cut with allowance |
 |---|---|---:|---:|

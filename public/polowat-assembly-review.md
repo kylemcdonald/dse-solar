@@ -1,5 +1,9 @@
 # Polowat terminal-level assembly review — P9, 15 September 2026
 
+## Terminal-grid alignment
+
+The DIN row and centered fuse terminals now align with the main 20 mm routing grid. Components remain contiguous; terminal leads leave square to their device faces. Diagonal lead adapters are removed. Every Polowat route segment, including terminal leads, must be axis-aligned before smooth elbows are rendered. Fiji is unchanged. The breaker direction comparison and cable schedule are regenerated for this alignment.
+
 ## Non-polarized breaker direction
 
 The three 30 A Battery A, Battery B and controller breakers may exchange top/bottom connection assignments. All eight combinations are compared on the same physical layout in the [breaker-routing comparison](polowat-breaker-comparison.md). The lowest-cost valid assignment drives the diagram, model and generated cable schedule. Polarized PV/load breakers keep their existing directions; terminal IDs and pole identities remain physical.

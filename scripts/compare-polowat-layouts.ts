@@ -1,3 +1,4 @@
+import {nonOrthogonalRouteSegments} from '../app/routeAudits';
 import {spawnSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
 import {glandCrossingFailures} from "../app/glandAudit";
@@ -55,6 +56,7 @@ for(const layout of polowatLayoutCandidates.filter(p=>p.id===process.argv[2])){
   const runtime=buildSystemRuntime(buildPolowatGraph(layout),{renderedAudit:true});
   const d=runtime.diagnostics;
   const failures=Object.fromEntries(['fallbacks','centerlineConflicts','sweptCableConflicts','selfIntersections','deviceConflicts','renderedGeometryConflicts'].map(k=>[k,d[k as keyof typeof d]]));
+  failures.diagonalSegments=nonOrthogonalRouteSegments(runtime.routes).length;
   failures.glandBoreConflicts=glandCrossingFailures(runtime).length;
   failures.deviceOverlaps=sampledResolvedDeviceOverlaps(runtime.devices).length;
   const box=runtime.deviceById.get('equipmentEnclosure')!;

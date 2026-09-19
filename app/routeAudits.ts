@@ -878,3 +878,9 @@ function blocksRoutingColumn(device: ResolvedDevice) {
   if (device.placement.space === "world") return ["wall", "outside-wall"].includes(device.placement.surface);
   return true;
 }
+
+/** Check the routing skeleton, not tessellation chords along a rounded elbow. */
+export function nonOrthogonalRouteSegments(routes:readonly Pick<RoutedConnection,'id'|'points'>[]):string[] {
+ return routes.flatMap(route=>route.points.slice(1).flatMap((point,i)=>
+  point.filter((v,axis)=>Math.abs(v-route.points[i][axis])>1e-8).length>1?[`${route.id}: segment ${i}`]:[]));
+}

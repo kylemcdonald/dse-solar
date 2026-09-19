@@ -23,7 +23,8 @@ test('displayed cable centreline lengths, cut allowances and purchased packs agr
  const branch=(letter:string,suffix:string[])=>plan.routes.filter(r=>suffix.some(s=>r.id===`battery-${letter}-${s}`)).reduce((s,r)=>s+r.cutLengthM,0);
  assert.ok(Math.abs(branch('a',['positive','positive-bus'])-branch('b',['positive','positive-bus']))<1e-8);
  assert.equal(branch('a',['negative']),branch('b',['negative']));
- assert.ok(system.routedCablePlan.allowanceBatteryControllerDropPercent>3);
+ assert.ok(Math.abs(system.routedCablePlan.allowanceBatteryControllerDropPercent-system.routedCablePlan.allowanceBatteryControllerDropV/11.8*100)<.01);
+ assert.ok(system.routedCablePlan.allowanceBatteryControllerDropV>=system.routedCablePlan.modelBatteryControllerDropV);
  assert.ok(!system.bom.some(b=>b.item.includes('Ancor')));
  assert.ok(system.bom.some(b=>b.amazonAsin==='B00CXKOEQ6'&&b.description.includes('outside the published range')));
 });

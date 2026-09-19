@@ -1,3 +1,4 @@
+import { nonOrthogonalRouteSegments } from "../app/routeAudits";
 import { glandCrossingFailures } from "../app/glandAudit";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
@@ -22,7 +23,9 @@ export async function generateRuntimeArtifact(graph:SystemGraph, outputPath:stri
 const started = performance.now();
 const runtime = buildSystemRuntime(graph, { renderedAudit: true });
 const glandFailures=glandCrossingFailures(runtime);
+const diagonalFailures=graph.orthogonalRoutes?nonOrthogonalRouteSegments(runtime.routes):[];
 const invalidDiagnostics = [
+  ["diagonal segments",diagonalFailures.length],
   ["gland-bore conflicts",glandFailures.length],
   ["fallbacks", runtime.diagnostics.fallbacks],
   ["centerline conflicts", runtime.diagnostics.centerlineConflicts],
@@ -35,7 +38,7 @@ const invalidDiagnostics = [
 ] as const;
 const failures = invalidDiagnostics.filter(([, count]) => count !== 0);
 if (failures.length > 0) {
-  console.error(JSON.stringify({ routing: routingFailureDiagnostics, rendered: renderedGeometryFailureDiagnostics, glands:glandFailures }, null, 2));
+  console.error(JSON.stringify({ routing: routingFailureDiagnostics, rendered: renderedGeometryFailureDiagnostics, glands:glandFailures,diagonals:diagonalFailures }, null, 2));
   throw new Error(`Refusing to serialize invalid runtime: ${failures.map(([label, count]) => `${count} ${label}`).join(", ")}`);
 }
 const artifact: GraphRuntimeArtifact & { wallPlanSourceHash: string | null } = {

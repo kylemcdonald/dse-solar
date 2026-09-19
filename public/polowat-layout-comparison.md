@@ -1,4 +1,6 @@
-# Polowat enclosure layout comparison
+# Original Polowat enclosure layout comparison
+
+Historical comparison before terminal-grid alignment. Keep the selected enclosure arrangement; use the [current breaker comparison](polowat-breaker-comparison.md) and [cable schedule](polowat-cable-routing.md) for current routing costs and lengths.
 
 Eight deterministic layouts were tested on the shared 20 mm router. Only Polowat opts into touching DIN components and centered gland bores. Fiji’s device, terminal, gland and route geometry is protected by a saved SHA-256 regression fixture.
 

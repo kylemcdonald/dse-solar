@@ -1,3 +1,4 @@
+import {nonOrthogonalRouteSegments} from '../app/routeAudits';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {writeFileSync} from 'node:fs';
@@ -39,6 +40,7 @@ try{
  const runtime=buildSystemRuntime(graph,{renderedAudit:true});
  const d=runtime.diagnostics;
  const failures=Object.fromEntries(['fallbacks','centerlineConflicts','sweptCableConflicts','selfIntersections','deviceConflicts','renderedGeometryConflicts'].map(k=>[k,d[k as keyof typeof d]]));
+ failures.diagonalSegments=nonOrthogonalRouteSegments(runtime.routes).length;
  failures.glandBoreConflicts=glandCrossingFailures(runtime).length;
  failures.deviceOverlaps=sampledResolvedDeviceOverlaps(runtime.devices).length;
  failures.wallCrossings=sampledRouteWallPlaneCrossings(runtime.routes,runtime.devices,graphWalls(graph)).length;

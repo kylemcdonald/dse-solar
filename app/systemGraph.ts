@@ -428,6 +428,8 @@ export const graphWalls = (graph: Pick<SystemGraph, "site">): readonly WallVolum
   ?? [{ ...EQUIPMENT_WALL_VOLUME, id: "north", normal: [0, 0, 1] }];
 
 export type SystemGraph = {
+  /** Require axis-aligned route segments, including terminal leads; rounded elbows remain allowed. */
+  orthogonalRoutes?: boolean;
   id: string;
   label: string;
   revision: string;

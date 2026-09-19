@@ -6,15 +6,15 @@ Only the three declared non-polarized 30 A breakers can exchange top/bottom conn
 
 | Reversed connections | Valid | Rounded cable (m) | Battery source leads (m) | Turns | Score |
 | --- | --- | --- | --- | --- | --- |
-| None (baseline) | Yes | 31.406 | 2.254 | 245 | 0.67113 |
-| Battery A | Yes | 30.881 | 2.018 | 243 | 0.66117 |
-| Battery B | Yes | 31.468 | 1.913 | 239 | 0.66495 |
-| Battery A, Battery B | Rejected | 30.999 | 1.642 | 243 | — |
-| Controller | Yes | 31.14 | 2.254 | 244 | 0.66847 |
-| Battery A, Controller | Yes | 30.812 | 2.018 | 242 | 0.66048 |
-| Battery B, Controller | Yes | 31.354 | 1.913 | 239 | 0.6638 |
-| Battery A, Battery B, Controller | Rejected | 29.057 | 1.642 | 215 | — |
+| None (baseline) | Yes | 29.311 | 1.979 | 194 | 0.6447 |
+| Battery A | Yes | 28.974 | 1.83 | 193 | 0.63835 |
+| Battery B | Yes | 29.313 | 1.687 | 193 | 0.63887 |
+| Battery A, Battery B | Yes | 28.84 | 1.499 | 193 | 0.63038 |
+| Controller | Yes | 29.741 | 1.979 | 196 | 0.64899 |
+| Battery A, Controller | Yes | 29.027 | 1.789 | 196 | 0.63806 |
+| Battery B, Controller | Yes | 29.699 | 1.687 | 196 | 0.64273 |
+| Battery A, Battery B, Controller | Yes | 28.894 | 1.499 | 192 | 0.63093 |
 
-Lowest valid score: **Battery A, Controller**, 0.66048, versus 0.67113 before. Total modeled cable changes by -0.594 m; upstream battery-positive leads change by -0.236 m.
+Lowest valid score: **Battery A, Battery B**, 0.63038, versus 0.6447 before. Total modeled cable changes by -0.471 m; upstream battery-positive leads change by -0.480 m.
 
 These are modeled route lengths. Pack quantities and procurement prices are unchanged. Reproduce with `npm run compare:polowat-breakers`; rejected candidates and audit counts are retained in `data/generated/polowat-breaker-comparison.json`.

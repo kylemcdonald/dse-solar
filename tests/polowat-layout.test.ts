@@ -5,7 +5,6 @@ import * as THREE from 'three';
 import fiji from '../data/generated/dse-runtime.json';
 import baseline from './fixtures/fiji-physical-layout.json';
 import comparison from '../data/generated/polowat-layout-comparison.json';
-import breakerComparison from '../data/generated/polowat-breaker-comparison.json';
 import {selectedPolowatLayout} from '../app/polowatLayout';
 import {polowatRuntime as runtime} from '../app/polowatRuntime';
 import {dseTopology} from '../app/dseTopology';
@@ -62,13 +61,25 @@ test('gland audit rejects a cable passing in front of its assigned opening',()=>
  assert.ok(glandCrossingFailures({...runtime,routeById:routes}).some(message=>message.startsWith(route.id+':')));
 });
 
-test('selected Polowat configuration has the best score among eight tested valid layouts',()=>{
+test('Polowat retains the configuration selected by the original eight-layout comparison',()=>{
  assert.equal(comparison.results.length,8);
  const valid=comparison.results.filter(r=>r.valid);
  const selected=valid.find(r=>r.layout.id===selectedPolowatLayout.id)!;
  assert.ok(selected);
  assert.equal(selected.score,Math.min(...valid.map(r=>r.score!)));
  assert.deepEqual(selected.sizeMm,runtime.deviceById.get('equipmentEnclosure')!.size.map(n=>Math.round(n*1000)));
- // The layout sweep precedes the separate terminal-direction optimization.
- assert.equal(selected.totalLengthM,breakerComparison.results.find(r=>r.mask===0)!.totalLengthM);
+ // Historical layout selection is separate from terminal-grid alignment and direction optimization.
+});
+
+test('Polowat terminal columns align with the voxel grid and every route segment is orthogonal',async()=>{
+ const {nonOrthogonalRouteSegments}=await import('../app/routeAudits');
+ assert.equal(runtime.graph.orthogonalRoutes,true);
+ for(const d of runtime.devices.filter(d=>d.placement.space==='junction'))for(const port of runtime.conductors.filter(p=>p.deviceId===d.id)){
+  for(let axis=0;axis<3;axis++)if(Math.abs(port.direction[axis])<1e-8)assert.ok(Math.abs(port.position[axis]/.02-Math.round(port.position[axis]/.02))<1e-6,port.key+' off-grid');
+ }
+ assert.deepEqual(nonOrthogonalRouteSegments(runtime.routes),[]);
+ const straightPieces=runtime.routes.flatMap(r=>roundedRoutePieces(r.points,Math.max(.009,r.diameterMm/2000*4.25)).filter(p=>p.kind==="line").map(p=>({id:r.id,points:p.points})));
+ assert.deepEqual(nonOrthogonalRouteSegments(straightPieces),[]);
+ assert.deepEqual(nonOrthogonalRouteSegments([{id:'bad',points:[[0,0,0],[.01,.02,0]]}]),['bad: segment 0']);
+ assert.deepEqual(nonOrthogonalRouteSegments([{id:'elbow',points:[[0,0,0],[0,.02,0],[.02,.02,0]]}]),[]);
 });
