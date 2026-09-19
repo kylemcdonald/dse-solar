@@ -2,6 +2,8 @@ let viewerBasePath = "";
 /** Static hosts may mount the viewer beneath a repository path. */
 export function configureViewerBasePath(base: string) { viewerBasePath = base.replace(/\/$/, ""); }
 
+export function viewerAssetHref(filename: string) { return `${viewerBasePath}/${filename.replace(/^\//, "")}`; }
+
 export type ProjectMode = "dse" | "polowat";
 export type ViewerMode = "simple" | "diagram" | "model" | "system" | "bom" | "cost" | "cables" | "notes";
 export type ViewerRoute = { project: ProjectMode; mode: ViewerMode };

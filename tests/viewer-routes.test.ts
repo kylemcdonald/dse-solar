@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseViewerPath, tabsForProject, viewerHref } from "../app/viewerRoutes";
+import { parseViewerPath, tabsForProject, viewerHref, viewerAssetHref } from "../app/viewerRoutes";
 
 test("every visible project tab has a unique route that resolves back to its view", () => {
   const paths = new Set<string>();
@@ -33,6 +33,7 @@ test("repository-hosted routes retain their prefix across tabs and refresh", asy
   configureViewerBasePath("/dse-solar/");
   try {
     assert.equal(viewerHref("polowat", "model"), "/dse-solar/polowat/model");
+    assert.equal(viewerAssetHref("polowat-layout-comparison.md"), "/dse-solar/polowat-layout-comparison.md");
     assert.deepEqual(parseViewerPath("/dse-solar/polowat/model/"), { project: "polowat", mode: "model" });
     assert.deepEqual(parseViewerPath("/dse-solar/"), { project: "dse", mode: "diagram" });
     assert.equal(parseViewerPath("/dse-solar/unknown/model"), null);

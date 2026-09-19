@@ -14,6 +14,8 @@ for (const software of [false,true]) {
   await page.goto('/polowat/model');
   const canvas=page.locator('.polowat-model canvas');
   await expect(page.locator('.polowat-model .unified-model')).toHaveAttribute('data-data-conductor-color','#2563eb');
+  await expect(page.locator('.polowat-model .unified-model')).toHaveAttribute('data-centered-gland-count','9');
+  await expect(page.locator('.polowat-model .unified-model')).toHaveAttribute('data-contiguous-din-rows','1');
   await expect(page.locator('.polowat-model .unified-model')).toHaveAttribute('data-wire-terminal-tangent-errors','0');
   await expect(canvas).toHaveAttribute('data-renderer',software?'software':'webgl');
   await expect(page.getByRole('button',{name:/Detailed assembly|Whole system|Oblique|DIN terminals/})).toHaveCount(0);

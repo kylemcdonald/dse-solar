@@ -1,3 +1,4 @@
+import { closestSegmentPoints } from "./routeAudits";
 import { graphWalls } from "./systemGraph";
 import type {
   Connection,
@@ -83,6 +84,8 @@ type Launch = {
   /** Lead from the terminal to this cell is under one cell, so a thick cable
    * must continue straight through the cell before it may bend. */
   shortLead: boolean;
+  /** Exact face-normal escape before adapting a half-cell terminal to A*. */
+  adapter?: Vec3[];
 };
 
 type Endpoint = {
@@ -360,8 +363,9 @@ export function buildVoxelGrid(graph: SystemGraph, devices: readonly ResolvedDev
     const junction = graph.junctions.find((candidate) => candidate.deviceId === gland.junctionId)!;
     const container = deviceById.get(gland.junctionId)!;
     const [x, y, z] = deviceLocalPoint(container, gland.position);
-    const [below, above] = doorReach(junction.padding);
-    localBox(grid, container, [x, y - (gland.face === "top" ? above : below), z], [x, y + (gland.face === "top" ? below : above), z + ROUTE_CELL_M * 2], (index) => {
+    const [below, defaultAbove] = doorReach(junction.padding);
+    const above=junction.centeredGlands?Math.max(defaultAbove,ROUTE_CELL_M*2):defaultAbove;
+    localBox(grid, container, [x, y - (gland.face === "top" ? above : below), z], [x, y + (gland.face === "top" ? below : above), z + (junction.centeredGlands ? 0 : ROUTE_CELL_M * 2)], (index) => {
       grid.flags[index] = (grid.flags[index] & ~FLAG_BLOCKED) | FLAG_DOOR;
       grid.doorGland[index] = glandIndex + 1;
     });
@@ -410,26 +414,31 @@ function isAxisAligned(direction: Vec3) {
 }
 
 /** First lattice cell beyond a terminal along its outward direction. */
-function faceLaunch(grid: VoxelGrid, conductor: ResolvedConductor, device: ResolvedDevice): Launch {
+function faceLaunch(grid: VoxelGrid, conductor: ResolvedConductor, device: ResolvedDevice, adaptHalfCell = false): Launch {
   const direction = normalize(conductor.direction);
   const aligned = isAxisAligned(direction);
   const reasons: string[] = [];
+  const nearest=grid.world(grid.cellAt(conductor.position));
+  const offset=subtract(subtract(nearest,conductor.position),scale(direction,dot(subtract(nearest,conductor.position),direction)));
+  const needsAdapter=adaptHalfCell && aligned && Math.hypot(...offset)>1e-6;
   // A tilted terminal launches three cells out so its exact-axis lead and the
   // short adapter to the lattice keep a gentle bend radius.
-  for (let step = aligned ? 1 : 3; step <= (aligned ? 4 : 6); step += 1) {
-    const probe = add(conductor.position, scale(direction, aligned ? step * ROUTE_CELL_M / 2 : step * ROUTE_CELL_M));
+  for (let step = aligned && !needsAdapter ? 1 : 3; step <= (aligned && !needsAdapter ? 4 : 6); step += 1) {
+    const probe = add(conductor.position, scale(direction, aligned && !needsAdapter ? step * ROUTE_CELL_M / 2 : step * ROUTE_CELL_M));
     const index = grid.cellAt(probe);
     if (index < 0) { reasons.push(`${probe}: out of bounds`); continue; }
     const point = grid.world(index);
     const along = dot(subtract(point, conductor.position), direction);
     if (along < ROUTE_CELL_M / 2 - 1e-6) continue;
-    if (aligned) {
+    if (aligned && !needsAdapter) {
       const lateral = subtract(subtract(point, conductor.position), scale(direction, along));
       if (Math.hypot(...lateral) > 1e-6) { reasons.push(`${point}: off-lattice terminal`); continue; }
     }
     if (insideDevice(device, point, 0.0005)) { reasons.push(`${point}: inside own body`); continue; }
     if (grid.flags[index] & FLAG_BLOCKED) { reasons.push(`${point}: blocked (region ${grid.region[index]})`); continue; }
-    return { cell: index, outDir: axisDirection(direction), shortLead: along < ROUTE_CELL_M - 1e-6 };
+    return { cell: index, outDir: axisDirection(direction), shortLead: along < ROUTE_CELL_M - 1e-6,
+      ...(needsAdapter ? {adapter:[conductor.position,add(conductor.position,scale(direction,along*.5))]} : {}),
+    };
   }
   throw new Error(`${conductor.key}: no free launch cell beyond the ${conductor.face} face of ${device.id} at ${conductor.position} (size ${device.size}, centre ${device.position}): ${reasons.join("; ")}`);
 }
@@ -480,6 +489,7 @@ export function routeConnections(
   const conductorByKey = new Map(conductors.map((conductor) => [conductor.key, conductor]));
   const cableById = new Map(graph.cables.map((cable) => [cable.id, cable]));
   const junctionIndex = new Map(graph.junctions.map((junction, index) => [junction.deviceId, index + 1]));
+  const centeredGlandJunctions = new Set(graph.junctions.filter(j=>j.centeredGlands).map(j=>j.deviceId));
   const glandIndexByConnection = new Map<string, number[]>();
   glands.forEach((gland, index) => gland.connectionIds.forEach((id) => glandIndexByConnection.set(id, [...(glandIndexByConnection.get(id) ?? []), index])));
   const diagnostics: RouterDiagnostics = {
@@ -505,10 +515,11 @@ export function routeConnections(
     return endpoint;
   };
   const withLaunches = (endpoint: Endpoint) => {
+    const placement=endpoint.device.placement;
     if (endpoint.launches.length === 0) {
       endpoint.launches = isLateralPost(endpoint.device, endpoint.conductor.face)
         ? postLaunches(grid, endpoint.conductor, endpoint.device)
-        : [faceLaunch(grid, endpoint.conductor, endpoint.device)];
+        : [faceLaunch(grid, endpoint.conductor, endpoint.device, placement.space === "junction" && Boolean(graph.junctions.find(j=>j.deviceId===placement.junctionId)?.contiguousDin))];
     }
     return endpoint;
   };
@@ -566,15 +577,36 @@ export function routeConnections(
   // only its endpoint lets an unrelated grid edge cut across the adapter.
   const lead = (endpoint: Endpoint, launch: Launch): Vec3[] => {
     const launchPoint = grid.world(launch.cell);
+    if (launch.adapter) return launch.adapter;
     if (isAxisAligned(endpoint.direction)) return [endpoint.point];
     const along = dot(subtract(launchPoint, endpoint.point), endpoint.direction);
     return [endpoint.point, add(endpoint.point, scale(endpoint.direction, Math.min(ROUTE_CELL_M, along * 0.5)))];
   };
+  // Half-cell terminal adapters are exact geometry between A* cells. Reserve
+  // intersecting edges as well as vertices so grid paths cannot cut across them.
+  const adapterEdges=new Map<string,Set<number>>();
+  const edgeKey=(a:number,b:number)=>a<b?`${a}:${b}`:`${b}:${a}`;
   const reserveTiltedLead = (endpoint: Endpoint, job: RouteJob) => {
-    if (isAxisAligned(endpoint.direction)) return;
-    const clearance = ROUTE_CELL_M / 2 + job.diameterMm / 2000 + Math.max(...jobs.map(candidate => candidate.diameterMm)) / 2000;
+    if (isAxisAligned(endpoint.direction) && !endpoint.launches.some(l=>l.adapter)) return;
+    const clearance = (endpoint.launches.some(l=>l.adapter) ? 0.0005 : ROUTE_CELL_M / 2) + job.diameterMm / 2000 + Math.max(...jobs.map(candidate => candidate.diameterMm)) / 2000;
     endpoint.launches.forEach(launch => {
       const points = [...lead(endpoint, launch), grid.world(launch.cell)];
+      if(launch.adapter) {
+        const clearance=job.diameterMm/2000+Math.max(...jobs.map(j=>j.diameterMm))/2000+.0005;
+        points.slice(1).forEach((end,i)=>{
+          const start=points[i];
+          const lo=start.map((v,a)=>Math.min(v,end[a])-clearance-ROUTE_CELL_M) as unknown as Vec3;
+          const hi=start.map((v,a)=>Math.max(v,end[a])+clearance+ROUTE_CELL_M) as unknown as Vec3;
+          forEachCellInBox(grid,lo,hi,(index,point)=>{
+            for(const dir of [0,2,4]) {
+              const next=add(point,scale(DIRS[dir],ROUTE_CELL_M)),to=grid.cellAt(next);
+              if(to<0 || closestSegmentPoints(start,end,point,next).distance>=clearance)continue;
+              const key=edgeKey(index,to),owners=adapterEdges.get(key)??new Set<number>();
+              owners.add(job.index+1);adapterEdges.set(key,owners);
+            }
+          });
+        });
+      }
       points.slice(1).forEach((end, i) => {
         const start = points[i], delta = subtract(end, start);
         const lo = start.map((value, axis) => Math.min(value, end[axis]) - clearance) as unknown as Vec3;
@@ -639,10 +671,12 @@ export function routeConnections(
   const doorCells = (job: RouteJob, visit: (index: number) => void) => {
     job.glands.forEach((glandIndex) => {
       const gland = glands[glandIndex];
-      const [below, above] = doorReach(graph.junctions.find((junction) => junction.deviceId === gland.junctionId)!.padding);
+      const junction=graph.junctions.find(j=>j.deviceId===gland.junctionId)!;
+      const [below, defaultAbove] = doorReach(junction.padding);
+      const above=junction.centeredGlands?Math.max(defaultAbove,ROUTE_CELL_M*2):defaultAbove;
       const container = devices.find(device => device.id === gland.junctionId)!;
       const [x, y, z] = deviceLocalPoint(container, gland.position);
-      localBox(grid, container, [x, y - (gland.face === "top" ? above : below), z], [x, y + (gland.face === "top" ? below : above), z + ROUTE_CELL_M * 2], visit);
+      localBox(grid, container, [x, y - (gland.face === "top" ? above : below), z], [x, y + (gland.face === "top" ? below : above), z + (junction.centeredGlands ? 0 : ROUTE_CELL_M * 2)], visit);
     });
   };
   jobs.forEach((job) => {
@@ -753,6 +787,19 @@ export function routeConnections(
     }));
     if (goalByCell.size === 0) return undefined;
     const rejection = (fromIndex: number, toIndex: number, dir: number): string | undefined => {
+      const adapterOwners=adapterEdges.size ? adapterEdges.get(edgeKey(fromIndex,toIndex)) : undefined;
+      if(adapterOwners && [...adapterOwners].some(id=>id!==jobId))return "foreign terminal adapter";
+      if (centeredGlandJunctions.size && AXIS_OF_DIR[dir] !== 1) {
+        for (const index of [fromIndex,toIndex]) {
+          const glandIndex=grid.doorGland[index]-1;
+          if(glandIndex<0)continue;
+          const gland=glands[glandIndex];
+          if(!centeredGlandJunctions.has(gland.junctionId))continue;
+          const container=deviceById.get(gland.junctionId)!;
+          const a=deviceLocalPoint(container,grid.world(index)),b=deviceLocalPoint(container,gland.position);
+          if(Math.abs(a[1]-b[1])<ROUTE_CELL_M*2-1e-8)return "gland straight approach";
+        }
+      }
       const flags = grid.flags[toIndex];
       if (flags & FLAG_BLOCKED) return "blocked";
       if (job.stubCells.has(toIndex)) return "own terminal lead";
@@ -827,6 +874,7 @@ export function routeConnections(
       const index = toGlobal(local);
       const goal = goalByCell.get(index);
       if (goal) {
+        if(goal.launch.adapter && dot(DIRS[dir],subtract(goal.launch.adapter.at(-1)!,grid.world(goal.launch.cell))) < -1e-9)continue;
         const straight = dir === (goal.launch.outDir ^ 1);
         if (!straight && goal.launch.shortLead && thick) continue;
         const total = g + (straight ? 0 : turnCost);
@@ -838,6 +886,7 @@ export function routeConnections(
       const [ix, iy, iz] = grid.coords(index);
       for (let next = 0; next < 6; next += 1) {
         if (next === (dir ^ 1)) continue;
+        if(startLaunch?.adapter && dot(DIRS[next],subtract(grid.world(startLaunch.cell),startLaunch.adapter.at(-1)!)) < -1e-9)continue;
         if (startLaunch?.shortLead && thick && next !== dir) continue;
         const d = DIRS[next];
         const nx = ix + d[0]; const ny = iy + d[1]; const nz = iz + d[2];

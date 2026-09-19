@@ -6,38 +6,38 @@ Planning geometry, not surveyed site distances or a fabrication release. All mod
 
 | Gauge / use | Red cuts | Black cuts | Stock per colour |
 |---|---:|---:|---:|
-| 8 AWG DC | 5.90 m | 5.20 m | 7.620 m |
-| 10 AWG PV | 5.90 m | 7.10 m | 9.144 m shared PV/controller |
-| 10 AWG DC | 2.00 m | 2.35 m | 9.144 m shared PV/controller |
-| 12 AWG DC | 4.40 m | 3.70 m | 7.620 m |
+| 8 AWG DC | 4.50 m | 3.40 m | 7.620 m |
+| 10 AWG PV | 5.20 m | 6.55 m | 9.144 m shared PV/controller |
+| 10 AWG DC | 1.75 m | 0.95 m | 9.144 m shared PV/controller |
+| 12 AWG DC | 3.80 m | 2.30 m | 7.620 m |
 
-The shared 10 AWG stock must cover PV, controller and both shunt legs together: 7.90 m red and 9.45 m black in this illustrative layout. Measure the actual roof run before cutting. The BMV kit supplies its 2 m fused positive lead and 10 m RJ12 cable; these are not extra field-wire purchases. Add two 10 AWG × M10 closed lugs for the shunt studs.
+The shared 10 AWG stock must cover PV, controller and both shunt legs together: 6.95 m red and 7.50 m black in this illustrative layout. Measure the actual roof run before cutting. The BMV kit supplies its 2 m fused positive lead and 10 m RJ12 cable; these are not extra field-wire purchases. Add two 10 AWG × M10 closed lugs for the shunt studs.
 
 ## Electrical limits
 
-At 20 A, 11.8 V and 75°C copper, modeled battery/controller drop is 0.500 V (4.24%); cut allowances give 0.636 V (5.39%). Both include the 500 A / 50 mV shunt's 2 mV drop at 20 A; terminal/contact resistance is additional. The 3% target remains unresolved. Shorten and measure the physical arrangement or revise the conductor plan before fabrication. Battery-to-box positives remain upstream of their in-box isolators; source-end protection remains unresolved.
+At 20 A, 11.8 V and 75°C copper, modeled battery/controller drop is 0.314 V (2.66%); cut allowances give 0.421 V (3.57%). Both include the 500 A / 50 mV shunt's 2 mV drop at 20 A; terminal/contact resistance is additional. The 3% target remains unresolved. Shorten and measure the physical arrangement or revise the conductor plan before fabrication. Battery-to-box positives remain upstream of their in-box isolators; source-end protection remains unresolved.
 
 | Circuit | Gauge / colour | Model length | Cut with allowance |
 |---|---|---:|---:|
-| 3S home run + · 4.84 A | 10 AWG PV / red | 3.916 m | 4.65 m |
-| 3S home run − | 10 AWG PV / black | 4.952 m | 5.80 m |
-| PV + | 10 AWG PV / red | 0.994 m | 1.25 m |
-| PV − | 10 AWG PV / black | 1.026 m | 1.30 m |
-| BATT + · 20 A / 30 A OCP | 10 AWG DC / red | 1.028 m | 1.30 m |
-| Protected charge path | 10 AWG DC / red | 0.482 m | 0.70 m |
-| BATT − via shunt SYSTEM side | 10 AWG DC / black | 0.569 m | 0.80 m |
-| Combined bank − → shunt BATTERY MINUS | 10 AWG DC / black | 1.240 m | 1.55 m |
-| Battery A + | 8 AWG DC / red | 1.969 m | 2.40 m |
-| 30 A protected + | 8 AWG DC / red | 0.390 m | 0.55 m |
-| Battery A − | 8 AWG DC / black | 2.148 m | 2.60 m |
-| Battery B + | 8 AWG DC / red | 1.403 m | 2.65 m |
-| 30 A protected + | 8 AWG DC / red | 0.168 m | 0.30 m |
-| Battery B − | 8 AWG DC / black | 1.211 m | 2.60 m |
-| LOAD + · 20 A max | 12 AWG DC / red | 1.359 m | 1.70 m |
-| LOAD − · 11.8 V disconnect | 12 AWG DC / black | 1.197 m | 1.50 m |
-| Starlink + | 12 AWG DC / red | 0.593 m | 0.80 m |
-| 10 A switched 12 V | 12 AWG DC / red | 0.469 m | 0.65 m |
-| Starlink return | 12 AWG DC / black | 0.886 m | 1.15 m |
-| USB + | 12 AWG DC / red | 0.525 m | 0.75 m |
-| 10 A switched 12 V | 12 AWG DC / red | 0.330 m | 0.50 m |
-| USB return | 12 AWG DC / black | 0.799 m | 1.05 m |
+| 3S home run + · 4.84 A | 10 AWG PV / red | 3.479 m | 4.15 m |
+| 3S home run − | 10 AWG PV / black | 4.650 m | 5.45 m |
+| PV + | 10 AWG PV / red | 0.795 m | 1.05 m |
+| PV − | 10 AWG PV / black | 0.867 m | 1.10 m |
+| BATT + · 20 A / 30 A OCP | 10 AWG DC / red | 0.990 m | 1.25 m |
+| Protected charge path | 10 AWG DC / red | 0.346 m | 0.50 m |
+| BATT − via shunt SYSTEM side | 10 AWG DC / black | 0.174 m | 0.35 m |
+| Combined bank − → shunt BATTERY MINUS | 10 AWG DC / black | 0.401 m | 0.60 m |
+| Battery A + | 8 AWG DC / red | 1.133 m | 1.45 m |
+| 30 A protected + | 8 AWG DC / red | 0.581 m | 0.80 m |
+| Battery A − | 8 AWG DC / black | 1.387 m | 1.70 m |
+| Battery B + | 8 AWG DC / red | 1.121 m | 1.90 m |
+| 30 A protected + | 8 AWG DC / red | 0.177 m | 0.35 m |
+| Battery B − | 8 AWG DC / black | 0.633 m | 1.70 m |
+| LOAD + · 20 A max | 12 AWG DC / red | 0.488 m | 0.70 m |
+| LOAD − · 11.8 V disconnect | 12 AWG DC / black | 0.438 m | 0.65 m |
+| Starlink + | 12 AWG DC / red | 0.660 m | 0.90 m |
+| 10 A switched 12 V | 12 AWG DC / red | 0.679 m | 0.90 m |
+| Starlink return | 12 AWG DC / black | 0.801 m | 1.05 m |
+| USB + | 12 AWG DC / red | 0.380 m | 0.55 m |
+| 10 A switched 12 V | 12 AWG DC / red | 0.535 m | 0.75 m |
+| USB return | 12 AWG DC / black | 0.418 m | 0.60 m |

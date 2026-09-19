@@ -130,7 +130,7 @@ export function sampledRouteWallPlaneCrossings(
 
 type SegmentClosest = { distance: number; first: Vec3; second: Vec3 };
 
-function closestSegmentPoints(p1: Vec3, q1: Vec3, p2: Vec3, q2: Vec3): SegmentClosest {
+export function closestSegmentPoints(p1: Vec3, q1: Vec3, p2: Vec3, q2: Vec3): SegmentClosest {
   const subtractPoint = (first: Vec3, second: Vec3): Vec3 => [
     first[0] - second[0], first[1] - second[1], first[2] - second[2],
   ];

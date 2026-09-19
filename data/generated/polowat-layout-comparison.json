@@ -1,0 +1,501 @@
+{
+  "objective": "Reject every collision and routing/gland failure. Prefer lower DIN. Compare footprint, cable length and battery source-lead length; score = area m² + 0.01 × cable m + 0.02 × battery source-lead m (lower is better).",
+  "timeoutSeconds": 45,
+  "results": [
+    {
+      "layout": {
+        "id": "top-sources-3",
+        "dinPosition": "top",
+        "columns": 3,
+        "minimumWidth": 0.5,
+        "dinOrder": [
+          "pvBreaker",
+          "controllerBreaker",
+          "batteryBreakerA",
+          "batteryBreakerB",
+          "positiveBus",
+          "negativeBus",
+          "loadPositiveBus",
+          "loadNegativeBus",
+          "starlinkBreaker",
+          "usbBreaker"
+        ],
+        "backplateOrder": [
+          "batteryShunt",
+          "monitorFuse",
+          "batteryMonitor",
+          "mppt",
+          "starlinkConverter",
+          "usbCharger"
+        ]
+      },
+      "valid": false,
+      "failures": {
+        "fallbacks": 9,
+        "centerlineConflicts": 8,
+        "sweptCableConflicts": 14,
+        "selfIntersections": 0,
+        "deviceConflicts": 13,
+        "renderedGeometryConflicts": 27,
+        "glandBoreConflicts": 5,
+        "deviceOverlaps": 0
+      },
+      "sizeMm": [
+        520,
+        640,
+        240
+      ],
+      "areaM2": 0.3328,
+      "totalLengthM": 26.857,
+      "batterySourceLeadM": 3.059,
+      "score": 0.66255,
+      "turns": 147,
+      "seconds": 17,
+      "details": [
+        {
+          "owner": "battery-a-positive-bus",
+          "space": "world",
+          "expansions": 0,
+          "reason": "no path; nearest reachable cell 0.32,1.42,0.08 (h=2.0): +x: foreign terminal adapter, -x: open, +y: blocked, -y: open, +z: open, -z: open; from batteryBreakerA.bottom-0@0.22,1.24,0.08 flags=0 region=1 occupant=0 reserved=15 group=-; to positiveBus.main-positive-0@0.32,1.46,0.08 flags=0 region=0 occupant=0 reserved=15 group=-"
+        },
+        {
+          "owner": "battery-bus-shunt",
+          "space": "world",
+          "expansions": 0,
+          "reason": "no path; nearest reachable cell 0.34,1.46,0.08 (h=41.0): +x: foreign terminal adapter, -x: foreign terminal adapter, +y: region 0, -y: blocked, +z: region 0, -z: region 0; from negativeBus.main-negative-2@0.34,1.46,0.08 flags=0 region=0 occupant=0 reserved=10 group=-; to batteryShunt.shunt-battery@0.16,0.9,0.08 flags=0 region=1 occupant=0 reserved=10 group=-"
+        },
+        {
+          "owner": "controller-positive-bus",
+          "space": "world",
+          "expansions": 0,
+          "reason": "no path; nearest reachable cell 0.18,1.46,0.08 (h=6.0): +x: region 0, -x: foreign terminal adapter, +y: region 0, -y: blocked, +z: region 0, -z: region 0; from controllerBreaker.top-0@0.18,1.46,0.08 flags=0 region=0 occupant=0 reserved=8 group=-; to positiveBus.main-positive-2@0.3,1.46,0.08 flags=0 region=0 occupant=0 reserved=8 group=-"
+        },
+        {
+          "owner": "mppt-load-negative",
+          "space": "world",
+          "expansions": 0,
+          "reason": "no path; nearest reachable cell 0.42,1.42,0.08 (h=2.0): +x: foreign terminal adapter, -x: open, +y: blocked, -y: open, +z: open, -z: open; from mppt.load-@0.24,1,0.08 flags=0 region=1 occupant=0 reserved=21 group=-; to loadNegativeBus.load-negative-0@0.42,1.46,0.08 flags=0 region=0 occupant=0 reserved=21 group=-"
+        },
+        {
+          "owner": "mppt-load-positive",
+          "space": "world",
+          "expansions": 0,
+          "reason": "no path; nearest reachable cell 0.38,1.42,0.08 (h=2.0): +x: foreign terminal adapter, -x: open, +y: blocked, -y: open, +z: open, -z: open; from mppt.load+@0.22,1,0.08 flags=0 region=1 occupant=0 reserved=20 group=-; to loadPositiveBus.load-positive-0@0.38,1.46,0.08 flags=0 region=0 occupant=0 reserved=20 group=-"
+        },
+        {
+          "owner": "load-usb-negative",
+          "space": "world",
+          "expansions": 0,
+          "reason": "no path; nearest reachable cell 0.44,1.46,0.08 (h=37.0): +x: foreign terminal adapter, -x: foreign terminal adapter, +y: region 0, -y: blocked, +z: region 0, -z: region 0; from loadNegativeBus.load-negative-2@0.44,1.46,0.08 flags=0 region=0 occupant=0 reserved=28 group=-; to usbCharger.@0.18,1.16,0.06 flags=0 region=1 occupant=0 reserved=28 group=-"
+        },
+        {
+          "owner": "load-starlink-positive",
+          "space": "world",
+          "expansions": 0,
+          "reason": "no path; nearest reachable cell 0.46,1.42,0.08 (h=2.0): +x: foreign terminal adapter, -x: open, +y: blocked, -y: open, +z: open, -z: open; from loadPositiveBus.load-positive-1@0.38,1.26,0.08 flags=0 region=1 occupant=0 reserved=22 group=-; to starlinkBreaker.top-0@0.46,1.46,0.08 flags=0 region=0 occupant=0 reserved=22 group=-"
+        },
+        {
+          "owner": "load-usb-positive",
+          "space": "world",
+          "expansions": 0,
+          "reason": "no path; nearest reachable cell 0.4,1.46,0.08 (h=4.0): +x: foreign terminal adapter, -x: foreign terminal adapter, +y: region 0, -y: blocked, +z: region 0, -z: region 0; from loadPositiveBus.load-positive-2@0.4,1.46,0.08 flags=0 region=0 occupant=0 reserved=26 group=-; to usbBreaker.top-0@0.48,1.46,0.08 flags=0 region=0 occupant=0 reserved=26 group=-"
+        },
+        {
+          "owner": "monitor-fuse-shunt",
+          "space": "world",
+          "expansions": 0,
+          "reason": "no path; nearest reachable cell 0.38,0.82,0.06 (h=18.0): +x: gland straight approach, -x: foreign terminal adapter, +y: foreign door battery-a-negative, -y: region 0, +z: gland straight approach, -z: gland straight approach; from monitorFuse.monitor-fuse-out@0.38,0.82,0.06 flags=4 region=1 occupant=0 reserved=12 group=-; to batteryShunt.shunt-positive@0.24,0.86,0.08 flags=0 region=1 occupant=0 reserved=12 group=-"
+        },
+        "route-swept · battery-a-positive ↔ controller-positive-bus",
+        "route-swept · battery-bus-shunt ↔ mppt-battery-negative",
+        "route-swept · battery-bus-shunt ↔ monitor-positive-fuse",
+        "route-swept · battery-b-positive-bus ↔ battery-bus-shunt",
+        "route-swept · battery-bus-shunt ↔ mppt-load-positive",
+        "route-swept · monitor-fuse-shunt ↔ monitor-rj12",
+        "route-swept · battery-b-positive-bus ↔ mppt-load-positive",
+        "route-swept · battery-b-negative ↔ mppt-load-positive",
+        "route-swept · battery-b-negative ↔ mppt-load-negative",
+        "route-swept · load-starlink-positive ↔ mppt-load-negative",
+        "route-swept · load-usb-negative ↔ mppt-load-negative",
+        "route-swept · load-starlink-positive ↔ load-usb-positive",
+        "route-swept · load-starlink-positive ↔ load-usb-negative",
+        "route-swept · load-usb-negative ↔ usb-device-leads",
+        "route-device · controller-positive-bus ↔ batteryBreakerA",
+        "route-device · controller-positive-bus ↔ batteryBreakerB",
+        "route-device · battery-bus-shunt ↔ positiveBus",
+        "route-device · battery-bus-shunt ↔ mppt",
+        "route-device · battery-a-positive-bus ↔ batteryBreakerB",
+        "route-device · mppt-load-positive ↔ starlinkConverter",
+        "route-device · mppt-load-positive ↔ negativeBus",
+        "route-device · mppt-load-negative ↔ starlinkConverter",
+        "route-device · mppt-load-negative ↔ loadPositiveBus",
+        "route-device · load-starlink-positive ↔ loadNegativeBus",
+        "route-device · load-usb-positive ↔ starlinkBreaker",
+        "route-device · load-usb-negative ↔ loadPositiveBus",
+        "route-device · load-usb-negative ↔ negativeBus",
+        "pv-home-positive: 0 shell crossings; bore aligned (equipmentEnclosure-bottom-gland-1)",
+        "pv-home-negative: 0 shell crossings; bore aligned (equipmentEnclosure-bottom-gland-2)",
+        "battery-a-positive: 0 shell crossings; bore aligned (equipmentEnclosure-bottom-gland-3)",
+        "battery-b-positive: 0 shell crossings; bore aligned (equipmentEnclosure-bottom-gland-4)",
+        "battery-a-negative: 0 shell crossings; bore aligned (equipmentEnclosure-bottom-gland-7)"
+      ]
+    },
+    {
+      "layout": {
+        "id": "bottom-sources-2",
+        "dinPosition": "bottom",
+        "columns": 2,
+        "minimumWidth": 0.5,
+        "dinOrder": [
+          "pvBreaker",
+          "controllerBreaker",
+          "batteryBreakerA",
+          "batteryBreakerB",
+          "positiveBus",
+          "negativeBus",
+          "loadPositiveBus",
+          "loadNegativeBus",
+          "starlinkBreaker",
+          "usbBreaker"
+        ],
+        "backplateOrder": [
+          "batteryShunt",
+          "monitorFuse",
+          "batteryMonitor",
+          "mppt",
+          "starlinkConverter",
+          "usbCharger"
+        ]
+      },
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0
+      },
+      "sizeMm": [
+        520,
+        680,
+        240
+      ],
+      "areaM2": 0.3536,
+      "totalLengthM": 32.008,
+      "batterySourceLeadM": 2.493,
+      "score": 0.72353,
+      "turns": 227,
+      "seconds": 18,
+      "details": []
+    },
+    {
+      "layout": {
+        "id": "bottom-sources-3",
+        "dinPosition": "bottom",
+        "columns": 3,
+        "minimumWidth": 0.5,
+        "dinOrder": [
+          "pvBreaker",
+          "controllerBreaker",
+          "batteryBreakerA",
+          "batteryBreakerB",
+          "positiveBus",
+          "negativeBus",
+          "loadPositiveBus",
+          "loadNegativeBus",
+          "starlinkBreaker",
+          "usbBreaker"
+        ],
+        "backplateOrder": [
+          "batteryShunt",
+          "monitorFuse",
+          "batteryMonitor",
+          "mppt",
+          "starlinkConverter",
+          "usbCharger"
+        ]
+      },
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0
+      },
+      "sizeMm": [
+        520,
+        640,
+        240
+      ],
+      "areaM2": 0.3328,
+      "totalLengthM": 31.89,
+      "batterySourceLeadM": 2.493,
+      "score": 0.70155,
+      "turns": 238,
+      "seconds": 18,
+      "details": []
+    },
+    {
+      "layout": {
+        "id": "bottom-batteries-3",
+        "dinPosition": "bottom",
+        "columns": 3,
+        "minimumWidth": 0.5,
+        "dinOrder": [
+          "batteryBreakerA",
+          "batteryBreakerB",
+          "positiveBus",
+          "negativeBus",
+          "loadPositiveBus",
+          "loadNegativeBus",
+          "controllerBreaker",
+          "pvBreaker",
+          "starlinkBreaker",
+          "usbBreaker"
+        ],
+        "backplateOrder": [
+          "batteryShunt",
+          "monitorFuse",
+          "batteryMonitor",
+          "mppt",
+          "starlinkConverter",
+          "usbCharger"
+        ]
+      },
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0
+      },
+      "sizeMm": [
+        520,
+        640,
+        240
+      ],
+      "areaM2": 0.3328,
+      "totalLengthM": 33.273,
+      "batterySourceLeadM": 2.252,
+      "score": 0.71056,
+      "turns": 229,
+      "seconds": 18,
+      "details": []
+    },
+    {
+      "layout": {
+        "id": "bottom-loads-3",
+        "dinPosition": "bottom",
+        "columns": 3,
+        "minimumWidth": 0.5,
+        "dinOrder": [
+          "starlinkBreaker",
+          "usbBreaker",
+          "positiveBus",
+          "negativeBus",
+          "loadPositiveBus",
+          "loadNegativeBus",
+          "batteryBreakerA",
+          "batteryBreakerB",
+          "controllerBreaker",
+          "pvBreaker"
+        ],
+        "backplateOrder": [
+          "batteryShunt",
+          "monitorFuse",
+          "batteryMonitor",
+          "mppt",
+          "starlinkConverter",
+          "usbCharger"
+        ]
+      },
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0
+      },
+      "sizeMm": [
+        520,
+        640,
+        240
+      ],
+      "areaM2": 0.3328,
+      "totalLengthM": 34.216,
+      "batterySourceLeadM": 2.526,
+      "score": 0.72549,
+      "turns": 260,
+      "seconds": 20,
+      "details": []
+    },
+    {
+      "layout": {
+        "id": "bottom-converters-3",
+        "dinPosition": "bottom",
+        "columns": 3,
+        "minimumWidth": 0.5,
+        "dinOrder": [
+          "pvBreaker",
+          "controllerBreaker",
+          "batteryBreakerA",
+          "batteryBreakerB",
+          "positiveBus",
+          "negativeBus",
+          "loadPositiveBus",
+          "loadNegativeBus",
+          "starlinkBreaker",
+          "usbBreaker"
+        ],
+        "backplateOrder": [
+          "mppt",
+          "starlinkConverter",
+          "usbCharger",
+          "batteryShunt",
+          "monitorFuse",
+          "batteryMonitor"
+        ]
+      },
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0
+      },
+      "sizeMm": [
+        520,
+        680,
+        240
+      ],
+      "areaM2": 0.3536,
+      "totalLengthM": 30.905,
+      "batterySourceLeadM": 2.489,
+      "score": 0.71242,
+      "turns": 245,
+      "seconds": 35,
+      "details": []
+    },
+    {
+      "layout": {
+        "id": "bottom-wide-3",
+        "dinPosition": "bottom",
+        "columns": 3,
+        "minimumWidth": 0.6,
+        "dinOrder": [
+          "pvBreaker",
+          "controllerBreaker",
+          "batteryBreakerA",
+          "batteryBreakerB",
+          "positiveBus",
+          "negativeBus",
+          "loadPositiveBus",
+          "loadNegativeBus",
+          "starlinkBreaker",
+          "usbBreaker"
+        ],
+        "backplateOrder": [
+          "mppt",
+          "starlinkConverter",
+          "usbCharger",
+          "batteryShunt",
+          "monitorFuse",
+          "batteryMonitor"
+        ]
+      },
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0
+      },
+      "sizeMm": [
+        600,
+        560,
+        240
+      ],
+      "areaM2": 0.336,
+      "totalLengthM": 29.205,
+      "batterySourceLeadM": 2.484,
+      "score": 0.67774,
+      "turns": 237,
+      "seconds": 39,
+      "details": []
+    },
+    {
+      "layout": {
+        "id": "bottom-wide-monitor-3",
+        "dinPosition": "bottom",
+        "columns": 3,
+        "minimumWidth": 0.6,
+        "dinOrder": [
+          "batteryBreakerA",
+          "batteryBreakerB",
+          "positiveBus",
+          "negativeBus",
+          "loadPositiveBus",
+          "loadNegativeBus",
+          "controllerBreaker",
+          "pvBreaker",
+          "starlinkBreaker",
+          "usbBreaker"
+        ],
+        "backplateOrder": [
+          "batteryShunt",
+          "monitorFuse",
+          "batteryMonitor",
+          "mppt",
+          "starlinkConverter",
+          "usbCharger"
+        ]
+      },
+      "valid": true,
+      "failures": {
+        "fallbacks": 0,
+        "centerlineConflicts": 0,
+        "sweptCableConflicts": 0,
+        "selfIntersections": 0,
+        "deviceConflicts": 0,
+        "renderedGeometryConflicts": 0,
+        "glandBoreConflicts": 0,
+        "deviceOverlaps": 0
+      },
+      "sizeMm": [
+        600,
+        520,
+        240
+      ],
+      "areaM2": 0.312,
+      "totalLengthM": 31.406,
+      "batterySourceLeadM": 2.254,
+      "score": 0.67113,
+      "turns": 245,
+      "seconds": 18,
+      "details": []
+    }
+  ]
+}

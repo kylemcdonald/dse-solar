@@ -223,11 +223,12 @@ export function terminalLocalPosition(device: Device & { size: Vec3 }, conductor
   const count = peers.length;
   const [width, height, depth] = device.size;
   const pitch = facePitch(device, conductor.face);
+  const offset=device.centeredTerminals?(index-(count-1)/2)*pitch:latticeOffset(index,count,pitch);
   switch (conductor.face) {
-    case "top": return [latticeOffset(index, count, pitch), height / 2, 0];
-    case "bottom": return [latticeOffset(index, count, pitch), -height / 2, 0];
-    case "left": return [-width / 2, -latticeOffset(index, count, pitch), 0];
-    case "right": return [width / 2, -latticeOffset(index, count, pitch), 0];
+    case "top": return [offset, height / 2, 0];
+    case "bottom": return [offset, -height / 2, 0];
+    case "left": return [-width / 2, -offset, 0];
+    case "right": return [width / 2, -offset, 0];
     case "front":
     case "back": {
       const { columns, rows } = frontFaceGrid(count, pitch, width);
@@ -455,7 +456,7 @@ function planEnclosure(
     below > 0 && above > 0 ? below + above + cell : below + above > 0 ? below + above + cell / 2 : cell
   );
   const horizontalGap = (a: SizedDevice, b: SizedDevice) => {
-    const contiguous = a.layoutGroup?.contiguous && a.layoutGroup.id === b.layoutGroup?.id;
+    const contiguous = (junction.contiguousDin && sectionOf(a) === "din" && sectionOf(b) === "din") || (a.layoutGroup?.contiguous && a.layoutGroup.id === b.layoutGroup?.id);
     const declared = contiguous ? 0 : sectionOf(a) === "din" && sectionOf(b) === "din" ? junction.dinGap : junction.backplateGap;
     const facing = reach(a, "right") + reach(b, "left");
     return Math.max(declared, facing > 0 ? channel(reach(a, "right"), reach(b, "left")) : 0);
@@ -530,15 +531,16 @@ function planEnclosure(
       }
       // The band's bottom face sits half a cell above the row that must stay
       // free below it (its own launch row when it has bottom terminals).
-      const faceY = bottomReach > 0 ? floor + cell / 2 : floor + cell / 2;
+      const faceY = floor + cell / 2;
       const rowSpan = rowWidth(row);
       const centered = rowIndex === 0 || row.every((device) => sectionOf(device) === "din");
       let cursor = padding + sideChannel + (centered ? (usable - rowSpan) / 2 : 0) + reach(row[0], "left");
       let rowTop = faceY;
       row.forEach((device, index) => {
         if (index > 0) cursor += horizontalGap(row[index - 1], device);
-        const dx = geometryMetres(Math.ceil((cursor + device.size[0] / 2) / cell - 1e-9) * 2);
-        const dy = geometryMetres(Math.ceil((faceY + device.size[1] / 2) / cell - 1e-9) * 2);
+        const dx = junction.contiguousDin && sectionOf(device) === "din" ? snapHalf(cursor + device.size[0] / 2) : geometryMetres(Math.ceil((cursor + device.size[0] / 2) / cell - 1e-9) * 2);
+        const rowHeight=junction.contiguousDin && sectionOf(device)==="din" ? Math.max(...row.map(d=>d.size[1])) : device.size[1];
+        const dy = geometryMetres(Math.ceil((faceY + rowHeight / 2) / cell - 1e-9) * 2);
         members.set(device.id, { dx, dy });
         rowTop = Math.max(rowTop, dy + device.size[1] / 2);
         cursor = dx + device.size[0] / 2;
@@ -699,7 +701,7 @@ export function resolveDevices(graph: SystemGraph): ResolvedDevice[] {
       if (z - device.size[2] / 2 < shellBack + 0.010 - 1e-9) z += ROUTE_CELL_M;
       if (z + device.size[2] / 2 > container.size[2] / 2 + 1e-9) z -= ROUTE_CELL_M;
       if (z - device.size[2] / 2 < shellBack + 0.010 - 1e-9) throw new Error(`${id}: no lattice mounting depth fits ${container.id}`);
-      const position = snapCellVec(worldPoint(container, [left + dx, bottom + dy, z]));
+      const position = (junction.contiguousDin && device.placement.space === "junction" && device.placement.section === "din" ? (p:Vec3)=>p.map(snapHalf) as unknown as Vec3 : snapCellVec)(worldPoint(container, [left + dx, bottom + dy, z]));
       const angle = device.placement.space === "junction" ? device.placement.rotationZ ?? 0 : 0;
       resolved.set(id, { ...device, position, size: device.size, rotation: [container.rotation[0], container.rotation[1], container.rotation[2] + angle] });
     });

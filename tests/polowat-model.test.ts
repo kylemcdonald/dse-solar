@@ -55,5 +55,5 @@ test('Polowat artifact invalidates when its shared engine or project inputs chan
  const {polowatGraph}=await import('../app/polowatGraph');
  const {readFile}=await import('node:fs/promises');
  const artifact=JSON.parse(await readFile(new URL('../data/generated/polowat-runtime.json',import.meta.url),'utf8'));
- assert.equal(artifact.sourceHash,await runtimeSourceHash(polowatGraph,['app/polowatGraph.ts','app/polowatTopology.ts','app/polowatHardware.ts']));
+ assert.equal(artifact.sourceHash,await runtimeSourceHash(polowatGraph,['app/polowatGraph.ts','app/polowatTopology.ts','app/polowatHardware.ts','app/polowatLayout.ts']));
 });

@@ -1,3 +1,4 @@
+import { glandCrossingFailures } from "../app/glandAudit";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
@@ -7,7 +8,7 @@ import { buildSystemRuntime, routingFailureDiagnostics, renderedGeometryFailureD
 /** Shared cache inputs and mandatory physical/rendered gates for every project. */
 const generatorVersion="shared-runtime-v2";
 export async function runtimeSourceHash(graph:SystemGraph, projectInputs:string[], wallPlanSourceHash:string|null=null) {
- const commonInputs=["systemGraph.ts","systemGraphRuntime.ts","physicalLayout.ts","voxelRouter.ts","routeAudits.ts","currentSafety.ts","renderedCableGeometry.ts"];
+ const commonInputs=["systemGraph.ts","systemGraphRuntime.ts","physicalLayout.ts","voxelRouter.ts","routeAudits.ts","currentSafety.ts","renderedCableGeometry.ts","glandAudit.ts","glandGeometry.ts"];
  const hash=createHash("sha256").update(generatorVersion).update(JSON.stringify(graph)).update(wallPlanSourceHash??"");
  for(const name of [...commonInputs.map(n=>"app/"+n),"scripts/runtimeArtifact.ts",...projectInputs])hash.update(name).update(await readFile(name));
  return hash.digest("hex");
@@ -20,7 +21,9 @@ export async function generateRuntimeArtifact(graph:SystemGraph, outputPath:stri
  } catch { /* Missing or stale artifact is rebuilt. */ }
 const started = performance.now();
 const runtime = buildSystemRuntime(graph, { renderedAudit: true });
+const glandFailures=glandCrossingFailures(runtime);
 const invalidDiagnostics = [
+  ["gland-bore conflicts",glandFailures.length],
   ["fallbacks", runtime.diagnostics.fallbacks],
   ["centerline conflicts", runtime.diagnostics.centerlineConflicts],
   ["swept-cable conflicts", runtime.diagnostics.sweptCableConflicts],
@@ -32,7 +35,7 @@ const invalidDiagnostics = [
 ] as const;
 const failures = invalidDiagnostics.filter(([, count]) => count !== 0);
 if (failures.length > 0) {
-  console.error(JSON.stringify({ routing: routingFailureDiagnostics, rendered: renderedGeometryFailureDiagnostics }, null, 2));
+  console.error(JSON.stringify({ routing: routingFailureDiagnostics, rendered: renderedGeometryFailureDiagnostics, glands:glandFailures }, null, 2));
   throw new Error(`Refusing to serialize invalid runtime: ${failures.map(([label, count]) => `${count} ${label}`).join(", ")}`);
 }
 const artifact: GraphRuntimeArtifact & { wallPlanSourceHash: string | null } = {

@@ -275,6 +275,8 @@ export type Device = {
   appearance?: "round-display" | "current-shunt" | "terminal-pair" | "inline-fuse" | "earth-bar" | "ac-socket" | "ac-plug" | "light";
   /** Required free space around the body (e.g. controller cooling). */
   installationClearanceM?: Partial<Record<Face, number>>;
+  /** Symmetric physical contact rows; half-cell contacts use face-normal adapters. */
+  centeredTerminals?: boolean;
   /** View-independent grouping hint for repeated physical families. Consumers
    * may arrange members in this declared column count without inferring IDs. */
   layoutGroup?: {
@@ -404,6 +406,10 @@ export type Junction = {
   sizePolicy?: "auto" | "verified-fixed";
   /** Declarative band policy; avoids enclosure-ID placement branches. */
   dinPosition?: "top" | "bottom";
+  /** Pack an entire DIN row edge-to-edge on the half-cell geometry lattice. */
+  contiguousDin?: boolean;
+  /** Constrain shell crossings to the gland bore and render a matching opening. */
+  centeredGlands?: boolean;
   /** Optional vertical datum for the power-device band. */
   powerBandFractionFromBottom?: number;
   /** Keep the first declared backplate row against the enclosure top. */

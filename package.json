@@ -30,7 +30,8 @@
     "typecheck": "wrangler types .wrangler/worker-runtime.d.ts --config worker/types.wrangler.jsonc --include-env false && tsc --noEmit && tsc --noEmit -p tsconfig.worker.json",
     "generate:polowat-diagram": "tsx scripts/generate-polowat-diagram.ts",
     "generate:polowat-cables": "tsx scripts/generate-polowat-cables.ts",
-    "generate:polowat-runtime": "tsx scripts/generate-polowat-runtime.ts"
+    "generate:polowat-runtime": "tsx scripts/generate-polowat-runtime.ts",
+    "compare:polowat-layouts": "tsx scripts/compare-polowat-layouts.ts"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

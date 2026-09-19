@@ -11,7 +11,8 @@ import {
 } from "./renderedCableGeometry";
 import { roundedRouteCurve, tessellatedCableCurve } from "./cableCurve3D";
 import { conductorColor, graphWalls, isPurchasedDevice } from "./systemGraph";
-import { worldHalfExtents } from "./physicalLayout";
+import { entryPanelGeometry, glandSleeveGeometry, glandDimensions } from "./glandGeometry";
+import { deviceLocalPoint, worldHalfExtents } from "./physicalLayout";
 import type { GraphRuntime, GraphSelection, ResolvedConductor, ResolvedDevice, Vec3 } from "./systemGraph";
 
 export type SystemModelProps = {
@@ -316,7 +317,13 @@ function deviceBody(device: ResolvedDevice, software = false) {
     const horizontal = new THREE.BoxGeometry(width + border, border, depth);
     const vertical = new THREE.BoxGeometry(border, height, depth);
     const top = new THREE.Mesh(horizontal, borderMaterial);
-    const bottom = new THREE.Mesh(horizontal, borderMaterial);
+    const centered=runtime.graph.junctions.find(j=>j.deviceId===device.id)?.centeredGlands;
+    const holes=centered?runtime.glands.filter(g=>g.junctionId===device.id&&g.face==='bottom').map(g=>{
+      const [x,,z]=deviceLocalPoint(device,g.position);
+      const diameter=Math.max(...g.connectionIds.map(id=>runtime.routeById.get(id)!.diameterMm));
+      return {x,z,radius:glandDimensions(diameter).boreRadius};
+    }):[];
+    const bottom = new THREE.Mesh(centered?entryPanelGeometry(width+border,depth,border,holes):horizontal, borderMaterial);
     const left = new THREE.Mesh(vertical, borderMaterial);
     const right = new THREE.Mesh(vertical, borderMaterial);
     top.position.y = height / 2;
@@ -658,14 +665,36 @@ function SystemModel3D({ fadePurchased, onFadePurchasedChange, onSelect, onClear
       scene.add(object);
     });
 
+    // A contiguous row shares one rail. This is opt-in enclosure metadata;
+    // installed projects retain their existing rendering and placement.
+    runtime.graph.junctions.filter(j=>j.contiguousDin).forEach(j=>{
+      const container=runtime.deviceById.get(j.deviceId)!;
+      const members=runtime.devices.filter(d=>d.placement.space==='junction'&&d.placement.junctionId===j.deviceId&&d.placement.section==='din');
+      if(!members.length)return;
+      const local=members.map(d=>({device:d,p:deviceLocalPoint(container,d.position)}));
+      const left=Math.min(...local.map(({device,p})=>p[0]-device.size[0]/2));
+      const right=Math.max(...local.map(({device,p})=>p[0]+device.size[0]/2));
+      const rear=Math.min(...local.map(({device,p})=>p[2]-device.size[2]/2))-.003;
+      const rail=new THREE.Group();rail.name=`din-rail:${j.id}`;
+      for(const [dy,height,depth] of [[0,.027,.003],[-.016,.004,.006],[.016,.004,.006]]){
+        const strip=new THREE.Mesh(new THREE.BoxGeometry(right-left+.012,height,depth),new THREE.MeshStandardMaterial({color:'#aeb4b5',metalness:.75,roughness:.38}));
+        strip.position.set((left+right)/2,local[0].p[1]+dy,rear);rail.add(strip);
+      }
+      rail.position.set(...container.position);rail.rotation.set(...container.rotation);scene.add(rail);
+    });
+
     runtime.glands.forEach((gland) => {
       const diameterMm = Math.max(...gland.connectionIds.map((id) => runtime.routeById.get(id)?.diameterMm ?? 6));
       const radius = Math.max(0.007, diameterMm / 1800);
+      const centered=runtime.graph.junctions.find(j=>j.deviceId===gland.junctionId)?.centeredGlands;
       const ring = new THREE.Mesh(
-        new THREE.CylinderGeometry(radius, radius, 0.018, 14),
+        centered?glandSleeveGeometry(diameterMm):new THREE.CylinderGeometry(radius, radius, 0.018, 14),
         new THREE.MeshStandardMaterial({ color: "#454846", roughness: 0.52, metalness: 0.30 }),
       );
       ring.position.set(...gland.position);
+      if(centered)ring.rotation.set(...runtime.deviceById.get(gland.junctionId)!.rotation);
+      ring.userData.glandId=gland.id;
+      ring.userData.boreDiameterMm=centered?glandDimensions(diameterMm).boreRadius*2000:0;
       ring.layers.enable(DEVICE_SHADOW_CASTER_LAYER);
       ring.castShadow = true;
       scene.add(ring);
@@ -1045,6 +1074,8 @@ function SystemModel3D({ fadePurchased, onFadePurchasedChange, onSelect, onClear
       className={`unified-model${config.compact ? " unified-model-compact" : ""}`}
       {...config.attributes}
       data-model="canonical-graph"
+      data-centered-gland-count={runtime.glands.filter(g=>runtime.graph.junctions.find(j=>j.deviceId===g.junctionId)?.centeredGlands).length}
+      data-contiguous-din-rows={runtime.graph.junctions.filter(j=>j.contiguousDin).length}
       data-data-conductor-color={conductorColor.data}
       data-route-fallbacks={runtime.diagnostics.fallbacks}
       data-route-centerline-conflicts={runtime.diagnostics.centerlineConflicts}

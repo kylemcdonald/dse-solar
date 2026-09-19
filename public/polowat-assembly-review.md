@@ -1,10 +1,18 @@
 # Polowat terminal-level assembly review — P9, 15 September 2026
 
+## Compact lower-rail layout · 19 September 2026
+
+The Polowat layout no longer enforces the previous 100 mm controller separation or declared inter-device gaps. All six DIN breakers and four terminal-pair devices touch side-by-side on one lower rail; wires route around the row. Functional space for terminal exits and cable bends remains.
+
+Nine bottom glands now have actual sleeve bores and matching panel openings. Routes stay centered through each sleeve with straight approaches on both sides. Exact rounded-cable checks reject misaligned entries. The shunt, supplied fuse and display remain modeled and connected.
+
+See the [eight-layout comparison](polowat-layout-comparison.md) for alternatives, measured footprints, cable lengths and the selected configuration. The live study and [cable schedule](polowat-cable-routing.md) are generated from that selection. Fiji’s device positions, terminals, glands and cable routes are unchanged and protected by an exact geometry regression test.
+
 ## Shared physical layout · 19 September 2026
 
-The current model replaces the earlier bench arrangement and front service loops below. It now uses Fiji's enclosure packing, 20 mm routing lattice, device-front exclusion, smooth bend rendering and collision audits. Data cables are blue. The BMV shunt, display and fused lead remain one purchased kit; USB-A and USB-C are separate modeled leads. Controller cooling clearances and the four isolated contiguous terminal pairs are declared in the shared graph.
+The current model replaces the earlier bench arrangement and front service loops below. It now uses Fiji's enclosure packing, 20 mm routing lattice, device-front exclusion, smooth bend rendering and collision audits. Data cables are blue. The BMV shunt, display and fused lead remain one purchased kit; USB-A and USB-C are separate modeled leads. The four isolated terminal pairs remain declared in the shared graph. The owner-requested compact layout below supersedes the former controller-spacing constraint.
 
-The automatically sized enclosure is a routing study, not the deferred retail box or a drilling template. See the live enclosure study and [generated cable schedule](polowat-cable-routing.md) for current dimensions, cut allowances and stock demand. The current black 10 AWG allowance exceeds listed stock by 0.306 m; verify the real roof run and final layout before cutting. Procurement is unchanged. Earlier revisions below are historical and their cable lengths and placement sketches are superseded.
+The automatically sized enclosure is a routing study, not the deferred retail box or a drilling template. See the live enclosure study and [generated cable schedule](polowat-cable-routing.md) for current dimensions, cut allowances and stock demand. Verify the real roof run and final layout before cutting; the linked generated schedule contains current stock demand. Procurement is unchanged. Earlier revisions below are historical and their cable lengths and placement sketches are superseded.
 
 
 ## P16 · BMV-700 ordered, 19 September 2026

@@ -1,7 +1,7 @@
 {
   "graphId": "inowon-polowat-compact-12v",
-  "graphRevision": "P16-2026-09-19-shared-1",
-  "sourceHash": "da96abc9deb1a3c5606ab836f4bc1a3aa84ffe31d5ad1bc3a668987434f9aea9",
+  "graphRevision": "P16-2026-09-19-compact-1",
+  "sourceHash": "5a986a878f2a1204ddee4653d058490e04270a038d4067fe12eec079a785caac",
   "layouts": {
     "system": {
       "key": "system",
@@ -42,6 +42,7 @@
             "label": "Renogy panel 1",
             "subtitle": "100 W · series negative end",
             "kind": "panel",
+            "centeredTerminals": false,
             "size": [
               0.6,
               1.1,
@@ -135,6 +136,7 @@
             "label": "Renogy panel 2",
             "subtitle": "100 W · series middle",
             "kind": "panel",
+            "centeredTerminals": false,
             "size": [
               0.6,
               1.1,
@@ -228,6 +230,7 @@
             "label": "Renogy panel 3",
             "subtitle": "100 W · series positive end",
             "kind": "panel",
+            "centeredTerminals": false,
             "size": [
               0.6,
               1.1,
@@ -321,6 +324,7 @@
             "label": "Battery A",
             "subtitle": "12 V · 150 Ah deep cycle",
             "kind": "battery",
+            "centeredTerminals": false,
             "size": [
               0.48,
               0.26,
@@ -414,6 +418,7 @@
             "label": "Battery B",
             "subtitle": "12 V · 150 Ah deep cycle",
             "kind": "battery",
+            "centeredTerminals": false,
             "size": [
               0.48,
               0.26,
@@ -496,6 +501,7 @@
             "label": "Starlink Mini",
             "subtitle": "Integrated Wi-Fi · 25–40 W average",
             "kind": "load",
+            "centeredTerminals": false,
             "size": [
               0.26,
               0.3,
@@ -580,6 +586,7 @@
             "label": "Laptop + phones",
             "subtitle": "One laptop and two phone charges/day",
             "kind": "load",
+            "centeredTerminals": false,
             "size": [
               0.42,
               0.24,
@@ -641,25 +648,25 @@
         {
           "ports": [
             {
-              "id": "equipmentEnclosure-bottom-gland-1-pv-home-negative",
+              "id": "equipmentEnclosure-bottom-gland-6-pv-home-negative",
               "endpointId": "equipmentEnclosure::pv-home-negative",
               "label": "Renogy panel 1",
               "kind": "negative",
               "side": "input",
               "selectionKey": "pvBreaker.top-1",
               "connectionId": "pv-home-negative",
-              "glandId": "equipmentEnclosure-bottom-gland-1",
+              "glandId": "equipmentEnclosure-bottom-gland-6",
               "offset": -36
             },
             {
-              "id": "equipmentEnclosure-bottom-gland-2-pv-home-positive",
+              "id": "equipmentEnclosure-bottom-gland-5-pv-home-positive",
               "endpointId": "equipmentEnclosure::pv-home-positive",
               "label": "Renogy panel 3",
               "kind": "positive",
               "side": "input",
               "selectionKey": "pvBreaker.top-0",
               "connectionId": "pv-home-positive",
-              "glandId": "equipmentEnclosure-bottom-gland-2",
+              "glandId": "equipmentEnclosure-bottom-gland-5",
               "offset": 0
             },
             {
@@ -670,7 +677,7 @@
               "side": "input",
               "selectionKey": "batteryBreakerA.top-0",
               "connectionId": "battery-a-positive",
-              "glandId": "equipmentEnclosure-bottom-gland-4",
+              "glandId": "equipmentEnclosure-bottom-gland-1",
               "offset": 36
             },
             {
@@ -681,40 +688,40 @@
               "side": "input",
               "selectionKey": "batteryBreakerB.top-0",
               "connectionId": "battery-b-positive",
-              "glandId": "equipmentEnclosure-bottom-gland-7",
+              "glandId": "equipmentEnclosure-bottom-gland-2",
               "offset": 72
             },
             {
-              "id": "equipmentEnclosure-bottom-gland-3-starlink-regulated",
+              "id": "equipmentEnclosure-bottom-gland-7-starlink-regulated",
               "endpointId": "equipmentEnclosure::starlink-regulated",
               "label": "Starlink Mini",
               "kind": "multicore",
               "side": "output",
               "selectionKey": "starlinkConverter.starlinkConverterout",
               "connectionId": "starlink-regulated",
-              "glandId": "equipmentEnclosure-bottom-gland-3",
+              "glandId": "equipmentEnclosure-bottom-gland-7",
               "offset": -36
             },
             {
-              "id": "equipmentEnclosure-bottom-gland-5-usb-a-device-lead",
+              "id": "equipmentEnclosure-bottom-gland-8-usb-a-device-lead",
               "endpointId": "equipmentEnclosure::usb-a-device-lead",
               "label": "Laptop + phones",
               "kind": "multicore",
               "side": "output",
               "selectionKey": "usbCharger.usb-a-output",
               "connectionId": "usb-a-device-lead",
-              "glandId": "equipmentEnclosure-bottom-gland-5",
+              "glandId": "equipmentEnclosure-bottom-gland-8",
               "offset": 0
             },
             {
-              "id": "equipmentEnclosure-bottom-gland-6-usb-device-leads",
+              "id": "equipmentEnclosure-bottom-gland-9-usb-device-leads",
               "endpointId": "equipmentEnclosure::usb-device-leads",
               "label": "Laptop + phones",
               "kind": "multicore",
               "side": "output",
               "selectionKey": "usbCharger.usbChargerout",
               "connectionId": "usb-device-leads",
-              "glandId": "equipmentEnclosure-bottom-gland-6",
+              "glandId": "equipmentEnclosure-bottom-gland-9",
               "offset": 36
             }
           ],
@@ -729,9 +736,10 @@
             "label": "Main junction box",
             "subtitle": "Planning enclosure sized to layout · final box order deferred",
             "kind": "junction",
+            "centeredTerminals": false,
             "size": [
-              0.8,
-              0.96,
+              0.6,
+              0.52,
               0.24
             ],
             "status": "planned",
@@ -755,7 +763,7 @@
             ],
             "position": [
               0.3,
-              1.28,
+              1.06,
               0.14
             ],
             "rotation": [
@@ -809,6 +817,7 @@
             "label": "Battery A supply cable",
             "subtitle": "Pair sheath fanning out at the device",
             "kind": "connector",
+            "centeredTerminals": false,
             "size": [
               0.01,
               0.01,
@@ -920,6 +929,7 @@
             "label": "Battery B supply cable",
             "subtitle": "Pair sheath fanning out at the device",
             "kind": "connector",
+            "centeredTerminals": false,
             "size": [
               0.01,
               0.01,
@@ -1194,46 +1204,71 @@
               ],
               [
                 -0.62,
-                0.8,
+                0.78,
                 0.02
               ],
               [
-                -0.62,
-                0.8,
-                0
+                0.3,
+                0.78,
+                0.02
               ],
               [
-                -0.62,
+                0.3,
                 0.78,
-                0
+                0.04
               ],
               [
-                0.18,
-                0.78,
-                0
+                0.3,
+                0.76,
+                0.04
               ],
               [
-                0.18,
-                0.78,
+                0.3,
+                0.76,
+                0.06
+              ],
+              [
+                0.3,
+                0.86,
+                0.06
+              ],
+              [
+                0.3,
+                0.86,
+                0.04
+              ],
+              [
+                0.5,
+                0.86,
+                0.04
+              ],
+              [
+                0.5,
+                1.04,
+                0.04
+              ],
+              [
+                0.42,
+                1.04,
+                0.04
+              ],
+              [
+                0.42,
+                1.04,
                 0.08
               ],
               [
-                0.18,
-                1.74,
+                0.41,
+                1.0050000000000001,
                 0.08
               ],
               [
-                -0.02,
-                1.74,
-                0.08
-              ],
-              [
-                -0.02,
-                1.71,
+                0.41,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 3.96,
+            "lengthM": 3.5414,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 7
@@ -1299,51 +1334,56 @@
               ],
               [
                 -1.84,
-                0.78,
+                0.76,
                 0.02
               ],
               [
-                0.14,
-                0.78,
+                0.34,
+                0.76,
                 0.02
               ],
               [
-                0.14,
-                0.78,
+                0.34,
+                0.76,
                 0.06
               ],
               [
-                0.14,
-                1.6,
+                0.34,
+                0.86,
                 0.06
               ],
               [
-                0.02,
-                1.6,
+                0.5,
+                0.86,
                 0.06
               ],
               [
-                0.02,
-                1.72,
+                0.5,
+                1.04,
                 0.06
               ],
               [
-                0,
-                1.72,
+                0.44,
+                1.04,
                 0.06
               ],
               [
-                0,
-                1.72,
+                0.44,
+                1.04,
                 0.08
               ],
               [
-                0,
-                1.71,
+                0.43,
+                1.0050000000000001,
+                0.08
+              ],
+              [
+                0.43,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 5,
+            "lengthM": 4.7014,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 6
@@ -1393,42 +1433,52 @@
                 0.06
               ],
               [
-                0.26,
+                0.14,
                 0.6,
                 0.06
               ],
               [
-                0.26,
-                0.92,
+                0.14,
+                0.84,
                 0.06
               ],
               [
-                0.18,
-                0.92,
+                0.1,
+                0.84,
                 0.06
               ],
               [
-                0.18,
-                1.74,
-                0.06
-              ],
-              [
-                0.28,
-                1.74,
-                0.06
-              ],
-              [
-                0.28,
-                1.74,
+                0.1,
+                0.84,
                 0.08
               ],
               [
-                0.28,
-                1.71,
+                0.1,
+                1.06,
+                0.08
+              ],
+              [
+                0.14,
+                1.06,
+                0.08
+              ],
+              [
+                0.14,
+                1.04,
+                0.08
+              ],
+              [
+                0.13,
+                1.0050000000000001,
+                0.08
+              ],
+              [
+                0.13,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 2.02,
+            "lengthM": 1.1814,
             "diameterMm": 11.850000000000001,
             "routed": true,
             "routingRank": 1
@@ -1489,42 +1539,52 @@
                 0.06
               ],
               [
-                0.26,
+                0.14,
                 0.6,
                 0.06
               ],
               [
-                0.26,
-                0.92,
+                0.14,
+                0.84,
                 0.06
               ],
               [
-                0.18,
-                0.92,
+                0.1,
+                0.84,
                 0.06
               ],
               [
-                0.18,
-                1.74,
-                0.06
-              ],
-              [
-                0.28,
-                1.74,
-                0.06
-              ],
-              [
-                0.28,
-                1.74,
+                0.1,
+                0.84,
                 0.08
               ],
               [
-                0.28,
-                1.71,
+                0.1,
+                1.06,
+                0.08
+              ],
+              [
+                0.14,
+                1.06,
+                0.08
+              ],
+              [
+                0.14,
+                1.04,
+                0.08
+              ],
+              [
+                0.13,
+                1.0050000000000001,
+                0.08
+              ],
+              [
+                0.13,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 2.02,
+            "lengthM": 1.1814,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 1
@@ -1574,60 +1634,60 @@
               [
                 -0.2,
                 0.58,
-                0.02
+                0.06
               ],
               [
-                0.42,
-                0.58,
-                0.02
-              ],
-              [
-                0.42,
+                0.22,
                 0.58,
                 0.06
               ],
               [
-                0.42,
-                1.18,
+                0.22,
+                0.86,
                 0.06
               ],
               [
-                0.46,
-                1.18,
+                0.1,
+                0.86,
                 0.06
               ],
               [
-                0.46,
-                1.6,
+                0.1,
+                1.04,
                 0.06
               ],
               [
-                0.42,
-                1.6,
+                0.26,
+                1.04,
                 0.06
               ],
               [
-                0.42,
-                1.7,
-                0.06
-              ],
-              [
-                0.54,
-                1.7,
-                0.06
-              ],
-              [
-                0.54,
-                1.7,
+                0.26,
+                1.04,
                 0.08
               ],
               [
-                0.54,
-                1.67,
+                0.28,
+                1.04,
+                0.08
+              ],
+              [
+                0.28,
+                1.02,
+                0.08
+              ],
+              [
+                0.27,
+                0.9850000000000001,
+                0.08
+              ],
+              [
+                0.27,
+                0.9500000000000001,
                 0.08
               ]
             ],
-            "lengthM": 2.22,
+            "lengthM": 1.4414,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 0
@@ -1676,56 +1736,71 @@
               ],
               [
                 0.42,
-                0.58,
+                0.6,
                 0.18
               ],
               [
                 0.42,
-                0.58,
-                0.08
+                0.6,
+                0.04
               ],
               [
-                0.38,
-                0.58,
-                0.08
+                0.18,
+                0.6,
+                0.04
               ],
               [
-                0.38,
+                0.18,
+                0.6,
+                0.06
+              ],
+              [
+                0.18,
+                0.84,
+                0.06
+              ],
+              [
+                0.16,
+                0.84,
+                0.06
+              ],
+              [
+                0.16,
+                0.84,
+                0.1
+              ],
+              [
+                0.1,
+                0.84,
+                0.1
+              ],
+              [
+                0.1,
+                1.04,
+                0.1
+              ],
+              [
+                0.18,
+                1.04,
+                0.1
+              ],
+              [
+                0.18,
                 1.04,
                 0.08
               ],
               [
-                0.34,
-                1.04,
+                0.16999999999999998,
+                1.0050000000000001,
                 0.08
               ],
               [
-                0.34,
-                1.46,
-                0.08
-              ],
-              [
-                0.32,
-                1.46,
-                0.08
-              ],
-              [
-                0.32,
-                1.74,
-                0.08
-              ],
-              [
-                0.36,
-                1.74,
-                0.08
-              ],
-              [
-                0.36,
-                1.71,
+                0.16999999999999998,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 1.46,
+            "lengthM": 1.1814,
             "diameterMm": 11.850000000000001,
             "routed": true,
             "routingRank": 2
@@ -1769,56 +1844,71 @@
               ],
               [
                 0.42,
-                0.58,
+                0.6,
                 0.18
               ],
               [
                 0.42,
-                0.58,
-                0.08
+                0.6,
+                0.04
               ],
               [
-                0.38,
-                0.58,
-                0.08
+                0.18,
+                0.6,
+                0.04
               ],
               [
-                0.38,
+                0.18,
+                0.6,
+                0.06
+              ],
+              [
+                0.18,
+                0.84,
+                0.06
+              ],
+              [
+                0.16,
+                0.84,
+                0.06
+              ],
+              [
+                0.16,
+                0.84,
+                0.1
+              ],
+              [
+                0.1,
+                0.84,
+                0.1
+              ],
+              [
+                0.1,
+                1.04,
+                0.1
+              ],
+              [
+                0.18,
+                1.04,
+                0.1
+              ],
+              [
+                0.18,
                 1.04,
                 0.08
               ],
               [
-                0.34,
-                1.04,
+                0.16999999999999998,
+                1.0050000000000001,
                 0.08
               ],
               [
-                0.34,
-                1.46,
-                0.08
-              ],
-              [
-                0.32,
-                1.46,
-                0.08
-              ],
-              [
-                0.32,
-                1.74,
-                0.08
-              ],
-              [
-                0.36,
-                1.74,
-                0.08
-              ],
-              [
-                0.36,
-                1.71,
+                0.16999999999999998,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 1.46,
+            "lengthM": 1.1814,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 2
@@ -1868,30 +1958,35 @@
               [
                 0.44,
                 0.58,
-                0.08
+                0.06
               ],
               [
-                0.46,
+                0.26,
                 0.58,
+                0.06
+              ],
+              [
+                0.26,
+                0.84,
+                0.06
+              ],
+              [
+                0.26,
+                0.84,
                 0.08
               ],
               [
-                0.46,
-                0.82,
+                0.25,
+                0.865,
                 0.08
               ],
               [
-                0.52,
-                0.82,
-                0.08
-              ],
-              [
-                0.52,
-                1.6099999999999999,
+                0.25,
+                0.89,
                 0.08
               ]
             ],
-            "lengthM": 1.24,
+            "lengthM": 0.6619,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 3
@@ -1933,48 +2028,68 @@
             "cableId": "starlink-regulated",
             "points": [
               [
-                0.12,
-                1.44,
+                0.38,
+                1.24,
                 0.08
               ],
               [
-                0.14,
-                1.44,
+                0.4,
+                1.24,
                 0.08
               ],
               [
-                0.14,
-                1.44,
-                0.1
+                0.4,
+                1.24,
+                0.06
               ],
               [
-                0.14,
-                1.18,
-                0.1
+                0.4,
+                1.06,
+                0.06
               ],
               [
-                0.22,
-                1.18,
-                0.1
+                0.52,
+                1.06,
+                0.06
               ],
               [
-                0.22,
-                1.18,
-                0.08
+                0.52,
+                0.84,
+                0.06
               ],
               [
-                0.22,
-                0.78,
-                0.08
+                0.48,
+                0.84,
+                0.06
               ],
               [
-                0.22,
-                0.78,
+                0.48,
+                0.84,
+                0.04
+              ],
+              [
+                0.38,
+                0.84,
+                0.04
+              ],
+              [
+                0.38,
+                0.84,
+                0.06
+              ],
+              [
+                0.38,
+                0.76,
+                0.06
+              ],
+              [
+                0.38,
+                0.76,
                 0.02
               ],
               [
                 1.32,
-                0.78,
+                0.76,
                 0.02
               ],
               [
@@ -1993,10 +2108,10 @@
                 0.34
               ]
             ],
-            "lengthM": 3.43,
+            "lengthM": 3.29,
             "diameterMm": 5,
             "routed": true,
-            "routingRank": 16
+            "routingRank": 14
           }
         },
         {
@@ -2035,57 +2150,47 @@
             "cableId": "usb-device-leads",
             "points": [
               [
-                0.33,
-                1.42,
+                0.53,
+                1.22,
                 0.06
               ],
               [
-                0.36,
-                1.42,
+                0.56,
+                1.22,
                 0.06
               ],
               [
-                0.36,
-                1.3,
-                0.06
-              ],
-              [
-                0.34,
-                1.3,
-                0.06
-              ],
-              [
-                0.34,
-                1.04,
-                0.06
-              ],
-              [
-                0.38,
-                1.04,
-                0.06
-              ],
-              [
-                0.38,
+                0.56,
                 0.84,
                 0.06
               ],
               [
-                0.34,
+                0.56,
+                0.84,
+                0.1
+              ],
+              [
+                0.46,
+                0.84,
+                0.1
+              ],
+              [
+                0.46,
                 0.84,
                 0.06
               ],
               [
-                0.34,
-                0.56,
+                0.46,
+                0.74,
                 0.06
               ],
               [
-                0.34,
-                0.56,
+                0.46,
+                0.74,
                 0.02
               ],
               [
-                0.34,
+                0.46,
                 0.38,
                 0.02
               ],
@@ -2105,10 +2210,10 @@
                 0.14
               ]
             ],
-            "lengthM": 2.33,
+            "lengthM": 2.09,
             "diameterMm": 5,
             "routed": true,
-            "routingRank": 14
+            "routingRank": 15
           }
         },
         {
@@ -2139,57 +2244,57 @@
             "cableId": "usb-a-device-lead",
             "points": [
               [
-                0.33,
-                1.4,
+                0.53,
+                1.2,
                 0.06
               ],
               [
-                0.34,
-                1.4,
+                0.54,
+                1.2,
                 0.06
               ],
               [
-                0.34,
-                1.4,
-                0.04
-              ],
-              [
-                0.34,
-                1.06,
-                0.04
-              ],
-              [
-                0.38,
-                1.06,
-                0.04
-              ],
-              [
-                0.38,
-                0.9,
-                0.04
-              ],
-              [
-                0.3,
-                0.9,
-                0.04
-              ],
-              [
-                0.3,
-                0.9,
+                0.54,
+                0.86,
                 0.06
               ],
               [
-                0.3,
-                0.56,
+                0.54,
+                0.86,
+                0.1
+              ],
+              [
+                0.4,
+                0.86,
+                0.1
+              ],
+              [
+                0.4,
+                0.84,
+                0.1
+              ],
+              [
+                0.4,
+                0.84,
                 0.06
               ],
               [
-                0.3,
-                0.56,
+                0.42,
+                0.84,
+                0.06
+              ],
+              [
+                0.42,
+                0.74,
+                0.06
+              ],
+              [
+                0.42,
+                0.74,
                 0.02
               ],
               [
-                0.3,
+                0.42,
                 0.36,
                 0.02
               ],
@@ -2209,10 +2314,10 @@
                 0.14
               ]
             ],
-            "lengthM": 2.45,
+            "lengthM": 2.21,
             "diameterMm": 5,
             "routed": true,
-            "routingRank": 15
+            "routingRank": 16
           }
         }
       ],
@@ -2295,6 +2400,7 @@
             "label": "PV disconnect",
             "subtitle": "10 A polarized · two-pole",
             "kind": "breaker",
+            "centeredTerminals": true,
             "size": [
               0.04,
               0.1,
@@ -2311,7 +2417,7 @@
               "space": "junction",
               "junctionId": "equipmentEnclosure",
               "section": "din",
-              "order": 5
+              "order": 7
             },
             "conductors": [
               {
@@ -2351,8 +2457,8 @@
               "polowat-pv-breaker"
             ],
             "position": [
-              -0.02,
-              1.66,
+              0.42,
+              0.92,
               0.08
             ],
             "rotation": [
@@ -2436,10 +2542,7 @@
             "label": "SmartSolar 100/20",
             "subtitle": "100 V PV · 20 A charge/load",
             "kind": "converter",
-            "installationClearanceM": {
-              "top": 0.1,
-              "bottom": 0.1
-            },
+            "centeredTerminals": false,
             "size": [
               0.14,
               0.1,
@@ -2454,7 +2557,7 @@
             "placement": {
               "space": "junction",
               "junctionId": "equipmentEnclosure",
-              "section": "power",
+              "section": "backplate",
               "order": 3
             },
             "conductors": [
@@ -2511,8 +2614,8 @@
               "polowat-mppt"
             ],
             "position": [
-              0.3,
-              0.98,
+              0.14,
+              1.24,
               0.08
             ],
             "rotation": [
@@ -2576,6 +2679,7 @@
             "label": "MPPT battery breaker",
             "subtitle": "30 A non-polarized · bus end",
             "kind": "breaker",
+            "centeredTerminals": true,
             "size": [
               0.04,
               0.1,
@@ -2632,8 +2736,8 @@
               "polowat-controller-breaker"
             ],
             "position": [
-              0.06,
-              1.66,
+              0.38,
+              0.92,
               0.08
             ],
             "rotation": [
@@ -2706,8 +2810,9 @@
               "order": 0,
               "contiguous": true
             },
+            "centeredTerminals": true,
             "size": [
-              0.06,
+              0.04,
               0.06,
               0.06
             ],
@@ -2721,7 +2826,7 @@
               "space": "junction",
               "junctionId": "equipmentEnclosure",
               "section": "din",
-              "order": 100
+              "order": 2
             },
             "conductors": [
               {
@@ -2781,8 +2886,8 @@
               "polowat-din-distribution"
             ],
             "position": [
-              0.46,
-              1.64,
+              0.22,
+              0.92,
               0.08
             ],
             "rotation": [
@@ -2845,8 +2950,9 @@
               "order": 0,
               "contiguous": true
             },
+            "centeredTerminals": true,
             "size": [
-              0.06,
+              0.04,
               0.06,
               0.06
             ],
@@ -2860,7 +2966,7 @@
               "space": "junction",
               "junctionId": "equipmentEnclosure",
               "section": "din",
-              "order": 101
+              "order": 3
             },
             "conductors": [
               {
@@ -2920,8 +3026,8 @@
               "polowat-din-distribution"
             ],
             "position": [
-              0.52,
-              1.64,
+              0.26,
+              0.92,
               0.08
             ],
             "rotation": [
@@ -2987,6 +3093,7 @@
             "subtitle": "500 A / 50 mV · BATTERY MINUS → LOAD AND CHARGER",
             "kind": "monitor",
             "appearance": "current-shunt",
+            "centeredTerminals": false,
             "size": [
               0.12,
               0.06,
@@ -3047,8 +3154,8 @@
               "polowat-battery-monitor"
             ],
             "position": [
-              0.06,
-              1.22,
+              0.16,
+              1.1,
               0.08
             ],
             "rotation": [
@@ -3084,6 +3191,7 @@
             "subtitle": "Wired battery % · volts · amps · <4 mA with backlight off",
             "kind": "monitor",
             "appearance": "round-display",
+            "centeredTerminals": false,
             "size": [
               0.08,
               0.08,
@@ -3116,8 +3224,8 @@
               "polowat-battery-monitor"
             ],
             "position": [
-              0.4,
-              1.24,
+              0.34,
+              1.1,
               0.06
             ],
             "rotation": [
@@ -3162,6 +3270,7 @@
             "subtitle": "1 A slow-blow · factory positive sense/power lead",
             "kind": "protection",
             "appearance": "inline-fuse",
+            "centeredTerminals": true,
             "size": [
               0.04,
               0.02,
@@ -3201,8 +3310,8 @@
               "polowat-battery-monitor"
             ],
             "position": [
-              0.24,
-              1.2,
+              0.28,
+              1.08,
               0.06
             ],
             "rotation": [
@@ -3267,6 +3376,7 @@
             "label": "Battery A isolate",
             "subtitle": "30 A non-polarized · inside junction box",
             "kind": "breaker",
+            "centeredTerminals": true,
             "size": [
               0.04,
               0.1,
@@ -3283,7 +3393,7 @@
               "space": "junction",
               "junctionId": "equipmentEnclosure",
               "section": "din",
-              "order": 11
+              "order": 0
             },
             "conductors": [
               {
@@ -3323,8 +3433,8 @@
               "polowat-battery-breakers"
             ],
             "position": [
-              0.28,
-              1.66,
+              0.14,
+              0.92,
               0.08
             ],
             "rotation": [
@@ -3389,6 +3499,7 @@
             "label": "Battery B isolate",
             "subtitle": "30 A non-polarized · inside junction box",
             "kind": "breaker",
+            "centeredTerminals": true,
             "size": [
               0.04,
               0.1,
@@ -3405,7 +3516,7 @@
               "space": "junction",
               "junctionId": "equipmentEnclosure",
               "section": "din",
-              "order": 12
+              "order": 1
             },
             "conductors": [
               {
@@ -3445,8 +3556,8 @@
               "polowat-battery-breakers"
             ],
             "position": [
-              0.36,
-              1.66,
+              0.18,
+              0.92,
               0.08
             ],
             "rotation": [
@@ -3509,8 +3620,9 @@
               "order": 0,
               "contiguous": true
             },
+            "centeredTerminals": true,
             "size": [
-              0.06,
+              0.04,
               0.06,
               0.06
             ],
@@ -3524,7 +3636,7 @@
               "space": "junction",
               "junctionId": "equipmentEnclosure",
               "section": "din",
-              "order": 102
+              "order": 4
             },
             "conductors": [
               {
@@ -3584,8 +3696,8 @@
               "polowat-din-distribution"
             ],
             "position": [
-              0.58,
-              1.64,
+              0.3,
+              0.92,
               0.08
             ],
             "rotation": [
@@ -3648,8 +3760,9 @@
               "order": 0,
               "contiguous": true
             },
+            "centeredTerminals": true,
             "size": [
-              0.06,
+              0.04,
               0.06,
               0.06
             ],
@@ -3663,7 +3776,7 @@
               "space": "junction",
               "junctionId": "equipmentEnclosure",
               "section": "din",
-              "order": 103
+              "order": 5
             },
             "conductors": [
               {
@@ -3723,8 +3836,8 @@
               "polowat-din-distribution"
             ],
             "position": [
-              0.64,
-              1.64,
+              0.34,
+              0.92,
               0.08
             ],
             "rotation": [
@@ -3769,6 +3882,7 @@
             "label": "Starlink branch",
             "subtitle": "10 A breaker",
             "kind": "breaker",
+            "centeredTerminals": true,
             "size": [
               0.02,
               0.1,
@@ -3785,7 +3899,7 @@
               "space": "junction",
               "junctionId": "equipmentEnclosure",
               "section": "din",
-              "order": 7
+              "order": 8
             },
             "conductors": [
               {
@@ -3809,8 +3923,8 @@
               "polowat-load-breakers"
             ],
             "position": [
-              0.14,
-              1.66,
+              0.45,
+              0.92,
               0.08
             ],
             "rotation": [
@@ -3864,6 +3978,7 @@
             "label": "12 → 24 V regulator",
             "subtitle": "72 W · switched",
             "kind": "converter",
+            "centeredTerminals": false,
             "size": [
               0.16,
               0.1,
@@ -3911,8 +4026,8 @@
               "polowat-starlink-converter"
             ],
             "position": [
-              0.04,
-              1.44,
+              0.3,
+              1.24,
               0.08
             ],
             "rotation": [
@@ -3957,6 +4072,7 @@
             "label": "USB branch",
             "subtitle": "10 A breaker",
             "kind": "breaker",
+            "centeredTerminals": true,
             "size": [
               0.02,
               0.1,
@@ -3973,7 +4089,7 @@
               "space": "junction",
               "junctionId": "equipmentEnclosure",
               "section": "din",
-              "order": 8
+              "order": 9
             },
             "conductors": [
               {
@@ -3997,8 +4113,8 @@
               "polowat-load-breakers"
             ],
             "position": [
-              0.2,
-              1.66,
+              0.47,
+              0.92,
               0.08
             ],
             "rotation": [
@@ -4062,6 +4178,7 @@
             "label": "USB charging",
             "subtitle": "60 W USB-C + 18 W USB-A",
             "kind": "converter",
+            "centeredTerminals": false,
             "size": [
               0.1,
               0.06,
@@ -4077,7 +4194,7 @@
               "space": "junction",
               "junctionId": "equipmentEnclosure",
               "section": "backplate",
-              "order": 13
+              "order": 5
             },
             "conductors": [
               {
@@ -4119,8 +4236,8 @@
               "polowat-usb"
             ],
             "position": [
-              0.28,
-              1.42,
+              0.48,
+              1.22,
               0.06
             ],
             "rotation": [
@@ -4140,7 +4257,7 @@
           "side": "input",
           "selectionKey": "pvBreaker.top-0",
           "connectionId": "pv-home-positive",
-          "glandId": "equipmentEnclosure-bottom-gland-2",
+          "glandId": "equipmentEnclosure-bottom-gland-5",
           "point": {
             "x": 0,
             "y": 720
@@ -4154,7 +4271,7 @@
           "side": "input",
           "selectionKey": "pvBreaker.top-1",
           "connectionId": "pv-home-negative",
-          "glandId": "equipmentEnclosure-bottom-gland-1",
+          "glandId": "equipmentEnclosure-bottom-gland-6",
           "point": {
             "x": 0,
             "y": 768
@@ -4168,7 +4285,7 @@
           "side": "input",
           "selectionKey": "batteryBreakerA.top-0",
           "connectionId": "battery-a-positive",
-          "glandId": "equipmentEnclosure-bottom-gland-4",
+          "glandId": "equipmentEnclosure-bottom-gland-1",
           "point": {
             "x": 0,
             "y": 564
@@ -4182,7 +4299,7 @@
           "side": "input",
           "selectionKey": "negativeBus.main-negative-0",
           "connectionId": "battery-a-negative",
-          "glandId": "equipmentEnclosure-bottom-gland-8",
+          "glandId": "equipmentEnclosure-bottom-gland-3",
           "point": {
             "x": 0,
             "y": 924
@@ -4196,7 +4313,7 @@
           "side": "input",
           "selectionKey": "batteryBreakerB.top-0",
           "connectionId": "battery-b-positive",
-          "glandId": "equipmentEnclosure-bottom-gland-7",
+          "glandId": "equipmentEnclosure-bottom-gland-2",
           "point": {
             "x": 0,
             "y": 1080
@@ -4210,7 +4327,7 @@
           "side": "input",
           "selectionKey": "negativeBus.main-negative-1",
           "connectionId": "battery-b-negative",
-          "glandId": "equipmentEnclosure-bottom-gland-9",
+          "glandId": "equipmentEnclosure-bottom-gland-4",
           "point": {
             "x": 0,
             "y": 1032
@@ -4224,7 +4341,7 @@
           "side": "output",
           "selectionKey": "starlinkConverter.starlinkConverterout",
           "connectionId": "starlink-regulated",
-          "glandId": "equipmentEnclosure-bottom-gland-3",
+          "glandId": "equipmentEnclosure-bottom-gland-7",
           "point": {
             "x": 2160,
             "y": 1044
@@ -4238,7 +4355,7 @@
           "side": "output",
           "selectionKey": "usbCharger.usbChargerout",
           "connectionId": "usb-device-leads",
-          "glandId": "equipmentEnclosure-bottom-gland-6",
+          "glandId": "equipmentEnclosure-bottom-gland-9",
           "point": {
             "x": 2160,
             "y": 1284
@@ -4252,7 +4369,7 @@
           "side": "output",
           "selectionKey": "usbCharger.usb-a-output",
           "connectionId": "usb-a-device-lead",
-          "glandId": "equipmentEnclosure-bottom-gland-5",
+          "glandId": "equipmentEnclosure-bottom-gland-8",
           "point": {
             "x": 2160,
             "y": 1332
@@ -4304,46 +4421,71 @@
               ],
               [
                 -0.62,
-                0.8,
+                0.78,
                 0.02
               ],
               [
-                -0.62,
-                0.8,
-                0
+                0.3,
+                0.78,
+                0.02
               ],
               [
-                -0.62,
+                0.3,
                 0.78,
-                0
+                0.04
               ],
               [
-                0.18,
-                0.78,
-                0
+                0.3,
+                0.76,
+                0.04
               ],
               [
-                0.18,
-                0.78,
+                0.3,
+                0.76,
+                0.06
+              ],
+              [
+                0.3,
+                0.86,
+                0.06
+              ],
+              [
+                0.3,
+                0.86,
+                0.04
+              ],
+              [
+                0.5,
+                0.86,
+                0.04
+              ],
+              [
+                0.5,
+                1.04,
+                0.04
+              ],
+              [
+                0.42,
+                1.04,
+                0.04
+              ],
+              [
+                0.42,
+                1.04,
                 0.08
               ],
               [
-                0.18,
-                1.74,
+                0.41,
+                1.0050000000000001,
                 0.08
               ],
               [
-                -0.02,
-                1.74,
-                0.08
-              ],
-              [
-                -0.02,
-                1.71,
+                0.41,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 3.96,
+            "lengthM": 3.5414,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 7
@@ -4393,51 +4535,56 @@
               ],
               [
                 -1.84,
-                0.78,
+                0.76,
                 0.02
               ],
               [
-                0.14,
-                0.78,
+                0.34,
+                0.76,
                 0.02
               ],
               [
-                0.14,
-                0.78,
+                0.34,
+                0.76,
                 0.06
               ],
               [
-                0.14,
-                1.6,
+                0.34,
+                0.86,
                 0.06
               ],
               [
-                0.02,
-                1.6,
+                0.5,
+                0.86,
                 0.06
               ],
               [
-                0.02,
-                1.72,
+                0.5,
+                1.04,
                 0.06
               ],
               [
-                0,
-                1.72,
+                0.44,
+                1.04,
                 0.06
               ],
               [
-                0,
-                1.72,
+                0.44,
+                1.04,
                 0.08
               ],
               [
-                0,
-                1.71,
+                0.43,
+                1.0050000000000001,
+                0.08
+              ],
+              [
+                0.43,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 5,
+            "lengthM": 4.7014,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 6
@@ -4471,47 +4618,52 @@
             "cableId": "pv-breaker-positive",
             "points": [
               [
-                -0.02,
-                1.6099999999999999,
+                0.41,
+                0.87,
                 0.08
               ],
               [
-                -0.02,
-                1.5,
+                0.41,
+                0.845,
                 0.08
               ],
               [
-                0.16,
-                1.5,
+                0.42,
+                0.82,
                 0.08
               ],
               [
-                0.16,
-                0.92,
-                0.08
-              ],
-              [
-                0.16,
-                0.92,
+                0.42,
+                0.82,
                 0.1
               ],
               [
-                0.26,
-                0.92,
+                0.08,
+                0.82,
                 0.1
               ],
               [
-                0.26,
-                0.92,
+                0.08,
+                1.14,
+                0.1
+              ],
+              [
+                0.08,
+                1.14,
                 0.08
               ],
               [
-                0.26,
-                0.9299999999999999,
+                0.1,
+                1.14,
+                0.08
+              ],
+              [
+                0.1,
+                1.19,
                 0.08
               ]
             ],
-            "lengthM": 1.02,
+            "lengthM": 0.8219,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 9
@@ -4545,52 +4697,52 @@
             "cableId": "pv-breaker-negative",
             "points": [
               [
-                0,
-                1.6099999999999999,
+                0.43,
+                0.87,
                 0.08
               ],
               [
-                0,
-                1.58,
+                0.43,
+                0.845,
                 0.08
               ],
               [
-                0.16,
-                1.58,
+                0.44,
+                0.82,
                 0.08
               ],
               [
-                0.16,
-                1.58,
-                0.06
+                0.44,
+                0.82,
+                0.12
               ],
               [
-                0.16,
-                0.9,
-                0.06
+                0.08,
+                0.82,
+                0.12
               ],
               [
-                0.24,
-                0.9,
-                0.06
+                0.08,
+                1.14,
+                0.12
               ],
               [
-                0.24,
-                0.9,
+                0.12,
+                1.14,
+                0.12
+              ],
+              [
+                0.12,
+                1.14,
                 0.08
               ],
               [
-                0.28,
-                0.9,
-                0.08
-              ],
-              [
-                0.27999999999999997,
-                0.9299999999999999,
+                0.12000000000000001,
+                1.19,
                 0.08
               ]
             ],
-            "lengthM": 1.06,
+            "lengthM": 0.9019,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 8
@@ -4632,52 +4784,57 @@
             "cableId": "mppt-battery-positive",
             "points": [
               [
-                0.3,
-                0.9299999999999999,
+                0.14,
+                1.19,
                 0.08
               ],
               [
-                0.3,
-                0.92,
+                0.14,
+                1.18,
                 0.08
               ],
               [
-                0.3,
-                0.92,
+                0.14,
+                1.18,
                 0.04
               ],
               [
-                0.16,
-                0.92,
+                0.52,
+                1.18,
                 0.04
               ],
               [
-                0.16,
-                1.6,
+                0.52,
+                0.82,
                 0.04
               ],
               [
-                0.16,
-                1.6,
-                0.1
+                0.4,
+                0.82,
+                0.04
               ],
               [
-                0.06,
-                1.6,
-                0.1
-              ],
-              [
-                0.06,
-                1.6,
+                0.4,
+                0.82,
                 0.08
               ],
               [
-                0.06,
-                1.6099999999999999,
+                0.38,
+                0.82,
+                0.08
+              ],
+              [
+                0.37,
+                0.845,
+                0.08
+              ],
+              [
+                0.37,
+                0.87,
                 0.08
               ]
             ],
-            "lengthM": 1.06,
+            "lengthM": 1.0219,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 10
@@ -4719,42 +4876,52 @@
             "cableId": "controller-positive-bus",
             "points": [
               [
-                0.06,
-                1.71,
+                0.37,
+                0.9700000000000001,
                 0.08
               ],
               [
-                0.06,
-                1.72,
+                0.37,
+                1.0050000000000001,
                 0.08
               ],
               [
-                0.06,
-                1.72,
-                0.1
-              ],
-              [
-                0.46,
-                1.72,
-                0.1
-              ],
-              [
-                0.46,
-                1.68,
-                0.1
-              ],
-              [
-                0.46,
-                1.68,
+                0.38,
+                1.04,
                 0.08
               ],
               [
-                0.46,
-                1.67,
+                0.38,
+                1.04,
+                0.1
+              ],
+              [
+                0.22,
+                1.04,
+                0.1
+              ],
+              [
+                0.22,
+                1.04,
+                0.08
+              ],
+              [
+                0.22,
+                1.02,
+                0.08
+              ],
+              [
+                0.21,
+                0.9850000000000001,
+                0.08
+              ],
+              [
+                0.21,
+                0.9500000000000001,
                 0.08
               ]
             ],
-            "lengthM": 0.5,
+            "lengthM": 0.3628,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 12
@@ -4812,42 +4979,32 @@
             "cableId": "mppt-battery-negative",
             "points": [
               [
-                0.32,
-                0.9299999999999999,
+                0.16,
+                1.19,
                 0.08
               ],
               [
-                0.32,
-                0.9,
+                0.16,
+                1.14,
                 0.08
               ],
               [
-                0.32,
-                0.9,
-                0.1
-              ],
-              [
-                0.14,
-                0.9,
-                0.1
-              ],
-              [
-                0.14,
-                0.9,
+                0.24,
+                1.14,
                 0.08
               ],
               [
-                0.14,
-                1.22,
+                0.24,
+                1.1,
                 0.08
               ],
               [
-                0.12,
-                1.22,
+                0.22,
+                1.1,
                 0.08
               ]
             ],
-            "lengthM": 0.59,
+            "lengthM": 0.19,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 13
@@ -4889,42 +5046,52 @@
             "cableId": "battery-bus-shunt",
             "points": [
               [
-                0.52,
-                1.67,
+                0.25,
+                0.9500000000000001,
                 0.08
               ],
               [
-                0.52,
-                1.72,
+                0.25,
+                0.9850000000000001,
                 0.08
               ],
               [
-                0.52,
-                1.72,
-                0.04
-              ],
-              [
-                -0.06,
-                1.72,
-                0.04
-              ],
-              [
-                -0.06,
-                1.22,
-                0.04
-              ],
-              [
-                -0.06,
-                1.22,
+                0.26,
+                1.02,
                 0.08
               ],
               [
-                0,
-                1.22,
+                0.26,
+                1.02,
+                0.04
+              ],
+              [
+                0.26,
+                1.04,
+                0.04
+              ],
+              [
+                0.08,
+                1.04,
+                0.04
+              ],
+              [
+                0.08,
+                1.04,
+                0.08
+              ],
+              [
+                0.08,
+                1.1,
+                0.08
+              ],
+              [
+                0.1,
+                1.1,
                 0.08
               ]
             ],
-            "lengthM": 1.27,
+            "lengthM": 0.4314,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 11
@@ -4958,52 +5125,67 @@
             "cableId": "monitor-positive-fuse",
             "points": [
               [
-                0.46,
-                1.6099999999999999,
+                0.21,
+                0.89,
                 0.08
               ],
               [
-                0.46,
-                1.6,
+                0.21,
+                0.865,
                 0.08
               ],
               [
-                0.38,
-                1.6,
+                0.22,
+                0.84,
                 0.08
               ],
               [
-                0.38,
-                1.6,
+                0.22,
+                0.84,
+                0.12
+              ],
+              [
+                0.1,
+                0.84,
+                0.12
+              ],
+              [
+                0.1,
+                0.98,
+                0.12
+              ],
+              [
+                0.28,
+                0.98,
+                0.12
+              ],
+              [
+                0.28,
+                0.98,
                 0.04
               ],
               [
-                0.2,
-                1.6,
+                0.28,
+                1.02,
                 0.04
               ],
               [
-                0.2,
-                1.18,
-                0.04
-              ],
-              [
-                0.2,
-                1.18,
+                0.28,
+                1.02,
                 0.06
               ],
               [
-                0.24,
-                1.18,
+                0.27,
+                1.045,
                 0.06
               ],
               [
-                0.24,
-                1.19,
+                0.27,
+                1.07,
                 0.06
               ]
             ],
-            "lengthM": 0.8,
+            "lengthM": 0.7239,
             "diameterMm": 2,
             "routed": true,
             "routingRank": 28
@@ -5045,37 +5227,57 @@
             "cableId": "monitor-fuse-shunt",
             "points": [
               [
-                0.26,
-                1.19,
+                0.29000000000000004,
+                1.07,
                 0.06
               ],
               [
-                0.26,
-                1.18,
+                0.29000000000000004,
+                1.045,
                 0.06
               ],
               [
-                0.26,
-                1.18,
-                0.12
+                0.3,
+                1.02,
+                0.06
               ],
               [
-                0.06,
-                1.18,
-                0.12
+                0.3,
+                1.02,
+                0.04
               ],
               [
-                0.06,
-                1.18,
+                0.3,
+                1.04,
+                0.04
+              ],
+              [
+                0.28,
+                1.04,
+                0.04
+              ],
+              [
+                0.28,
+                1.06,
+                0.04
+              ],
+              [
+                0.16,
+                1.06,
+                0.04
+              ],
+              [
+                0.16,
+                1.06,
                 0.08
               ],
               [
-                0.06,
-                1.19,
+                0.16,
+                1.07,
                 0.08
               ]
             ],
-            "lengthM": 0.32,
+            "lengthM": 0.3019,
             "diameterMm": 2,
             "routed": true,
             "routingRank": 29
@@ -5125,37 +5327,42 @@
             "cableId": "monitor-rj12",
             "points": [
               [
-                0.08,
-                1.19,
+                0.18,
+                1.07,
                 0.08
               ],
               [
-                0.08,
-                1.16,
+                0.18,
+                1.06,
                 0.08
               ],
               [
-                0.08,
-                1.16,
-                0.1
+                0.2,
+                1.06,
+                0.08
               ],
               [
-                0.4,
-                1.16,
-                0.1
+                0.2,
+                1,
+                0.08
               ],
               [
-                0.4,
-                1.16,
+                0.2,
+                1,
                 0.06
               ],
               [
-                0.4,
-                1.2,
+                0.34,
+                1,
+                0.06
+              ],
+              [
+                0.34,
+                1.06,
                 0.06
               ]
             ],
-            "lengthM": 0.45,
+            "lengthM": 0.31,
             "diameterMm": 5,
             "routed": true,
             "routingRank": 19
@@ -5212,42 +5419,52 @@
                 0.06
               ],
               [
-                0.26,
+                0.14,
                 0.6,
                 0.06
               ],
               [
-                0.26,
-                0.92,
+                0.14,
+                0.84,
                 0.06
               ],
               [
-                0.18,
-                0.92,
+                0.1,
+                0.84,
                 0.06
               ],
               [
-                0.18,
-                1.74,
-                0.06
-              ],
-              [
-                0.28,
-                1.74,
-                0.06
-              ],
-              [
-                0.28,
-                1.74,
+                0.1,
+                0.84,
                 0.08
               ],
               [
-                0.28,
-                1.71,
+                0.1,
+                1.06,
+                0.08
+              ],
+              [
+                0.14,
+                1.06,
+                0.08
+              ],
+              [
+                0.14,
+                1.04,
+                0.08
+              ],
+              [
+                0.13,
+                1.0050000000000001,
+                0.08
+              ],
+              [
+                0.13,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 2.02,
+            "lengthM": 1.1814,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 1
@@ -5281,47 +5498,62 @@
             "cableId": "battery-a-positive-bus",
             "points": [
               [
-                0.28,
-                1.6099999999999999,
+                0.13,
+                0.87,
                 0.08
               ],
               [
-                0.28,
-                1.58,
+                0.13,
+                0.845,
                 0.08
               ],
               [
-                0.28,
-                1.58,
-                0.06
-              ],
-              [
-                0.4,
-                1.58,
-                0.06
-              ],
-              [
-                0.4,
-                1.7,
-                0.06
-              ],
-              [
-                0.4,
-                1.7,
+                0.14,
+                0.82,
                 0.08
               ],
               [
-                0.48,
-                1.7,
+                0.16,
+                0.82,
                 0.08
               ],
               [
-                0.48000000000000004,
-                1.67,
+                0.16,
+                0.82,
+                0.04
+              ],
+              [
+                0.1,
+                0.82,
+                0.04
+              ],
+              [
+                0.1,
+                1.02,
+                0.04
+              ],
+              [
+                0.24,
+                1.02,
+                0.04
+              ],
+              [
+                0.24,
+                1.02,
+                0.08
+              ],
+              [
+                0.23,
+                0.9850000000000001,
+                0.08
+              ],
+              [
+                0.23,
+                0.9500000000000001,
                 0.08
               ]
             ],
-            "lengthM": 0.42,
+            "lengthM": 0.6233,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 4
@@ -5398,60 +5630,60 @@
               [
                 -0.2,
                 0.58,
-                0.02
+                0.06
               ],
               [
-                0.42,
-                0.58,
-                0.02
-              ],
-              [
-                0.42,
+                0.22,
                 0.58,
                 0.06
               ],
               [
-                0.42,
-                1.18,
+                0.22,
+                0.86,
                 0.06
               ],
               [
-                0.46,
-                1.18,
+                0.1,
+                0.86,
                 0.06
               ],
               [
-                0.46,
-                1.6,
+                0.1,
+                1.04,
                 0.06
               ],
               [
-                0.42,
-                1.6,
+                0.26,
+                1.04,
                 0.06
               ],
               [
-                0.42,
-                1.7,
-                0.06
-              ],
-              [
-                0.54,
-                1.7,
-                0.06
-              ],
-              [
-                0.54,
-                1.7,
+                0.26,
+                1.04,
                 0.08
               ],
               [
-                0.54,
-                1.67,
+                0.28,
+                1.04,
+                0.08
+              ],
+              [
+                0.28,
+                1.02,
+                0.08
+              ],
+              [
+                0.27,
+                0.9850000000000001,
+                0.08
+              ],
+              [
+                0.27,
+                0.9500000000000001,
                 0.08
               ]
             ],
-            "lengthM": 2.22,
+            "lengthM": 1.4414,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 0
@@ -5530,56 +5762,71 @@
               ],
               [
                 0.42,
-                0.58,
+                0.6,
                 0.18
               ],
               [
                 0.42,
-                0.58,
-                0.08
+                0.6,
+                0.04
               ],
               [
-                0.38,
-                0.58,
-                0.08
+                0.18,
+                0.6,
+                0.04
               ],
               [
-                0.38,
+                0.18,
+                0.6,
+                0.06
+              ],
+              [
+                0.18,
+                0.84,
+                0.06
+              ],
+              [
+                0.16,
+                0.84,
+                0.06
+              ],
+              [
+                0.16,
+                0.84,
+                0.1
+              ],
+              [
+                0.1,
+                0.84,
+                0.1
+              ],
+              [
+                0.1,
+                1.04,
+                0.1
+              ],
+              [
+                0.18,
+                1.04,
+                0.1
+              ],
+              [
+                0.18,
                 1.04,
                 0.08
               ],
               [
-                0.34,
-                1.04,
+                0.16999999999999998,
+                1.0050000000000001,
                 0.08
               ],
               [
-                0.34,
-                1.46,
-                0.08
-              ],
-              [
-                0.32,
-                1.46,
-                0.08
-              ],
-              [
-                0.32,
-                1.74,
-                0.08
-              ],
-              [
-                0.36,
-                1.74,
-                0.08
-              ],
-              [
-                0.36,
-                1.71,
+                0.16999999999999998,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 1.46,
+            "lengthM": 1.1814,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 2
@@ -5621,27 +5868,42 @@
             "cableId": "battery-b-positive-bus",
             "points": [
               [
-                0.36,
-                1.6099999999999999,
+                0.16999999999999998,
+                0.87,
                 0.08
               ],
               [
-                0.36,
-                1.58,
+                0.16999999999999998,
+                0.845,
                 0.08
               ],
               [
-                0.48,
-                1.58,
+                0.18,
+                0.82,
                 0.08
               ],
               [
-                0.48000000000000004,
-                1.6099999999999999,
+                0.24,
+                0.82,
+                0.08
+              ],
+              [
+                0.24,
+                0.84,
+                0.08
+              ],
+              [
+                0.23,
+                0.865,
+                0.08
+              ],
+              [
+                0.23,
+                0.89,
                 0.08
               ]
             ],
-            "lengthM": 0.18,
+            "lengthM": 0.1839,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 5
@@ -5718,30 +5980,35 @@
               [
                 0.44,
                 0.58,
-                0.08
+                0.06
               ],
               [
-                0.46,
+                0.26,
                 0.58,
+                0.06
+              ],
+              [
+                0.26,
+                0.84,
+                0.06
+              ],
+              [
+                0.26,
+                0.84,
                 0.08
               ],
               [
-                0.46,
-                0.82,
+                0.25,
+                0.865,
                 0.08
               ],
               [
-                0.52,
-                0.82,
-                0.08
-              ],
-              [
-                0.52,
-                1.6099999999999999,
+                0.25,
+                0.89,
                 0.08
               ]
             ],
-            "lengthM": 1.24,
+            "lengthM": 0.6619,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 3
@@ -5783,50 +6050,70 @@
             "cableId": "mppt-load-positive",
             "points": [
               [
-                0.33999999999999997,
-                0.9299999999999999,
+                0.18000000000000002,
+                1.19,
                 0.08
               ],
               [
-                0.34,
-                0.88,
+                0.18,
+                1.18,
                 0.08
               ],
               [
-                0.34,
-                0.88,
-                0.04
+                0.18,
+                1.18,
+                0.06
               ],
               [
-                0.68,
-                0.88,
-                0.04
+                0.24,
+                1.18,
+                0.06
               ],
               [
-                0.68,
-                1.68,
-                0.04
+                0.24,
+                1.06,
+                0.06
               ],
               [
-                0.58,
-                1.68,
-                0.04
+                0.24,
+                1.06,
+                0.1
               ],
               [
-                0.58,
-                1.68,
+                0.2,
+                1.06,
+                0.1
+              ],
+              [
+                0.2,
+                1.02,
+                0.1
+              ],
+              [
+                0.3,
+                1.02,
+                0.1
+              ],
+              [
+                0.3,
+                1.02,
                 0.08
               ],
               [
-                0.58,
-                1.67,
+                0.29,
+                0.9850000000000001,
+                0.08
+              ],
+              [
+                0.29,
+                0.9500000000000001,
                 0.08
               ]
             ],
-            "lengthM": 1.38,
+            "lengthM": 0.5214,
             "diameterMm": 4,
             "routed": true,
-            "routingRank": 21
+            "routingRank": 25
           }
         },
         {
@@ -5873,55 +6160,55 @@
             "cableId": "mppt-load-negative",
             "points": [
               [
-                0.36,
-                0.9299999999999999,
+                0.2,
+                1.19,
                 0.08
               ],
               [
-                0.36,
-                0.92,
+                0.2,
+                1.16,
                 0.08
               ],
               [
-                0.36,
-                0.92,
-                0.1
-              ],
-              [
-                0.68,
-                0.92,
-                0.1
-              ],
-              [
-                0.68,
-                0.92,
-                0.06
-              ],
-              [
-                0.68,
-                1.68,
-                0.06
-              ],
-              [
-                0.64,
-                1.68,
-                0.06
-              ],
-              [
-                0.64,
-                1.68,
+                0.24,
+                1.16,
                 0.08
               ],
               [
-                0.64,
-                1.67,
+                0.24,
+                1.16,
+                0.12
+              ],
+              [
+                0.24,
+                1.02,
+                0.12
+              ],
+              [
+                0.34,
+                1.02,
+                0.12
+              ],
+              [
+                0.34,
+                1.02,
+                0.08
+              ],
+              [
+                0.33,
+                0.9850000000000001,
+                0.08
+              ],
+              [
+                0.33,
+                0.9500000000000001,
                 0.08
               ]
             ],
-            "lengthM": 1.22,
+            "lengthM": 0.4614,
             "diameterMm": 4,
             "routed": true,
-            "routingRank": 20
+            "routingRank": 24
           }
         },
         {
@@ -5960,60 +6247,60 @@
             "cableId": "load-starlink-positive",
             "points": [
               [
-                0.58,
-                1.6099999999999999,
+                0.29,
+                0.89,
                 0.08
               ],
               [
-                0.58,
-                1.6,
+                0.29,
+                0.865,
                 0.08
               ],
               [
-                0.58,
-                1.6,
-                0.1
-              ],
-              [
-                0.18,
-                1.6,
-                0.1
-              ],
-              [
-                0.18,
-                1.7,
-                0.1
-              ],
-              [
-                0.16,
-                1.7,
-                0.1
-              ],
-              [
-                0.16,
-                1.7,
+                0.3,
+                0.84,
                 0.08
               ],
               [
-                0.16,
-                1.72,
+                0.3,
+                0.84,
+                0.14
+              ],
+              [
+                0.5,
+                0.84,
+                0.14
+              ],
+              [
+                0.5,
+                1.04,
+                0.14
+              ],
+              [
+                0.46,
+                1.04,
+                0.14
+              ],
+              [
+                0.46,
+                1.04,
                 0.08
               ],
               [
-                0.14,
-                1.72,
+                0.45,
+                1.0050000000000001,
                 0.08
               ],
               [
-                0.14,
-                1.71,
+                0.45,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 0.62,
+            "lengthM": 0.6833,
             "diameterMm": 4,
             "routed": true,
-            "routingRank": 24
+            "routingRank": 26
           }
         },
         {
@@ -6052,65 +6339,55 @@
             "cableId": "starlink-breaker-converter",
             "points": [
               [
-                0.14,
-                1.6099999999999999,
+                0.45,
+                0.87,
                 0.08
               ],
               [
-                0.14,
-                1.6,
+                0.45,
+                0.845,
                 0.08
               ],
               [
-                0.12,
-                1.6,
+                0.46,
+                0.82,
                 0.08
               ],
               [
-                0.12,
-                1.62,
+                0.46,
+                0.82,
+                0.1
+              ],
+              [
+                0.5,
+                0.82,
+                0.1
+              ],
+              [
+                0.5,
+                0.82,
                 0.08
               ],
               [
-                0.12,
-                1.62,
-                0.04
-              ],
-              [
-                0.12,
-                1.54,
-                0.04
-              ],
-              [
-                0.14,
-                1.54,
-                0.04
-              ],
-              [
-                0.14,
-                1.38,
-                0.04
-              ],
-              [
-                0.04,
-                1.38,
-                0.04
-              ],
-              [
-                0.04,
-                1.38,
+                0.5,
+                1.16,
                 0.08
               ],
               [
-                0.04,
-                1.39,
+                0.3,
+                1.16,
+                0.08
+              ],
+              [
+                0.3,
+                1.19,
                 0.08
               ]
             ],
-            "lengthM": 0.5,
+            "lengthM": 0.7019,
             "diameterMm": 4,
             "routed": true,
-            "routingRank": 26
+            "routingRank": 20
           }
         },
         {
@@ -6149,37 +6426,52 @@
             "cableId": "load-starlink-negative",
             "points": [
               [
-                0.64,
-                1.6099999999999999,
+                0.33,
+                0.89,
                 0.08
               ],
               [
-                0.64,
-                1.38,
+                0.33,
+                0.865,
                 0.08
               ],
               [
-                0.64,
-                1.38,
+                0.34,
+                0.84,
+                0.08
+              ],
+              [
+                0.34,
+                0.84,
                 0.12
               ],
               [
-                0.06,
-                1.38,
+                0.5,
+                0.84,
                 0.12
               ],
               [
-                0.06,
-                1.38,
+                0.5,
+                1.18,
+                0.12
+              ],
+              [
+                0.5,
+                1.18,
                 0.08
               ],
               [
-                0.06,
-                1.39,
+                0.32,
+                1.18,
+                0.08
+              ],
+              [
+                0.32,
+                1.19,
                 0.08
               ]
             ],
-            "lengthM": 0.9,
+            "lengthM": 0.8219,
             "diameterMm": 4,
             "routed": true,
             "routingRank": 22
@@ -6221,48 +6513,68 @@
             "cableId": "starlink-regulated",
             "points": [
               [
-                0.12,
-                1.44,
+                0.38,
+                1.24,
                 0.08
               ],
               [
-                0.14,
-                1.44,
+                0.4,
+                1.24,
                 0.08
               ],
               [
-                0.14,
-                1.44,
-                0.1
+                0.4,
+                1.24,
+                0.06
               ],
               [
-                0.14,
-                1.18,
-                0.1
+                0.4,
+                1.06,
+                0.06
               ],
               [
-                0.22,
-                1.18,
-                0.1
+                0.52,
+                1.06,
+                0.06
               ],
               [
-                0.22,
-                1.18,
-                0.08
+                0.52,
+                0.84,
+                0.06
               ],
               [
-                0.22,
-                0.78,
-                0.08
+                0.48,
+                0.84,
+                0.06
               ],
               [
-                0.22,
-                0.78,
+                0.48,
+                0.84,
+                0.04
+              ],
+              [
+                0.38,
+                0.84,
+                0.04
+              ],
+              [
+                0.38,
+                0.84,
+                0.06
+              ],
+              [
+                0.38,
+                0.76,
+                0.06
+              ],
+              [
+                0.38,
+                0.76,
                 0.02
               ],
               [
                 1.32,
-                0.78,
+                0.76,
                 0.02
               ],
               [
@@ -6281,10 +6593,10 @@
                 0.34
               ]
             ],
-            "lengthM": 3.43,
+            "lengthM": 3.29,
             "diameterMm": 5,
             "routed": true,
-            "routingRank": 16
+            "routingRank": 14
           }
         },
         {
@@ -6315,40 +6627,60 @@
             "cableId": "load-usb-positive",
             "points": [
               [
-                0.6,
-                1.67,
+                0.31,
+                0.9500000000000001,
                 0.08
               ],
               [
-                0.6,
-                1.74,
+                0.31,
+                0.9850000000000001,
                 0.08
               ],
               [
-                0.6,
-                1.74,
+                0.32,
+                1.02,
+                0.08
+              ],
+              [
+                0.32,
+                1.02,
                 0.1
               ],
               [
-                0.2,
-                1.74,
+                0.32,
+                1,
                 0.1
               ],
               [
-                0.2,
-                1.74,
+                0.48,
+                1,
+                0.1
+              ],
+              [
+                0.48,
+                1.04,
+                0.1
+              ],
+              [
+                0.48,
+                1.04,
                 0.08
               ],
               [
-                0.2,
-                1.71,
+                0.47,
+                1.0050000000000001,
+                0.08
+              ],
+              [
+                0.47,
+                0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 0.54,
+            "lengthM": 0.4028,
             "diameterMm": 4,
             "routed": true,
-            "routingRank": 25
+            "routingRank": 27
           }
         },
         {
@@ -6387,35 +6719,60 @@
             "cableId": "usb-breaker-charger",
             "points": [
               [
-                0.2,
-                1.6099999999999999,
+                0.47,
+                0.87,
                 0.08
               ],
               [
-                0.2,
-                1.38,
+                0.47,
+                0.845,
                 0.08
               ],
               [
-                0.2,
-                1.38,
+                0.48,
+                0.82,
+                0.08
+              ],
+              [
+                0.48,
+                0.82,
                 0.06
               ],
               [
-                0.28,
-                1.38,
+                0.52,
+                0.82,
                 0.06
               ],
               [
-                0.28,
-                1.39,
+                0.52,
+                0.82,
+                0.08
+              ],
+              [
+                0.52,
+                1.08,
+                0.08
+              ],
+              [
+                0.52,
+                1.08,
+                0.06
+              ],
+              [
+                0.48,
+                1.08,
+                0.06
+              ],
+              [
+                0.48,
+                1.19,
                 0.06
               ]
             ],
-            "lengthM": 0.34,
+            "lengthM": 0.5619,
             "diameterMm": 4,
             "routed": true,
-            "routingRank": 27
+            "routingRank": 21
           }
         },
         {
@@ -6446,47 +6803,57 @@
             "cableId": "load-usb-negative",
             "points": [
               [
-                0.66,
-                1.67,
+                0.35000000000000003,
+                0.9500000000000001,
                 0.08
               ],
               [
-                0.66,
-                1.68,
+                0.35000000000000003,
+                0.9850000000000001,
                 0.08
               ],
               [
-                0.68,
-                1.68,
+                0.36,
+                1.02,
                 0.08
               ],
               [
-                0.68,
-                1.36,
+                0.36,
+                1.04,
                 0.08
               ],
               [
-                0.68,
-                1.36,
-                0.1
+                0.36,
+                1.04,
+                0.04
               ],
               [
-                0.3,
-                1.36,
-                0.1
+                0.4,
+                1.04,
+                0.04
               ],
               [
-                0.3,
-                1.36,
+                0.4,
+                1.1,
+                0.04
+              ],
+              [
+                0.5,
+                1.1,
+                0.04
+              ],
+              [
+                0.5,
+                1.1,
                 0.06
               ],
               [
-                0.30000000000000004,
-                1.39,
+                0.5,
+                1.19,
                 0.06
               ]
             ],
-            "lengthM": 0.82,
+            "lengthM": 0.4414,
             "diameterMm": 4,
             "routed": true,
             "routingRank": 23
@@ -6524,57 +6891,47 @@
             "cableId": "usb-device-leads",
             "points": [
               [
-                0.33,
-                1.42,
+                0.53,
+                1.22,
                 0.06
               ],
               [
-                0.36,
-                1.42,
+                0.56,
+                1.22,
                 0.06
               ],
               [
-                0.36,
-                1.3,
-                0.06
-              ],
-              [
-                0.34,
-                1.3,
-                0.06
-              ],
-              [
-                0.34,
-                1.04,
-                0.06
-              ],
-              [
-                0.38,
-                1.04,
-                0.06
-              ],
-              [
-                0.38,
+                0.56,
                 0.84,
                 0.06
               ],
               [
-                0.34,
+                0.56,
+                0.84,
+                0.1
+              ],
+              [
+                0.46,
+                0.84,
+                0.1
+              ],
+              [
+                0.46,
                 0.84,
                 0.06
               ],
               [
-                0.34,
-                0.56,
+                0.46,
+                0.74,
                 0.06
               ],
               [
-                0.34,
-                0.56,
+                0.46,
+                0.74,
                 0.02
               ],
               [
-                0.34,
+                0.46,
                 0.38,
                 0.02
               ],
@@ -6594,10 +6951,10 @@
                 0.14
               ]
             ],
-            "lengthM": 2.33,
+            "lengthM": 2.09,
             "diameterMm": 5,
             "routed": true,
-            "routingRank": 14
+            "routingRank": 15
           }
         },
         {
@@ -6636,57 +6993,57 @@
             "cableId": "usb-a-device-lead",
             "points": [
               [
-                0.33,
-                1.4,
+                0.53,
+                1.2,
                 0.06
               ],
               [
-                0.34,
-                1.4,
+                0.54,
+                1.2,
                 0.06
               ],
               [
-                0.34,
-                1.4,
-                0.04
-              ],
-              [
-                0.34,
-                1.06,
-                0.04
-              ],
-              [
-                0.38,
-                1.06,
-                0.04
-              ],
-              [
-                0.38,
-                0.9,
-                0.04
-              ],
-              [
-                0.3,
-                0.9,
-                0.04
-              ],
-              [
-                0.3,
-                0.9,
+                0.54,
+                0.86,
                 0.06
               ],
               [
-                0.3,
-                0.56,
+                0.54,
+                0.86,
+                0.1
+              ],
+              [
+                0.4,
+                0.86,
+                0.1
+              ],
+              [
+                0.4,
+                0.84,
+                0.1
+              ],
+              [
+                0.4,
+                0.84,
                 0.06
               ],
               [
-                0.3,
-                0.56,
+                0.42,
+                0.84,
+                0.06
+              ],
+              [
+                0.42,
+                0.74,
+                0.06
+              ],
+              [
+                0.42,
+                0.74,
                 0.02
               ],
               [
-                0.3,
+                0.42,
                 0.36,
                 0.02
               ],
@@ -6706,10 +7063,10 @@
                 0.14
               ]
             ],
-            "lengthM": 2.45,
+            "lengthM": 2.21,
             "diameterMm": 5,
             "routed": true,
-            "routingRank": 15
+            "routingRank": 16
           }
         }
       ],
