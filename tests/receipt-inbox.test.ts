@@ -66,7 +66,9 @@ test("receipt arithmetic uses rounded lines and exports order-level amounts once
   assert.equal(validateReceiptReview(r, new Set(["polowat-panels"])).total, 24);
   assert.throws(() => validateReceiptReview({ ...r, tax: -1 }, new Set()), /does not belong|nonnegative/);
   const csv = purchaseCsv({ version: 1, project: "polowat", records: [{ id: "a".repeat(64), originalName: "private-address.pdf", extension: "pdf", bytes: 1, uploadedAt: "", revision: 1, review: r, history: [] }] });
-  assert.equal(csv.split('"24"').length - 1, 2, "receipt total and net spend occur only on first line");
+  assert.match(csv, /"Row type","Section","Item","Quantity","Unit","Evidence","Original currency","Original amount","USD equivalent","Note"/);
+  assert.match(csv, /"Grand total","EXPENSE RECONCILIATION","COMBINED TOTAL",,,,,,24.00/);
+  assert.equal(csv.split('"Tax",1,"order"').length - 1, 1, "tax appears once as a purchase line");
   assert.match(csv, /'=1\+1/);
   assert.doesNotMatch(csv, /private-address/);
 });
@@ -93,4 +95,21 @@ test("public mode gates all receipt operations; private mutations enforce origin
   assert.equal(uploaded.status, 201);
   assert.equal(uploaded.headers.get("cache-control"), "no-store");
   assert.equal(loadInbox("polowat", root).records.length, 1);
+});
+
+test('private expense PDF and ZIP reflect reviewed expenses; public mode blocks all formats',async t=>{
+ const root=fixture(t),saved=process.env.DSE_PRIVATE_MODE;
+ t.after(()=>{if(saved===undefined)delete process.env.DSE_PRIVATE_MODE;else process.env.DSE_PRIVATE_MODE=saved;});
+ const added=await addReceipt('polowat','receipt.pdf',pdf('export'),root);
+ await reviewReceipt('polowat',added.record.id,0,review(),root);
+ const pending=await addReceipt('polowat','pending.pdf',pdf('pending'),root);
+ assert.ok(pending.record);
+ process.env.DSE_PRIVATE_MODE='1';
+ const response=await handleReceiptInbox(new Request('http://localhost/api/receipts/inbox?project=polowat&download=pdf'),root);
+ assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),'application/pdf');assert.equal(response.headers.get('cache-control'),'no-store');
+ const text=await response.text();assert.ok(text.startsWith('%PDF-'));assert.ok(text.includes('23.95'));assert.ok(text.includes('Test material'));assert.ok(text.includes('Pending: 1'));assert.ok(!text.includes('IYOIYO'));
+ const zip=await handleReceiptInbox(new Request('http://localhost/api/receipts/inbox?project=polowat&download=zip'),root);
+ assert.ok(Buffer.from(await zip.arrayBuffer()).includes(Buffer.from('expense-report.pdf')));
+ delete process.env.DSE_PRIVATE_MODE;
+ for(const type of ['csv','zip','pdf'])assert.equal((await handleReceiptInbox(new Request('http://localhost/api/receipts/inbox?project=polowat&download='+type),root)).status,404);
 });

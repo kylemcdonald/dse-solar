@@ -3,6 +3,7 @@
 import { useState } from "react";
 import system from "@/data/polowat-system.json";
 import { batteryPathVoltageDrop } from "./polowatElectrical";
+import { PolowatCableSchedule } from './PolowatCableSchedule';
 import { PolowatEnclosureSizing } from "./PolowatEnclosureSizing";
 
 export function PolowatElectricalAudit() {
@@ -18,16 +19,17 @@ export function PolowatElectricalAudit() {
     <div style={{ overflowX: "auto" }}><table>
       <thead><tr><th>Circuit</th><th>Current basis</th><th>Conductor</th><th>One-way length</th><th>Protection / limits</th></tr></thead>
       <tbody>{audit.circuits.map(c => <tr key={c.id}>
-        <th>{c.circuit}</th><td>{c.designCurrentA === null ? "Negotiated USB" : `${c.designCurrentA.toFixed(2)} A`}</td>
+        <th>{c.circuit}</th><td>{c.designCurrentA === null ? (c.id === "monitor-display" ? "Display power/data" : "Negotiated USB") : c.designCurrentA < .01 ? `${(c.designCurrentA * 1000).toFixed(0)} mA · backlight off` : `${c.designCurrentA.toFixed(2)} A`}</td>
         <td>{c.gauge}</td><td>{c.oneWayMetres === null ? "Factory" : `${c.oneWayMetres} m`}</td>
         <td>{c.protection}<br /><small>{c.note}</small></td>
       </tr>)}</tbody>
     </table></div>
     <div className="polowat-drop-check">
-      <h3>Battery-to-controller voltage drop</h3>
+      <h3>Battery-to-controller voltage drop · compact-layout target</h3>
+      <p><strong>Routed cut allowance: {system.routedCablePlan.allowanceBatteryControllerDropPercent}% drop, above the 3% target.</strong> The calculation below uses the earlier compact length targets; it does not approve the longer modeled cuts. Shorten the final layout or revise the conductor plan before cutting.</p>
       <label htmlFor="polowat-cable-length">Battery → busbars, one-way route: <strong>{oneWay.toFixed(1)} m</strong></label>
       <input id="polowat-cable-length" type="range" min="0.5" max="6" step="0.1" value={oneWay} onChange={e => setOneWay(Number(e.target.value))} />
-      <p>Both conductors included, at 20 A and 75°C copper. The bus-to-controller pair stays at {a.controllerOneWayM} m one way. The owner’s battery route is under 2 m; the calculation uses 2 m as its planning boundary.</p>
+      <p>Both conductors included, at 20 A and 75°C copper. The bus-to-controller pair stays at {a.controllerOneWayM} m one way. The owner expects the battery route under 2 m. These are target lengths; the current routing study and allowances are longer.</p>
       <table><thead><tr><th>Copper size</th><th>Drop</th><th>At 11.8 V</th></tr></thead><tbody>
         {[{ label: "Prior 4 mm² throughout", battery: 4, controller: 4 }, { label: "Prior 10 AWG throughout", battery: 5.26, controller: 5.26 }, { label: "Selected 8 AWG battery + 10 AWG controller", battery: a.batteryAreaMm2, controller: a.controllerAreaMm2 }].map(wire => {
           const drop = batteryPathVoltageDrop(oneWay, a.controllerOneWayM, a.mainCurrentA, wire.battery, wire.controller, a.conductorTemperatureC);
@@ -37,7 +39,8 @@ export function PolowatElectricalAudit() {
       <p>Wire-only estimate; contacts and breakers add resistance. Ampacity, fault protection and terminal fit require separate checks. A larger conductor may be needed for a longer route and may require an approved transition at the controller.</p>
     </div>
     <PolowatEnclosureSizing />
+    <PolowatCableSchedule />
     <h3>Open installation checks</h3><ul>{audit.holds.map(hold => <li key={hold}>{hold}</li>)}</ul>
-    <p>Last cart verification ({system.cartStaging.checkedDate}): {system.cartStaging.retailQuantity} retail units across {system.cartStaging.distinctAsins} Amazon listings, ${system.cartStaging.itemSubtotalUsd.toFixed(2)} item subtotal. Both round USB extensions are staged; the enclosure remains deferred. See the staging report for held and unsourced items. Nothing ordered.</p>
+    <p>Historical cart verification ({system.cartStaging.checkedDate}): {system.cartStaging.retailQuantity} retail units across {system.cartStaging.distinctAsins} Amazon listings, ${system.cartStaging.itemSubtotalUsd.toFixed(2)} item subtotal. Both round USB extensions are staged; the enclosure remains deferred. See the staging report for held and unsourced items. The BMV-700 was ordered separately on 19 September; actual purchase receipts are tracked in the private ledger.</p>
   </article>;
 }

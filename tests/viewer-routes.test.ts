@@ -27,3 +27,14 @@ test("project switches preserve shared tabs and fall back for Fiji-only tabs", (
     assert.equal(parseViewerPath(invalid), null, invalid);
   }
 });
+
+test("repository-hosted routes retain their prefix across tabs and refresh", async () => {
+  const { configureViewerBasePath } = await import("../app/viewerRoutes");
+  configureViewerBasePath("/dse-solar/");
+  try {
+    assert.equal(viewerHref("polowat", "model"), "/dse-solar/polowat/model");
+    assert.deepEqual(parseViewerPath("/dse-solar/polowat/model/"), { project: "polowat", mode: "model" });
+    assert.deepEqual(parseViewerPath("/dse-solar/"), { project: "dse", mode: "diagram" });
+    assert.equal(parseViewerPath("/dse-solar/unknown/model"), null);
+  } finally { configureViewerBasePath(""); }
+});

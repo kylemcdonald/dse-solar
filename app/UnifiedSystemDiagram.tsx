@@ -19,11 +19,14 @@ import {
   routeStrokeWidth,
 } from "./diagramLayout";
 import type { DiagramLayout, DiagramNode, DiagramPort, Point, RoutedWire } from "./diagramLayout";
+import type { DiagramRuntime } from "./diagramRuntime";
 import { dseRuntime } from "./dseRuntime";
 import { isPurchasedDevice } from "./systemGraph";
 import type { GraphSelection } from "./systemGraph";
 
 type Props = {
+  runtime?: DiagramRuntime;
+  layouts?: typeof generatedLayouts;
   fadePurchased: boolean;
   onFadePurchasedChange: (fade: boolean) => void;
   onSelect: (selection: GraphSelection) => void;
@@ -39,11 +42,11 @@ const MAX_SCALE = 2.4;
 
 /** A join arm is as wide as the wire on it: the routed wire when the layout
  * has one (pair sheaths exist only in the diagram), else the physical route. */
-function wireJoinArmWidth(node: DiagramNode, port: DiagramPort, widthByEndpoint?: ReadonlyMap<string, number>) {
+function wireJoinArmWidth(node: DiagramNode, port: DiagramPort, widthByEndpoint?: ReadonlyMap<string, number>, runtime: DiagramRuntime = dseRuntime) {
   const endpoint = `${node.device.id}.${port.id}`;
   const routed = widthByEndpoint?.get(endpoint);
   if (routed !== undefined) return routed;
-  const route = dseRuntime.routes.find((candidate) => candidate.from === endpoint || candidate.to === endpoint);
+  const route = runtime.routes.find((candidate) => candidate.from === endpoint || candidate.to === endpoint);
   return route ? routeStrokeWidth(route) : 4;
 }
 
@@ -58,28 +61,30 @@ const generatedLayouts = diagramLayoutsArtifact as unknown as {
   graphRevision: string;
   layouts: Record<string, SerializedDiagramLayout>;
 };
-const hydratedLayoutCache = new Map<string, DiagramLayout>();
+const hydratedLayoutCaches = new WeakMap<DiagramRuntime, Map<string, DiagramLayout>>();
 
-function hydrateDiagramLayout(activeJunctionId?: string) {
+function hydrateDiagramLayout(activeJunctionId: string | undefined, runtime: DiagramRuntime, layouts: typeof generatedLayouts) {
+  let hydratedLayoutCache = hydratedLayoutCaches.get(runtime);
+  if(!hydratedLayoutCache) { hydratedLayoutCache = new Map(); hydratedLayoutCaches.set(runtime, hydratedLayoutCache); }
   const key = activeJunctionId ?? "system";
   const cached = hydratedLayoutCache.get(key);
   if (cached) return cached;
-  if (generatedLayouts.graphId !== dseRuntime.graph.id || generatedLayouts.graphRevision !== dseRuntime.graph.revision) {
+  if (layouts.graphId !== runtime.graph.id || layouts.graphRevision !== runtime.graph.revision) {
     throw new Error("Generated diagram geometry is stale; run npm run generate:diagram-layouts.");
   }
   const started = performance.now();
-  const serialized = generatedLayouts.layouts[key];
+  const serialized = layouts.layouts[key];
   if (!serialized) throw new Error(`Generated diagram geometry has no ${key} scope.`);
   const layout: DiagramLayout = {
     ...serialized,
-    junction: serialized.junctionId ? dseRuntime.deviceById.get(serialized.junctionId) : undefined,
+    junction: serialized.junctionId ? runtime.deviceById.get(serialized.junctionId) : undefined,
     nodes: serialized.nodes.map(({ deviceId, device, ...node }) => ({
       ...node,
-      device: dseRuntime.deviceById.get(deviceId) ?? device!,
+      device: runtime.deviceById.get(deviceId) ?? device!,
     })),
     wires: serialized.wires.map(({ routeId, route, ...wire }) => ({
       ...wire,
-      route: dseRuntime.routeById.get(routeId) ?? route!,
+      route: runtime.routeById.get(routeId) ?? route!,
     })),
     precomputedLayoutMs: serialized.layoutMs,
     layoutMs: performance.now() - started,
@@ -150,9 +155,9 @@ function localJumpPath(jump: WireJumpGeometry) {
 
 const INTEGRATED_FUSION_OFFSET = 22;
 
-function isIntegratedCableEndpoint(endpointId: string) {
-  const port = dseRuntime.conductorByKey.get(endpointId);
-  const owner = port ? dseRuntime.deviceById.get(port.deviceId) : undefined;
+function isIntegratedCableEndpoint(endpointId: string, runtime: DiagramRuntime) {
+  const port = runtime.conductorByKey.get(endpointId);
+  const owner = port ? runtime.deviceById.get(port.deviceId) : undefined;
   return owner?.presentation === "integrated-cable-breakout"
     && port?.kind === "multicore" && (port.internalMates?.length ?? 0) >= 2;
 }
@@ -175,14 +180,14 @@ function trimDiagramPolyline(points: readonly Point[], fromStart: boolean, trimD
   return [...points];
 }
 
-function wireRenderGeometry(wire: RoutedWire) {
+function wireRenderGeometry(wire: RoutedWire, runtime: DiagramRuntime) {
   const trimmedEndpoints: string[] = [];
   let visiblePoints = [...wire.points];
-  if (isIntegratedCableEndpoint(wire.fromEndpointId)) {
+  if (isIntegratedCableEndpoint(wire.fromEndpointId, runtime)) {
     visiblePoints = trimDiagramPolyline(visiblePoints, true, INTEGRATED_FUSION_OFFSET);
     trimmedEndpoints.push(wire.fromEndpointId);
   }
-  if (isIntegratedCableEndpoint(wire.toEndpointId)) {
+  if (isIntegratedCableEndpoint(wire.toEndpointId, runtime)) {
     visiblePoints = trimDiagramPolyline(visiblePoints, false, INTEGRATED_FUSION_OFFSET);
     trimmedEndpoints.push(wire.toEndpointId);
   }
@@ -324,7 +329,7 @@ function centroid(points: readonly Point[]) {
 }
 
 export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onSelect, onClearSelection,
-  inspectorOpen = false }: Props) {
+  inspectorOpen = false, runtime = dseRuntime, layouts = generatedLayouts }: Props) {
   const [activeJunctionId, setActiveJunctionId] = useState<string>();
   const [hoveredWireId, setHoveredWireId] = useState<string>();
   const [view, setViewState] = useState<ViewTransform>({ x: 0, y: 0, scale: 0.5 });
@@ -339,12 +344,12 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
   const viewCommitTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const rememberedViews = useRef(new Map<string, ViewTransform>());
   const mountedLayoutKey = useRef<string | undefined>(undefined);
-  const layout = useMemo(() => hydrateDiagramLayout(activeJunctionId), [activeJunctionId]);
+  const layout = useMemo(() => hydrateDiagramLayout(activeJunctionId, runtime, layouts), [activeJunctionId, runtime, layouts]);
   const wireWidthByEndpoint = useMemo(() => new Map(layout.wires.flatMap((wire) => [[wire.fromEndpointId, wire.width], [wire.toEndpointId, wire.width]] as const)), [layout]);
   const renderedWires = useMemo(() => layout.wires.map((wire) => ({
     wire,
-    ...wireRenderGeometry(wire),
-  })), [layout]);
+    ...wireRenderGeometry(wire, runtime),
+  })), [layout, runtime]);
   const hoveredWire = renderedWires.find(({ wire }) => wire.route.id === hoveredWireId);
   const applyViewToDom = useCallback((value: ViewTransform) => {
     contentRef.current?.setAttribute("transform", `translate(${value.x} ${value.y}) scale(${value.scale})`);
@@ -504,8 +509,8 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
 
   return (
     <section ref={diagramRef} className="unified-diagram" data-diagram="canonical-graph-subpatch" data-diagram-scope={layout.scope}
-      data-junction-id={activeJunctionId ?? ""} data-device-count={dseRuntime.devices.length}
-      data-wire-count={dseRuntime.routes.length} data-visible-device-count={layout.nodes.length}
+      data-junction-id={activeJunctionId ?? ""} data-device-count={runtime.devices.length}
+      data-wire-count={runtime.routes.length} data-visible-device-count={layout.nodes.length}
       data-visible-wire-count={layout.wires.length} data-junctions-abstracted={layout.scope === "system" ? "true" : "false"}
       data-orthogonal-t-join-count={layout.nodes.filter((node) => node.device.diagramJoinGeometry === "orthogonal-t").length}
       data-junction-internals-visible={layout.scope === "junction" ? "true" : "false"}
@@ -520,9 +525,9 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
       data-node-overlaps={layout.nodeOverlaps} data-wire-turns={layout.wireTurns}
       data-wire-length={layout.wireLength}
       data-routing-fallbacks={layout.routingFallbacks} data-layout-hydration="index-only"
-      data-current-safety-status={dseRuntime.diagnostics.currentSafety.status}
-      data-current-safety-errors={dseRuntime.diagnostics.currentSafety.errors.length}
-      data-current-safety-warnings={dseRuntime.diagnostics.currentSafety.warnings.length}
+      data-current-safety-status={runtime === dseRuntime ? dseRuntime.diagnostics.currentSafety.status : "unverified"}
+      data-current-safety-errors={runtime === dseRuntime ? dseRuntime.diagnostics.currentSafety.errors.length : undefined}
+      data-current-safety-warnings={runtime === dseRuntime ? dseRuntime.diagnostics.currentSafety.warnings.length : undefined}
       data-precomputed-layout-ms={layout.precomputedLayoutMs?.toFixed(1)}
       data-diagram-routing-ms="0.0" data-layout-source="build-generated-artifact"
       data-wire-geometry="orthogonal-grid" data-wire-crossing-rendering="arched-jumps"
@@ -548,7 +553,7 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
               + `${layout.boundaryPorts.filter((port) => port.side === "neutral").length} battery / earth / data below`}</span>
         </div>
         <div className="diagram-zoom-controls" aria-label="Diagram zoom">
-          <CurrentSafetySummary />
+          {runtime === dseRuntime ? <CurrentSafetySummary /> : <span className="route-runtime">Planning · installation checks open</span>}
           <button type="button" onClick={() => zoomAt({ x: viewportSize.width / 2, y: viewportSize.height / 2 }, 0.82)} aria-label="Zoom out">−</button>
           <button type="button" onClick={() => fitLayout()} aria-label="Fit diagram">{Math.round(view.scale * 100)}%</button>
           <button type="button" onClick={() => zoomAt({ x: viewportSize.width / 2, y: viewportSize.height / 2 }, 1.22)} aria-label="Zoom in">+</button>
@@ -609,7 +614,7 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
                   onPointerEnter={() => setHoveredWireId(wire.route.id)}
                   onPointerLeave={() => setHoveredWireId((current) => current === wire.route.id ? undefined : current)}
                   onClick={(event) => { event.stopPropagation();
-                    const conductorKey = dseRuntime.conductorByKey.has(wire.fromEndpointId)
+                    const conductorKey = runtime.conductorByKey.has(wire.fromEndpointId)
                       ? wire.fromEndpointId : wire.route.from;
                     onSelect({ type: "conductor", conductorKey, connectionId: wire.route.id }); }}>
                   <title>{wire.route.label ?? wire.route.id}</title>
@@ -646,7 +651,7 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
                 if (integratedCablePort.side === "output") return { x: node.width / 2 + 22, y: local.y };
                 return { x: local.x, y: node.height / 2 + 22 };
               })() : undefined;
-              const joinArmWidths = wireJoin ? node.ports.map((port) => wireJoinArmWidth(node, port, wireWidthByEndpoint)) : [];
+              const joinArmWidths = wireJoin ? node.ports.map((port) => wireJoinArmWidth(node, port, wireWidthByEndpoint, runtime)) : [];
               const railGroups = rigidRail
                 ? Object.values(Object.groupBy(node.ports, (port) => port.kind)).filter(Boolean)
                 : [];
@@ -667,7 +672,7 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
                     return <path key={port.id} className="diagram-wire-join-arm"
                       data-endpoint-id={`${node.device.id}.${port.id}`}
                       d={`M${point.x - node.x},${point.y - node.y} L0,0`}
-                      style={{ stroke: diagramConductorColor[port.kind], strokeWidth: wireJoinArmWidth(node, port, wireWidthByEndpoint) }} />;
+                      style={{ stroke: diagramConductorColor[port.kind], strokeWidth: wireJoinArmWidth(node, port, wireWidthByEndpoint, runtime) }} />;
                   })}
                   <circle className="diagram-wire-join-center"
                     r={Math.max(5, ...joinArmWidths.map((width) => width / 2 + 2))}
@@ -701,7 +706,7 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
                       return <path key={mate.id} className="diagram-integrated-breakout-arm"
                         data-endpoint-id={`${node.device.id}.${mate.id}`}
                         d={`M${point.x - node.x},${point.y - node.y} L${integratedFusion.x},${integratedFusion.y}`}
-                        style={{ stroke: diagramConductorColor[mate.kind], strokeWidth: wireJoinArmWidth(node, mate, wireWidthByEndpoint) }} />;
+                        style={{ stroke: diagramConductorColor[mate.kind], strokeWidth: wireJoinArmWidth(node, mate, wireWidthByEndpoint, runtime) }} />;
                     })}
                     <circle className="diagram-integrated-breakout-center" cx={integratedFusion.x}
                       cy={integratedFusion.y} r="5" />
@@ -724,7 +729,7 @@ export function UnifiedSystemDiagram({ fadePurchased, onFadePurchasedChange, onS
               </g>;
             })}
             {layout.nodes.flatMap((node) => isDiagramJoin(node.device) ? [] : node.ports
-              .filter((port) => !isIntegratedCableEndpoint(port.selectionKey))
+              .filter((port) => !isIntegratedCableEndpoint(port.selectionKey, runtime))
               .map((port) => <PortGraphic key={`${node.device.id}-${port.id}`} port={port} point={portPoint(node, port)}
                 ownerLabel={node.device.label} viewScale={view.scale} onSelect={onSelect} />))}
             {layout.scope === "junction" && <g className="diagram-boundary-glands">

@@ -17,7 +17,7 @@
     "targetBasis": "remaining",
     "donorFundedIncrementUsd": 607.11,
     "contingencyIncluded": false,
-    "note": "Purchases and transaction adjustments include the three August MultiPlus wires reconciled on 12 Sep 2026. IYOIYO paid Solar Fiji FJD 12,172.00 by wire against quote TP260901-V2 for the three AIKO panels, four Victron batteries, Schletter mounting hardware, cable, grounding materials, lugs and a used cutter; the system is now installed on Fulaga. IYOIYO also paid FJD 50.00 cash at R.C. Manubhai for eleven units across nine site-supply lines, including FJD 5.56 VAT. The retired Suntech and EverExceed rows were estimates only: no purchase occurred, their cost is zero, and they are excluded from all payer totals. Actual FJD values remain visible by item; MultiPlus reporting uses actual USD bank debits, while other Fiji purchases retain 2.20 FJD/USD. Imported equipment and customs clearance have reached Fiji, so the shipping and customs interfaces are archived from production while their source data and code remain retained. IYOIYO paid the Extreme Customs Clearance invoice totaling FJD 2,808.53, including import VAT, fiscal duty, clearance and agent charges, and service VAT. After assumed return credits, the grant ledger classifies $12,224.64 as solar-system/shared project costs and $3,422.50 as outside scope, totaling $15,647.14. Within outside scope, one SSD and one SD card reader are allocated to Inowon in Polowat at $179.98 in documented item prices, while shared order-level tax, promotions and customs remain unallocated by recipient. IYOIYO's Ekrano GX purchase remains charged against the $8,000 Pacific Traditions Society check; Erik Godo's donation reimburses PTS and is attribution only. The Amazon audit retains $324.95 in issued or credited refunds and keeps incompatible/return-bound equipment out of the installed design. The MultiPlus is fully paid by IYOIYO: FJD 2,971.00 / USD 1,382.72 across three wires. All USD 631.86 of historical installation, freight and baggage allowances were removed from the active ledger after the owner confirmed the installation was complete. Baggage was handled elsewhere, outside this project. The USD 16,387.03 positive-value chart less USD 424.88 documented refunds/promotions and USD 315.01 assumed refunds equals USD 15,647.14 in net IYOIYO expenses. The owner instructed treating all items marked for return as returned and refunded. The eight assumed credits include tax, shipping where charged on fully returned orders, and proportional discounts/tax on mixed orders; Amazon processing and final refund amounts are not confirmed. Existing issued refunds remain separate, and later confirmed credits replace the corresponding assumptions."
+    "note": "Purchases and transaction adjustments include the three August MultiPlus wires reconciled on 12 Sep 2026. IYOIYO paid Solar Fiji FJD 12,172.00 by wire against quote TP260901-V2 for the three AIKO panels, four Victron batteries, Schletter mounting hardware, cable, grounding materials, lugs and a used cutter; the system is now installed on Fulaga. IYOIYO also paid FJD 50.00 cash at R.C. Manubhai for eleven units across nine site-supply lines, including FJD 5.56 VAT. The retired Suntech and EverExceed rows were estimates only: no purchase occurred, their cost is zero, and they are excluded from all payer totals. Actual FJD values remain visible by item; MultiPlus reporting uses actual USD bank debits, while other Fiji purchases retain 2.20 FJD/USD. Imported equipment and customs clearance have reached Fiji, so the shipping and customs interfaces are archived from production while their source data and code remain retained. IYOIYO paid the Extreme Customs Clearance invoice totaling FJD 2,808.53, including import VAT, fiscal duty, clearance and agent charges, and service VAT. After assumed return credits, the grant ledger classifies $11,981.34 as solar-system/shared project costs and $3,422.50 as outside scope, totaling $15,403.84. Within outside scope, one SSD and one SD card reader are allocated to Inowon in Polowat at $179.98 in documented item prices, while shared order-level tax, promotions and customs remain unallocated by recipient. IYOIYO's Ekrano GX purchase remains charged against the $8,000 Pacific Traditions Society check; Erik Godo's donation reimburses PTS and is attribution only. The Amazon audit retains $643.94 in issued or credited refunds and keeps incompatible/return-bound equipment out of the installed design. The MultiPlus is fully paid by IYOIYO: FJD 2,971.00 / USD 1,382.72 across three wires. All USD 631.86 of historical installation, freight and baggage allowances were removed from the active ledger after the owner confirmed the installation was complete. Baggage was handled elsewhere, outside this project. The USD 16,387.03 positive-value chart less USD 743.87 documented refunds/promotions and USD 239.32 assumed refunds equals USD 15,403.84 in net IYOIYO expenses. The owner instructed treating all items marked for return as returned and refunded. The five remaining nonzero assumed credits include tax, shipping where charged on fully returned orders, and proportional discounts/tax on mixed orders; Amazon processing and final refund amounts are not confirmed. Existing issued refunds remain separate, and later confirmed credits replace the corresponding assumptions. On 18 Sep 2026, ten newly verified Amazon-issued refund transactions totaled USD 318.99. USD 75.69 replaced existing assumed refunds, reducing the prior net total by USD 243.30. MidNite remains return-approved with USD 135.63 assumed, not issued. Original purchase values and tax charges are preserved and offset once by the linked refund credits."
   },
   "summary": "The installed Fulaga system has three roof-mounted solar panels on two transverse rails, white series power links and a white two-core PV downlead, a 24 V / 440 Ah GEL battery bank labeled A1, A2, B1 and B2, and equipment on the west and north walls. The PV cutoff box contains PV breaker 1, a disconnected PV breaker 2, a 40 A DC 600 V combiner breaker and a DC 600 V 40 kA surge protector. A three-gang wall switch controls Internet, Orion remote H and both indoor lights, top to bottom. Equipment is already installed; geometry is an illustrative record, not a purchase plan or measured cable schedule. Exact AC earth/neutral bridge terminals and the positive voltage-sense connection still need to be recorded.",
   "keyFacts": [
@@ -1110,7 +1110,7 @@
       "currency": "USD",
       "totalUsd": 124.15,
       "location": "Import",
-      "procurement": "Purchased · allocate where compatible",
+      "procurement": "Purchased · partially returned · refund issued",
       "priority": "Imported stock · onsite allocation",
       "description": "Five fixed-length red/black pairs were purchased 26 Aug 2026 with pre-crimped M10-class closed-end lugs. The receipt and listing identify flexible OFC copper cable and adhesive heat-shrink; the listing describes tin-plated lugs, not a tinned conductor. Do not represent these as verified UL 1426 marine cable. R32 permits allocation only to the three 1/0 routes—the SmartShunt trunk and direct MultiPlus pair—and only where actual length, crimp quality and M8/M10 lug geometry match after final measurement. Never use 1/0 at a 120 A disconnect, trim strands or drill lugs.",
       "productUrl": "https://www.amazon.com/dp/B0F93TT9CW",
@@ -1118,7 +1118,11 @@
       "totalWeightKg": 4.41,
       "weightBasis": "retail-listing estimate",
       "weightNote": "Mixed-length estimate: three 1.5 ft pairs at about 0.91 kg each and two 2 ft pairs at about 0.84 kg each. Weigh the delivered packages for the final shipping declaration.",
-      "weightSourceUrl": "https://www.amazon.com/dp/B0F93TT9CW"
+      "weightSourceUrl": "https://www.amazon.com/dp/B0F93TT9CW",
+      "returnedQuantity": 4,
+      "retainedQuantity": 1,
+      "returnAccounting": "confirmed",
+      "grantPaymentNote": "4 of 5 purchased units returned; 1 retained. Separately listed Amazon-issued refund: USD 110.58, including tax. Gross purchase quantity and value preserved."
     },
     {
       "id": "dse-supplemental-1-0-cable-fiji",
@@ -1960,7 +1964,7 @@
       "unitCost": 25.19,
       "currency": "USD",
       "location": "Import",
-      "procurement": "Purchased",
+      "procurement": "Purchased · partially returned · refund issued",
       "priority": "Integration pending",
       "description": "Two identical red/black 2 AWG OFC pairs were purchased across two 26 Aug 2026 orders, ASIN B0CHS3JJ9F, with factory-crimped M10-class lugs. R32 uses exact 2 AWG for the battery strings, every 120 A disconnect landing and the SmartSolar branch; the secondary feeder is separately fabricated in 8 AWG. These fixed M10–M10 assemblies are not automatically compatible with M8 battery posts or screw clamps. Allocate only after final metric measurement and exact end verification; otherwise have the required assemblies fabricated.",
       "productUrl": "https://www.amazon.com/dp/B0CHS3JJ9F",
@@ -1969,7 +1973,11 @@
       "weightBasis": "length-scaled retail estimate",
       "weightSourceUrl": "https://www.amazon.com/dp/B0CHS3JJ9F",
       "weightNote": "Estimated at 0.85 kg per three-foot red/black pair from the listed 2 AWG copper area and a shorter-pair retail package weight; weigh received packages before filing.",
-      "totalUsd": 50.38
+      "totalUsd": 50.38,
+      "returnedQuantity": 1,
+      "retainedQuantity": 1,
+      "returnAccounting": "confirmed",
+      "grantPaymentNote": "1 of 2 purchased units returned; 1 retained. Separately listed Amazon-issued refund: USD 27.65, including tax. Gross purchase quantity and value preserved."
     },
     {
       "id": "dse-amomd-600a-busbars-unused",
@@ -2045,7 +2053,7 @@
       "currency": "USD",
       "totalUsd": 11.99,
       "location": "Return",
-      "procurement": "Purchased · treated as returned · refund assumed",
+      "procurement": "Purchased · returned · refund issued",
       "priority": "Surplus · do not install",
       "accountingGroup": "returns",
       "includedInTotal": false,
@@ -2055,8 +2063,10 @@
       "totalWeightKg": 0.18,
       "weightBasis": "estimate",
       "weightNote": "Estimated single-pole breaker mass; excluded from shipping pending the return/spare decision.",
-      "returnAccounting": "assumed",
-      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
+      "returnAccounting": "confirmed",
+      "grantPaymentNote": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0
     },
     {
       "id": "dse-extra-ac-rcbo-pair",
@@ -2068,7 +2078,7 @@
       "currency": "USD",
       "totalUsd": 47.98,
       "location": "Return",
-      "procurement": "Purchased · treated as returned · refund assumed",
+      "procurement": "Purchased · returned · refund issued",
       "priority": "Exact duplicate · do not install",
       "accountingGroup": "returns",
       "includedInTotal": false,
@@ -2079,8 +2089,10 @@
       "weightBasis": "listing",
       "weightSourceUrl": "https://www.amazon.com/dp/B0CRKNJSRH",
       "weightNote": "Product-family listing mass; excluded from shipping pending the return decision.",
-      "returnAccounting": "assumed",
-      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
+      "returnAccounting": "confirmed",
+      "grantPaymentNote": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
+      "returnedQuantity": 2,
+      "retainedQuantity": 0
     },
     {
       "id": "dse-kerwinn-shared-services-breaker-alternate",
@@ -2486,7 +2498,7 @@
       "currency": "USD",
       "totalUsd": 8.99,
       "location": "Return",
-      "procurement": "Purchased · treated as returned · refund assumed",
+      "procurement": "Purchased · returned · refund issued",
       "priority": "Not in design",
       "description": "Purchased 23 Aug 2026 and not selected in the R32 USB topology. Marked for return; keep it out of the installed circuit and exclude it from the Fiji import/customs manifest.",
       "productUrl": "https://www.amazon.com/dp/B09H4W8CLY",
@@ -2498,8 +2510,10 @@
       "weightSourceUrl": "https://www.amazon.com/dp/B09H4W8CLY",
       "weightNote": "Amazon listing item weight for the one-pole breaker body.",
       "accountingGroup": "returns",
-      "returnAccounting": "assumed",
-      "grantPaymentNote": "Offset by a separately listed assumed refund. Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
+      "returnAccounting": "confirmed",
+      "grantPaymentNote": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0
     },
     {
       "id": "dse-unifi-converter",
@@ -3032,7 +3046,7 @@
       "unitCost": 35.99,
       "currency": "USD",
       "location": "Import",
-      "procurement": "Purchased",
+      "procurement": "Purchased · returned · refund issued",
       "priority": "Install stock",
       "description": "Thirty-foot red/black stranded-wire pair purchased 24 Aug 2026, ASIN B08HSC5NW5. Allocate only to branches whose protection, ampacity, insulation and voltage-drop requirements are satisfied.",
       "productUrl": "https://www.amazon.com/dp/B08HSC5NW5",
@@ -3040,7 +3054,13 @@
       "unitWeightKg": 1.45,
       "totalWeightKg": 1.45,
       "weightBasis": "estimate",
-      "weightNote": "Copper-area plus flexible-insulation estimate for a 30 ft red/black 10 AWG pair."
+      "weightNote": "Copper-area plus flexible-insulation estimate for a 30 ft red/black 10 AWG pair.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0,
+      "returnAccounting": "confirmed",
+      "grantPaymentNote": "1 of 1 purchased units returned; 0 retained. Separately listed Amazon-issued refund: USD 39.50, including tax. Gross purchase quantity and value preserved.",
+      "accountingGroup": "returns",
+      "includedInTotal": false
     },
     {
       "id": "dse-2awg-wire-pair-5ft",
@@ -3051,7 +3071,7 @@
       "unitCost": 39.99,
       "currency": "USD",
       "location": "Import",
-      "procurement": "Purchased · allocate where compatible",
+      "procurement": "Purchased · returned · refund issued",
       "priority": "Imported stock · onsite allocation",
       "description": "One five-foot red plus five-foot black 2 AWG pair purchased 24 Aug 2026, ASIN B0DTNX7S3S. Verify conductor material, insulation, termination geometry, protection and ampacity before assigning it to a circuit.",
       "productUrl": "https://www.amazon.com/dp/B0DTNX7S3S",
@@ -3059,7 +3079,13 @@
       "unitWeightKg": 1.15,
       "totalWeightKg": 1.15,
       "weightBasis": "estimate",
-      "weightNote": "Copper-area plus flexible-insulation and terminal estimate for a five-foot red/black 2 AWG pair."
+      "weightNote": "Copper-area plus flexible-insulation and terminal estimate for a five-foot red/black 2 AWG pair.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0,
+      "returnAccounting": "confirmed",
+      "grantPaymentNote": "1 of 1 purchased units returned; 0 retained. Separately listed Amazon-issued refund: USD 43.89, including tax. Gross purchase quantity and value preserved.",
+      "accountingGroup": "returns",
+      "includedInTotal": false
     },
     {
       "id": "dse-1-0-battery-cables-2ft",
@@ -3168,7 +3194,7 @@
       "unitCost": 19.75,
       "currency": "USD",
       "location": "Import",
-      "procurement": "Purchased",
+      "procurement": "Purchased · returned · refund issued",
       "priority": "Install stock",
       "description": "Ten-foot red/black stranded-wire pair purchased 24 Aug 2026, ASIN B093R538JV. Allocate only to a circuit with verified protection, ampacity, insulation and voltage drop.",
       "productUrl": "https://www.amazon.com/dp/B093R538JV",
@@ -3176,7 +3202,13 @@
       "unitWeightKg": 0.65,
       "totalWeightKg": 0.65,
       "weightBasis": "estimate",
-      "weightNote": "Copper-area plus flexible-insulation estimate for a 10 ft red/black 8 AWG pair."
+      "weightNote": "Copper-area plus flexible-insulation estimate for a 10 ft red/black 8 AWG pair.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0,
+      "returnAccounting": "confirmed",
+      "grantPaymentNote": "1 of 1 purchased units returned; 0 retained. Separately listed Amazon-issued refund: USD 21.68, including tax. Gross purchase quantity and value preserved.",
+      "accountingGroup": "returns",
+      "includedInTotal": false
     },
     {
       "id": "dse-ferrule-crimper-kit",
@@ -3804,7 +3836,7 @@
       "unit": "refund credit",
       "currency": "USD",
       "location": "Return",
-      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "procurement": "Purchased · refund assumption superseded by confirmed credit",
       "priority": "Accounting assumption",
       "accountingGroup": "returns",
       "includedInTotal": false,
@@ -3812,18 +3844,18 @@
       "refundStatus": "assumed",
       "refundForBomId": "dse-extra-dihool-120a-breaker",
       "refundExpectedUsd": 13.16,
-      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
-      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "description": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
+      "grantPaymentNote": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
       "unitWeightKg": 0,
       "totalWeightKg": 0,
       "weightBasis": "not-applicable",
       "weightNote": "Refund credit; no physical item.",
-      "totalUsd": -13.16,
-      "unitCost": -13.16,
+      "totalUsd": 0,
+      "unitCost": 0,
       "refundAllocations": [
         {
           "bomId": "dse-extra-dihool-120a-breaker",
-          "amountUsd": 13.16
+          "amountUsd": 0
         }
       ]
     },
@@ -3835,7 +3867,7 @@
       "unit": "refund credit",
       "currency": "USD",
       "location": "Return",
-      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "procurement": "Purchased · refund assumption superseded by confirmed credit",
       "priority": "Accounting assumption",
       "accountingGroup": "returns",
       "includedInTotal": false,
@@ -3843,18 +3875,18 @@
       "refundStatus": "assumed",
       "refundForBomId": "dse-extra-ac-rcbo-pair",
       "refundExpectedUsd": 52.66,
-      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
-      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "description": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
+      "grantPaymentNote": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
       "unitWeightKg": 0,
       "totalWeightKg": 0,
       "weightBasis": "not-applicable",
       "weightNote": "Refund credit; no physical item.",
-      "totalUsd": -52.66,
-      "unitCost": -52.66,
+      "totalUsd": 0,
+      "unitCost": 0,
       "refundAllocations": [
         {
           "bomId": "dse-extra-ac-rcbo-pair",
-          "amountUsd": 52.66
+          "amountUsd": 0
         }
       ]
     },
@@ -3959,7 +3991,7 @@
       "unit": "refund credit",
       "currency": "USD",
       "location": "Return",
-      "procurement": "Purchased · assumed refund · Amazon confirmation pending",
+      "procurement": "Purchased · refund assumption superseded by confirmed credit",
       "priority": "Accounting assumption",
       "accountingGroup": "returns",
       "includedInTotal": false,
@@ -3967,18 +3999,18 @@
       "refundStatus": "assumed",
       "refundForBomId": "dse-usb-output-breaker",
       "refundExpectedUsd": 9.87,
-      "description": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
-      "grantPaymentNote": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund.",
+      "description": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
+      "grantPaymentNote": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
       "unitWeightKg": 0,
       "totalWeightKg": 0,
       "weightBasis": "not-applicable",
       "weightNote": "Refund credit; no physical item.",
-      "totalUsd": -9.87,
-      "unitCost": -9.87,
+      "totalUsd": 0,
+      "unitCost": 0,
       "refundAllocations": [
         {
           "bomId": "dse-usb-output-breaker",
-          "amountUsd": 9.87
+          "amountUsd": 0
         }
       ]
     },
@@ -4012,6 +4044,238 @@
           "amountUsd": 23.4
         }
       ]
+    },
+    {
+      "id": "dse-extra-dihool-120a-breaker-confirmed-refund-2026-09-18",
+      "category": "Purchase adjustments",
+      "item": "Amazon refund · Surplus fourth DIHOOL 120 A non-polarized breaker · not in design",
+      "qty": 1,
+      "unit": "refund credit",
+      "unitCost": -13.16,
+      "currency": "USD",
+      "totalUsd": -13.16,
+      "location": "Return",
+      "procurement": "Purchased · Amazon-issued refund",
+      "priority": "Confirmed refund",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-extra-dihool-120a-breaker",
+          "amountUsd": 13.16
+        }
+      ],
+      "description": "Amazon refund issuance verified 18 Sep 2026 for 1 of 1 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "grantPaymentNote": "Amazon refund issuance verified 18 Sep 2026 for 1 of 1 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item."
+    },
+    {
+      "id": "dse-extra-ac-rcbo-pair-confirmed-refund-2026-09-18",
+      "category": "Purchase adjustments",
+      "item": "Amazon refund · Duplicate DIHOOL 10 A two-pole ground-fault/surge units · not in design",
+      "qty": 1,
+      "unit": "refund credit",
+      "unitCost": -52.66,
+      "currency": "USD",
+      "totalUsd": -52.66,
+      "location": "Return",
+      "procurement": "Purchased · Amazon-issued refund",
+      "priority": "Confirmed refund",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-extra-ac-rcbo-pair",
+          "amountUsd": 52.66
+        }
+      ],
+      "description": "Amazon refund issuance verified 18 Sep 2026 for 2 of 2 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "grantPaymentNote": "Amazon refund issuance verified 18 Sep 2026 for 2 of 2 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item."
+    },
+    {
+      "id": "dse-shirbly-2awg-cable-pairs-confirmed-refund-2026-09-18",
+      "category": "Purchase adjustments",
+      "item": "Amazon refund · Shirbly preterminated 2 AWG OFC battery cable pairs · 3 ft · 3/8 in lugs",
+      "qty": 1,
+      "unit": "refund credit",
+      "unitCost": -27.65,
+      "currency": "USD",
+      "totalUsd": -27.65,
+      "location": "Return",
+      "procurement": "Purchased · Amazon-issued refund",
+      "priority": "Confirmed refund",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-shirbly-2awg-cable-pairs",
+          "amountUsd": 27.65
+        }
+      ],
+      "description": "Amazon refund issuance verified 18 Sep 2026 for 1 of 2 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "grantPaymentNote": "Amazon refund issuance verified 18 Sep 2026 for 1 of 2 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item."
+    },
+    {
+      "id": "dse-battery-cable-confirmed-refund-2026-09-18",
+      "category": "Purchase adjustments",
+      "item": "Amazon refund · Shirbly preterminated 1/0 AWG OFC battery cable pairs · 3/8 in lugs",
+      "qty": 1,
+      "unit": "refund credit",
+      "unitCost": -110.58,
+      "currency": "USD",
+      "totalUsd": -110.58,
+      "location": "Return",
+      "procurement": "Purchased · Amazon-issued refund",
+      "priority": "Confirmed refund",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-battery-cable",
+          "amountUsd": 110.58
+        }
+      ],
+      "description": "Amazon refund issuance verified 18 Sep 2026 for 4 of 5 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "grantPaymentNote": "Amazon refund issuance verified 18 Sep 2026 for 4 of 5 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item."
+    },
+    {
+      "id": "dse-10awg-wire-30ft-confirmed-refund-2026-09-18",
+      "category": "Purchase adjustments",
+      "item": "Amazon refund · iGreely 10 AWG red/black wire",
+      "qty": 1,
+      "unit": "refund credit",
+      "unitCost": -39.5,
+      "currency": "USD",
+      "totalUsd": -39.5,
+      "location": "Return",
+      "procurement": "Purchased · Amazon-issued refund",
+      "priority": "Confirmed refund",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-10awg-wire-30ft",
+          "amountUsd": 39.5
+        }
+      ],
+      "description": "Amazon refund issuance verified 18 Sep 2026 for 1 of 1 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "grantPaymentNote": "Amazon refund issuance verified 18 Sep 2026 for 1 of 1 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item."
+    },
+    {
+      "id": "dse-2awg-wire-pair-5ft-confirmed-refund-2026-09-18",
+      "category": "Purchase adjustments",
+      "item": "Amazon refund · 2 AWG five-foot red/black cable pair",
+      "qty": 1,
+      "unit": "refund credit",
+      "unitCost": -43.89,
+      "currency": "USD",
+      "totalUsd": -43.89,
+      "location": "Return",
+      "procurement": "Purchased · Amazon-issued refund",
+      "priority": "Confirmed refund",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-2awg-wire-pair-5ft",
+          "amountUsd": 43.89
+        }
+      ],
+      "description": "Amazon refund issuance verified 18 Sep 2026 for 1 of 1 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "grantPaymentNote": "Amazon refund issuance verified 18 Sep 2026 for 1 of 1 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item."
+    },
+    {
+      "id": "dse-8awg-wire-10ft-confirmed-refund-2026-09-18",
+      "category": "Purchase adjustments",
+      "item": "Amazon refund · iGreely 8 AWG red/black wire",
+      "qty": 1,
+      "unit": "refund credit",
+      "unitCost": -21.68,
+      "currency": "USD",
+      "totalUsd": -21.68,
+      "location": "Return",
+      "procurement": "Purchased · Amazon-issued refund",
+      "priority": "Confirmed refund",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-8awg-wire-10ft",
+          "amountUsd": 21.68
+        }
+      ],
+      "description": "Amazon refund issuance verified 18 Sep 2026 for 1 of 1 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "grantPaymentNote": "Amazon refund issuance verified 18 Sep 2026 for 1 of 1 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item."
+    },
+    {
+      "id": "dse-usb-output-breaker-confirmed-refund-2026-09-18",
+      "category": "Purchase adjustments",
+      "item": "Amazon refund · Owned CHTAIXI B60 breaker · removed from USB topology",
+      "qty": 1,
+      "unit": "refund credit",
+      "unitCost": -9.87,
+      "currency": "USD",
+      "totalUsd": -9.87,
+      "location": "Return",
+      "procurement": "Purchased · Amazon-issued refund",
+      "priority": "Confirmed refund",
+      "accountingGroup": "returns",
+      "includedInTotal": false,
+      "grantPayer": "IYOIYO",
+      "refundStatus": "confirmed",
+      "refundAllocations": [
+        {
+          "bomId": "dse-usb-output-breaker",
+          "amountUsd": 9.87
+        }
+      ],
+      "description": "Amazon refund issuance verified 18 Sep 2026 for 1 of 1 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "grantPaymentNote": "Amazon refund issuance verified 18 Sep 2026 for 1 of 1 purchased units; includes refunded tax. Original purchase remains at gross cost; this credit replaces matching assumed refunds.",
+      "unitWeightKg": 0,
+      "totalWeightKg": 0,
+      "weightBasis": "not-applicable",
+      "weightNote": "Refund credit; no physical item."
     }
   ],
   "operatingRules": [

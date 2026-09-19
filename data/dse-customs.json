@@ -17,7 +17,11 @@
       "originBasis": "unresolved",
       "originSourceUrl": "https://www.amazon.com/dp/B0F93TT9CW",
       "originNote": "Confirm manufacturing country from the received product and packaging before filing.",
-      "originReviewedOn": "2026-08-26"
+      "originReviewedOn": "2026-08-26",
+      "returnedQuantity": 4,
+      "retainedQuantity": 1,
+      "returnReviewDate": "2026-09-18",
+      "returnNote": "Post-installation return accounting; original customs filing values remain historical."
     },
     "dse-multiplus": {
       "model": "MultiPlus-II 24/3000/70-32 230 V",
@@ -475,9 +479,13 @@
       "originNote": "TAIXI identifies its manufacturing operation and address in Zhejiang, China; verify the received product label before filing.",
       "originReviewedOn": "2026-08-25",
       "excludedFromManifest": true,
-      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction.",
+      "exclusionReason": "Returned item; Amazon-issued refund confirmed.",
       "make": "CHTAIXI",
-      "additionalInfo": "12–110 VDC"
+      "additionalInfo": "12–110 VDC",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0,
+      "returnReviewDate": "2026-09-18",
+      "returnNote": "Post-installation return accounting; original customs filing values remain historical."
     },
     "dse-mppt-wirebox-mc4-rejected": {
       "model": "MPPT WireBox-XL MC4 VE.Can",
@@ -701,7 +709,13 @@
       "originSourceUrl": "https://www.amazon.com/dp/B08HSC5NW5",
       "originReviewedOn": "2026-08-25",
       "make": "iGreely",
-      "additionalInfo": "30 ft"
+      "additionalInfo": "30 ft",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0,
+      "returnReviewDate": "2026-09-18",
+      "returnNote": "Post-installation return accounting; original customs filing values remain historical.",
+      "excludedFromManifest": true,
+      "exclusionReason": "Returned stock; Amazon refund verified 18 Sep 2026."
     },
     "dse-2awg-wire-pair-5ft": {
       "model": "2 AWG red/black battery cable",
@@ -712,7 +726,13 @@
       "originSourceUrl": "https://www.amazon.com/dp/B0DTNX7S3S",
       "originReviewedOn": "2026-08-25",
       "make": "Unbranded",
-      "additionalInfo": "5 ft"
+      "additionalInfo": "5 ft",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0,
+      "returnReviewDate": "2026-09-18",
+      "returnNote": "Post-installation return accounting; original customs filing values remain historical.",
+      "excludedFromManifest": true,
+      "exclusionReason": "Returned stock; Amazon refund verified 18 Sep 2026."
     },
     "dse-1-0-battery-cables-2ft": {
       "model": "1/0 AWG red/black battery cable",
@@ -780,7 +800,13 @@
       "originSourceUrl": "https://www.amazon.com/dp/B093R538JV",
       "originReviewedOn": "2026-08-25",
       "make": "iGreely",
-      "additionalInfo": "10 ft"
+      "additionalInfo": "10 ft",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0,
+      "returnReviewDate": "2026-09-18",
+      "returnNote": "Post-installation return accounting; original customs filing values remain historical.",
+      "excludedFromManifest": true,
+      "exclusionReason": "Returned stock; Amazon refund verified 18 Sep 2026."
     },
     "dse-ferrule-crimper-kit": {
       "model": "Ferrule crimper and ferrule assortment",
@@ -1075,7 +1101,11 @@
       "originBasis": "unresolved",
       "originSourceUrl": "https://www.amazon.com/dp/B0CHS3JJ9F",
       "originNote": "Confirm manufacturing country from the received product and packaging before filing.",
-      "originReviewedOn": "2026-08-26"
+      "originReviewedOn": "2026-08-26",
+      "returnedQuantity": 1,
+      "retainedQuantity": 1,
+      "returnReviewDate": "2026-09-18",
+      "returnNote": "Post-installation return accounting; original customs filing values remain historical."
     },
     "dse-switched-load-breaker": {
       "make": "CHTAIXI",
@@ -1115,7 +1145,11 @@
       "originNote": "Confirm manufacturing country from the received product and packaging before filing.",
       "originReviewedOn": "2026-08-26",
       "excludedFromManifest": true,
-      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction."
+      "exclusionReason": "Returned item; Amazon-issued refund confirmed.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0,
+      "returnReviewDate": "2026-09-18",
+      "returnNote": "Post-installation return accounting; original customs filing values remain historical."
     },
     "dse-extra-ac-rcbo-pair": {
       "make": "DIHOOL",
@@ -1129,7 +1163,11 @@
       "serialRequired": false,
       "defaultCondition": "New — duplicate purchase",
       "excludedFromManifest": true,
-      "exclusionReason": "Return item, excluded from installed/import inventory; refund assumed for accounting under owner instruction."
+      "exclusionReason": "Returned item; Amazon-issued refund confirmed.",
+      "returnedQuantity": 2,
+      "retainedQuantity": 0,
+      "returnReviewDate": "2026-09-18",
+      "returnNote": "Post-installation return accounting; original customs filing values remain historical."
     },
     "dse-kerwinn-shared-services-breaker-alternate": {
       "make": "KERWINN",

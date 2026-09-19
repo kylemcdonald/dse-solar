@@ -135,7 +135,6 @@ export function CostView({ bom, project = "dse", taxEstimate }: { bom: CostBomIt
   const isPolowat = project === "polowat";
   const [privateMode, setPrivateMode] = useState(false);
   useEffect(() => {
-    if (isPolowat) return;
     let active = true;
     void fetch("/api/receipts/status", { cache: "no-store" })
       .then((response) => response.ok ? response.json() as Promise<{ privateMode?: boolean }> : null)
@@ -185,11 +184,11 @@ export function CostView({ bom, project = "dse", taxEstimate }: { bom: CostBomIt
         {!isPolowat && <option value="Additional purchases">Additional purchases</option>}
         {!isPolowat && <option value="Excluded / returns">Excluded / returns</option>}
       </select>
-      {!isPolowat && <button type="button" className="grant-report-export" onClick={() => downloadGrantPurchaseReportPdf(bom)}>
+      {!isPolowat && privateMode && <button type="button" className="grant-report-export" onClick={() => downloadGrantPurchaseReportPdf(bom)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14" /></svg>
         Export grant report PDF
       </button>}
-      {!isPolowat && <button type="button" className="grant-report-export" onClick={() => downloadGrantPurchaseReportCsv(bom)}>
+      {!isPolowat && privateMode && <button type="button" className="grant-report-export" onClick={() => downloadGrantPurchaseReportCsv(bom)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14" /></svg>
         Export grant report CSV
       </button>}
@@ -197,6 +196,14 @@ export function CostView({ bom, project = "dse", taxEstimate }: { bom: CostBomIt
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14" /></svg>
         Download all receipts (.zip)
       </a>}
+      {/* These are attachment endpoints; client-side page navigation is inappropriate. */}
+      {/* eslint-disable @next/next/no-html-link-for-pages */}
+      {isPolowat && privateMode && <>
+        <a className="receipt-archive-download" href="/api/receipts/inbox?project=polowat&download=csv">Download parts CSV</a>
+        <a className="receipt-archive-download" href="/api/receipts/inbox?project=polowat&download=zip">Download receipts + ledger ZIP</a>
+        <a className="receipt-archive-download" href="/api/receipts/inbox?project=polowat&download=pdf">Download expense report PDF</a>
+      </>}
+      {/* eslint-enable @next/next/no-html-link-for-pages */}
       <span>{items.length} rows shown</span>
     </div>
     {grantReport && <details className="cost-reconciliation">

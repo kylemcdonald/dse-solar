@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { createRoot } from "react-dom/client";
 import { SystemViewer } from "@/app/SystemViewer";
 import "@/app/globals.css";

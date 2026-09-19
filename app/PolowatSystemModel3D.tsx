@@ -2,8 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { PolowatSystemDiagram } from "./PolowatSystemDiagram";
-import { PolowatAssemblyModel } from "./PolowatAssemblyModel";
+import { SVGRenderer } from "three/examples/jsm/renderers/SVGRenderer.js";
+import { createPolowatShell } from "./polowatShellGeometry";
+import { createPolowatAssembly } from "./polowatAssemblyGeometry";
+import { assemblyParts } from "./polowatAssembly";
+import { polowatCableRoutes, cableCurve } from "./polowatCableRoutes";
+import { PolowatModelInspector, type PolowatModelSelection } from "./PolowatModelInspector";
 import { GrabPointCameraControls } from "./GrabPointCameraControls";
 import {
   polowatDeviceById,
@@ -12,24 +16,10 @@ import {
   type PolowatDevice,
 } from "./polowatTopology";
 
-type Preset = "whole" | "array" | "equipment" | "batteries";
-type Pose = { position: readonly [number, number, number]; target: readonly [number, number, number] };
-
-const presets: readonly { id: Preset; label: string }[] = [
-  { id: "whole", label: "Whole system" },
-  { id: "array", label: "3-panel array" },
-  { id: "equipment", label: "Equipment" },
-  { id: "batteries", label: "Battery pair" },
-];
-
-const poses: Record<Preset, Pose> = {
-  whole: { position: [4.15, 3.65, 5.65], target: [0.20, 1.55, 0.10] },
-  array: { position: [-0.35, 3.15, 4.35], target: [-1.24, 2.84, 0.25] },
-  equipment: { position: [1.50, 2.10, 2.15], target: [0.43, 1.62, 0.10] },
-  batteries: { position: [1.80, 0.92, 2.25], target: [0.16, 0.48, 0.16] },
-};
-
 const kindColors: Record<PolowatDevice["kind"], string> = {
+  shunt: "#b78643",
+  monitor: "#2479ad",
+  fuse: "#303940",
   panel: "#24558c",
   battery: "#3f4648",
   breaker: "#f2f0e8",
@@ -48,6 +38,7 @@ const conductorColors: Record<PolowatConductorKind, string> = {
   series: "#e2a236",
   regulated: "#3b6ea8",
   usb: "#4a82b4",
+  data: "#8b68ac",
 };
 
 function disposeObject(root: THREE.Object3D) {
@@ -100,26 +91,7 @@ function deviceObject(device: PolowatDevice) {
   group.userData.deviceId = device.id;
 
   if (device.kind === "enclosure") {
-    const [width, height, depth] = device.size;
-    const back = new THREE.Mesh(
-      new THREE.BoxGeometry(width, height, 0.018),
-      new THREE.MeshStandardMaterial({ color: kindColors.enclosure, roughness: 0.82, transparent: true, opacity: 0.70 }),
-    );
-    back.position.z = -depth / 2;
-    group.add(back);
-    const frameMaterial = new THREE.MeshStandardMaterial({ color: "#8f8a80", roughness: 0.66 });
-    const border = 0.022;
-    const horizontal = new THREE.BoxGeometry(width + border, border, depth);
-    const vertical = new THREE.BoxGeometry(border, height, depth);
-    const top = new THREE.Mesh(horizontal, frameMaterial);
-    const bottom = new THREE.Mesh(horizontal, frameMaterial);
-    const left = new THREE.Mesh(vertical, frameMaterial);
-    const right = new THREE.Mesh(vertical, frameMaterial);
-    top.position.y = height / 2;
-    bottom.position.y = -height / 2;
-    left.position.x = -width / 2;
-    right.position.x = width / 2;
-    group.add(top, bottom, left, right);
+    group.add(createPolowatShell(device));
   } else {
     const material = new THREE.MeshStandardMaterial({
       color: kindColors[device.kind],
@@ -171,36 +143,16 @@ function deviceObject(device: PolowatDevice) {
   return group;
 }
 
-function routePoints(from: PolowatDevice, to: PolowatDevice, routeLift: number) {
-  const start = new THREE.Vector3(
-    from.position[0],
-    from.position[1],
-    from.position[2] + from.size[2] / 2 + 0.012,
-  );
-  const end = new THREE.Vector3(
-    to.position[0],
-    to.position[1],
-    to.position[2] + to.size[2] / 2 + 0.012,
-  );
-  const front = Math.max(start.z, end.z, routeLift);
-  const middleX = (start.x + end.x) / 2;
-  return [
-    start,
-    new THREE.Vector3(start.x, start.y, front),
-    new THREE.Vector3(middleX, start.y, front),
-    new THREE.Vector3(middleX, end.y, front),
-    new THREE.Vector3(end.x, end.y, front),
-    end,
-  ];
-}
-
-function WholeSystemModel3D() {
-  const [unavailable, setUnavailable] = useState(false);
+export function PolowatSystemModel3D() {
   const hostRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<GrabPointCameraControls | null>(null);
-  const [preset, setPreset] = useState<Preset>("whole");
-  const [selectedId, setSelectedId] = useState("mppt");
+  const [selection, setSelection] = useState<PolowatModelSelection | null>(null);
+  useEffect(() => {
+    const close = (event: KeyboardEvent) => { if(event.key === "Escape") setSelection(null); };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, []);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -213,29 +165,35 @@ function WholeSystemModel3D() {
     const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 35);
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("webgl2", { antialias: true });
-    if (!context) {
-      const frame = requestAnimationFrame(() => setUnavailable(true));
-      return () => cancelAnimationFrame(frame);
+    const gpu = context ? new THREE.WebGLRenderer({ canvas, context, antialias: true }) : null;
+    const software = gpu ? null : new SVGRenderer();
+    const renderer = gpu ?? software!;
+    const surface = canvas;
+    if (gpu) {
+      gpu.outputColorSpace = THREE.SRGBColorSpace;
+      gpu.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      gpu.shadowMap.enabled = true;
+      gpu.shadowMap.type = THREE.PCFSoftShadowMap;
+      host.replaceChildren(surface);
+    } else {
+      surface.style.cssText = "position:absolute;inset:0;width:100%;height:100%;touch-action:none";
+      host.replaceChildren(renderer.domElement, surface);
     }
-    const renderer = new THREE.WebGLRenderer({ canvas, context, antialias: true });
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    host.replaceChildren(renderer.domElement);
+    surface.dataset.renderer = gpu ? "webgl" : "software";
 
     scene.add(new THREE.HemisphereLight("#fffdf4", "#a89578", 2.2));
-    const key = new THREE.DirectionalLight("#fff5df", 2.5);
+    const key = new THREE.DirectionalLight("#fff5df", software ? .85 : 2.5);
     key.position.set(4, 7, 5);
     key.castShadow = true;
     key.shadow.mapSize.set(1536, 1536);
     scene.add(key);
-    const fill = new THREE.DirectionalLight("#cfecf1", 0.8);
+    const fill = new THREE.DirectionalLight("#cfecf1", software ? .3 : .8);
     fill.position.set(-4, 3, 3);
     scene.add(fill);
 
+    // Small background faces keep the software painter from covering nearby hardware.
     const floor = new THREE.Mesh(
-      new THREE.BoxGeometry(6.2, 0.05, 3.3),
+      new THREE.BoxGeometry(6.2, 0.05, 3.3, 24, 1, 16),
       new THREE.MeshStandardMaterial({ color: "#ddcfb6", roughness: 0.96 }),
     );
     floor.position.set(0.15, 0.02, 0.20);
@@ -243,7 +201,7 @@ function WholeSystemModel3D() {
     floor.userData.cameraSurface = true;
     scene.add(floor);
     const wall = new THREE.Mesh(
-      new THREE.BoxGeometry(5.7, 3.7, 0.10),
+      new THREE.BoxGeometry(5.7, 3.7, 0.10, 32, 24, 1),
       new THREE.MeshStandardMaterial({ color: "#d9cfbd", roughness: 0.94 }),
     );
     wall.position.set(0.05, 1.88, -0.16);
@@ -261,10 +219,15 @@ function WholeSystemModel3D() {
     });
 
     const interactive: THREE.Object3D[] = [floor, wall];
-    const deviceObjects = new Map<string, THREE.Object3D>();
+    const assembly = createPolowatAssembly();
+    scene.add(assembly.group);
+    interactive.push(...assembly.interactive);
+    const deviceObjects = new Map<string, THREE.Object3D>(assembly.devices);
+    const detailedIds = new Set(assemblyParts.map(part => part.id));
     [...polowatTopology.devices]
       .toSorted((first, second) => first.kind === "enclosure" ? -1 : second.kind === "enclosure" ? 1 : 0)
       .forEach((device) => {
+        if(detailedIds.has(device.id)) return;
         const object = deviceObject(device);
         object.traverse((child) => {
           const mesh = child as THREE.Mesh;
@@ -278,9 +241,11 @@ function WholeSystemModel3D() {
       const from = polowatDeviceById.get(connection.from);
       const to = polowatDeviceById.get(connection.to);
       if (!from || !to) return;
-      const points = routePoints(from, to, connection.routeLift ?? 0.35);
-      const curve = new THREE.CatmullRomCurve3(points, false, "centripetal", 0.12);
-      const radius = connection.kind === "usb" ? 0.0032 : 0.0046;
+      const route = polowatCableRoutes.routes.find(r => r.id === connection.id)!;
+      if (!route.outside.length) return; // Internal segment is rendered by the detailed assembly.
+      const points = route.outside;
+      const curve = cableCurve(points);
+      const radius = route.diameterMm / 2000;
       const wire = new THREE.Mesh(
         new THREE.TubeGeometry(curve, Math.max(18, points.length * 8), radius, 8, false),
         new THREE.MeshStandardMaterial({ color: conductorColors[connection.kind], roughness: 0.58 }),
@@ -295,7 +260,7 @@ function WholeSystemModel3D() {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     const hitsAt = (clientX: number, clientY: number) => {
-      const rect = renderer.domElement.getBoundingClientRect();
+      const rect = surface.getBoundingClientRect();
       pointer.set(((clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1,
         -((clientY - rect.top) / Math.max(1, rect.height)) * 2 + 1);
       raycaster.setFromCamera(pointer, camera);
@@ -305,7 +270,7 @@ function WholeSystemModel3D() {
     let hoverOutline: THREE.Box3Helper | null = null;
     let hoveredKey = "";
     const render = () => {
-      controlsRef.current?.writeDiagnostics(renderer.domElement);
+      controlsRef.current?.writeDiagnostics(surface);
       renderer.render(scene, camera);
     };
     const clearHover = () => {
@@ -322,12 +287,12 @@ function WholeSystemModel3D() {
     const setHover = (hit?: THREE.Intersection<THREE.Object3D>) => {
       const deviceId = hit?.object.userData.deviceId as string | undefined;
       const connectionId = hit?.object.userData.connectionId as string | undefined;
-      const nextKey = deviceId ? `device:${deviceId}` : connectionId ? `connection:${connectionId}` : "";
+      const nextKey = hit?.object.userData.info ? hit.object.uuid : deviceId ? `device:${deviceId}` : connectionId ? `connection:${connectionId}` : "";
       if (nextKey === hoveredKey) return;
       clearHover();
       if (!hit || !nextKey) return;
       hoveredKey = nextKey;
-      const target = deviceId ? deviceObjects.get(deviceId) : hit.object;
+      const target = hit.object.userData.info ? hit.object : deviceId ? deviceObjects.get(deviceId) : hit.object;
       if (target) {
         hoverOutline = new THREE.Box3Helper(new THREE.Box3().setFromObject(target), "#fff200");
         (Array.isArray(hoverOutline.material) ? hoverOutline.material : [hoverOutline.material]).forEach((material) => {
@@ -336,7 +301,7 @@ function WholeSystemModel3D() {
         hoverOutline.renderOrder = 40;
         scene.add(hoverOutline);
       }
-      tooltip.textContent = deviceId
+      tooltip.textContent = hit.object.userData.info ? String(hit.object.userData.info).split(".")[0] : deviceId
         ? polowatDeviceById.get(deviceId)?.label ?? deviceId
         : String(hit.object.userData.label ?? connectionId);
       tooltip.hidden = false;
@@ -345,7 +310,7 @@ function WholeSystemModel3D() {
 
     const controls = new GrabPointCameraControls({
       camera,
-      domElement: renderer.domElement,
+      domElement: surface,
       onChange: render,
       pickSurface: (clientX, clientY) => {
         const hit = hitsAt(clientX, clientY)[0];
@@ -353,35 +318,33 @@ function WholeSystemModel3D() {
       },
     });
     controlsRef.current = controls;
-    const initial = poses.whole;
-    controls.setPose(new THREE.Vector3(...initial.position), new THREE.Vector3(...initial.target));
+    controls.setPose(new THREE.Vector3(3.4, 3.1, 5.1), new THREE.Vector3(.0, 1.65, .1));
 
     let down = { x: 0, y: 0, button: 0 };
     const onPointerDown = (event: PointerEvent) => { down = { x: event.clientX, y: event.clientY, button: event.button }; };
     const onPointerUp = (event: PointerEvent) => {
       if (event.button !== 0 || down.button !== 0 || Math.hypot(event.clientX - down.x, event.clientY - down.y) > 5) return;
-      const hit = hitsAt(event.clientX, event.clientY).find((candidate) => candidate.object.userData.deviceId);
-      const deviceId = hit?.object.userData.deviceId as string | undefined;
-      if (deviceId) setSelectedId(deviceId);
+      const hit = hitsAt(event.clientX, event.clientY).find(candidate => candidate.object.userData.deviceId || candidate.object.userData.connectionId || candidate.object.userData.info);
+      setSelection(hit ? { deviceId: hit.object.userData.deviceId, connectionId: hit.object.userData.connectionId, info: hit.object.userData.info } : null);
     };
     const onPointerMove = (event: PointerEvent) => {
       if (event.buttons !== 0) return;
       const hit = hitsAt(event.clientX, event.clientY).find((candidate) => (
-        candidate.object.userData.connectionId || candidate.object.userData.deviceId
+        candidate.object.userData.connectionId || candidate.object.userData.deviceId || candidate.object.userData.info
       ));
       setHover(hit);
-      renderer.domElement.style.cursor = hit ? "pointer" : "grab";
+      surface.style.cursor = hit ? "pointer" : "grab";
     };
     const onPointerLeave = () => { clearHover(); render(); };
-    renderer.domElement.addEventListener("pointerdown", onPointerDown);
-    renderer.domElement.addEventListener("pointerup", onPointerUp);
-    renderer.domElement.addEventListener("pointermove", onPointerMove);
-    renderer.domElement.addEventListener("pointerleave", onPointerLeave);
+    surface.addEventListener("pointerdown", onPointerDown);
+    surface.addEventListener("pointerup", onPointerUp);
+    surface.addEventListener("pointermove", onPointerMove);
+    surface.addEventListener("pointerleave", onPointerLeave);
 
     const resize = () => {
       const width = Math.max(1, host.clientWidth);
       const height = Math.max(1, host.clientHeight);
-      renderer.setSize(width, height, false);
+      if(gpu) gpu.setSize(width, height, false); else software!.setSize(width, height);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       render();
@@ -390,60 +353,35 @@ function WholeSystemModel3D() {
     observer.observe(host);
     resize();
 
-    renderer.domElement.dataset.system = "inowon-polowat";
-    renderer.domElement.dataset.deviceCount = String(polowatTopology.devices.length);
-    renderer.domElement.dataset.connectionCount = String(polowatTopology.connections.length);
-    renderer.domElement.dataset.modelStatus = "planning-site-inputs-pending";
+    surface.dataset.system = "inowon-polowat";
+    surface.dataset.deviceCount = String(polowatTopology.devices.length);
+    surface.dataset.connectionCount = String(polowatTopology.connections.length);
+    surface.dataset.modelStatus = "planning-site-inputs-pending";
 
     return () => {
       observer.disconnect();
-      renderer.domElement.removeEventListener("pointerdown", onPointerDown);
-      renderer.domElement.removeEventListener("pointerup", onPointerUp);
-      renderer.domElement.removeEventListener("pointermove", onPointerMove);
-      renderer.domElement.removeEventListener("pointerleave", onPointerLeave);
+      surface.removeEventListener("pointerdown", onPointerDown);
+      surface.removeEventListener("pointerup", onPointerUp);
+      surface.removeEventListener("pointermove", onPointerMove);
+      surface.removeEventListener("pointerleave", onPointerLeave);
       controls.dispose();
       controlsRef.current = null;
       clearHover();
       disposeObject(scene);
-      renderer.dispose();
+      gpu?.dispose();
+      surface.remove();
       renderer.domElement.remove();
     };
   }, []);
 
-  const choosePreset = (id: Preset) => {
-    setPreset(id);
-    const pose = poses[id];
-    controlsRef.current?.setPose(new THREE.Vector3(...pose.position), new THREE.Vector3(...pose.target));
-  };
-  const selected = polowatDeviceById.get(selectedId) ?? polowatTopology.devices[0];
-  if (unavailable) return <><p>This browser cannot render the whole-system WebGL scene. The detailed assembly remains available in interactive software 3D; the complete wiring diagram is shown below.</p><PolowatSystemDiagram /></>;
-
   return (
     <section className="unified-model polowat-model" data-model="polowat-planning-topology"
       data-device-count={polowatTopology.devices.length} data-connection-count={polowatTopology.connections.length}>
-      <div className="model-toolbar" aria-label="Polowat 3D model controls">
-        <div className="model-preset-buttons">{presets.map(({ id, label }) => (
-          <button key={id} type="button" className={preset === id ? "active" : ""} onClick={() => choosePreset(id)}>{label}</button>
-        ))}</div>
-        <span className="polowat-model-rating">300 W PV · 12 V / 300 Ah · 165 W design envelope</span>
-        <span className="route-runtime">Bench arrangement · enclosure fit and order deferred</span>
-      </div>
       <div className="unified-model-stage">
         <div className="unified-model-canvas" ref={hostRef} />
         <div ref={tooltipRef} className="model-hover-tooltip" role="tooltip" hidden />
-        <div className="model-wire-legend polowat-model-legend" aria-label="3D conductor legend">
-          <span><i className="wire-red" />Positive</span><span><i className="wire-black" />Negative</span>
-          <span><i className="wire-blue" />Regulated / USB</span>
-        </div>
-        <article className="polowat-model-selection" aria-live="polite">
-          <small>{selected.kind}</small><strong>{selected.label}</strong><span>{selected.subtitle}</span>
-        </article>
       </div>
+      {selection && <div className="inspector-layer"><PolowatModelInspector selection={selection} onClose={() => setSelection(null)} onSelect={setSelection}/></div>}
     </section>
   );
-}
-
-export function PolowatSystemModel3D() {
-  const [assembly,setAssembly]=useState(true);
-  return <><div className="model-toolbar"><button onClick={()=>setAssembly(true)} aria-pressed={assembly}>Detailed assembly</button><button onClick={()=>setAssembly(false)} aria-pressed={!assembly}>Whole system</button></div>{assembly?<PolowatAssemblyModel/>:<WholeSystemModel3D/>}</>;
 }

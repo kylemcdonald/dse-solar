@@ -1,0 +1,4262 @@
+{
+  "graphId": "inowon-polowat-compact-12v",
+  "graphRevision": "P16-2026-09-19",
+  "sourceHash": "27cb91b93bc5a1b4210dc5f667cdb4c098caec4e3578921d43ce0a87ed81310a",
+  "layouts": {
+    "system": {
+      "key": "system",
+      "scope": "system",
+      "nodes": [
+        {
+          "ports": [
+            {
+              "id": "negative",
+              "endpointId": "panel1.negative",
+              "label": "−",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "panel1.negative",
+              "declaredOrder": 1,
+              "offset": 0
+            },
+            {
+              "id": "positive",
+              "endpointId": "panel1.positive",
+              "label": "+",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "panel1.positive",
+              "declaredOrder": 0,
+              "offset": 0
+            }
+          ],
+          "width": 168,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 324,
+          "y": 216,
+          "lockedPorts": true,
+          "deviceId": "panel1",
+          "device": {
+            "id": "panel1",
+            "label": "Renogy panel 1",
+            "subtitle": "100 W · series negative end",
+            "kind": "panel",
+            "size": [
+              0.582,
+              1.093,
+              0.018
+            ],
+            "position": [
+              -1.86,
+              2.86,
+              0.3
+            ],
+            "rotation": [
+              -0.22,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "world",
+              "surface": "wall",
+              "position": [
+                -1.86,
+                2.86,
+                0.3
+              ]
+            },
+            "conductors": [
+              {
+                "id": "positive",
+                "label": "+",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "Panel leads",
+                "order": 0
+              },
+              {
+                "id": "negative",
+                "label": "−",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "10 AWG PV",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-panels"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "negative",
+              "endpointId": "panel2.negative",
+              "label": "−",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "panel2.negative",
+              "declaredOrder": 1,
+              "offset": 0
+            },
+            {
+              "id": "positive",
+              "endpointId": "panel2.positive",
+              "label": "+",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "panel2.positive",
+              "declaredOrder": 0,
+              "offset": 0
+            }
+          ],
+          "width": 168,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 324,
+          "y": 432,
+          "lockedPorts": true,
+          "deviceId": "panel2",
+          "device": {
+            "id": "panel2",
+            "label": "Renogy panel 2",
+            "subtitle": "100 W · series middle",
+            "kind": "panel",
+            "size": [
+              0.582,
+              1.093,
+              0.018
+            ],
+            "position": [
+              -1.24,
+              2.86,
+              0.3
+            ],
+            "rotation": [
+              -0.22,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "world",
+              "surface": "wall",
+              "position": [
+                -1.24,
+                2.86,
+                0.3
+              ]
+            },
+            "conductors": [
+              {
+                "id": "negative",
+                "label": "−",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "Panel leads",
+                "order": 1
+              },
+              {
+                "id": "positive",
+                "label": "+",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "Panel leads",
+                "order": 0
+              }
+            ],
+            "bomIds": [
+              "polowat-panels"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "negative",
+              "endpointId": "panel3.negative",
+              "label": "−",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "panel3.negative",
+              "declaredOrder": 1,
+              "offset": 0
+            },
+            {
+              "id": "positive",
+              "endpointId": "panel3.positive",
+              "label": "+",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "panel3.positive",
+              "declaredOrder": 0,
+              "offset": 0
+            }
+          ],
+          "width": 168,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 324,
+          "y": 648,
+          "lockedPorts": true,
+          "deviceId": "panel3",
+          "device": {
+            "id": "panel3",
+            "label": "Renogy panel 3",
+            "subtitle": "100 W · series positive end",
+            "kind": "panel",
+            "size": [
+              0.582,
+              1.093,
+              0.018
+            ],
+            "position": [
+              -0.62,
+              2.86,
+              0.3
+            ],
+            "rotation": [
+              -0.22,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "world",
+              "surface": "wall",
+              "position": [
+                -0.62,
+                2.86,
+                0.3
+              ]
+            },
+            "conductors": [
+              {
+                "id": "negative",
+                "label": "−",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "Panel leads",
+                "order": 1
+              },
+              {
+                "id": "positive",
+                "label": "+",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "10 AWG PV",
+                "order": 0
+              }
+            ],
+            "bomIds": [
+              "polowat-panels"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "negative",
+              "endpointId": "batteryA.negative",
+              "label": "−",
+              "kind": "negative",
+              "side": "neutral",
+              "selectionKey": "batteryA.negative",
+              "declaredOrder": 1,
+              "offset": -24
+            },
+            {
+              "id": "positive",
+              "endpointId": "batteryA.positive",
+              "label": "+",
+              "kind": "positive",
+              "side": "neutral",
+              "selectionKey": "batteryA.positive",
+              "declaredOrder": 0,
+              "offset": 24
+            }
+          ],
+          "width": 168,
+          "height": 96,
+          "abstractJunction": false,
+          "x": 228,
+          "y": 804,
+          "lockedPorts": true,
+          "deviceId": "batteryA",
+          "device": {
+            "id": "batteryA",
+            "label": "Battery A",
+            "subtitle": "12 V · 150 Ah deep cycle",
+            "kind": "battery",
+            "size": [
+              0.48,
+              0.25,
+              0.24
+            ],
+            "position": [
+              -0.22,
+              0.42,
+              0.18
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "world",
+              "surface": "floor",
+              "position": [
+                -0.22,
+                0.42,
+                0.18
+              ]
+            },
+            "conductors": [
+              {
+                "id": "positive",
+                "label": "+",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "negative",
+                "label": "−",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-batteries"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "negative",
+              "endpointId": "batteryB.negative",
+              "label": "−",
+              "kind": "negative",
+              "side": "neutral",
+              "selectionKey": "batteryB.negative",
+              "declaredOrder": 1,
+              "offset": -24
+            },
+            {
+              "id": "positive",
+              "endpointId": "batteryB.positive",
+              "label": "+",
+              "kind": "positive",
+              "side": "neutral",
+              "selectionKey": "batteryB.positive",
+              "declaredOrder": 0,
+              "offset": 24
+            }
+          ],
+          "width": 168,
+          "height": 96,
+          "abstractJunction": false,
+          "x": 228,
+          "y": 948,
+          "lockedPorts": true,
+          "deviceId": "batteryB",
+          "device": {
+            "id": "batteryB",
+            "label": "Battery B",
+            "subtitle": "12 V · 150 Ah deep cycle",
+            "kind": "battery",
+            "size": [
+              0.48,
+              0.25,
+              0.24
+            ],
+            "position": [
+              0.42,
+              0.42,
+              0.18
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "world",
+              "surface": "floor",
+              "position": [
+                0.42,
+                0.42,
+                0.18
+              ]
+            },
+            "conductors": [
+              {
+                "id": "positive",
+                "label": "+",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "negative",
+                "label": "−",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-batteries"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "input",
+              "endpointId": "starlink.input",
+              "label": "Input",
+              "kind": "multicore",
+              "side": "input",
+              "selectionKey": "starlink.input",
+              "declaredOrder": 0,
+              "offset": 0
+            }
+          ],
+          "width": 144,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 840,
+          "y": 684,
+          "deviceId": "starlink",
+          "device": {
+            "id": "starlink",
+            "label": "Starlink Mini",
+            "subtitle": "Integrated Wi-Fi · 25–40 W average",
+            "kind": "load",
+            "size": [
+              0.259,
+              0.299,
+              0.039
+            ],
+            "position": [
+              1.32,
+              2.08,
+              0.34
+            ],
+            "rotation": [
+              -0.32,
+              0,
+              -0.08
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "world",
+              "surface": "wall",
+              "position": [
+                1.32,
+                2.08,
+                0.34
+              ]
+            },
+            "conductors": [
+              {
+                "id": "input",
+                "label": "Input",
+                "kind": "multicore",
+                "face": "bottom",
+                "gauge": "Factory lead",
+                "order": 0
+              }
+            ],
+            "bomIds": [
+              "polowat-starlink"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "input",
+              "endpointId": "devices.input",
+              "label": "Input",
+              "kind": "multicore",
+              "side": "input",
+              "selectionKey": "devices.input",
+              "declaredOrder": 0,
+              "offset": 0
+            }
+          ],
+          "width": 144,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 864,
+          "y": 852,
+          "deviceId": "devices",
+          "device": {
+            "id": "devices",
+            "label": "Laptop + phones",
+            "subtitle": "One laptop and two phone charges/day",
+            "kind": "load",
+            "size": [
+              0.42,
+              0.24,
+              0.035
+            ],
+            "position": [
+              1.32,
+              0.52,
+              0.14
+            ],
+            "rotation": [
+              -0.18,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "world",
+              "surface": "wall",
+              "position": [
+                1.32,
+                0.52,
+                0.14
+              ]
+            },
+            "conductors": [
+              {
+                "id": "input",
+                "label": "Input",
+                "kind": "multicore",
+                "face": "bottom",
+                "gauge": "Factory USB leads",
+                "order": 0
+              }
+            ],
+            "bomIds": []
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "entry-pv-home-negative-pv-home-negative",
+              "endpointId": "equipmentEnclosure::pv-home-negative",
+              "label": "Renogy panel 1 · −",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "pvBreaker.top-1",
+              "connectionId": "pv-home-negative",
+              "glandId": "entry-pv-home-negative",
+              "offset": -36
+            },
+            {
+              "id": "entry-pv-home-positive-pv-home-positive",
+              "endpointId": "equipmentEnclosure::pv-home-positive",
+              "label": "Renogy panel 3 · +",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "pvBreaker.top-0",
+              "connectionId": "pv-home-positive",
+              "glandId": "entry-pv-home-positive",
+              "offset": 0
+            },
+            {
+              "id": "sheath-batteryA",
+              "endpointId": "equipmentEnclosure::sheath:equipmentEnclosure:batteryA",
+              "label": "Battery A",
+              "kind": "multicore",
+              "side": "input",
+              "selectionKey": "batteryBreakerA.top-0",
+              "connectionId": "battery-a-positive",
+              "glandId": "entry-battery-a-positive",
+              "offset": 36
+            },
+            {
+              "id": "sheath-batteryB",
+              "endpointId": "equipmentEnclosure::sheath:equipmentEnclosure:batteryB",
+              "label": "Battery B",
+              "kind": "multicore",
+              "side": "input",
+              "selectionKey": "batteryBreakerB.top-0",
+              "connectionId": "battery-b-positive",
+              "glandId": "entry-battery-b-positive",
+              "offset": 72
+            },
+            {
+              "id": "entry-starlink-regulated-starlink-regulated",
+              "endpointId": "equipmentEnclosure::starlink-regulated",
+              "label": "Starlink Mini · cable",
+              "kind": "multicore",
+              "side": "output",
+              "selectionKey": "starlinkConverter.starlinkConverterout",
+              "connectionId": "starlink-regulated",
+              "glandId": "entry-starlink-regulated",
+              "offset": 0
+            },
+            {
+              "id": "entry-usb-device-leads-usb-device-leads",
+              "endpointId": "equipmentEnclosure::usb-device-leads",
+              "label": "Laptop + phones · cable",
+              "kind": "multicore",
+              "side": "output",
+              "selectionKey": "usbCharger.usbChargerout",
+              "connectionId": "usb-device-leads",
+              "glandId": "entry-usb-device-leads",
+              "offset": 36
+            }
+          ],
+          "width": 264,
+          "height": 216,
+          "abstractJunction": true,
+          "x": 588,
+          "y": 816,
+          "deviceId": "equipmentEnclosure",
+          "device": {
+            "id": "equipmentEnclosure",
+            "label": "Main junction box",
+            "subtitle": "Planning enclosure sized to layout · final box order deferred",
+            "kind": "junction",
+            "size": [
+              0.541,
+              0.541,
+              0.209
+            ],
+            "position": [
+              0.4,
+              1.4395,
+              0.0955
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "world",
+              "surface": "wall",
+              "position": [
+                0.4,
+                1.4395,
+                0.0955
+              ]
+            },
+            "conductors": [],
+            "bomIds": [
+              "polowat-enclosure"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "batteryA-positive",
+              "endpointId": "sheath:equipmentEnclosure:batteryA.batteryA-positive",
+              "label": "Battery A +",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "batteryA.positive",
+              "declaredOrder": 0,
+              "offset": -24
+            },
+            {
+              "id": "batteryA-negative",
+              "endpointId": "sheath:equipmentEnclosure:batteryA.batteryA-negative",
+              "label": "Battery A −",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "batteryA.negative",
+              "declaredOrder": 1,
+              "offset": 24
+            },
+            {
+              "id": "cable",
+              "endpointId": "sheath:equipmentEnclosure:batteryA.cable",
+              "label": "Battery A supply sheath",
+              "kind": "multicore",
+              "side": "output",
+              "selectionKey": "battery-a-positive",
+              "declaredOrder": 0,
+              "offset": 0
+            }
+          ],
+          "width": 48,
+          "height": 96,
+          "abstractJunction": false,
+          "x": 384,
+          "y": 852,
+          "deviceId": "sheath:equipmentEnclosure:batteryA",
+          "device": {
+            "id": "sheath:equipmentEnclosure:batteryA",
+            "label": "Battery A supply cable",
+            "subtitle": "Pair sheath fanning out at the device",
+            "kind": "connector",
+            "size": [
+              0.01,
+              0.01,
+              0.01
+            ],
+            "position": [
+              -0.22,
+              0.42,
+              0.18
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "world",
+              "surface": "floor",
+              "position": [
+                -0.22,
+                0.42,
+                0.18
+              ]
+            },
+            "conductors": [
+              {
+                "id": "cable",
+                "label": "Battery A supply sheath",
+                "kind": "multicore",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "batteryA-positive",
+                "label": "Battery A +",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "batteryA-negative",
+                "label": "Battery A −",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-batteries"
+            ],
+            "presentation": "wire-join"
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "batteryB-positive",
+              "endpointId": "sheath:equipmentEnclosure:batteryB.batteryB-positive",
+              "label": "Battery B +",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "batteryB.positive",
+              "declaredOrder": 0,
+              "offset": -24
+            },
+            {
+              "id": "batteryB-negative",
+              "endpointId": "sheath:equipmentEnclosure:batteryB.batteryB-negative",
+              "label": "Battery B −",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "batteryB.negative",
+              "declaredOrder": 1,
+              "offset": 24
+            },
+            {
+              "id": "cable",
+              "endpointId": "sheath:equipmentEnclosure:batteryB.cable",
+              "label": "Battery B supply sheath",
+              "kind": "multicore",
+              "side": "output",
+              "selectionKey": "battery-b-positive",
+              "declaredOrder": 0,
+              "offset": 0
+            }
+          ],
+          "width": 48,
+          "height": 96,
+          "abstractJunction": false,
+          "x": 384,
+          "y": 1044,
+          "deviceId": "sheath:equipmentEnclosure:batteryB",
+          "device": {
+            "id": "sheath:equipmentEnclosure:batteryB",
+            "label": "Battery B supply cable",
+            "subtitle": "Pair sheath fanning out at the device",
+            "kind": "connector",
+            "size": [
+              0.01,
+              0.01,
+              0.01
+            ],
+            "position": [
+              0.42,
+              0.42,
+              0.18
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "world",
+              "surface": "floor",
+              "position": [
+                0.42,
+                0.42,
+                0.18
+              ]
+            },
+            "conductors": [
+              {
+                "id": "cable",
+                "label": "Battery B supply sheath",
+                "kind": "multicore",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "batteryB-positive",
+                "label": "Battery B +",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "batteryB-negative",
+                "label": "Battery B −",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-batteries"
+            ],
+            "presentation": "wire-join"
+          }
+        }
+      ],
+      "boundaryPorts": [],
+      "wires": [
+        {
+          "fromEndpointId": "panel1.positive",
+          "toEndpointId": "panel2.negative",
+          "points": [
+            {
+              "x": 408,
+              "y": 216
+            },
+            {
+              "x": 420,
+              "y": 216
+            },
+            {
+              "x": 420,
+              "y": 144
+            },
+            {
+              "x": 216,
+              "y": 144
+            },
+            {
+              "x": 216,
+              "y": 432
+            },
+            {
+              "x": 240,
+              "y": 432
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.5,
+          "fromNodeId": "panel1",
+          "toNodeId": "panel2",
+          "routeId": "panel-series-1",
+          "route": {
+            "id": "panel-series-1",
+            "label": "MC4 series link",
+            "from": "panel1.positive",
+            "to": "panel2.negative",
+            "kind": "positive",
+            "gauge": "Panel leads",
+            "cableId": "panel-series-1",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 5,
+            "routed": false,
+            "routingRank": 0
+          }
+        },
+        {
+          "fromEndpointId": "panel2.positive",
+          "toEndpointId": "panel3.negative",
+          "points": [
+            {
+              "x": 408,
+              "y": 432
+            },
+            {
+              "x": 420,
+              "y": 432
+            },
+            {
+              "x": 420,
+              "y": 576
+            },
+            {
+              "x": 228,
+              "y": 576
+            },
+            {
+              "x": 228,
+              "y": 648
+            },
+            {
+              "x": 240,
+              "y": 648
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.5,
+          "fromNodeId": "panel2",
+          "toNodeId": "panel3",
+          "routeId": "panel-series-2",
+          "route": {
+            "id": "panel-series-2",
+            "label": "MC4 series link",
+            "from": "panel2.positive",
+            "to": "panel3.negative",
+            "kind": "positive",
+            "gauge": "Panel leads",
+            "cableId": "panel-series-2",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 5,
+            "routed": false,
+            "routingRank": 1
+          }
+        },
+        {
+          "fromEndpointId": "panel3.positive",
+          "toEndpointId": "equipmentEnclosure::pv-home-positive",
+          "points": [
+            {
+              "x": 408,
+              "y": 648
+            },
+            {
+              "x": 432,
+              "y": 648
+            },
+            {
+              "x": 432,
+              "y": 816
+            },
+            {
+              "x": 456,
+              "y": 816
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.954545454545454,
+          "fromNodeId": "panel3",
+          "toNodeId": "equipmentEnclosure",
+          "routeId": "pv-home-positive",
+          "route": {
+            "id": "pv-home-positive",
+            "label": "3S home run + · 4.84 A",
+            "from": "panel3.positive",
+            "to": "pvBreaker.top-0",
+            "kind": "positive",
+            "gauge": "10 AWG PV",
+            "cableId": "pv-home-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 6.5,
+            "routed": false,
+            "routingRank": 2
+          }
+        },
+        {
+          "fromEndpointId": "panel1.negative",
+          "toEndpointId": "equipmentEnclosure::pv-home-negative",
+          "points": [
+            {
+              "x": 240,
+              "y": 216
+            },
+            {
+              "x": 228,
+              "y": 216
+            },
+            {
+              "x": 228,
+              "y": 288
+            },
+            {
+              "x": 444,
+              "y": 288
+            },
+            {
+              "x": 444,
+              "y": 780
+            },
+            {
+              "x": 456,
+              "y": 780
+            }
+          ],
+          "bridges": [],
+          "color": "#111827",
+          "width": 2.954545454545454,
+          "fromNodeId": "panel1",
+          "toNodeId": "equipmentEnclosure",
+          "routeId": "pv-home-negative",
+          "route": {
+            "id": "pv-home-negative",
+            "label": "3S home run −",
+            "from": "panel1.negative",
+            "to": "pvBreaker.top-1",
+            "kind": "negative",
+            "gauge": "10 AWG PV",
+            "cableId": "pv-home-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 6.5,
+            "routed": false,
+            "routingRank": 3
+          }
+        },
+        {
+          "fromEndpointId": "sheath:equipmentEnclosure:batteryA.cable",
+          "toEndpointId": "equipmentEnclosure::sheath:equipmentEnclosure:batteryA",
+          "sheath": true,
+          "points": [
+            {
+              "x": 408,
+              "y": 852
+            },
+            {
+              "x": 456,
+              "y": 852
+            }
+          ],
+          "bridges": [],
+          "color": "#f8f6ef",
+          "width": 5.386363636363637,
+          "fromNodeId": "sheath:equipmentEnclosure:batteryA",
+          "toNodeId": "equipmentEnclosure",
+          "routeId": "sheath:equipmentEnclosure:batteryA",
+          "route": {
+            "id": "sheath:equipmentEnclosure:batteryA",
+            "label": "Battery A supply cable",
+            "from": "batteryA.positive",
+            "to": "batteryBreakerA.top-0",
+            "kind": "multicore",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-a-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 11.850000000000001,
+            "routed": false,
+            "routingRank": 13
+          }
+        },
+        {
+          "fromEndpointId": "batteryA.positive",
+          "toEndpointId": "sheath:equipmentEnclosure:batteryA.batteryA-positive",
+          "points": [
+            {
+              "x": 252,
+              "y": 852
+            },
+            {
+              "x": 252,
+              "y": 864
+            },
+            {
+              "x": 348,
+              "y": 864
+            },
+            {
+              "x": 348,
+              "y": 828
+            },
+            {
+              "x": 360,
+              "y": 828
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 3.590909090909091,
+          "fromNodeId": "batteryA",
+          "toNodeId": "sheath:equipmentEnclosure:batteryA",
+          "routeId": "battery-a-positive",
+          "route": {
+            "id": "battery-a-positive",
+            "label": "Battery A +",
+            "from": "batteryA.positive",
+            "to": "batteryBreakerA.top-0",
+            "kind": "positive",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-a-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 7.9,
+            "routed": false,
+            "routingRank": 13
+          }
+        },
+        {
+          "fromEndpointId": "batteryA.negative",
+          "toEndpointId": "sheath:equipmentEnclosure:batteryA.batteryA-negative",
+          "points": [
+            {
+              "x": 204,
+              "y": 852
+            },
+            {
+              "x": 204,
+              "y": 876
+            },
+            {
+              "x": 360,
+              "y": 876
+            }
+          ],
+          "bridges": [],
+          "color": "#111827",
+          "width": 3.590909090909091,
+          "fromNodeId": "batteryA",
+          "toNodeId": "sheath:equipmentEnclosure:batteryA",
+          "routeId": "battery-a-negative",
+          "route": {
+            "id": "battery-a-negative",
+            "label": "Battery A −",
+            "from": "batteryA.negative",
+            "to": "negativeBus.main-negative-0",
+            "kind": "negative",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-a-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 7.9,
+            "routed": false,
+            "routingRank": 15
+          }
+        },
+        {
+          "fromEndpointId": "sheath:equipmentEnclosure:batteryB.cable",
+          "toEndpointId": "equipmentEnclosure::sheath:equipmentEnclosure:batteryB",
+          "sheath": true,
+          "points": [
+            {
+              "x": 408,
+              "y": 1044
+            },
+            {
+              "x": 444,
+              "y": 1044
+            },
+            {
+              "x": 444,
+              "y": 888
+            },
+            {
+              "x": 456,
+              "y": 888
+            }
+          ],
+          "bridges": [],
+          "color": "#f8f6ef",
+          "width": 5.386363636363637,
+          "fromNodeId": "sheath:equipmentEnclosure:batteryB",
+          "toNodeId": "equipmentEnclosure",
+          "routeId": "sheath:equipmentEnclosure:batteryB",
+          "route": {
+            "id": "sheath:equipmentEnclosure:batteryB",
+            "label": "Battery B supply cable",
+            "from": "batteryB.positive",
+            "to": "batteryBreakerB.top-0",
+            "kind": "multicore",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-b-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 11.850000000000001,
+            "routed": false,
+            "routingRank": 16
+          }
+        },
+        {
+          "fromEndpointId": "batteryB.positive",
+          "toEndpointId": "sheath:equipmentEnclosure:batteryB.batteryB-positive",
+          "points": [
+            {
+              "x": 252,
+              "y": 996
+            },
+            {
+              "x": 252,
+              "y": 1020
+            },
+            {
+              "x": 360,
+              "y": 1020
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 3.590909090909091,
+          "fromNodeId": "batteryB",
+          "toNodeId": "sheath:equipmentEnclosure:batteryB",
+          "routeId": "battery-b-positive",
+          "route": {
+            "id": "battery-b-positive",
+            "label": "Battery B +",
+            "from": "batteryB.positive",
+            "to": "batteryBreakerB.top-0",
+            "kind": "positive",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-b-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 7.9,
+            "routed": false,
+            "routingRank": 16
+          }
+        },
+        {
+          "fromEndpointId": "batteryB.negative",
+          "toEndpointId": "sheath:equipmentEnclosure:batteryB.batteryB-negative",
+          "points": [
+            {
+              "x": 204,
+              "y": 996
+            },
+            {
+              "x": 204,
+              "y": 1068
+            },
+            {
+              "x": 360,
+              "y": 1068
+            }
+          ],
+          "bridges": [],
+          "color": "#111827",
+          "width": 3.590909090909091,
+          "fromNodeId": "batteryB",
+          "toNodeId": "sheath:equipmentEnclosure:batteryB",
+          "routeId": "battery-b-negative",
+          "route": {
+            "id": "battery-b-negative",
+            "label": "Battery B −",
+            "from": "batteryB.negative",
+            "to": "negativeBus.main-negative-1",
+            "kind": "negative",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-b-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 7.9,
+            "routed": false,
+            "routingRank": 18
+          }
+        },
+        {
+          "fromEndpointId": "equipmentEnclosure::starlink-regulated",
+          "toEndpointId": "starlink.input",
+          "points": [
+            {
+              "x": 720,
+              "y": 816
+            },
+            {
+              "x": 756,
+              "y": 816
+            },
+            {
+              "x": 756,
+              "y": 684
+            },
+            {
+              "x": 768,
+              "y": 684
+            }
+          ],
+          "bridges": [],
+          "color": "#f8fafc",
+          "width": 2.5,
+          "fromNodeId": "equipmentEnclosure",
+          "toNodeId": "starlink",
+          "routeId": "starlink-regulated",
+          "route": {
+            "id": "starlink-regulated",
+            "label": "Regulated 24 V · OEM cable",
+            "from": "starlinkConverter.starlinkConverterout",
+            "to": "starlink.input",
+            "kind": "multicore",
+            "gauge": "Factory lead",
+            "cableId": "starlink-regulated",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 5,
+            "routed": false,
+            "routingRank": 24
+          }
+        },
+        {
+          "fromEndpointId": "equipmentEnclosure::usb-device-leads",
+          "toEndpointId": "devices.input",
+          "points": [
+            {
+              "x": 720,
+              "y": 852
+            },
+            {
+              "x": 792,
+              "y": 852
+            }
+          ],
+          "bridges": [],
+          "color": "#f8fafc",
+          "width": 2.5,
+          "fromNodeId": "equipmentEnclosure",
+          "toNodeId": "devices",
+          "routeId": "usb-device-leads",
+          "route": {
+            "id": "usb-device-leads",
+            "label": "Capped USB-C + USB-A ports",
+            "from": "usbCharger.usbChargerout",
+            "to": "devices.input",
+            "kind": "multicore",
+            "gauge": "Factory USB leads",
+            "cableId": "usb-device-leads",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 5,
+            "routed": false,
+            "routingRank": 28
+          }
+        }
+      ],
+      "width": 1080,
+      "height": 1248,
+      "routingMs": 0,
+      "layoutMs": 0,
+      "compactionMs": 0,
+      "compactionMoves": 8,
+      "coincidentSegments": 0,
+      "nonOrthogonalSegments": 0,
+      "conductorOverlaps": 0,
+      "routingFallbacks": 0,
+      "fallbackRouteIds": [],
+      "bridgedCrossings": 0,
+      "unbridgedCrossings": 0,
+      "parallelEnvelopeOverlaps": 0,
+      "minimumParallelWireSeparation": 12,
+      "nodeBodyCrossings": 0,
+      "maskedNodeBodyCrossings": 0,
+      "nodeOverlaps": 0,
+      "wireTurns": 24,
+      "wireLength": 3252
+    },
+    "equipmentEnclosure": {
+      "key": "equipmentEnclosure",
+      "scope": "junction",
+      "nodes": [
+        {
+          "ports": [
+            {
+              "id": "top-0",
+              "endpointId": "pvBreaker.top-0",
+              "label": "Source clamp 1",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "pvBreaker.top-0",
+              "declaredOrder": 0,
+              "offset": -24
+            },
+            {
+              "id": "top-1",
+              "endpointId": "pvBreaker.top-1",
+              "label": "Source clamp 2",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "pvBreaker.top-1",
+              "declaredOrder": 1,
+              "offset": 24
+            },
+            {
+              "id": "bottom-0",
+              "endpointId": "pvBreaker.bottom-0",
+              "label": "Load clamp 1",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "pvBreaker.bottom-0",
+              "declaredOrder": 2,
+              "offset": -24
+            },
+            {
+              "id": "bottom-1",
+              "endpointId": "pvBreaker.bottom-1",
+              "label": "Load clamp 2",
+              "kind": "negative",
+              "side": "output",
+              "selectionKey": "pvBreaker.bottom-1",
+              "declaredOrder": 3,
+              "offset": 24
+            }
+          ],
+          "width": 144,
+          "height": 168,
+          "abstractJunction": false,
+          "x": 216,
+          "y": 660,
+          "deviceId": "pvBreaker",
+          "device": {
+            "id": "pvBreaker",
+            "label": "PV disconnect",
+            "subtitle": "10 A polarized · two-pole",
+            "kind": "breaker",
+            "size": [
+              0.054,
+              0.092,
+              0.07
+            ],
+            "position": [
+              0.3695,
+              1.4909999999999999,
+              0.035
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 5
+            },
+            "conductors": [
+              {
+                "id": "top-0",
+                "label": "Source clamp 1",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "10 AWG PV",
+                "order": 0
+              },
+              {
+                "id": "top-1",
+                "label": "Source clamp 2",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "10 AWG PV",
+                "order": 1
+              },
+              {
+                "id": "bottom-0",
+                "label": "Load clamp 1",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "10 AWG PV",
+                "order": 2
+              },
+              {
+                "id": "bottom-1",
+                "label": "Load clamp 2",
+                "kind": "negative",
+                "face": "top",
+                "gauge": "10 AWG PV",
+                "order": 3
+              }
+            ],
+            "bomIds": [
+              "polowat-pv-breaker"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "pv+",
+              "endpointId": "mppt.pv+",
+              "label": "PV+",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "mppt.pv+",
+              "declaredOrder": 0,
+              "offset": -24
+            },
+            {
+              "id": "pv-",
+              "endpointId": "mppt.pv-",
+              "label": "PV-",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "mppt.pv-",
+              "declaredOrder": 1,
+              "offset": 24
+            },
+            {
+              "id": "batt+",
+              "endpointId": "mppt.batt+",
+              "label": "BATT+",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "mppt.batt+",
+              "declaredOrder": 2,
+              "offset": -72
+            },
+            {
+              "id": "batt-",
+              "endpointId": "mppt.batt-",
+              "label": "BATT-",
+              "kind": "negative",
+              "side": "output",
+              "selectionKey": "mppt.batt-",
+              "declaredOrder": 3,
+              "offset": -24
+            },
+            {
+              "id": "load-",
+              "endpointId": "mppt.load-",
+              "label": "LOAD-",
+              "kind": "negative",
+              "side": "output",
+              "selectionKey": "mppt.load-",
+              "declaredOrder": 5,
+              "offset": 24
+            },
+            {
+              "id": "load+",
+              "endpointId": "mppt.load+",
+              "label": "LOAD+",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "mppt.load+",
+              "declaredOrder": 4,
+              "offset": 72
+            }
+          ],
+          "width": 168,
+          "height": 264,
+          "abstractJunction": false,
+          "x": 516,
+          "y": 660,
+          "deviceId": "mppt",
+          "device": {
+            "id": "mppt",
+            "label": "SmartSolar 100/20",
+            "subtitle": "100 V PV · 20 A charge/load",
+            "kind": "converter",
+            "size": [
+              0.131,
+              0.1,
+              0.06
+            ],
+            "position": [
+              0.23800000000000002,
+              1.522,
+              0.03
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 3
+            },
+            "conductors": [
+              {
+                "id": "pv+",
+                "label": "PV+",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "10 AWG PV",
+                "order": 0
+              },
+              {
+                "id": "pv-",
+                "label": "PV-",
+                "kind": "negative",
+                "face": "top",
+                "gauge": "10 AWG PV",
+                "order": 1
+              },
+              {
+                "id": "batt+",
+                "label": "BATT+",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "10 AWG DC",
+                "order": 2
+              },
+              {
+                "id": "batt-",
+                "label": "BATT-",
+                "kind": "negative",
+                "face": "top",
+                "gauge": "10 AWG DC",
+                "order": 3
+              },
+              {
+                "id": "load+",
+                "label": "LOAD+",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "12 AWG DC",
+                "order": 4
+              },
+              {
+                "id": "load-",
+                "label": "LOAD-",
+                "kind": "negative",
+                "face": "top",
+                "gauge": "12 AWG DC",
+                "order": 5
+              }
+            ],
+            "bomIds": [
+              "polowat-mppt"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "bottom-0",
+              "endpointId": "controllerBreaker.bottom-0",
+              "label": "Load clamp 1",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "controllerBreaker.bottom-0",
+              "declaredOrder": 0,
+              "offset": 0
+            },
+            {
+              "id": "top-0",
+              "endpointId": "controllerBreaker.top-0",
+              "label": "Source clamp 1",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "controllerBreaker.top-0",
+              "declaredOrder": 1,
+              "offset": 0
+            }
+          ],
+          "width": 192,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 720,
+          "y": 336,
+          "deviceId": "controllerBreaker",
+          "device": {
+            "id": "controllerBreaker",
+            "label": "MPPT battery breaker",
+            "subtitle": "30 A non-polarized · bus end",
+            "kind": "breaker",
+            "size": [
+              0.054,
+              0.092,
+              0.077
+            ],
+            "position": [
+              0.4445,
+              1.4909999999999999,
+              0.0385
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 6
+            },
+            "conductors": [
+              {
+                "id": "bottom-0",
+                "label": "Load clamp 1",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "10 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "top-0",
+                "label": "Source clamp 1",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "10 AWG DC",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-controller-breaker"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "main-positive-2",
+              "endpointId": "positiveBus.main-positive-2",
+              "label": "BATT + · MPPT breaker feed",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "positiveBus.main-positive-2",
+              "declaredOrder": 0,
+              "offset": -96
+            },
+            {
+              "id": "main-positive-0",
+              "endpointId": "positiveBus.main-positive-0",
+              "label": "BATT + · Battery A +",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "positiveBus.main-positive-0",
+              "declaredOrder": 2,
+              "offset": 48
+            },
+            {
+              "id": "main-positive-1",
+              "endpointId": "positiveBus.main-positive-1",
+              "label": "BATT + · Battery B +",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "positiveBus.main-positive-1",
+              "declaredOrder": 3,
+              "offset": 144
+            },
+            {
+              "id": "main-positive-3",
+              "endpointId": "positiveBus.main-positive-3",
+              "label": "BATT + · BMV fused positive lead",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "positiveBus.main-positive-3",
+              "declaredOrder": 1,
+              "offset": -24
+            }
+          ],
+          "width": 168,
+          "height": 408,
+          "abstractJunction": false,
+          "x": 1284,
+          "y": 432,
+          "lockedPorts": true,
+          "deviceId": "positiveBus",
+          "device": {
+            "id": "positiveBus",
+            "label": "BATT + bus",
+            "subtitle": "DK10N bridged pair · 60 A body",
+            "kind": "busbar",
+            "size": [
+              0.02,
+              0.0432,
+              0.0493
+            ],
+            "position": [
+              0.2025,
+              1.3154,
+              0.02465
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 14
+            },
+            "conductors": [
+              {
+                "id": "main-positive-2",
+                "label": "BATT + · MPPT breaker feed",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "10 AWG DC",
+                "order": 0,
+                "internalMates": [
+                  "main-positive-3",
+                  "main-positive-0",
+                  "main-positive-1"
+                ]
+              },
+              {
+                "id": "main-positive-3",
+                "label": "BATT + · BMV fused positive lead",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "Factory fused lead",
+                "order": 1,
+                "internalMates": [
+                  "main-positive-2",
+                  "main-positive-0",
+                  "main-positive-1"
+                ]
+              },
+              {
+                "id": "main-positive-0",
+                "label": "BATT + · Battery A +",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 2,
+                "internalMates": [
+                  "main-positive-2",
+                  "main-positive-3",
+                  "main-positive-1"
+                ]
+              },
+              {
+                "id": "main-positive-1",
+                "label": "BATT + · Battery B +",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "8 AWG DC",
+                "order": 3,
+                "internalMates": [
+                  "main-positive-2",
+                  "main-positive-3",
+                  "main-positive-0"
+                ]
+              }
+            ],
+            "bomIds": [
+              "polowat-din-distribution"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "main-negative-0",
+              "endpointId": "negativeBus.main-negative-0",
+              "label": "BATT − · Battery A −",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "negativeBus.main-negative-0",
+              "declaredOrder": 1,
+              "offset": 0
+            },
+            {
+              "id": "main-negative-1",
+              "endpointId": "negativeBus.main-negative-1",
+              "label": "BATT − · Battery B −",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "negativeBus.main-negative-1",
+              "declaredOrder": 2,
+              "offset": 96
+            },
+            {
+              "id": "main-negative-2",
+              "endpointId": "negativeBus.main-negative-2",
+              "label": "BATT − · Shunt BATTERY MINUS",
+              "kind": "negative",
+              "side": "output",
+              "selectionKey": "negativeBus.main-negative-2",
+              "declaredOrder": 0,
+              "offset": -120
+            }
+          ],
+          "width": 168,
+          "height": 408,
+          "abstractJunction": false,
+          "x": 1500,
+          "y": 684,
+          "lockedPorts": true,
+          "deviceId": "negativeBus",
+          "device": {
+            "id": "negativeBus",
+            "label": "BATT − bus",
+            "subtitle": "DK10N bridged pair · 60 A body",
+            "kind": "busbar",
+            "size": [
+              0.02,
+              0.0432,
+              0.0493
+            ],
+            "position": [
+              0.22250000000000003,
+              1.3154,
+              0.02465
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 15
+            },
+            "conductors": [
+              {
+                "id": "main-negative-2",
+                "label": "BATT − · Shunt BATTERY MINUS",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "10 AWG DC",
+                "order": 0,
+                "internalMates": [
+                  "main-negative-0",
+                  "main-negative-1"
+                ]
+              },
+              {
+                "id": "main-negative-0",
+                "label": "BATT − · Battery A −",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 1,
+                "internalMates": [
+                  "main-negative-2",
+                  "main-negative-1"
+                ]
+              },
+              {
+                "id": "main-negative-1",
+                "label": "BATT − · Battery B −",
+                "kind": "negative",
+                "face": "top",
+                "gauge": "8 AWG DC",
+                "order": 2,
+                "internalMates": [
+                  "main-negative-2",
+                  "main-negative-0"
+                ]
+              }
+            ],
+            "bomIds": [
+              "polowat-din-distribution"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "shunt-positive",
+              "endpointId": "batteryShunt.shunt-positive",
+              "label": "+B1 · fused supply",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "batteryShunt.shunt-positive",
+              "declaredOrder": 2,
+              "offset": -48
+            },
+            {
+              "id": "shunt-system",
+              "endpointId": "batteryShunt.shunt-system",
+              "label": "LOAD AND CHARGER · M10",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "batteryShunt.shunt-system",
+              "declaredOrder": 0,
+              "offset": 0
+            },
+            {
+              "id": "shunt-battery",
+              "endpointId": "batteryShunt.shunt-battery",
+              "label": "BATTERY MINUS · M10",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "batteryShunt.shunt-battery",
+              "declaredOrder": 1,
+              "offset": 48
+            },
+            {
+              "id": "shunt-rj12",
+              "endpointId": "batteryShunt.shunt-rj12",
+              "label": "RJ12 · display power/data",
+              "kind": "data",
+              "side": "neutral",
+              "selectionKey": "batteryShunt.shunt-rj12",
+              "declaredOrder": 3,
+              "offset": 24
+            }
+          ],
+          "width": 168,
+          "height": 216,
+          "abstractJunction": false,
+          "x": 1740,
+          "y": 468,
+          "lockedPorts": true,
+          "deviceId": "batteryShunt",
+          "device": {
+            "id": "batteryShunt",
+            "label": "BMV 500 A shunt",
+            "subtitle": "500 A / 50 mV · BATTERY MINUS → LOAD AND CHARGER",
+            "kind": "monitor",
+            "size": [
+              0.12,
+              0.05,
+              0.065
+            ],
+            "position": [
+              0.5725,
+              1.642,
+              0.0325
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 0
+            },
+            "conductors": [
+              {
+                "id": "shunt-system",
+                "label": "LOAD AND CHARGER · M10",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "10 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "shunt-battery",
+                "label": "BATTERY MINUS · M10",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "10 AWG DC",
+                "order": 1
+              },
+              {
+                "id": "shunt-positive",
+                "label": "+B1 · fused supply",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "Factory fused lead",
+                "order": 2
+              },
+              {
+                "id": "shunt-rj12",
+                "label": "RJ12 · display power/data",
+                "kind": "data",
+                "face": "top",
+                "gauge": "Factory RJ12 cable",
+                "order": 3
+              }
+            ],
+            "bomIds": [
+              "polowat-battery-monitor"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "monitor-rj12",
+              "endpointId": "batteryMonitor.monitor-rj12",
+              "label": "RJ12 · from shunt",
+              "kind": "data",
+              "side": "neutral",
+              "selectionKey": "batteryMonitor.monitor-rj12",
+              "declaredOrder": 0,
+              "offset": -24
+            }
+          ],
+          "width": 168,
+          "height": 216,
+          "abstractJunction": false,
+          "x": 1740,
+          "y": 156,
+          "lockedPorts": true,
+          "deviceId": "batteryMonitor",
+          "device": {
+            "id": "batteryMonitor",
+            "label": "BMV-700 display",
+            "subtitle": "Wired battery % · volts · amps · <4 mA with backlight off",
+            "kind": "monitor",
+            "size": [
+              0.069,
+              0.069,
+              0.031
+            ],
+            "position": [
+              0.462,
+              1.3875,
+              0.0155
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 2
+            },
+            "conductors": [
+              {
+                "id": "monitor-rj12",
+                "label": "RJ12 · from shunt",
+                "kind": "data",
+                "face": "top",
+                "gauge": "Factory RJ12 cable",
+                "order": 0
+              }
+            ],
+            "bomIds": [
+              "polowat-battery-monitor"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "monitor-fuse-in",
+              "endpointId": "monitorFuse.monitor-fuse-in",
+              "label": "Battery positive · factory lead",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "monitorFuse.monitor-fuse-in",
+              "declaredOrder": 0,
+              "offset": 0
+            },
+            {
+              "id": "monitor-fuse-out",
+              "endpointId": "monitorFuse.monitor-fuse-out",
+              "label": "1 A fused output",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "monitorFuse.monitor-fuse-out",
+              "declaredOrder": 1,
+              "offset": 0
+            }
+          ],
+          "width": 168,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 1524,
+          "y": 372,
+          "deviceId": "monitorFuse",
+          "device": {
+            "id": "monitorFuse",
+            "label": "BMV supplied fuse",
+            "subtitle": "1 A slow-blow · factory positive sense/power lead",
+            "kind": "protection",
+            "size": [
+              0.04,
+              0.015,
+              0.015
+            ],
+            "position": [
+              0.5325,
+              1.5845,
+              0.0075
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 1
+            },
+            "conductors": [
+              {
+                "id": "monitor-fuse-in",
+                "label": "Battery positive · factory lead",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "Factory fused lead",
+                "order": 0
+              },
+              {
+                "id": "monitor-fuse-out",
+                "label": "1 A fused output",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "Factory fused lead",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-battery-monitor"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "top-0",
+              "endpointId": "batteryBreakerA.top-0",
+              "label": "Source clamp 1",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "batteryBreakerA.top-0",
+              "declaredOrder": 0,
+              "offset": 0
+            },
+            {
+              "id": "bottom-0",
+              "endpointId": "batteryBreakerA.bottom-0",
+              "label": "Load clamp 1",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "batteryBreakerA.bottom-0",
+              "declaredOrder": 1,
+              "offset": 0
+            }
+          ],
+          "width": 168,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 1044,
+          "y": 480,
+          "lockedPorts": true,
+          "deviceId": "batteryBreakerA",
+          "device": {
+            "id": "batteryBreakerA",
+            "label": "Battery A isolate",
+            "subtitle": "30 A non-polarized · inside junction box",
+            "kind": "breaker",
+            "size": [
+              0.054,
+              0.092,
+              0.077
+            ],
+            "position": [
+              0.5395,
+              1.4909999999999999,
+              0.0385
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 11
+            },
+            "conductors": [
+              {
+                "id": "top-0",
+                "label": "Source clamp 1",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "bottom-0",
+                "label": "Load clamp 1",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "8 AWG DC",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-battery-breakers"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "top-0",
+              "endpointId": "batteryBreakerB.top-0",
+              "label": "Source clamp 1",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "batteryBreakerB.top-0",
+              "declaredOrder": 0,
+              "offset": 0
+            },
+            {
+              "id": "bottom-0",
+              "endpointId": "batteryBreakerB.bottom-0",
+              "label": "Load clamp 1",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "batteryBreakerB.bottom-0",
+              "declaredOrder": 1,
+              "offset": 0
+            }
+          ],
+          "width": 168,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 864,
+          "y": 648,
+          "lockedPorts": true,
+          "deviceId": "batteryBreakerB",
+          "device": {
+            "id": "batteryBreakerB",
+            "label": "Battery B isolate",
+            "subtitle": "30 A non-polarized · inside junction box",
+            "kind": "breaker",
+            "size": [
+              0.054,
+              0.092,
+              0.077
+            ],
+            "position": [
+              0.5395,
+              1.376,
+              0.0385
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 12
+            },
+            "conductors": [
+              {
+                "id": "top-0",
+                "label": "Source clamp 1",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "8 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "bottom-0",
+                "label": "Load clamp 1",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "8 AWG DC",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-battery-breakers"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "load-positive-0",
+              "endpointId": "loadPositiveBus.load-positive-0",
+              "label": "LOAD + · MPPT LOAD+",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "loadPositiveBus.load-positive-0",
+              "declaredOrder": 0,
+              "offset": -144
+            },
+            {
+              "id": "load-positive-1",
+              "endpointId": "loadPositiveBus.load-positive-1",
+              "label": "LOAD + · Starlink breaker",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "loadPositiveBus.load-positive-1",
+              "declaredOrder": 1,
+              "offset": -72
+            },
+            {
+              "id": "load-positive-2",
+              "endpointId": "loadPositiveBus.load-positive-2",
+              "label": "LOAD + · USB breaker",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "loadPositiveBus.load-positive-2",
+              "declaredOrder": 2,
+              "offset": 72
+            }
+          ],
+          "width": 168,
+          "height": 408,
+          "abstractJunction": false,
+          "x": 1080,
+          "y": 1500,
+          "lockedPorts": true,
+          "deviceId": "loadPositiveBus",
+          "device": {
+            "id": "loadPositiveBus",
+            "label": "LOAD + bus",
+            "subtitle": "DK10N bridged pair · 20 A LOAD circuit",
+            "kind": "busbar",
+            "size": [
+              0.02,
+              0.0432,
+              0.0493
+            ],
+            "position": [
+              0.24250000000000002,
+              1.3154,
+              0.02465
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 9
+            },
+            "conductors": [
+              {
+                "id": "load-positive-0",
+                "label": "LOAD + · MPPT LOAD+",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "12 AWG DC",
+                "order": 0,
+                "internalMates": [
+                  "load-positive-1",
+                  "load-positive-2"
+                ]
+              },
+              {
+                "id": "load-positive-1",
+                "label": "LOAD + · Starlink breaker",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "12 AWG DC",
+                "order": 1,
+                "internalMates": [
+                  "load-positive-0",
+                  "load-positive-2"
+                ]
+              },
+              {
+                "id": "load-positive-2",
+                "label": "LOAD + · USB breaker",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "12 AWG DC",
+                "order": 2,
+                "internalMates": [
+                  "load-positive-0",
+                  "load-positive-1"
+                ]
+              }
+            ],
+            "bomIds": [
+              "polowat-din-distribution"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "load-negative-0",
+              "endpointId": "loadNegativeBus.load-negative-0",
+              "label": "LOAD − · MPPT LOAD−",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "loadNegativeBus.load-negative-0",
+              "declaredOrder": 0,
+              "offset": -48
+            },
+            {
+              "id": "load-negative-1",
+              "endpointId": "loadNegativeBus.load-negative-1",
+              "label": "LOAD − · Starlink return",
+              "kind": "negative",
+              "side": "output",
+              "selectionKey": "loadNegativeBus.load-negative-1",
+              "declaredOrder": 1,
+              "offset": 24
+            },
+            {
+              "id": "load-negative-2",
+              "endpointId": "loadNegativeBus.load-negative-2",
+              "label": "LOAD − · USB return",
+              "kind": "negative",
+              "side": "output",
+              "selectionKey": "loadNegativeBus.load-negative-2",
+              "declaredOrder": 2,
+              "offset": 120
+            }
+          ],
+          "width": 168,
+          "height": 408,
+          "abstractJunction": false,
+          "x": 1404,
+          "y": 1188,
+          "lockedPorts": true,
+          "deviceId": "loadNegativeBus",
+          "device": {
+            "id": "loadNegativeBus",
+            "label": "LOAD − bus",
+            "subtitle": "DK10N bridged pair · 20 A LOAD circuit",
+            "kind": "busbar",
+            "size": [
+              0.02,
+              0.0432,
+              0.0493
+            ],
+            "position": [
+              0.2625,
+              1.3154,
+              0.02465
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 10
+            },
+            "conductors": [
+              {
+                "id": "load-negative-0",
+                "label": "LOAD − · MPPT LOAD−",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "12 AWG DC",
+                "order": 0,
+                "internalMates": [
+                  "load-negative-1",
+                  "load-negative-2"
+                ]
+              },
+              {
+                "id": "load-negative-1",
+                "label": "LOAD − · Starlink return",
+                "kind": "negative",
+                "face": "top",
+                "gauge": "12 AWG DC",
+                "order": 1,
+                "internalMates": [
+                  "load-negative-0",
+                  "load-negative-2"
+                ]
+              },
+              {
+                "id": "load-negative-2",
+                "label": "LOAD − · USB return",
+                "kind": "negative",
+                "face": "bottom",
+                "gauge": "12 AWG DC",
+                "order": 2,
+                "internalMates": [
+                  "load-negative-0",
+                  "load-negative-1"
+                ]
+              }
+            ],
+            "bomIds": [
+              "polowat-din-distribution"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "top-0",
+              "endpointId": "starlinkBreaker.top-0",
+              "label": "Source clamp 1",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "starlinkBreaker.top-0",
+              "declaredOrder": 0,
+              "offset": 0
+            },
+            {
+              "id": "bottom-0",
+              "endpointId": "starlinkBreaker.bottom-0",
+              "label": "Load clamp 1",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "starlinkBreaker.bottom-0",
+              "declaredOrder": 1,
+              "offset": 0
+            }
+          ],
+          "width": 144,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 1752,
+          "y": 936,
+          "lockedPorts": true,
+          "deviceId": "starlinkBreaker",
+          "device": {
+            "id": "starlinkBreaker",
+            "label": "Starlink branch",
+            "subtitle": "10 A breaker",
+            "kind": "breaker",
+            "size": [
+              0.018,
+              0.092,
+              0.07
+            ],
+            "position": [
+              0.35150000000000003,
+              1.376,
+              0.035
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 7
+            },
+            "conductors": [
+              {
+                "id": "top-0",
+                "label": "Source clamp 1",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "12 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "bottom-0",
+                "label": "Load clamp 1",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "12 AWG DC",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-load-breakers"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "starlinkConverter+",
+              "endpointId": "starlinkConverter.starlinkConverter+",
+              "label": "DC input +",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "starlinkConverter.starlinkConverter+",
+              "declaredOrder": 0,
+              "offset": -24
+            },
+            {
+              "id": "",
+              "endpointId": "starlinkConverter.",
+              "label": "DC input −",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "starlinkConverter.",
+              "declaredOrder": 1,
+              "offset": 24
+            },
+            {
+              "id": "starlinkConverterout",
+              "endpointId": "starlinkConverter.starlinkConverterout",
+              "label": "24 V factory output",
+              "kind": "multicore",
+              "side": "output",
+              "selectionKey": "starlinkConverter.starlinkConverterout",
+              "declaredOrder": 2,
+              "offset": 0
+            }
+          ],
+          "width": 192,
+          "height": 168,
+          "abstractJunction": false,
+          "x": 1968,
+          "y": 960,
+          "deviceId": "starlinkConverter",
+          "device": {
+            "id": "starlinkConverter",
+            "label": "12 → 24 V regulator",
+            "subtitle": "72 W · switched",
+            "kind": "converter",
+            "size": [
+              0.15,
+              0.09,
+              0.055
+            ],
+            "position": [
+              0.4175,
+              1.6219999999999999,
+              0.0275
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 4
+            },
+            "conductors": [
+              {
+                "id": "starlinkConverter+",
+                "label": "DC input +",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "12 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "",
+                "label": "DC input −",
+                "kind": "negative",
+                "face": "top",
+                "gauge": "12 AWG DC",
+                "order": 1
+              },
+              {
+                "id": "starlinkConverterout",
+                "label": "24 V factory output",
+                "kind": "multicore",
+                "face": "bottom",
+                "gauge": "Factory lead",
+                "order": 2
+              }
+            ],
+            "bomIds": [
+              "polowat-starlink-converter"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "top-0",
+              "endpointId": "usbBreaker.top-0",
+              "label": "Source clamp 1",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "usbBreaker.top-0",
+              "declaredOrder": 0,
+              "offset": 0
+            },
+            {
+              "id": "bottom-0",
+              "endpointId": "usbBreaker.bottom-0",
+              "label": "Load clamp 1",
+              "kind": "positive",
+              "side": "output",
+              "selectionKey": "usbBreaker.bottom-0",
+              "declaredOrder": 1,
+              "offset": 0
+            }
+          ],
+          "width": 144,
+          "height": 120,
+          "abstractJunction": false,
+          "x": 1284,
+          "y": 1572,
+          "lockedPorts": true,
+          "deviceId": "usbBreaker",
+          "device": {
+            "id": "usbBreaker",
+            "label": "USB branch",
+            "subtitle": "10 A breaker",
+            "kind": "breaker",
+            "size": [
+              0.018,
+              0.092,
+              0.07
+            ],
+            "position": [
+              0.3855,
+              1.376,
+              0.035
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 8
+            },
+            "conductors": [
+              {
+                "id": "top-0",
+                "label": "Source clamp 1",
+                "kind": "positive",
+                "face": "bottom",
+                "gauge": "12 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "bottom-0",
+                "label": "Load clamp 1",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "12 AWG DC",
+                "order": 1
+              }
+            ],
+            "bomIds": [
+              "polowat-load-breakers"
+            ]
+          }
+        },
+        {
+          "ports": [
+            {
+              "id": "",
+              "endpointId": "usbCharger.",
+              "label": "DC input −",
+              "kind": "negative",
+              "side": "input",
+              "selectionKey": "usbCharger.",
+              "declaredOrder": 1,
+              "offset": -24
+            },
+            {
+              "id": "usbCharger+",
+              "endpointId": "usbCharger.usbCharger+",
+              "label": "DC input +",
+              "kind": "positive",
+              "side": "input",
+              "selectionKey": "usbCharger.usbCharger+",
+              "declaredOrder": 0,
+              "offset": 24
+            },
+            {
+              "id": "usbChargerout",
+              "endpointId": "usbCharger.usbChargerout",
+              "label": "USB sockets / male extension plugs",
+              "kind": "multicore",
+              "side": "output",
+              "selectionKey": "usbCharger.usbChargerout",
+              "declaredOrder": 2,
+              "offset": 0
+            }
+          ],
+          "width": 168,
+          "height": 168,
+          "abstractJunction": false,
+          "x": 1620,
+          "y": 1332,
+          "deviceId": "usbCharger",
+          "device": {
+            "id": "usbCharger",
+            "label": "USB charging",
+            "subtitle": "60 W USB-C + 18 W USB-A",
+            "kind": "converter",
+            "size": [
+              0.089,
+              0.051,
+              0.027
+            ],
+            "position": [
+              0.397,
+              1.2915,
+              0.0135
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "status": "planned",
+            "placement": {
+              "space": "junction",
+              "junctionId": "equipmentEnclosure",
+              "section": "backplate",
+              "order": 13
+            },
+            "conductors": [
+              {
+                "id": "usbCharger+",
+                "label": "DC input +",
+                "kind": "positive",
+                "face": "top",
+                "gauge": "12 AWG DC",
+                "order": 0
+              },
+              {
+                "id": "",
+                "label": "DC input −",
+                "kind": "negative",
+                "face": "top",
+                "gauge": "12 AWG DC",
+                "order": 1
+              },
+              {
+                "id": "usbChargerout",
+                "label": "USB sockets / male extension plugs",
+                "kind": "multicore",
+                "face": "bottom",
+                "gauge": "Factory USB leads",
+                "order": 2
+              }
+            ],
+            "bomIds": [
+              "polowat-usb"
+            ]
+          }
+        }
+      ],
+      "boundaryPorts": [
+        {
+          "id": "boundary-pv-home-positive",
+          "endpointId": "boundary::pv-home-positive",
+          "label": "Renogy panel 3 · +",
+          "kind": "positive",
+          "side": "input",
+          "selectionKey": "pvBreaker.top-0",
+          "connectionId": "pv-home-positive",
+          "glandId": "entry-pv-home-positive",
+          "point": {
+            "x": 0,
+            "y": 636
+          }
+        },
+        {
+          "id": "boundary-pv-home-negative",
+          "endpointId": "boundary::pv-home-negative",
+          "label": "Renogy panel 1 · −",
+          "kind": "negative",
+          "side": "input",
+          "selectionKey": "pvBreaker.top-1",
+          "connectionId": "pv-home-negative",
+          "glandId": "entry-pv-home-negative",
+          "point": {
+            "x": 0,
+            "y": 684
+          }
+        },
+        {
+          "id": "boundary-battery-a-positive",
+          "endpointId": "boundary::battery-a-positive",
+          "label": "Battery A · +",
+          "kind": "positive",
+          "side": "input",
+          "selectionKey": "batteryBreakerA.top-0",
+          "connectionId": "battery-a-positive",
+          "glandId": "entry-battery-a-positive",
+          "point": {
+            "x": 0,
+            "y": 480
+          }
+        },
+        {
+          "id": "boundary-battery-a-negative",
+          "endpointId": "boundary::battery-a-negative",
+          "label": "Battery A · −",
+          "kind": "negative",
+          "side": "input",
+          "selectionKey": "negativeBus.main-negative-0",
+          "connectionId": "battery-a-negative",
+          "glandId": "entry-battery-a-negative",
+          "point": {
+            "x": 0,
+            "y": 264
+          }
+        },
+        {
+          "id": "boundary-battery-b-positive",
+          "endpointId": "boundary::battery-b-positive",
+          "label": "Battery B · +",
+          "kind": "positive",
+          "side": "input",
+          "selectionKey": "batteryBreakerB.top-0",
+          "connectionId": "battery-b-positive",
+          "glandId": "entry-battery-b-positive",
+          "point": {
+            "x": 0,
+            "y": 888
+          }
+        },
+        {
+          "id": "boundary-battery-b-negative",
+          "endpointId": "boundary::battery-b-negative",
+          "label": "Battery B · −",
+          "kind": "negative",
+          "side": "input",
+          "selectionKey": "negativeBus.main-negative-1",
+          "connectionId": "battery-b-negative",
+          "glandId": "entry-battery-b-negative",
+          "point": {
+            "x": 0,
+            "y": 840
+          }
+        },
+        {
+          "id": "boundary-starlink-regulated",
+          "endpointId": "boundary::starlink-regulated",
+          "label": "Starlink Mini · cable",
+          "kind": "multicore",
+          "side": "output",
+          "selectionKey": "starlinkConverter.starlinkConverterout",
+          "connectionId": "starlink-regulated",
+          "glandId": "entry-starlink-regulated",
+          "point": {
+            "x": 2208,
+            "y": 960
+          }
+        },
+        {
+          "id": "boundary-usb-device-leads",
+          "endpointId": "boundary::usb-device-leads",
+          "label": "Laptop + phones · cable",
+          "kind": "multicore",
+          "side": "output",
+          "selectionKey": "usbCharger.usbChargerout",
+          "connectionId": "usb-device-leads",
+          "glandId": "entry-usb-device-leads",
+          "point": {
+            "x": 2208,
+            "y": 1224
+          }
+        }
+      ],
+      "wires": [
+        {
+          "fromEndpointId": "boundary::pv-home-positive",
+          "toEndpointId": "pvBreaker.top-0",
+          "points": [
+            {
+              "x": 0,
+              "y": 636
+            },
+            {
+              "x": 144,
+              "y": 636
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.954545454545454,
+          "fromNodeId": "boundary",
+          "toNodeId": "pvBreaker",
+          "routeId": "pv-home-positive",
+          "route": {
+            "id": "pv-home-positive",
+            "label": "3S home run + · 4.84 A",
+            "from": "panel3.positive",
+            "to": "pvBreaker.top-0",
+            "kind": "positive",
+            "gauge": "10 AWG PV",
+            "cableId": "pv-home-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 6.5,
+            "routed": false,
+            "routingRank": 2
+          }
+        },
+        {
+          "fromEndpointId": "boundary::pv-home-negative",
+          "toEndpointId": "pvBreaker.top-1",
+          "points": [
+            {
+              "x": 0,
+              "y": 684
+            },
+            {
+              "x": 144,
+              "y": 684
+            }
+          ],
+          "bridges": [],
+          "color": "#111827",
+          "width": 2.954545454545454,
+          "fromNodeId": "boundary",
+          "toNodeId": "pvBreaker",
+          "routeId": "pv-home-negative",
+          "route": {
+            "id": "pv-home-negative",
+            "label": "3S home run −",
+            "from": "panel1.negative",
+            "to": "pvBreaker.top-1",
+            "kind": "negative",
+            "gauge": "10 AWG PV",
+            "cableId": "pv-home-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 6.5,
+            "routed": false,
+            "routingRank": 3
+          }
+        },
+        {
+          "fromEndpointId": "pvBreaker.bottom-0",
+          "toEndpointId": "mppt.pv+",
+          "points": [
+            {
+              "x": 288,
+              "y": 636
+            },
+            {
+              "x": 432,
+              "y": 636
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.954545454545454,
+          "fromNodeId": "pvBreaker",
+          "toNodeId": "mppt",
+          "routeId": "pv-breaker-positive",
+          "route": {
+            "id": "pv-breaker-positive",
+            "label": "PV +",
+            "from": "pvBreaker.bottom-0",
+            "to": "mppt.pv+",
+            "kind": "positive",
+            "gauge": "10 AWG PV",
+            "cableId": "pv-breaker-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 6.5,
+            "routed": false,
+            "routingRank": 4
+          }
+        },
+        {
+          "fromEndpointId": "pvBreaker.bottom-1",
+          "toEndpointId": "mppt.pv-",
+          "points": [
+            {
+              "x": 288,
+              "y": 684
+            },
+            {
+              "x": 432,
+              "y": 684
+            }
+          ],
+          "bridges": [],
+          "color": "#111827",
+          "width": 2.954545454545454,
+          "fromNodeId": "pvBreaker",
+          "toNodeId": "mppt",
+          "routeId": "pv-breaker-negative",
+          "route": {
+            "id": "pv-breaker-negative",
+            "label": "PV −",
+            "from": "pvBreaker.bottom-1",
+            "to": "mppt.pv-",
+            "kind": "negative",
+            "gauge": "10 AWG PV",
+            "cableId": "pv-breaker-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 6.5,
+            "routed": false,
+            "routingRank": 5
+          }
+        },
+        {
+          "fromEndpointId": "mppt.batt+",
+          "toEndpointId": "controllerBreaker.bottom-0",
+          "points": [
+            {
+              "x": 600,
+              "y": 588
+            },
+            {
+              "x": 612,
+              "y": 588
+            },
+            {
+              "x": 612,
+              "y": 336
+            },
+            {
+              "x": 624,
+              "y": 336
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.954545454545454,
+          "fromNodeId": "mppt",
+          "toNodeId": "controllerBreaker",
+          "routeId": "mppt-battery-positive",
+          "route": {
+            "id": "mppt-battery-positive",
+            "label": "BATT + · 20 A / 30 A OCP",
+            "from": "mppt.batt+",
+            "to": "controllerBreaker.bottom-0",
+            "kind": "positive",
+            "gauge": "10 AWG DC",
+            "cableId": "mppt-battery-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 6.5,
+            "routed": false,
+            "routingRank": 6
+          }
+        },
+        {
+          "fromEndpointId": "controllerBreaker.top-0",
+          "toEndpointId": "positiveBus.main-positive-2",
+          "points": [
+            {
+              "x": 816,
+              "y": 336
+            },
+            {
+              "x": 1200,
+              "y": 336
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.954545454545454,
+          "fromNodeId": "controllerBreaker",
+          "toNodeId": "positiveBus",
+          "routeId": "controller-positive-bus",
+          "route": {
+            "id": "controller-positive-bus",
+            "label": "Protected charge path",
+            "from": "controllerBreaker.top-0",
+            "to": "positiveBus.main-positive-2",
+            "kind": "positive",
+            "gauge": "10 AWG DC",
+            "cableId": "controller-positive-bus",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 6.5,
+            "routed": false,
+            "routingRank": 7
+          }
+        },
+        {
+          "fromEndpointId": "mppt.batt-",
+          "toEndpointId": "batteryShunt.shunt-system",
+          "points": [
+            {
+              "x": 600,
+              "y": 636
+            },
+            {
+              "x": 756,
+              "y": 636
+            },
+            {
+              "x": 756,
+              "y": 720
+            },
+            {
+              "x": 1392,
+              "y": 720
+            },
+            {
+              "x": 1392,
+              "y": 468
+            },
+            {
+              "x": 1656,
+              "y": 468
+            }
+          ],
+          "bridges": [
+            {
+              "point": {
+                "x": 1404,
+                "y": 468
+              },
+              "axis": "horizontal"
+            }
+          ],
+          "color": "#111827",
+          "width": 2.954545454545454,
+          "fromNodeId": "mppt",
+          "toNodeId": "batteryShunt",
+          "routeId": "mppt-battery-negative",
+          "route": {
+            "id": "mppt-battery-negative",
+            "label": "BATT − via shunt SYSTEM side",
+            "from": "mppt.batt-",
+            "to": "batteryShunt.shunt-system",
+            "kind": "negative",
+            "gauge": "10 AWG DC",
+            "cableId": "mppt-battery-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 6.5,
+            "routed": false,
+            "routingRank": 8
+          }
+        },
+        {
+          "fromEndpointId": "negativeBus.main-negative-2",
+          "toEndpointId": "batteryShunt.shunt-battery",
+          "points": [
+            {
+              "x": 1584,
+              "y": 564
+            },
+            {
+              "x": 1644,
+              "y": 564
+            },
+            {
+              "x": 1644,
+              "y": 516
+            },
+            {
+              "x": 1656,
+              "y": 516
+            }
+          ],
+          "bridges": [],
+          "color": "#111827",
+          "width": 2.954545454545454,
+          "fromNodeId": "negativeBus",
+          "toNodeId": "batteryShunt",
+          "routeId": "battery-bus-shunt",
+          "route": {
+            "id": "battery-bus-shunt",
+            "label": "Combined bank − → shunt BATTERY MINUS",
+            "from": "negativeBus.main-negative-2",
+            "to": "batteryShunt.shunt-battery",
+            "kind": "negative",
+            "gauge": "10 AWG DC",
+            "cableId": "battery-bus-shunt",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 6.5,
+            "routed": false,
+            "routingRank": 9
+          }
+        },
+        {
+          "fromEndpointId": "positiveBus.main-positive-3",
+          "toEndpointId": "monitorFuse.monitor-fuse-in",
+          "points": [
+            {
+              "x": 1368,
+              "y": 408
+            },
+            {
+              "x": 1428,
+              "y": 408
+            },
+            {
+              "x": 1428,
+              "y": 372
+            },
+            {
+              "x": 1440,
+              "y": 372
+            }
+          ],
+          "bridges": [
+            {
+              "point": {
+                "x": 1404,
+                "y": 408
+              },
+              "axis": "horizontal"
+            }
+          ],
+          "color": "#dc2626",
+          "width": 2.5,
+          "fromNodeId": "positiveBus",
+          "toNodeId": "monitorFuse",
+          "routeId": "monitor-positive-fuse",
+          "route": {
+            "id": "monitor-positive-fuse",
+            "label": "BMV positive sense/power · supplied 1 A fuse",
+            "from": "positiveBus.main-positive-3",
+            "to": "monitorFuse.monitor-fuse-in",
+            "kind": "positive",
+            "gauge": "Factory fused lead",
+            "cableId": "monitor-positive-fuse",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 2,
+            "routed": false,
+            "routingRank": 10
+          }
+        },
+        {
+          "fromEndpointId": "monitorFuse.monitor-fuse-out",
+          "toEndpointId": "batteryShunt.shunt-positive",
+          "points": [
+            {
+              "x": 1608,
+              "y": 372
+            },
+            {
+              "x": 1644,
+              "y": 372
+            },
+            {
+              "x": 1644,
+              "y": 420
+            },
+            {
+              "x": 1656,
+              "y": 420
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.5,
+          "fromNodeId": "monitorFuse",
+          "toNodeId": "batteryShunt",
+          "routeId": "monitor-fuse-shunt",
+          "route": {
+            "id": "monitor-fuse-shunt",
+            "label": "Fused supply → shunt +B1",
+            "from": "monitorFuse.monitor-fuse-out",
+            "to": "batteryShunt.shunt-positive",
+            "kind": "positive",
+            "gauge": "Factory fused lead",
+            "cableId": "monitor-fuse-shunt",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 2,
+            "routed": false,
+            "routingRank": 11
+          }
+        },
+        {
+          "fromEndpointId": "batteryShunt.shunt-rj12",
+          "toEndpointId": "batteryMonitor.monitor-rj12",
+          "points": [
+            {
+              "x": 1764,
+              "y": 576
+            },
+            {
+              "x": 1764,
+              "y": 588
+            },
+            {
+              "x": 1836,
+              "y": 588
+            },
+            {
+              "x": 1836,
+              "y": 276
+            },
+            {
+              "x": 1716,
+              "y": 276
+            },
+            {
+              "x": 1716,
+              "y": 264
+            }
+          ],
+          "bridges": [],
+          "color": "#2563eb",
+          "width": 2.5,
+          "fromNodeId": "batteryShunt",
+          "toNodeId": "batteryMonitor",
+          "routeId": "monitor-rj12",
+          "route": {
+            "id": "monitor-rj12",
+            "label": "BMV display · RJ12 power/data",
+            "from": "batteryShunt.shunt-rj12",
+            "to": "batteryMonitor.monitor-rj12",
+            "kind": "data",
+            "gauge": "Factory RJ12 cable",
+            "cableId": "monitor-rj12",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 5,
+            "routed": false,
+            "routingRank": 12
+          }
+        },
+        {
+          "fromEndpointId": "boundary::battery-a-positive",
+          "toEndpointId": "batteryBreakerA.top-0",
+          "points": [
+            {
+              "x": 0,
+              "y": 480
+            },
+            {
+              "x": 960,
+              "y": 480
+            }
+          ],
+          "bridges": [
+            {
+              "point": {
+                "x": 612,
+                "y": 480
+              },
+              "axis": "horizontal"
+            }
+          ],
+          "color": "#dc2626",
+          "width": 3.590909090909091,
+          "fromNodeId": "boundary",
+          "toNodeId": "batteryBreakerA",
+          "routeId": "battery-a-positive",
+          "route": {
+            "id": "battery-a-positive",
+            "label": "Battery A +",
+            "from": "batteryA.positive",
+            "to": "batteryBreakerA.top-0",
+            "kind": "positive",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-a-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 7.9,
+            "routed": false,
+            "routingRank": 13
+          }
+        },
+        {
+          "fromEndpointId": "batteryBreakerA.bottom-0",
+          "toEndpointId": "positiveBus.main-positive-0",
+          "points": [
+            {
+              "x": 1128,
+              "y": 480
+            },
+            {
+              "x": 1200,
+              "y": 480
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 3.590909090909091,
+          "fromNodeId": "batteryBreakerA",
+          "toNodeId": "positiveBus",
+          "routeId": "battery-a-positive-bus",
+          "route": {
+            "id": "battery-a-positive-bus",
+            "label": "30 A protected +",
+            "from": "batteryBreakerA.bottom-0",
+            "to": "positiveBus.main-positive-0",
+            "kind": "positive",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-a-positive-bus",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 7.9,
+            "routed": false,
+            "routingRank": 14
+          }
+        },
+        {
+          "fromEndpointId": "boundary::battery-a-negative",
+          "toEndpointId": "negativeBus.main-negative-0",
+          "points": [
+            {
+              "x": 0,
+              "y": 264
+            },
+            {
+              "x": 1188,
+              "y": 264
+            },
+            {
+              "x": 1188,
+              "y": 216
+            },
+            {
+              "x": 1404,
+              "y": 216
+            },
+            {
+              "x": 1404,
+              "y": 684
+            },
+            {
+              "x": 1416,
+              "y": 684
+            }
+          ],
+          "bridges": [],
+          "color": "#111827",
+          "width": 3.590909090909091,
+          "fromNodeId": "boundary",
+          "toNodeId": "negativeBus",
+          "routeId": "battery-a-negative",
+          "route": {
+            "id": "battery-a-negative",
+            "label": "Battery A −",
+            "from": "batteryA.negative",
+            "to": "negativeBus.main-negative-0",
+            "kind": "negative",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-a-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 7.9,
+            "routed": false,
+            "routingRank": 15
+          }
+        },
+        {
+          "fromEndpointId": "boundary::battery-b-positive",
+          "toEndpointId": "batteryBreakerB.top-0",
+          "points": [
+            {
+              "x": 0,
+              "y": 888
+            },
+            {
+              "x": 12,
+              "y": 888
+            },
+            {
+              "x": 12,
+              "y": 852
+            },
+            {
+              "x": 0,
+              "y": 852
+            },
+            {
+              "x": 0,
+              "y": 516
+            },
+            {
+              "x": 768,
+              "y": 516
+            },
+            {
+              "x": 768,
+              "y": 648
+            },
+            {
+              "x": 780,
+              "y": 648
+            }
+          ],
+          "bridges": [
+            {
+              "point": {
+                "x": 612,
+                "y": 516
+              },
+              "axis": "horizontal"
+            }
+          ],
+          "color": "#dc2626",
+          "width": 3.590909090909091,
+          "fromNodeId": "boundary",
+          "toNodeId": "batteryBreakerB",
+          "routeId": "battery-b-positive",
+          "route": {
+            "id": "battery-b-positive",
+            "label": "Battery B +",
+            "from": "batteryB.positive",
+            "to": "batteryBreakerB.top-0",
+            "kind": "positive",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-b-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 7.9,
+            "routed": false,
+            "routingRank": 16
+          }
+        },
+        {
+          "fromEndpointId": "batteryBreakerB.bottom-0",
+          "toEndpointId": "positiveBus.main-positive-1",
+          "points": [
+            {
+              "x": 948,
+              "y": 648
+            },
+            {
+              "x": 1188,
+              "y": 648
+            },
+            {
+              "x": 1188,
+              "y": 576
+            },
+            {
+              "x": 1200,
+              "y": 576
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 3.590909090909091,
+          "fromNodeId": "batteryBreakerB",
+          "toNodeId": "positiveBus",
+          "routeId": "battery-b-positive-bus",
+          "route": {
+            "id": "battery-b-positive-bus",
+            "label": "30 A protected +",
+            "from": "batteryBreakerB.bottom-0",
+            "to": "positiveBus.main-positive-1",
+            "kind": "positive",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-b-positive-bus",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 7.9,
+            "routed": false,
+            "routingRank": 17
+          }
+        },
+        {
+          "fromEndpointId": "boundary::battery-b-negative",
+          "toEndpointId": "negativeBus.main-negative-1",
+          "points": [
+            {
+              "x": 0,
+              "y": 840
+            },
+            {
+              "x": 1404,
+              "y": 840
+            },
+            {
+              "x": 1404,
+              "y": 780
+            },
+            {
+              "x": 1416,
+              "y": 780
+            }
+          ],
+          "bridges": [
+            {
+              "point": {
+                "x": 720,
+                "y": 840
+              },
+              "axis": "horizontal"
+            },
+            {
+              "point": {
+                "x": 732,
+                "y": 840
+              },
+              "axis": "horizontal"
+            }
+          ],
+          "color": "#111827",
+          "width": 3.590909090909091,
+          "fromNodeId": "boundary",
+          "toNodeId": "negativeBus",
+          "routeId": "battery-b-negative",
+          "route": {
+            "id": "battery-b-negative",
+            "label": "Battery B −",
+            "from": "batteryB.negative",
+            "to": "negativeBus.main-negative-1",
+            "kind": "negative",
+            "gauge": "8 AWG DC",
+            "cableId": "battery-b-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 7.9,
+            "routed": false,
+            "routingRank": 18
+          }
+        },
+        {
+          "fromEndpointId": "mppt.load+",
+          "toEndpointId": "loadPositiveBus.load-positive-0",
+          "points": [
+            {
+              "x": 600,
+              "y": 732
+            },
+            {
+              "x": 720,
+              "y": 732
+            },
+            {
+              "x": 720,
+              "y": 1356
+            },
+            {
+              "x": 996,
+              "y": 1356
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.5,
+          "fromNodeId": "mppt",
+          "toNodeId": "loadPositiveBus",
+          "routeId": "mppt-load-positive",
+          "route": {
+            "id": "mppt-load-positive",
+            "label": "LOAD + · 20 A max",
+            "from": "mppt.load+",
+            "to": "loadPositiveBus.load-positive-0",
+            "kind": "positive",
+            "gauge": "12 AWG DC",
+            "cableId": "mppt-load-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 4,
+            "routed": false,
+            "routingRank": 19
+          }
+        },
+        {
+          "fromEndpointId": "mppt.load-",
+          "toEndpointId": "loadNegativeBus.load-negative-0",
+          "points": [
+            {
+              "x": 600,
+              "y": 684
+            },
+            {
+              "x": 732,
+              "y": 684
+            },
+            {
+              "x": 732,
+              "y": 1140
+            },
+            {
+              "x": 1320,
+              "y": 1140
+            }
+          ],
+          "bridges": [
+            {
+              "point": {
+                "x": 1296,
+                "y": 1140
+              },
+              "axis": "horizontal"
+            }
+          ],
+          "color": "#111827",
+          "width": 2.5,
+          "fromNodeId": "mppt",
+          "toNodeId": "loadNegativeBus",
+          "routeId": "mppt-load-negative",
+          "route": {
+            "id": "mppt-load-negative",
+            "label": "LOAD − · 11.8 V disconnect",
+            "from": "mppt.load-",
+            "to": "loadNegativeBus.load-negative-0",
+            "kind": "negative",
+            "gauge": "12 AWG DC",
+            "cableId": "mppt-load-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 4,
+            "routed": false,
+            "routingRank": 20
+          }
+        },
+        {
+          "fromEndpointId": "loadPositiveBus.load-positive-1",
+          "toEndpointId": "starlinkBreaker.top-0",
+          "points": [
+            {
+              "x": 1164,
+              "y": 1428
+            },
+            {
+              "x": 1296,
+              "y": 1428
+            },
+            {
+              "x": 1296,
+              "y": 936
+            },
+            {
+              "x": 1680,
+              "y": 936
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.5,
+          "fromNodeId": "loadPositiveBus",
+          "toNodeId": "starlinkBreaker",
+          "routeId": "load-starlink-positive",
+          "route": {
+            "id": "load-starlink-positive",
+            "label": "Starlink +",
+            "from": "loadPositiveBus.load-positive-1",
+            "to": "starlinkBreaker.top-0",
+            "kind": "positive",
+            "gauge": "12 AWG DC",
+            "cableId": "load-starlink-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 4,
+            "routed": false,
+            "routingRank": 21
+          }
+        },
+        {
+          "fromEndpointId": "starlinkBreaker.bottom-0",
+          "toEndpointId": "starlinkConverter.starlinkConverter+",
+          "points": [
+            {
+              "x": 1824,
+              "y": 936
+            },
+            {
+              "x": 1872,
+              "y": 936
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.5,
+          "fromNodeId": "starlinkBreaker",
+          "toNodeId": "starlinkConverter",
+          "routeId": "starlink-breaker-converter",
+          "route": {
+            "id": "starlink-breaker-converter",
+            "label": "10 A switched 12 V",
+            "from": "starlinkBreaker.bottom-0",
+            "to": "starlinkConverter.starlinkConverter+",
+            "kind": "positive",
+            "gauge": "12 AWG DC",
+            "cableId": "starlink-breaker-converter",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 4,
+            "routed": false,
+            "routingRank": 22
+          }
+        },
+        {
+          "fromEndpointId": "loadNegativeBus.load-negative-1",
+          "toEndpointId": "starlinkConverter.",
+          "points": [
+            {
+              "x": 1488,
+              "y": 1212
+            },
+            {
+              "x": 1860,
+              "y": 1212
+            },
+            {
+              "x": 1860,
+              "y": 984
+            },
+            {
+              "x": 1872,
+              "y": 984
+            }
+          ],
+          "bridges": [],
+          "color": "#111827",
+          "width": 2.5,
+          "fromNodeId": "loadNegativeBus",
+          "toNodeId": "starlinkConverter",
+          "routeId": "load-starlink-negative",
+          "route": {
+            "id": "load-starlink-negative",
+            "label": "Starlink return",
+            "from": "loadNegativeBus.load-negative-1",
+            "to": "starlinkConverter.",
+            "kind": "negative",
+            "gauge": "12 AWG DC",
+            "cableId": "load-starlink-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 4,
+            "routed": false,
+            "routingRank": 23
+          }
+        },
+        {
+          "fromEndpointId": "starlinkConverter.starlinkConverterout",
+          "toEndpointId": "boundary::starlink-regulated",
+          "points": [
+            {
+              "x": 2064,
+              "y": 960
+            },
+            {
+              "x": 2208,
+              "y": 960
+            }
+          ],
+          "bridges": [],
+          "color": "#f8fafc",
+          "width": 2.5,
+          "fromNodeId": "starlinkConverter",
+          "toNodeId": "boundary",
+          "routeId": "starlink-regulated",
+          "route": {
+            "id": "starlink-regulated",
+            "label": "Regulated 24 V · OEM cable",
+            "from": "starlinkConverter.starlinkConverterout",
+            "to": "starlink.input",
+            "kind": "multicore",
+            "gauge": "Factory lead",
+            "cableId": "starlink-regulated",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 5,
+            "routed": false,
+            "routingRank": 24
+          }
+        },
+        {
+          "fromEndpointId": "loadPositiveBus.load-positive-2",
+          "toEndpointId": "usbBreaker.top-0",
+          "points": [
+            {
+              "x": 1164,
+              "y": 1572
+            },
+            {
+              "x": 1212,
+              "y": 1572
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.5,
+          "fromNodeId": "loadPositiveBus",
+          "toNodeId": "usbBreaker",
+          "routeId": "load-usb-positive",
+          "route": {
+            "id": "load-usb-positive",
+            "label": "USB +",
+            "from": "loadPositiveBus.load-positive-2",
+            "to": "usbBreaker.top-0",
+            "kind": "positive",
+            "gauge": "12 AWG DC",
+            "cableId": "load-usb-positive",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 4,
+            "routed": false,
+            "routingRank": 25
+          }
+        },
+        {
+          "fromEndpointId": "usbBreaker.bottom-0",
+          "toEndpointId": "usbCharger.usbCharger+",
+          "points": [
+            {
+              "x": 1356,
+              "y": 1572
+            },
+            {
+              "x": 1524,
+              "y": 1572
+            },
+            {
+              "x": 1524,
+              "y": 1356
+            },
+            {
+              "x": 1536,
+              "y": 1356
+            }
+          ],
+          "bridges": [],
+          "color": "#dc2626",
+          "width": 2.5,
+          "fromNodeId": "usbBreaker",
+          "toNodeId": "usbCharger",
+          "routeId": "usb-breaker-charger",
+          "route": {
+            "id": "usb-breaker-charger",
+            "label": "10 A switched 12 V",
+            "from": "usbBreaker.bottom-0",
+            "to": "usbCharger.usbCharger+",
+            "kind": "positive",
+            "gauge": "12 AWG DC",
+            "cableId": "usb-breaker-charger",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 4,
+            "routed": false,
+            "routingRank": 26
+          }
+        },
+        {
+          "fromEndpointId": "loadNegativeBus.load-negative-2",
+          "toEndpointId": "usbCharger.",
+          "points": [
+            {
+              "x": 1488,
+              "y": 1308
+            },
+            {
+              "x": 1536,
+              "y": 1308
+            }
+          ],
+          "bridges": [],
+          "color": "#111827",
+          "width": 2.5,
+          "fromNodeId": "loadNegativeBus",
+          "toNodeId": "usbCharger",
+          "routeId": "load-usb-negative",
+          "route": {
+            "id": "load-usb-negative",
+            "label": "USB return",
+            "from": "loadNegativeBus.load-negative-2",
+            "to": "usbCharger.",
+            "kind": "negative",
+            "gauge": "12 AWG DC",
+            "cableId": "load-usb-negative",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 4,
+            "routed": false,
+            "routingRank": 27
+          }
+        },
+        {
+          "fromEndpointId": "usbCharger.usbChargerout",
+          "toEndpointId": "boundary::usb-device-leads",
+          "points": [
+            {
+              "x": 1704,
+              "y": 1332
+            },
+            {
+              "x": 2196,
+              "y": 1332
+            },
+            {
+              "x": 2196,
+              "y": 1224
+            },
+            {
+              "x": 2208,
+              "y": 1224
+            }
+          ],
+          "bridges": [],
+          "color": "#f8fafc",
+          "width": 2.5,
+          "fromNodeId": "usbCharger",
+          "toNodeId": "boundary",
+          "routeId": "usb-device-leads",
+          "route": {
+            "id": "usb-device-leads",
+            "label": "Capped USB-C + USB-A ports",
+            "from": "usbCharger.usbChargerout",
+            "to": "devices.input",
+            "kind": "multicore",
+            "gauge": "Factory USB leads",
+            "cableId": "usb-device-leads",
+            "points": [],
+            "lengthM": 0,
+            "diameterMm": 5,
+            "routed": false,
+            "routingRank": 28
+          }
+        }
+      ],
+      "width": 2208,
+      "height": 1776,
+      "routingMs": 0,
+      "layoutMs": 0,
+      "compactionMs": 0,
+      "compactionMoves": 43,
+      "coincidentSegments": 0,
+      "nonOrthogonalSegments": 0,
+      "conductorOverlaps": 0,
+      "routingFallbacks": 0,
+      "fallbackRouteIds": [],
+      "bridgedCrossings": 7,
+      "unbridgedCrossings": 0,
+      "parallelEnvelopeOverlaps": 0,
+      "minimumParallelWireSeparation": 12,
+      "nodeBodyCrossings": 0,
+      "maskedNodeBodyCrossings": 0,
+      "nodeOverlaps": 0,
+      "wireTurns": 42,
+      "wireLength": 14664,
+      "junctionId": "equipmentEnclosure"
+    }
+  }
+}

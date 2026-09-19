@@ -6182,53 +6182,6 @@ main {
   line-height: 1.45;
 }
 
-.polowat-model-rating {
-  padding: 6px 9px;
-  border: 1px solid #c4b8a4;
-  border-radius: 999px;
-  color: #3e594b;
-  background: #fffaf0;
-  font-size: 10px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.polowat-model-selection {
-  position: absolute;
-  right: 14px;
-  bottom: 14px;
-  z-index: 4;
-  display: grid;
-  min-width: 220px;
-  max-width: 310px;
-  gap: 2px;
-  padding: 10px 12px;
-  border: 1px solid rgb(91 101 87 / 0.34);
-  border-radius: 8px;
-  color: #283029;
-  background: rgb(255 252 244 / 0.96);
-  box-shadow: 0 5px 18px rgb(58 52 41 / 0.18);
-  pointer-events: none;
-}
-
-.polowat-model-selection small {
-  color: #657166;
-  font-size: 8px;
-  font-weight: 850;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.polowat-model-selection span {
-  color: #657166;
-  font-size: 10px;
-}
-
-.polowat-model .model-hover-tooltip {
-  top: 14px;
-  bottom: auto;
-}
-
 .polowat-planning-grid {
   display: grid;
   grid-template-columns: minmax(620px, 1.55fr) minmax(300px, 0.75fr);
@@ -7241,10 +7194,6 @@ main {
   .polowat-planning-grid { grid-template-columns: 1fr; }
   .polowat-load-budget { overflow-x: auto; }
   .polowat-load-budget table { min-width: 620px; }
-  .polowat-model .model-toolbar { min-height: 0; align-items: stretch; flex-direction: column; }
-  .polowat-model-rating,
-  .polowat-model .route-runtime { display: none; }
-  .polowat-model-selection { right: 8px; bottom: 8px; max-width: calc(100% - 16px); }
   .shipping-view { padding: 20px 14px; }
   .shipping-heading { flex-direction: column; }
   .shipping-total { width: 100%; }
@@ -7373,3 +7322,37 @@ main {
 .polowat-enclosure-layout { display: grid; grid-template-columns: minmax(260px, 370px) 1fr; gap: 1.5rem; align-items: start; }
 .polowat-enclosure-layout svg { width: 100%; max-height: 540px; }
 @media (max-width: 800px) { .polowat-enclosure-layout { grid-template-columns: 1fr; } }
+
+/* The Polowat model is a viewport workspace, with scrolling confined to its inspector. */
+body:has(.app-shell[data-project="inowon-polowat"]:is([data-view="model"], [data-view="diagram"])) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+.app-shell[data-project="inowon-polowat"]:is([data-view="model"], [data-view="diagram"]) {
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.app-shell[data-project="inowon-polowat"]:is([data-view="model"], [data-view="diagram"]) > .app-header { flex: 0 0 auto; }
+.app-shell[data-project="inowon-polowat"]:is([data-view="model"], [data-view="diagram"]) > main {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+.app-shell[data-project="inowon-polowat"]:is([data-view="model"], [data-view="diagram"]) .model-workspace,
+.polowat-model,
+.polowat-model .unified-model-stage,
+.polowat-model .unified-model-canvas {
+  height: 100%;
+  min-height: 0;
+}
+.polowat-model .unified-model-canvas { position: relative; }
+.polowat-model canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.polowat-model .inspector-layer { position: absolute; inset: 0; }
+.polowat-model .inspector { overscroll-behavior: contain; }
+.polowat-model .model-hover-tooltip { white-space: normal; }
+
+.polowat-diagram-workspace, .polowat-diagram-workspace .unified-diagram { height: 100%; min-height: 0; }

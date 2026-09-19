@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedOn": "2026-09-02",
+  "generatedOn": "2026-09-18",
   "privacy": "Public PII-free purchase-evidence index. Safe filenames and document kinds may be committed; source PDFs and sensitive payment details remain ignored under private/.",
   "invoices": [
     {
@@ -334,6 +334,94 @@
       "supplier": "Bank of America",
       "kind": "Payment confirmation",
       "reference": "Wind Solar Battery Pacific wire"
+    },
+    {
+      "number": 54,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-01.pdf",
+      "supplier": "Amazon",
+      "kind": "Refund confirmation",
+      "reference": "Return review 01"
+    },
+    {
+      "number": 55,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-02.pdf",
+      "supplier": "Amazon",
+      "kind": "Refund confirmation",
+      "reference": "Return review 02"
+    },
+    {
+      "number": 56,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-03.pdf",
+      "supplier": "Amazon",
+      "kind": "Refund confirmation",
+      "reference": "Return review 03"
+    },
+    {
+      "number": 57,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-04.pdf",
+      "supplier": "Amazon",
+      "kind": "Refund confirmation",
+      "reference": "Return review 04"
+    },
+    {
+      "number": 58,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-05.pdf",
+      "supplier": "Amazon",
+      "kind": "Refund confirmation",
+      "reference": "Return review 05"
+    },
+    {
+      "number": 59,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-06.pdf",
+      "supplier": "Amazon",
+      "kind": "Refund confirmation",
+      "reference": "Return review 06"
+    },
+    {
+      "number": 60,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-09.pdf",
+      "supplier": "Amazon",
+      "kind": "Refund confirmation",
+      "reference": "Return review 09"
+    },
+    {
+      "number": 61,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-10.pdf",
+      "supplier": "Amazon",
+      "kind": "Refund confirmation",
+      "reference": "Return review 10"
+    },
+    {
+      "number": 62,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-11.pdf",
+      "supplier": "Amazon",
+      "kind": "Refund confirmation",
+      "reference": "Return review 11"
+    },
+    {
+      "number": 63,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-12.pdf",
+      "supplier": "Amazon",
+      "kind": "Refund confirmation",
+      "reference": "Return review 12"
+    },
+    {
+      "number": 64,
+      "date": "2026-09-18",
+      "filename": "amazon-return-2026-09-18-midnite-approved.pdf",
+      "supplier": "Amazon",
+      "kind": "Return approval",
+      "reference": "MidNite return approved; refund pending"
     }
   ],
   "itemInvoices": {
@@ -775,6 +863,45 @@
     "dse-ex-starlink": [
       24
     ],
+    "dse-battery-string-breakers-midnite-unused-assumed-refund": [
+      10,
+      64
+    ],
+    "dse-extra-dihool-120a-breaker-confirmed-refund-2026-09-18": [
+      45,
+      54
+    ],
+    "dse-extra-ac-rcbo-pair-confirmed-refund-2026-09-18": [
+      46,
+      55
+    ],
+    "dse-shirbly-2awg-cable-pairs-confirmed-refund-2026-09-18": [
+      38,
+      40,
+      56
+    ],
+    "dse-battery-cable-confirmed-refund-2026-09-18": [
+      38,
+      57,
+      58,
+      59
+    ],
+    "dse-10awg-wire-30ft-confirmed-refund-2026-09-18": [
+      26,
+      60
+    ],
+    "dse-2awg-wire-pair-5ft-confirmed-refund-2026-09-18": [
+      26,
+      61
+    ],
+    "dse-8awg-wire-10ft-confirmed-refund-2026-09-18": [
+      25,
+      62
+    ],
+    "dse-usb-output-breaker-confirmed-refund-2026-09-18": [
+      21,
+      63
+    ],
     "dse-amazon-shipping": [
       10
     ],
@@ -837,7 +964,18 @@
       43,
       45,
       46,
-      47
+      47,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64
     ],
     "dse-us-sales-tax": [
       8,
@@ -877,7 +1015,18 @@
       43,
       45,
       46,
-      47
+      47,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64
     ],
     "dse-b125-chtaixi-unused-assumed-refund": [
       28,
@@ -891,9 +1040,6 @@
     ],
     "dse-kerwinn-shared-services-breaker-alternate-assumed-refund": [
       47
-    ],
-    "dse-battery-string-breakers-midnite-unused-assumed-refund": [
-      10
     ],
     "dse-pv-breakers-32a-rejected-assumed-refund": [
       18

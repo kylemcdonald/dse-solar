@@ -96,6 +96,19 @@ export type GrantPurchaseReport = {
   };
 };
 
+/** Shared layout with project-specific accounting summaries. */
+export type ReceiptPurchaseReport = Pick<GrantPurchaseReport,
+  "title" | "generatedDate" | "generatedDateLabel" | "explanation" | "sections" | "grandTotalUsd"> & {
+  presentation: {
+    cards: Array<readonly [string, string]>;
+    source: { label: string; value: string; detail: string; note: string };
+    summaryTitle: string;
+    summaryRows: Array<readonly [string, number]>;
+    evidenceNotes: string[];
+  };
+};
+type PurchaseReport = GrantPurchaseReport | ReceiptPurchaseReport;
+
 const CUSTOMS_IDS = new Set(["dse-customs-vat", "dse-customs-agent-costs"]);
 const IYOIYO_CHECK_AMOUNT_USD = 8_000;
 
@@ -279,7 +292,8 @@ const csvCell = (value: CsvValue) => {
   const text = String(value);
   if (!text) return "";
   if (typeof value === "number" || /^-?\d+(?:\.\d+)?$/.test(text)) return text;
-  return `"${text.replaceAll("\"", "\"\"")}"`;
+  const safe = /^[=+\-@\t\r]/.test(text) ? "'" + text : text;
+  return `"${safe.replaceAll("\"", "\"\"")}"`;
 };
 
 function singleSourceCurrency(lines: readonly GrantReportLine[]) {
@@ -287,7 +301,7 @@ function singleSourceCurrency(lines: readonly GrantReportLine[]) {
   return currencies.size === 1 ? lines[0]?.sourceCurrency : undefined;
 }
 
-export function createGrantReportCsv(report: GrantPurchaseReport) {
+export function createGrantReportCsv(report: PurchaseReport) {
   const rows: CsvValue[][] = [
     ["Report", report.title],
     ["Generated date", report.generatedDate],
@@ -313,6 +327,13 @@ export function createGrantReportCsv(report: GrantPurchaseReport) {
     rows.push([]);
   }
 
+  if ("presentation" in report) {
+    for (const [label, amount] of report.presentation.summaryRows) {
+      rows.push(["Reconciliation", report.presentation.summaryTitle, label, "", "", "", "", "", amount.toFixed(2)]);
+    }
+    rows.push(["Grand total", report.presentation.summaryTitle, "COMBINED TOTAL", "", "", "", "", "", report.grandTotalUsd.toFixed(2)]);
+    for (const note of report.presentation.evidenceNotes) rows.push(["Evidence", "Receipt index", note]);
+  } else {
   const checkBalanceNote = report.iyoyioCheckBalanceUsd >= 0
     ? `${usdMoney(report.iyoyioCheckBalanceUsd)} remains from the ${usdMoney(report.iyoyioCheckAmountUsd)} PTS advance`
     : `${usdMoney(Math.abs(report.iyoyioCheckBalanceUsd))} net expenses beyond the ${usdMoney(report.iyoyioCheckAmountUsd)} PTS advance`;
@@ -355,6 +376,8 @@ export function createGrantReportCsv(report: GrantPurchaseReport) {
     ["Reconciliation", "Cost chart to grant report", "IYOIYO net expenses", "", "", "", "", "",
       report.grandTotalUsd.toFixed(2)],
   );
+
+  }
 
   const encodeRow = (row: readonly CsvValue[]) => Array.from(
     { length: CSV_COLUMN_COUNT }, (_, index) => csvCell(row[index] ?? ""),
@@ -402,7 +425,7 @@ const pdfLine = (x1: number, y1: number, x2: number, y2: number, color = "0.82 0
 const pdfRect = (x: number, y: number, width: number, height: number, color: string) =>
   `q ${color} rg ${x.toFixed(2)} ${y.toFixed(2)} ${width.toFixed(2)} ${height.toFixed(2)} re f Q`;
 
-function reportPages(report: GrantPurchaseReport) {
+function reportPages(report: PurchaseReport) {
   const pages: PdfPage[] = [];
   let page: PdfPage = { commands: [] };
   let y = 0;
@@ -412,12 +435,12 @@ function reportPages(report: GrantPurchaseReport) {
     pages.push(page);
     if (firstPage) {
       page.commands.push(pdfText(report.title, 48, 748, 20, true, "0.08 0.28 0.29"));
-      page.commands.push(pdfText("Funding reconciliation & purchase ledger", 48, 726, 10, true, "0.38 0.43 0.41"));
+      page.commands.push(pdfText("presentation" in report ? "Expense reconciliation & purchase ledger" : "Funding reconciliation & purchase ledger", 48, 726, 10, true, "0.38 0.43 0.41"));
       page.commands.push(pdfText(`Generated ${report.generatedDateLabel}`, 422, 748, 8, false, "0.38 0.43 0.41"));
       wrapText(report.explanation, 110).forEach((line, index) =>
         page.commands.push(pdfText(line, 48, 700 - index * 10, 8.2, false, "0.30 0.35 0.34")));
 
-      const cards = [
+      const cards = "presentation" in report ? report.presentation.cards : [
         ["IYOIYO NET EXPENSES", usdMoney(report.iyoyioPurchasesSubtotalUsd)],
         ["PTS ADVANCE", usdMoney(report.iyoyioCheckAmountUsd)],
         [report.iyoyioCheckBalanceUsd < 0 ? "IYOIYO ABOVE ADVANCE" : "ADVANCE REMAINING",
@@ -430,10 +453,18 @@ function reportPages(report: GrantPurchaseReport) {
         page.commands.push(pdfText(value, x + 10, 604, 14, true, index === 2 ? "1 1 1" : "0.08 0.28 0.29"));
       });
       page.commands.push(pdfRect(48, 520, 516, 54, "0.96 0.92 0.82"));
+      if ("presentation" in report) {
+        const source = report.presentation.source;
+        page.commands.push(pdfText(source.label, 59, 555, 7.2, true, "0.43 0.35 0.18"));
+        page.commands.push(pdfText(source.value, 59, 535, 13, true, "0.30 0.28 0.20"));
+        page.commands.push(pdfText(source.detail, 250, 541, 8.2, false, "0.30 0.28 0.20"));
+        page.commands.push(pdfText(source.note, 250, 529, 7, false, "0.30 0.28 0.20"));
+      } else {
       page.commands.push(pdfText("VERIFIED FIJI SOURCE TOTAL", 59, 555, 7.2, true, "0.43 0.35 0.18"));
       page.commands.push(pdfText(sourceMoney("FJD", report.fijiPurchasesSourceFjd), 59, 535, 13, true, "0.30 0.28 0.20"));
       page.commands.push(pdfText(`${usdMoney(report.fijiPurchasesSubtotalUsd)} USD accounting total`, 250, 541, 8.2, false, "0.30 0.28 0.20"));
       page.commands.push(pdfText("Actual bank debits where documented; otherwise 2.20 FJD/USD", 250, 529, 7, false, "0.30 0.28 0.20"));
+      }
       y = 496;
     } else {
       page.commands.push(pdfText(`${report.title} - purchase ledger`, 48, 748, 10, true, "0.08 0.28 0.29"));
@@ -492,6 +523,34 @@ function reportPages(report: GrantPurchaseReport) {
     y -= 14;
   }
 
+  if ("presentation" in report) {
+    ensureSpace(70);
+    page.commands.push(pdfLine(48, y, 564, y, "0.10 0.32 0.33", 1.1));
+    y -= 24;
+    page.commands.push(pdfText(report.presentation.summaryTitle, 48, y, 9, true, "0.08 0.28 0.29"));
+    y -= 25;
+    for (const [label, amount] of report.presentation.summaryRows) {
+      ensureSpace(24);
+      page.commands.push(pdfText(label, 54, y, 8));
+      const value = usdMoney(amount);
+      page.commands.push(pdfText(value, 558 - value.length * 4.3, y, 8, true));
+      y -= 24;
+    }
+    ensureSpace(50);
+    page.commands.push(pdfRect(48, y - 36, 516, 36, "0.10 0.32 0.33"));
+    page.commands.push(pdfText("COMBINED TOTAL", 58, y - 23, 10.5, true, "1 1 1"));
+    const total = usdMoney(report.grandTotalUsd);
+    page.commands.push(pdfText(total, 556 - total.length * 6, y - 23, 11.5, true, "1 1 1"));
+    y -= 62;
+    for (const note of report.presentation.evidenceNotes) {
+      for (const text of wrapText(note, 108)) {
+        ensureSpace(12);
+        page.commands.push(pdfText(text, 54, y, 7, false, "0.42 0.46 0.44"));
+        y -= 12;
+      }
+      y -= 6;
+    }
+  } else {
   ensureSpace(282);
   page.commands.push(pdfLine(48, y, 564, y, "0.10 0.32 0.33", 1.1));
   y -= 24;
@@ -561,6 +620,8 @@ function reportPages(report: GrantPurchaseReport) {
     y -= 6;
   }
 
+  }
+
   pages.forEach((currentPage, index) => {
     currentPage.commands.push(pdfLine(48, 40, 564, 40, "0.82 0.84 0.81", 0.4));
     currentPage.commands.push(pdfText(`DSE Grant Purchase Report | Page ${index + 1} of ${pages.length}`, 48, 25, 7, false, "0.48 0.52 0.50"));
@@ -568,7 +629,7 @@ function reportPages(report: GrantPurchaseReport) {
   return pages;
 }
 
-export function createGrantReportPdf(report: GrantPurchaseReport) {
+export function createGrantReportPdf(report: PurchaseReport) {
   const pages = reportPages(report);
   const pageObjectIds = pages.map((_, index) => 5 + index * 2);
   const infoObjectId = 5 + pages.length * 2;

@@ -1,6 +1,21 @@
 # Inowon / Polowat electrical survey — P9, 15 September 2026
 
-The selection retains shared 10 AWG PV/controller cable, 8 AWG battery branches and 12 AWG LOAD wiring. P9 uses one $35.99 DK10N kit for all four isolated BATT+/BATT−/LOAD+/LOAD− groups: eight blocks, four bridges and two unbridged spare blocks. All ten blocks stay contiguous on one rail so the supplied single end cover and two stops suffice. One bare stranded conductor per clamp, 12–14 mm strip and 1.3 Nm. Six bus-end eyelets are eliminated; only four battery-post lugs remain. Both Blue Sea buses, DK4N kit and unneeded 22–10 AWG eyelet assortment are removed from the cart. See the [assembly review](polowat-assembly-review.md).
+## P16 · BMV-700 ordered, 19 September 2026
+
+The owner ordered one Victron BMV-700 kit (Amazon B01BVQR0V8), item price $88.40. Invoice and actual tax/payment reconciliation are archived in the private Polowat receipt ledger; the public BOM records the kit once. It includes the display, 500 A / 50 mV shunt, 10 m RJ12 cable and 2 m positive lead with a supplied 1 A slow-blow fuse. No separate SmartShunt or Bluetooth accessory is ordered.
+
+Both battery negatives join at the existing BATT− DK10N pair, then a 10 AWG lead reaches shunt BATTERY MINUS. Shunt LOAD AND CHARGER connects to MPPT BATT−; LOAD− stays separate. The spare BATT+ cage feeds the supplied fused lead to +B1. Add two 10 AWG × M10 closed lugs and exact spare factory fuses to the existing unpriced termination scope. Display, fuse and shunt are separate modeled devices sharing one BOM kit. Display face is 63 mm round with optional 69 mm square bezel; 52 mm body diameter / 31 mm depth, with rear connector clearance still to verify. All monitor parts stay dry and sheltered. Final panel location and enclosure purchase await hand assembly.
+
+Set 300 Ah for both batteries (150 Ah with one isolated), use battery-specific full-charge detection and enable backlight timeout. Electronics draw <4 mA with backlight off (<1.152 Wh/day at 12 V); shunt loss is 0.04 W at 20 A. These fit within the existing 100 Wh/day control/conversion reserve. The 520 Wh/day budget stays unchanged.
+
+The [regenerated cable schedule](polowat-cable-routing.md) supersedes earlier route/drop numbers. The shunt and display are included in both diagram and 3D model. The expanded mounting study remains provisional, not evidence that the deferred reference box fits.
+
+Sources: [Victron datasheet](https://www.victronenergy.com/upload/documents/Datasheet-BMV-700-series-EN.pdf), [installation](https://www.victronenergy.com/media/pg/BMV-700/en/installation.html).
+
+Earlier revision record follows; procurement and monitor changes above supersede conflicting historical statements.
+
+
+The selection retains shared 10 AWG PV/controller cable, 8 AWG battery branches and 12 AWG LOAD wiring. P9 uses one $35.99 DK10N kit for all four isolated BATT+/BATT−/LOAD+/LOAD− groups: eight blocks, four bridges and two unbridged spare blocks. The eight installed blocks stay contiguous on one rail; two unused kit blocks are stored off the assembly so the supplied single end cover and two stops suffice. One bare stranded conductor per clamp, 12–14 mm strip and 1.3 Nm. Six bus-end eyelets are eliminated; only four battery-post lugs remain. Both Blue Sea buses, DK4N kit and unneeded 22–10 AWG eyelet assortment are removed from the cart. See the [assembly review](polowat-assembly-review.md).
 
 ## Why 300 W does not require AWG 7 here
 
@@ -72,7 +87,7 @@ The **PV disconnect is already a polarized 10 A two-pole CHTAIXI**, on the array
 
 **Parallel-source fault protection is still unresolved.** A battery branch cable can be back-fed from the other battery and the MPPT. Its battery-end breaker alone does not prove protection of every bus-side cable segment. Normal 20 A current calculations are not a fault study, and breaker ampere numbers are not instantaneous clamps. Before construction, establish actual battery prospective fault current, breaker curves/clearing energy and cable withstand, using protected short routes; otherwise add appropriately rated bus-end protection and revise the mounting/BOM. Likewise verify bus fault withstand and controller source-end breaker placement. The two 100 A Blue Sea buses have adequate normal-current headroom but do not limit battery fault current.
 
-P9 uses one $35.99 DK10N kit for all four isolated BATT+/BATT−/LOAD+/LOAD− groups: eight blocks, four bridges and two unbridged spare blocks. All ten blocks stay contiguous on one rail so the supplied single end cover and two stops suffice. One bare stranded conductor per clamp, 12–14 mm strip and 1.3 Nm. Six bus-end eyelets are eliminated; only four battery-post lugs remain. Both Blue Sea buses, DK4N kit and unneeded 22–10 AWG eyelet assortment are removed from the cart. [DK10N specifications](https://www.dinkle.com/en/terminal/DK10N).
+P9 uses one $35.99 DK10N kit for all four isolated BATT+/BATT−/LOAD+/LOAD− groups: eight blocks, four bridges and two unbridged spare blocks. The eight installed blocks stay contiguous on one rail; two unused kit blocks are stored off the assembly so the supplied single end cover and two stops suffice. One bare stranded conductor per clamp, 12–14 mm strip and 1.3 Nm. Six bus-end eyelets are eliminated; only four battery-post lugs remain. Both Blue Sea buses, DK4N kit and unneeded 22–10 AWG eyelet assortment are removed from the cart. [DK10N specifications](https://www.dinkle.com/en/terminal/DK10N).
 
 Four 8 AWG battery-post lugs remain, with holes matched to the received batteries and proper lug-crimp tooling. All six bus-end eyelets are removed; DK10N uses bare stranded cage terminations. Never clamp an eyelet in a wire cage or trim strands. Final DIHOOL pole/clamp instructions and converter input terminal compatibility remain open.
 
@@ -86,7 +101,7 @@ The optional WireBox-S 100/20 remains excluded; its 5 mm secured-jacket limit is
 
 **Owner reference box: ANIMACYN B0CT5LRGRF, 13.8 × 9.7 × 5.9 inches, $59.99**, the model previously used for Pasana Group / PNG. The listing describes clear-cover ventilated ABS with a mounting panel and cable grommets. Assume it in the full estimate, but **do not stage or order it**. The owner will hand-assemble received components, establish actual dimensions, and then order the junction box. The large QILIPSU fitted layout is withdrawn. The reference outline and unpacked 3D bench arrangement assert no internal-fit dimensions or drilling pattern. [Owner reference enclosure](https://www.amazon.com/dp/B0CT5LRGRF).
 
-No separate QWORK vent is required. Preserve the controller’s specified nonflammable mounting and cooling clearances during assembly; the $11.99 aluminum sheet is cuttable stock, not a claim that its uncut dimensions fit the case. Battery breakers remain in guarded housings near battery posts. Resolve final bends, glands, USB entries, terminal guards and component layout by hand assembly. Check thermal and weather performance with the final lid closed; the approximate 25–35 W heat allowance is not a guaranteed maximum. Maintain ≤40°C controller ambient for full output. The prior large-case footprint is not a requirement to buy a larger enclosure. [Victron installation](https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/installation.html).
+No separate QWORK vent is required. Preserve the controller’s specified nonflammable mounting and cooling clearances during assembly; the Tynulox sheet has been removed; the plastic grid has not been demonstrated to satisfy Victron’s nonflammable-substrate requirement. Battery isolators are now inside the main junction box; upstream battery-to-box protection remains unresolved. Resolve final bends, glands, USB entries, terminal guards and component layout by hand assembly. Check thermal and weather performance with the final lid closed; the approximate 25–35 W heat allowance is not a guaranteed maximum. Maintain ≤40°C controller ambient for full output. The prior large-case footprint is not a requirement to buy a larger enclosure. [Victron installation](https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/installation.html).
 
 The owner accepts **waterproof with USB caps closed, sheltered while charging**. Both round extensions are now staged: [BATIGE USB-A B0BDWSQ49P](https://www.amazon.com/dp/B0BDWSQ49P), 0.3 m, $7.90, and [QIANRENON USB-C B0DRVMXWHX](https://www.amazon.com/dp/B0DRVMXWHX), 0.3 m, **PD 60 W at 20 V/3 A**, $15.99. The USB-C socket uses an 18.5 mm cutout and permits up to 20 mm panel thickness. It replaces the rejected $26.99 flat 100 W cable, saving $11. The Coolgear USB-C ceiling remains 60 W; a higher-rated cable would only add capacity, not faster charging. Verify received sealing, PD/QC modes in both orientations, loaded voltage drop and temperature. BATIGE does not publish formal current/QC/IP ratings; the complete drilled box has no established IP rating. The user's devices supply external charging leads.
 
@@ -94,12 +109,30 @@ Grounding, exposed roof/metalwork bonding, earth conductor sizing, lightning/sur
 
 ## Procurement result
 
-See the [staging and outstanding list](polowat-amazon-staging.md). 31 BOM rows: $2,033.09 equipment ($1,333.09 imports / $700 local), plus $129.98 estimated LA tax: **$2,163.07 total**. Includes the deferred box and held DIHOOL allowances. Three unpriced scopes, freight, duty and service excluded. Imported mass 22.54 kg net / 25.9 kg packed is provisional.
+See the [staging and outstanding list](polowat-amazon-staging.md). 32 BOM rows: $2,045.25 equipment ($1,345.25 imports / $700 local), plus $131.16 estimated LA tax: **$2,176.41 total**. Includes the deferred box and held DIHOOL allowances. Three unpriced scopes, freight, duty and service excluded. Imported mass 22.54 kg net / 25.9 kg packed is provisional.
 
-Authenticated cart verified: **21 listings / 24 units / $907.15 before tax**, plus **$88.45 estimated LA tax = $995.60 before delivery**. This revision saves $57.73 in staged merchandise. Nothing purchased.
+Authenticated cart verified: **22 listings / 25 units / $919.31 before tax**, plus **$89.63 estimated LA tax = $1,008.94 before delivery**. P11 removes the $11.99 sheet and replaces the $9.99 drill set with a $28.49 better-reviewed bit; net increase $6.51 from P10. Nothing purchased.
 
 ## Terminal-level assembly review
 
 The new terminal-level 3D study shows individual cages, screws, jumpers, rail stops/end cover, device envelopes, controller cooling, cable endpoints, bottom glands and capped USB ports. It is a dimensioned assembly study, not a fabrication release. The 325 × 424 mm workspace exceeds the reference enclosure’s 246.4 × 350.5 mm outside footprint. Converter bodies, final cable bends/collision clearance and compact layout need received measurements; do not claim the reference box fits or order it yet. DIHOOL pole wiring/fault coordination, battery-post size, PV connector family and full-load thermal/weather tests remain unresolved.
 
 [Open detailed findings](polowat-assembly-review.md).
+
+## P13 layout and PV expansion review
+
+Four distinct bus devices represent BATT+, BATT−, LOAD+ and LOAD−. Eight physical blocks and four within-pair jumpers are unchanged. Both battery isolators and their entry-to-breaker-to-bus wiring are inside the planning shell; component study width is now 409 mm. Reference-box purchase remains deferred.
+
+Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream.
+
+Retain the 10 A PV disconnect for the present 3S string (4.84 A Imp / 5.16 A Isc; 8.06 A sizing basis). A 20 A device can only be considered as an adequately rated service disconnect where string overcurrent protection is not required, not as 20 A protection for panels with a 15 A maximum series fuse rating. The MPPT battery-charge rating is not the PV breaker sizing basis. Future parallel strings require a new protection review, total array Isc below the 20 A controller limit and cold Voc below 100 V; the controller still caps battery charging at 20 A (290 W nominal PV at 12 V). Cart remains 10 A.
+
+Sources: [Victron ratings](https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html), [Renogy flexible panel](https://www.renogy.com/products/100-watt-12-volt-flexible-monocrystalline-solar-panel).
+
+## P14 routed stock and faster shipping
+
+The rendered 3D centreline routes now generate a [per-circuit cable schedule](polowat-cable-routing.md). Allowance cuts total 6.60/4.90 m red/black in 8 AWG and 2.95/1.85 m in 12 AWG. YDDECW 25 ft-per-colour and NOVINO 15 ft-per-colour paired packs replace all four Ancor coils; wire cost falls $59.06 with Sep 16–17 delivery shown. The owner-selected Klein 11061 is staged at $22.96; 8/10 AWG stranded tooling remains unresolved. The route-plus-allowance battery/controller drop is 3.78%, exceeding the 3% target; shorten the physical layout or revise the conductor plan before cutting. Old compact length assumptions are targets only.
+
+P14 equipment $1,979.17 ($1,279.17 import / $700.00 local), LA tax estimate $124.72, total $2,103.89. Cart $853.23 before tax. Includes deferred box and held DIHOOL allowances; unpriced scopes, freight, duty and service excluded. Routed voltage drop, tooling, mounting and enclosure fit remain unresolved.
+
+P15 owner preference: YDDECW for both 8 AWG and 12 AWG, each 25 ft red + 25 ft black. NOVINO B0FCLPKH31 removed; YDDECW B0DTPDQ656 staged at $25.99, Sep 17 delivery shown. Cart $859.23 before tax / $943.00 with estimated LA tax. BOM total $2,110.47 including estimated LA tax. Wire route/cut allowances unchanged. Nothing purchased.

@@ -42,7 +42,7 @@ test.describe("Viewer routes", () => {
     await page.goBack();
     await expect(page).toHaveURL(/\/polowat\/costs$/);
     await expect(page.locator(".app-shell")).toHaveAttribute("data-project", "inowon-polowat");
-    await expect(page.locator(".cost-total strong")).toHaveText("$2,354.54");
+    await expect(page.locator(".cost-total strong")).toHaveText("$2,207.49");
     await page.goBack();
     await expect(page).toHaveURL(/\/polowat\/bom$/);
     await expect(page.locator(".bom-v2")).toBeVisible();
@@ -75,6 +75,6 @@ test.describe("Viewer routes", () => {
     await expect(page.locator(".app-shell")).toHaveAttribute("data-viewer-ready", "true");
     await page.getByRole("link", { name: /Inowon.*Polowat/ }).click();
     await expect(page).toHaveURL(/\/polowat\/diagram$/);
-    await expect(page.locator(".polowat-diagram")).toBeVisible();
+    await expect(page.locator(".polowat-diagram-workspace .unified-diagram")).toBeVisible();
   });
 });

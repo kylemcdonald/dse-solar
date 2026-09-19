@@ -4,7 +4,7 @@ import system from "../data/polowat-system.json";
 import { polowatDeviceById, polowatTopology } from "../app/polowatTopology";
 import { copperVoltageDrop, batteryPathVoltageDrop } from "../app/polowatElectrical";
 import { planningEstimate } from "../app/planningEstimate";
-import { polowatEnclosure } from "../app/polowatEnclosure";
+import { polowatEnclosure, polowatPlanningShell, polowatPlanningEnvelope } from "../app/polowatEnclosure";
 
 const roundMoney = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
 
@@ -12,7 +12,7 @@ test("Los Angeles tax applies to priced imports while preserving pre-tax cart an
   assert.equal(system.taxEstimate.ratePercent, 9.75);
   assert.equal(system.taxEstimate.jurisdiction, "City of Los Angeles, California");
   assert.deepEqual(planningEstimate(system.bom, system.taxEstimate), {
-    subtotalUsd: 2033.09, taxableSubtotalUsd: 1333.09, taxUsd: 129.98, totalUsd: 2163.07,
+    subtotalUsd: 2073.57, taxableSubtotalUsd: 1373.57, taxUsd: 133.92, totalUsd: 2207.49,
   });
   const local = system.bom.filter(item => item.location === "Buy in Chuuk");
   assert.deepEqual(planningEstimate(local, system.taxEstimate), {
@@ -20,7 +20,7 @@ test("Los Angeles tax applies to priced imports while preserving pre-tax cart an
   });
   const cart = system.cartStaging.items.map(item => ({ totalUsd: item.totalUsd, location: "Import to Chuuk" }));
   assert.deepEqual(planningEstimate(cart, system.taxEstimate), {
-    subtotalUsd: 907.15, taxableSubtotalUsd: 907.15, taxUsd: 88.45, totalUsd: 995.60,
+    subtotalUsd: 859.23, taxableSubtotalUsd: 859.23, taxUsd: 83.77, totalUsd: 943.00,
   });
 });
 
@@ -74,18 +74,17 @@ test("three-panel energy model retains margin for the stated direct-DC load", ()
 });
 
 test("Polowat diagram and 3D model share one minimal protected topology", () => {
-  assert.equal(polowatTopology.devices.length, 20);
-  assert.equal(polowatTopology.connections.length, 25);
+  assert.equal(polowatTopology.devices.length, 24);
+  assert.equal(polowatTopology.connections.length, 29);
   assert.equal(polowatDeviceById.size, polowatTopology.devices.length);
   assert.ok(polowatTopology.connections.every((connection) => (
     polowatDeviceById.has(connection.from) && polowatDeviceById.has(connection.to)
   )));
-  assert.ok(polowatTopology.connections.every((connection) => connection.diagramRoute));
 
   assert.deepEqual(polowatTopology.devices.filter((device) => device.kind === "panel").map((device) => device.id),
     ["panel1", "panel2", "panel3"]);
   assert.equal(polowatTopology.devices.filter((device) => device.kind === "battery").length, 2);
-  assert.deepEqual(polowatDeviceById.get("equipmentEnclosure")?.size.map(value => Number(value.toFixed(5))), [.24638, .35052, .14986]);
+  assert.deepEqual(polowatDeviceById.get("equipmentEnclosure")?.size, polowatPlanningShell.size);
   assert.equal(polowatDeviceById.get("mppt")?.size.join("×"), "0.131×0.1×0.06");
 
   const ids = new Set(polowatTopology.connections.map((connection) => connection.id));
@@ -96,15 +95,15 @@ test("Polowat diagram and 3D model share one minimal protected topology", () => 
     "mppt-load-positive", "mppt-load-negative", "starlink-regulated", "usb-device-leads",
   ]) assert.ok(ids.has(id), `missing ${id}`);
 
-  assert.equal(polowatDeviceById.get("batteryBreakerA")?.subtitle, "30 A non-polarized · at battery");
-  assert.equal(polowatDeviceById.get("batteryBreakerB")?.subtitle, "30 A non-polarized · at battery");
+  assert.equal(polowatDeviceById.get("batteryBreakerA")?.subtitle, "30 A non-polarized · inside junction box");
+  assert.equal(polowatDeviceById.get("batteryBreakerB")?.subtitle, "30 A non-polarized · inside junction box");
   assert.equal(polowatDeviceById.get("pvBreaker")?.subtitle, "10 A polarized · two-pole");
   assert.equal(polowatDeviceById.get("controllerBreaker")?.subtitle, "30 A non-polarized · bus end");
   assert.equal(polowatDeviceById.get("starlinkBreaker")?.subtitle, "10 A breaker");
   assert.equal(polowatDeviceById.get("usbBreaker")?.subtitle, "10 A breaker");
 
   const labels = polowatTopology.devices.map((device) => `${device.id} ${device.label}`).join(" ").toLowerCase();
-  assert.doesNotMatch(labels, /inverter|combiner|shunt|unifi/);
+  assert.doesNotMatch(labels, /inverter|combiner|unifi/);
   const fieldGauges = new Set(polowatTopology.connections.map((connection) => connection.gauge)
     .filter((gauge) => !/panel leads|factory/i.test(gauge)));
   assert.deepEqual([...fieldGauges].sort(), ["10 AWG DC", "10 AWG PV", "12 AWG DC", "8 AWG DC"]);
@@ -148,7 +147,7 @@ test("owner route limits use mixed battery/controller gauges and short converter
   assert.ok(a.controllerAreaMm2 <= 6, "controller terminal area limit");
   assert.ok(a.mainProtectionA >= 25 && a.mainProtectionA <= 30, "Victron protection interval");
   assert.match(system.electricalAudit.holds.join(" "), /backfeed/);
-  for (const connection of polowatTopology.connections.filter(c => c.from === "loadSplit" || c.to === "loadSplit")) {
+  for (const connection of polowatTopology.connections.filter(c => ["loadPositiveBus", "loadNegativeBus"].includes(c.from) || ["loadPositiveBus", "loadNegativeBus"].includes(c.to))) {
     assert.equal(connection.gauge, "12 AWG DC", "LOAD distribution retains 12 AWG");
     assert.notEqual(connection.to, "negativeBus", "LOAD return must not bypass output switching");
   }
@@ -166,7 +165,7 @@ test("cart snapshot reconciles exact packages and never marks staging as paid", 
   const expected = new Map<string, number>();
   let subtotal = 0;
   for (const row of system.bom) {
-    assert.doesNotMatch(row.procurement, /Purchased/);
+    if (row.cartQuantity) assert.doesNotMatch(row.procurement, /Purchased/);
     const asin = "amazonAsin" in row ? row.amazonAsin : undefined;
     if (!row.cartQuantity) continue;
     assert.ok(asin);
@@ -189,7 +188,7 @@ test("cart snapshot reconciles exact packages and never marks staging as paid", 
 });
 
 test("reference enclosure is deferred and bench spacing does not claim a fitted mounting layout", () => {
-  const { parts, bench: mounting, controllerClearance: clearance } = polowatEnclosure;
+  const { parts, controllerClearance: clearance } = polowatEnclosure;
   assert.equal(polowatEnclosure.mounting, null);
   assert.equal(polowatEnclosure.layoutStatus, "bench-assembly-pending");
   assert.deepEqual(system.enclosurePlan.outerInches, [13.8, 9.7, 5.9]);
@@ -203,7 +202,7 @@ test("reference enclosure is deferred and bench spacing does not claim a fitted 
   assert.deepEqual(system.cartStaging.pendingChanges.deferredBomIds, [enclosure.id]);
   const overlaps = (a: { x: number; y: number; width: number; height: number }, b: typeof a) => a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
   for (const part of parts) {
-    assert.ok(part.x >= 0 && part.y >= 0 && part.x + part.width <= mounting.width && part.y + part.height <= mounting.height, part.id);
+    assert.ok(part.x >= 0 && part.y >= 0 && part.x + part.width <= polowatPlanningEnvelope.right && part.y + part.height <= polowatPlanningEnvelope.bottom, part.id);
     if (part.id !== "mppt") assert.ok(!overlaps(part, clearance), `${part.id} intrudes into controller cooling column`);
     for (const other of parts.filter(other => other.id !== part.id)) assert.ok(!overlaps(part, other), `${part.id} / ${other.id}`);
   }
@@ -223,10 +222,10 @@ test("staged DC coils cover both batteries and both short loads without local DC
     const stock = (awg: number) => rows.filter(row => row.wireStock?.awg === awg && [color, "red-and-black"].includes(row.wireStock?.color ?? ""))
       .reduce((sum, row) => sum + (row.wireStock?.lengthM ?? 0) * row.qty, 0);
     assert.ok(stock(8) >= 2 * system.electricalAudit.assumptions.batteryBranchOneWayM);
-    assert.ok(stock(10) >= system.electricalAudit.assumptions.pvOneWayM + system.electricalAudit.assumptions.controllerOneWayM + system.cableStockPlan.reservePerColourM);
+    assert.ok(stock(10) >= system.cableStockPlan.pvRoutePerColourM + system.cableStockPlan.controllerRoutePerColourM + system.cableStockPlan.reservePerColourM);
     assert.ok(stock(12) >= system.electricalAudit.assumptions.sharedLoadOneWayM + 2 * system.electricalAudit.assumptions.branchOneWayM);
   }
-  assert.equal(rows.length, 5);
+  assert.equal(rows.length, 3);
   assert.ok(rows.every(row => row.location === "Import to Chuuk" && row.cartQuantity === 1));
   assert.deepEqual(system.bom.filter(row => row.location === "Buy in Chuuk").map(row => row.id).sort(), ["polowat-batteries"]);
 });
@@ -240,6 +239,6 @@ test("shared PV stock covers both circuits once and removed splice purchases sta
   for (const asin of ["B00DGXVO80", "B0CJ5QF4Z2", "B01MEE7KL3", "B000NV2CV6", "B000NV0D08"]) {
     assert.ok(!system.cartStaging.items.some(row => row.asin === asin));
   }
-  assert.equal(polowatDeviceById.get("loadSplit")?.bomId, "polowat-din-distribution");
+  assert.equal(polowatDeviceById.get("loadPositiveBus")?.bomId, "polowat-din-distribution");
   assert.ok(!system.bom.some(row => row.id === "polowat-pv-splice-housing"));
 });

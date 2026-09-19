@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import {createReceiptReportPdf, createReceiptReportCsv} from "../../receiptReport";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
@@ -152,24 +153,17 @@ export async function reviewReceipt(project: ReceiptProject, id: string, revisio
     return record;
   });
 }
-export function purchaseCsv(ledger: ReceiptLedger) {
-  const rows: (string | number)[][] = [["Project", "Receipt SHA256", "Document", "Date", "Vendor", "Order", "Currency", "USD per currency", "BOM ID", "Description", "ASIN", "Quantity", "Quantity returned", "Unit price", "Line subtotal", "Disposition", "Shipping", "Tax", "Discount", "Receipt total", "New net spend USD", "Linked receipt", "Notes"]];
-  for (const record of ledger.records) {
-    const r = record.review;
-    if (!r) continue;
-    r.lines.forEach((line, index) => rows.push([ledger.project, record.id, r.kind, r.date, r.vendor, r.orderNumber, r.currency, r.usdPerCurrency, line.bomId, line.description, line.asin, line.quantity, line.returnedQuantity ?? 0, line.unitPrice, receiptCents(line.quantity * line.unitPrice) / 100, line.disposition,
-      ...(index === 0 ? [r.shipping, r.tax, r.discount, r.total, receiptNetUsd(r), r.linkedReceiptId, r.notes] : ["", "", "", "", "", "", ""])]));
-  }
-  return rows.map(row => row.map(value => {
-    const text = String(value);
-    return `"${(typeof value === "string" && /^[=+\-@\t\r]/.test(text) ? "'" + text : text).replace(/"/g, '""')}"`;
-  }).join(",")).join("\r\n") + "\r\n";
-}
+export const purchaseCsv = createReceiptReportCsv;
 export function inboxArchive(project: ReceiptProject, privateRoot?: string) {
   const root = rootFor(project, privateRoot), ledger = readLedger(root, project), now = new Date();
   return createStoredZip([
+    { name: "expense-report.pdf", data: Buffer.from(createReceiptReportPdf(ledger)), modified: now },
     { name: "purchase-ledger.csv", data: Buffer.from(purchaseCsv(ledger)), modified: now },
     { name: "ledger.json", data: Buffer.from(JSON.stringify(ledger, null, 2)), modified: now },
     ...ledger.records.map(record => ({ name: `${record.review ? "receipts" : "pending"}/${record.id}.${record.extension}`, data: readFile(originalAt(root, record)), modified: new Date(record.uploadedAt) })),
   ]);
+}
+
+export function purchasePdf(project: ReceiptProject, privateRoot?: string) {
+  return createReceiptReportPdf(loadInbox(project, privateRoot));
 }

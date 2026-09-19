@@ -18,6 +18,8 @@ export async function handleReceiptInbox(request: Request, privateRoot?: string)
           "Content-Type": record.extension === "pdf" ? "application/pdf" : record.extension === "png" ? "image/png" : "image/jpeg",
           "Content-Disposition": `attachment; filename="receipt-${record.id.slice(0, 12)}.${record.extension}"` } });
       }
+      if (download === "pdf") return new Response(new Uint8Array(server.purchasePdf(project, privateRoot)), { headers: { ...privateHeaders,
+        "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="${project}-expense-report.pdf"` } });
       if (download === "csv") return new Response(server.purchaseCsv(server.loadInbox(project, privateRoot)), { headers: { ...privateHeaders,
         "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${project}-purchase-ledger.csv"` } });
       if (download === "zip") return new Response(new Uint8Array(server.inboxArchive(project, privateRoot)), { headers: { ...privateHeaders,

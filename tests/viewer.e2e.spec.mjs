@@ -60,29 +60,24 @@ test("Polowat mode exposes its independent wiring, model, energy, BOM, shipping,
   await expect(page.getByRole("link", { name: "Wiring diagram" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Wire cut list" })).toHaveCount(0);
 
-  const diagram = page.locator(".polowat-diagram");
-  await expect(diagram).toHaveAttribute("data-system", "inowon-polowat");
-  await expect(diagram).toHaveAttribute("data-device-count", "20");
-  await expect(diagram).toHaveAttribute("data-connection-count", "25");
-  await expect(diagram.locator(".polowat-diagram-device")).toHaveCount(19);
-  await expect(diagram.locator(".polowat-wire")).toHaveCount(25);
-  await expect(page.getByRole("heading", { name: "Compact system wiring" })).toBeVisible();
-  await expect(page.getByText("300 W · 3S", { exact: true })).toBeVisible();
-  await expect(page.getByText("12 V · 300 Ah", { exact: true })).toBeVisible();
+  const diagram = page.locator(".polowat-diagram-workspace .unified-diagram");
+  await expect(diagram).toHaveAttribute("data-diagram-scope", "system");
+  await expect(diagram).toHaveAttribute("data-wire-count", "29");
+  await expect(diagram).toHaveAttribute("data-layout-source", "build-generated-artifact");
 
   await page.getByRole("link", { name: "System", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Inowon Sailing School compact solar network" })).toBeVisible();
   await expect(page.getByText("0.52 kWh/day", { exact: true })).toBeVisible();
   await expect(page.getByText("0.90 kWh/day", { exact: true })).toBeVisible();
   await expect(page.getByText("520 Wh/day", { exact: true })).toBeVisible();
-  await expect(page.getByText("25.9 kg", { exact: true })).toBeVisible();
-  await expect(page.getByText("29.8 kg", { exact: true })).toBeVisible();
-  await expect(page.locator('[data-system-total="solar-internet"]')).toContainText("$2,354.54");
+  await expect(page.getByText("23.4 kg", { exact: true })).toBeVisible();
+  await expect(page.getByText("27.0 kg", { exact: true })).toBeVisible();
+  await expect(page.locator('[data-system-total="solar-internet"]')).toContainText("$2,207.49");
   const audit = page.locator(".polowat-electrical-audit");
   await expect(audit.getByRole("heading", { name: "Current limits and wire sizes" })).toBeVisible();
   await expect(audit.locator('.polowat-enclosure-sizing')).toHaveAttribute('data-layout-status', 'bench-assembly-pending');
-  await expect(audit).toContainText('Do not stage or order the enclosure yet.');
-  await expect(audit).toContainText("$992.52");
+  await expect(audit).toContainText('Keep it out of the order.');
+  await expect(audit).toContainText("$859.23");
   const selectedDrop = audit.locator("tr").filter({ hasText: "Selected 8 AWG battery + 10 AWG controller" });
   await expect(selectedDrop).toContainText("2.41%");
   await page.getByLabel(/Battery → busbars/).fill("3");
@@ -90,30 +85,30 @@ test("Polowat mode exposes its independent wiring, model, energy, BOM, shipping,
 
 
   await page.getByRole("link", { name: /Bill of materials/ }).click();
-  await expect(page.locator("[data-bom-id]")).toHaveCount(38);
+  await expect(page.locator("[data-bom-id]")).toHaveCount(31);
   await expect(page.locator('[data-bom-id="polowat-enclosure"]')).toContainText('Deferred · order after bench assembly');
   await expect(page.locator('[data-bom-id="polowat-enclosure"] a[href="https://www.amazon.com/dp/B0CT5LRGRF"]').first()).toBeVisible();
-  await expect(page.locator('[data-bom-total="design"]')).toContainText("$2,354.54");
+  await expect(page.locator('[data-bom-total="design"]')).toContainText("$2,207.49");
   await expect(page.locator('[data-bom-total="tax"]')).toContainText("9.75%");
-  await expect(page.locator('[data-bom-total="tax"]')).toContainText("$143.43");
+  await expect(page.locator('[data-bom-total="tax"]')).toContainText("$133.92");
   await expect(page.locator(".bom-tax-note")).toContainText("California tax is not applied to purchases made locally in Chuuk");
-  await expect(page.locator(".bom-summary-v2")).toContainText("$1,471.11");
-  await expect(page.locator(".bom-summary-v2")).toContainText("$740.00");
+  await expect(page.locator(".bom-summary-v2")).toContainText("$1,373.57");
+  await expect(page.locator(".bom-summary-v2")).toContainText("$700.00");
   await expect(page.locator('[data-bom-id="polowat-batteries"]')).toContainText("Buy in Chuuk");
-  await expect(page.locator('[data-bom-id="polowat-pv-cable"]')).toContainText("Buy in Chuuk");
+  await expect(page.locator('[data-bom-id="polowat-pv-cable"]')).toContainText("Import to Chuuk");
 
   await page.getByRole("link", { name: "Costs" }).click();
-  await expect(page.locator(".cost-tile")).toHaveCount(34);
-  await expect(page.locator(".cost-total strong")).toHaveText("$2,354.54");
-  await expect(page.locator(".cost-total")).toContainText("Items: $2,211.11 · estimated Los Angeles tax (9.75%): $143.43");
-  await expect(page.locator(".cost-total")).toContainText("Import hardware: $1,471.11 · buy in Chuuk: $740.00");
+  await expect(page.locator(".cost-tile")).toHaveCount(28);
+  await expect(page.locator(".cost-total strong")).toHaveText("$2,207.49");
+  await expect(page.locator(".cost-total")).toContainText("Items: $2,073.57 · estimated Los Angeles tax (9.75%): $133.92");
+  await expect(page.locator(".cost-total")).toContainText("Import hardware: $1,373.57 · buy in Chuuk: $700.00");
   await expect(page.getByRole("button", { name: /Export grant report/ })).toHaveCount(0);
   await expect(page.getByLabel("Show costs for").locator("option")).toHaveCount(2);
 
   await page.getByRole("link", { name: "3D model" }).click();
   const model = page.locator('.polowat-model[data-model="polowat-planning-topology"]');
-  await expect(model).toHaveAttribute("data-device-count", "20", { timeout: 45_000 });
-  await expect(model).toHaveAttribute("data-connection-count", "25");
+  await expect(model).toHaveAttribute("data-device-count", "24", { timeout: 45_000 });
+  await expect(model).toHaveAttribute("data-connection-count", "29");
   const canvas = model.locator("canvas");
   await expect(canvas).toBeVisible();
   await expect(canvas).toHaveAttribute("data-system", "inowon-polowat");
@@ -855,7 +850,7 @@ test("3D model uses canonical router and has no removed controls", async ({ page
 
 test("BOM can show only items to purchase and sort by status, weight and cost", async ({ page }) => {
   await page.getByRole("link", { name: /Bill of materials/ }).click();
-  await expect(page.locator('[data-bom-total="design"]')).toContainText("$12,292.48");
+  await expect(page.locator('[data-bom-total="design"]')).toContainText("$12,196.75");
   await expect(page.locator('[data-bom-total="design"]')).toContainText("Solar + internet only");
   await expect(page.locator('[data-bom-total="additional"]')).toContainText("$3,422.50");
   await expect(page.locator('[data-bom-total="additional"]')).toContainText("14 rows");
@@ -882,8 +877,8 @@ test("Costs treemap includes every positive-cost BOM line", async ({ page }) => 
   await expect(page.locator(".cost-tile")).toHaveCount(138);
   await expect(page.locator(".cost-total strong")).toHaveText("$16,387.03");
   await page.locator(".cost-reconciliation summary").click();
-  await expect(page.locator(".cost-reconciliation")).toContainText("$15,647.14");
-  await expect(page.locator(".cost-reconciliation")).toContainText("$424.88");
+  await expect(page.locator(".cost-reconciliation")).toContainText("$15,403.84");
+  await expect(page.locator(".cost-reconciliation")).toContainText("$743.87");
   await expect(page.locator(".cost-reconciliation li")).toHaveCount(0);
   await expect(page.locator(".cost-total")).toContainText("On-site Fiji purchases: FJD 15,193.00 · $6,938.18 · paid by IYOIYO");
   await expect(page.locator('[data-source-currency="FJD"]')).toHaveCount(34);
@@ -893,17 +888,17 @@ test("Costs treemap includes every positive-cost BOM line", async ({ page }) => 
   await expect(page.locator('.cost-tile[data-accounting-scope="Excluded / returns"]')).not.toHaveCount(0);
   const scope = page.getByLabel("Show costs for");
   await scope.selectOption("Solar + internet");
-  await expect(page.locator(".cost-tile")).toHaveCount(111);
-  await expect(page.locator(".cost-total strong")).toHaveText("$12,382.71");
+  await expect(page.locator(".cost-tile")).toHaveCount(108);
+  await expect(page.locator(".cost-total strong")).toHaveText("$12,286.98");
   await expect(page.locator(".cost-total")).toContainText("$90.23 across 1 credit row stays");
   await scope.selectOption("Additional purchases");
   await expect(page.locator(".cost-tile")).toHaveCount(13);
   await expect(page.locator(".cost-total strong")).toHaveText("$3,432.20");
-  await expect(page.locator(".cost-reconciliation")).toContainText("$15,647.14");
+  await expect(page.locator(".cost-reconciliation")).toContainText("$15,403.84");
   await scope.selectOption("Excluded / returns");
-  await expect(page.locator(".cost-tile")).toHaveCount(14);
-  await expect(page.locator(".cost-total strong")).toHaveText("$572.12");
-  await expect(page.locator(".cost-total")).toContainText("$639.96 across 13 credit rows stay");
+  await expect(page.locator(".cost-tile")).toHaveCount(17);
+  await expect(page.locator(".cost-total strong")).toHaveText("$667.85");
+  await expect(page.locator(".cost-total")).toContainText("$883.26 across 18 credit rows stay");
   await scope.selectOption("All items");
   await expect(page.locator(".cost-tile")).toHaveCount(138);
 });

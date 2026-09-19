@@ -5,7 +5,7 @@
   "name": "Inowon Sailing School compact solar network",
   "subtitle": "Minimal direct-DC Starlink and USB charging system",
   "location": "Polowat, Chuuk State, FSM",
-  "revision": "P9 · detailed assembly review and unified DK10N distribution · 15 Sep 2026",
+  "revision": "P16 · BMV-700 bank monitor · 19 Sep 2026",
   "status": "Cart staged for owner review · enclosure fit and installation checks unresolved",
   "currency": {
     "base": "USD",
@@ -16,9 +16,9 @@
     "targetUsd": 2350,
     "targetBasis": "total",
     "contingencyIncluded": false,
-    "note": "P9 equipment $2,033.09 ($1,333.09 import / $700 local), LA estimated tax $129.98, total $2,163.07. Cart $907.15 before tax. Includes deferred enclosure and held DIHOOL allowances. Three unpriced scopes, freight, duty and service excluded. Assembly model is not a confirmed enclosure fit."
+    "note": "P15 equipment $1,985.17 ($1,285.17 import / $700.00 local), LA tax estimate $125.30, total $2,110.47. Cart $859.23 before tax. Includes deferred box and held DIHOOL allowances; unpriced scopes, freight, duty and service excluded. Routed voltage drop, tooling, mounting and enclosure fit remain unresolved."
   },
-  "summary": "Three 100 W panels in 3S feed a SmartSolar 100/20: 20 A maximum charge and physical LOAD output. Two matched local 12 V / 150 Ah batteries use 8 AWG branches; controller wiring is 10 AWG and short LOAD wiring 12 AWG. CHTAIXI supplies polarized 10 A PV/load protection; required 30 A non-polarized DIHOOL battery/controller protection has conflicting published specifications to resolve. Owner reference enclosure is the ANIMACYN B0CT5LRGRF ventilated ABS box, 13.8 × 9.7 × 5.9 inches, previously used for Pasana Group / PNG. Keep it out of the current order; determine the final fit by hand-assembling the components before ordering the box. Capped USB-A/USB-C female extensions remain. The 165 W load envelope has no inverter or extra battery-bus loads. Nothing ordered.",
+  "summary": "Three 100 W panels in 3S feed a SmartSolar 100/20: 20 A maximum charge and physical LOAD output. Two matched local 12 V / 150 Ah batteries use 8 AWG branches; controller wiring is 10 AWG and short LOAD wiring 12 AWG. CHTAIXI supplies polarized 10 A PV/load protection; required 30 A non-polarized DIHOOL battery/controller protection has conflicting published specifications to resolve. Owner reference enclosure is the ANIMACYN B0CT5LRGRF ventilated ABS box, 13.8 × 9.7 × 5.9 inches, previously used for Pasana Group / PNG. Keep it out of the current order; determine the final fit by hand-assembling the components before ordering the box. Capped USB-A/USB-C female extensions remain. The 165 W load envelope has no inverter. The ordered BMV-700 adds bank state of charge through its included 500 A / 50 mV shunt and wired display; its fused sense/power lead is the only added battery-bus load. Purchase evidence is retained in the private Polowat ledger.",
   "keyFacts": [
     {
       "label": "Solar array",
@@ -47,8 +47,13 @@
     },
     {
       "label": "Imported shipment",
-      "value": "21.9 kg net",
-      "detail": "About 25.2 kg packed; reference junction box ordered later; no battery boxes"
+      "value": "23.45 kg net",
+      "detail": "About 27.0 kg packed; includes provisional monitor-kit weight; final box deferred"
+    },
+    {
+      "label": "Battery monitor",
+      "value": "BMV-700",
+      "detail": "Ordered · included shunt + wired LCD · <4 mA with backlight off"
     }
   ],
   "powerModel": {
@@ -64,7 +69,7 @@
     "modeledLoadKwhDay": 0.52,
     "peakLoadWatts": 165,
     "loadOutputLimitA": 20,
-    "assumptions": "Daily budget remains 520 Wh: Starlink 40 W × 8 h, laptop 70 Wh, phones 30 Wh, conversion/control/reserve 100 Wh. Solar 300 W × 4 PSH × 75% = 900 Wh/day is a weather-dependent estimate including clipping/field losses. Expected simultaneous device maximum is 60/0.85 + 78 = 148.6 W before wiring losses; full 72 W converter envelope is 72/0.85 + 78 = 162.7 W, rounded to 165 W. The 85% converter efficiency is an acceptance assumption, not a published guarantee. At 11.8 V, 165 W is 13.98 A. Require ≥11.5 V at converters under load. BatteryLife does not guarantee an 11.8 V floor: configure user-defined LOAD disconnect 11.8 V and provisional reconnect 13.1 V, then validate against the exact battery chemistry. No continuous-load expansion beyond 20 A.",
+    "assumptions": "Daily budget remains 520 Wh: Starlink 40 W × 8 h, laptop 70 Wh, phones 30 Wh, conversion/control/reserve 100 Wh. Solar 300 W × 4 PSH × 75% = 900 Wh/day is a weather-dependent estimate including clipping/field losses. Expected simultaneous device maximum is 60/0.85 + 78 = 148.6 W before wiring losses; full 72 W converter envelope is 72/0.85 + 78 = 162.7 W, rounded to 165 W. The 85% converter efficiency is an acceptance assumption, not a published guarantee. At 11.8 V, 165 W is 13.98 A. Require ≥11.5 V at converters under load. BatteryLife does not guarantee an 11.8 V floor: configure user-defined LOAD disconnect 11.8 V and provisional reconnect 13.1 V, then validate against the exact battery chemistry. No continuous-load expansion beyond 20 A. The BMV-700 electronics use <1.152 Wh/day at 12 V with backlight off. Its 500 A / 50 mV shunt adds 0.04 W at 20 A (2 mV drop); both fit within the existing 100 Wh conversion/control reserve. No change to the 520 Wh/day budget.",
     "chargeCurrentLimitA": 20,
     "designDisconnectVolts": 11.8,
     "minimumConverterInputVolts": 11.5,
@@ -92,19 +97,19 @@
       },
       {
         "load": "Conversion, control, and reserve",
-        "basis": "Daily reserve; peak includes full converter envelope and wiring overhead",
+        "basis": "Daily reserve; peak includes full converter envelope and wiring overhead; includes BMV electronics (<1.152 Wh/day at 12 V, backlight off) and shunt losses",
         "wattHoursPerDay": 100,
         "peakWatts": 27
       }
     ],
     "shipping": {
-      "importedNetKg": 22.54,
-      "importedPackedKg": 25.9,
+      "importedNetKg": 23.45,
+      "importedPackedKg": 27,
       "localEquipmentKg": 84,
       "batteryKg": 84,
-      "totalInstalledKg": 106.54,
+      "totalInstalledKg": 107.45,
       "packingAllowancePercent": 15,
-      "note": "Complete eventual deployment estimate, including a provisional 1.5 kg reference enclosure that is excluded from the current cart. Includes DC coils, tools, spares and aluminum assembly stock. Weigh received cartons and the final box before freight booking; three unpriced scopes and added cooling may increase mass. Battery boxes and their former 4 kg allowance are excluded."
+      "note": "Complete eventual deployment estimate, including a provisional 1.5 kg reference enclosure that is excluded from the current cart. Includes DC coils, tools and spares; the aluminum sheet is excluded. Weigh received cartons and the final box before freight booking; three unpriced scopes and added cooling may increase mass. Battery boxes and their former 4 kg allowance are excluded."
     }
   },
   "bom": [
@@ -130,7 +135,7 @@
       "weightSourceUrl": "https://www.renogy.com/collections/flexible-solar-panel/products/100-watt-12-volt-flexible-monocrystalline-solar-panel",
       "weightNote": "Manufacturer net panel weight; packing is covered by the shipment allowance.",
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "amazonAsin": "B07BMNGVV3",
       "cartQuantity": 3,
       "offerCheckedDate": "2026-09-15",
@@ -142,9 +147,9 @@
       "item": "Victron SmartSolar MPPT 100/20 · SCC110020160R",
       "qty": 1,
       "unit": "ea",
-      "unitCost": 96.31,
+      "unitCost": 79.04,
       "currency": "USD",
-      "totalUsd": 96.31,
+      "totalUsd": 79.04,
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must",
@@ -158,11 +163,36 @@
       "weightSourceUrl": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html",
       "weightNote": "Manufacturer weight for the 100/20 model.",
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "amazonAsin": "B075NPQHQK",
       "cartQuantity": 1,
       "offerCheckedDate": "2026-09-15",
       "cartCheckedDate": "2026-09-15"
+    },
+    {
+      "id": "polowat-battery-monitor",
+      "category": "Monitoring",
+      "item": "Victron BMV-700 kit · display + 500 A / 50 mV shunt",
+      "qty": 1,
+      "unit": "kit",
+      "unitCost": 88.4,
+      "currency": "USD",
+      "totalUsd": 88.4,
+      "location": "Import to Chuuk",
+      "procurement": "Purchased · 19 Sep 2026 · awaiting delivery",
+      "priority": "Must",
+      "description": "BAM010700000. One kit: wired LCD, 500 A / 50 mV shunt with M10 studs, 10 m RJ12 cable and 2 m positive lead with supplied 1 A slow-blow fuse. Both parallel batteries combine before BATTERY MINUS; MPPT BATT− connects only to LOAD AND CHARGER. Preserve separate LOAD−. <4 mA with backlight off, <1.152 Wh/day at 12 V. No built-in Bluetooth; not the SmartShunt product. Set 300 Ah with both 150 Ah batteries connected, then battery-specific synchronization settings. Keep display/shunt sheltered and dry. Kit only counted once across its three modeled parts.",
+      "productUrl": "https://www.amazon.com/dp/B01BVQR0V8",
+      "specUrl": "https://www.victronenergy.com/upload/documents/Datasheet-BMV-700-series-EN.pdf",
+      "accountingGroup": "system",
+      "unitWeightKg": 0.6,
+      "totalWeightKg": 0.6,
+      "weightBasis": "estimate",
+      "weightNote": "Provisional complete-kit allowance including shunt and cables; weigh received package. Not the display-only weight.",
+      "priceCheckedDate": "2026-09-19",
+      "priceBasis": "Amazon order invoice: $88.40 item price; actual tax/payment details retained in the private receipt ledger.",
+      "amazonAsin": "B01BVQR0V8",
+      "cartQuantity": 0
     },
     {
       "id": "polowat-starlink",
@@ -209,7 +239,7 @@
       "weightBasis": "estimate",
       "weightNote": "Planning allowance for converter, switch and leads; verify received package.",
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "amazonAsin": "B0FP1CSTVX",
       "cartQuantity": 1,
       "offerCheckedDate": "2026-09-15",
@@ -237,7 +267,7 @@
       "weightSourceUrl": "https://www.coolgear.com/wp-content/uploads/CG-PD60PPS_Technical-Data-Sheet-06-260205.pdf",
       "weightNote": "Manufacturer technical-data-sheet mass.",
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "amazonAsin": "B084P83JNW",
       "cartQuantity": 1,
       "offerCheckedDate": "2026-09-15",
@@ -263,7 +293,7 @@
       "weightNote": "Estimated two-pole miniature DC-breaker weight.",
       "productUrl": "https://www.amazon.com/dp/B0D4JQ9LHZ",
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "amazonAsin": "B0D4JQ9LHZ",
       "cartQuantity": 1,
       "offerCheckedDate": "2026-09-15",
@@ -281,7 +311,7 @@
       "location": "Import to Chuuk",
       "procurement": "Hold · reconcile DIHOOL specifications",
       "priority": "Must · battery adjacent",
-      "description": "Two 30 A non-polarized battery-branch breakers, one nearest each battery positive, on 8 AWG cable. Charging and discharging reverse current on these conductors. The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection. Final two-pole wiring, received fine-stranded conductor preparation and torque, actual battery fault current and parallel-source backfeed coordination remain installation checks. MidNite is excluded.",
+      "description": "Two 30 A non-polarized battery-branch breakers, both inside the main junction box, on 8 AWG cable. Charging and discharging reverse current on these conductors. The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection. Final two-pole wiring, received fine-stranded conductor preparation and torque, actual battery fault current and parallel-source backfeed coordination remain installation checks. MidNite is excluded. Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream.",
       "accountingGroup": "system",
       "unitWeightKg": 0.2,
       "totalWeightKg": 0.4,
@@ -345,7 +375,7 @@
       "weightNote": "Estimated compact DC-breaker weight.",
       "productUrl": "https://www.amazon.com/dp/B09H4W5HSW",
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "amazonAsin": "B09H4W5HSW",
       "cartQuantity": 2,
       "offerCheckedDate": "2026-09-15",
@@ -379,33 +409,6 @@
       "purchaseTiming": "after-bench-assembly"
     },
     {
-      "id": "polowat-controller-backplate",
-      "category": "Mounting",
-      "item": "Nonflammable controller mounting subplate · 6061 aluminum · 8 × 12 × 1/16 in",
-      "qty": 1,
-      "unit": "ea",
-      "unitCost": 11.99,
-      "currency": "USD",
-      "totalUsd": 11.99,
-      "location": "Import to Chuuk",
-      "procurement": "Staged 15 Sep · not purchased",
-      "priority": "Must · site fit pending",
-      "description": "One 204 × 305 × 1.5 mm aluminum sheet provides a nonflammable surface for controller bench assembly and can be cut to the measured final layout. Remove protective film; cut/drill/deburr before fitting electronics. It is not a claim that the uncut sheet fits the deferred reference box and is not an engineered heatsink. Retain controller cooling clearance; final standoffs, fasteners, bonding and corrosion isolation follow bench assembly.",
-      "accountingGroup": "system",
-      "unitWeightKg": 0.26,
-      "totalWeightKg": 0.26,
-      "weightBasis": "estimate",
-      "weightNote": "Planning shipping mass; weigh received hardware.",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
-      "cartQuantity": 1,
-      "productUrl": "https://www.amazon.com/dp/B0CW9SWVC5",
-      "amazonAsin": "B0CW9SWVC5",
-      "priceCheckedDate": "2026-09-15",
-      "specUrl": "https://www.amazon.com/dp/B0CW9SWVC5",
-      "offerCheckedDate": "2026-09-15",
-      "cartCheckedDate": "2026-09-15"
-    },
-    {
       "id": "polowat-din-hardware",
       "category": "Mounting",
       "item": "mxuteuk 35 mm DIN rail · three 4-inch pieces with six screws",
@@ -425,7 +428,7 @@
       "weightNote": "Planning hardware allowance.",
       "productUrl": "https://www.amazon.com/dp/B07RFQGVXG",
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "amazonAsin": "B07RFQGVXG",
       "cartQuantity": 1,
       "offerCheckedDate": "2026-09-15",
@@ -496,7 +499,7 @@
       "weightNote": "Planning shipping mass; weigh received hardware.",
       "productUrl": "https://www.amazon.com/dp/B0DRVMXWHX",
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New item; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "amazonAsin": "B0DRVMXWHX",
       "cartQuantity": 1,
       "specUrl": "https://www.amazon.com/dp/B0DRVMXWHX",
@@ -542,13 +545,13 @@
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must",
-      "description": "Owner-selected B09BYGJGTB supplies 30 ft / 9.144 m EACH red and black, bare-ended. Listing claims tinned copper, UV-resistant PV insulation, −40 to 90°C and 1.5 kV DC / 1.0 kV AC; suitable in principle for outdoor PV and short DC controller wiring. Title says 6 mm², but 84 strands × 0.285 mm implies about 5.36 mm²: calculate conservatively as 10 AWG / 5.26 mm², not certified 6 mm². Per colour allocate 8 m complete PV route (including breaker-to-MPPT tails), 0.5 m total bus-to-controller BATT path, and 0.644 m trimming/slack reserve. Measure before cutting; if either route exceeds this budget buy additional matching wire rather than introducing roof splices. Offcuts replace both separate Ancor 10 AWG rolls; retain 8 AWG batteries and 12 AWG LOAD. Require ≥30 A ampacity after installation derating for the BATT cuts; verify received conductor/temperature markings, actual jacket OD, gland/MC4 seal fit, crimp contact and controller clamp fit. One lead per controller terminal, max 6 mm²; never trim strands. PV cable temperature rating alone does not establish derated ampacity.",
+      "description": "Owner-selected B09BYGJGTB supplies 30 ft / 9.144 m EACH red and black, bare-ended. Listing claims tinned copper, UV-resistant PV insulation, −40 to 90°C and 1.5 kV DC / 1.0 kV AC; suitable in principle for outdoor PV and short DC controller wiring. Title says 6 mm², but 84 strands × 0.285 mm implies about 5.36 mm²: calculate conservatively as 10 AWG / 5.26 mm², not certified 6 mm². Offcuts replace both separate Ancor 10 AWG rolls; retain 8 AWG batteries and 12 AWG LOAD. Require ≥30 A ampacity after installation derating for the BATT cuts; verify received conductor/temperature markings, actual jacket OD, gland/MC4 seal fit, crimp contact and controller clamp fit. One lead per controller terminal, max 6 mm²; never trim strands. PV cable temperature rating alone does not establish derated ampacity. Shared 9.144 m per colour: reserve 1.95 m for controller/shunt, 6.95 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site. Shared 9.144 m per colour: reserve 1.95 m for controller/shunt, 6.95 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site. Shared 9.144 m per colour: reserve 1.95 m for controller/shunt, 6.95 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site. Shared 9.144 m per colour: reserve 1.95 m for controller/shunt, 6.95 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site. Shared 9.144 m per colour: reserve 1.95 m for controller/shunt, 6.95 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site.",
       "accountingGroup": "system",
       "unitWeightKg": 1.3,
       "totalWeightKg": 1.3,
       "weightBasis": "estimate",
       "weightNote": "Provisional packed kit mass; weigh received stock.",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Staged only; tax/delivery excluded.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "cartQuantity": 1,
       "productUrl": "https://www.amazon.com/dp/B09BYGJGTB",
       "amazonAsin": "B09BYGJGTB",
@@ -587,7 +590,7 @@
       "amazonAsin": "B0BDWSQ49P",
       "cartQuantity": 1,
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart price verified 15 Sep 2026; approved by owner and staged only. Tax/delivery excluded.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "offerCheckedDate": "2026-09-15",
       "cartCheckedDate": "2026-09-15"
     },
@@ -612,7 +615,7 @@
       "amazonAsin": "B0DRJ9CDNG",
       "cartQuantity": 1,
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "offerCheckedDate": "2026-09-15",
       "cartCheckedDate": "2026-09-15"
     },
@@ -637,7 +640,7 @@
       "amazonAsin": "B0GKSWYXSK",
       "cartQuantity": 1,
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "offerCheckedDate": "2026-09-15",
       "cartCheckedDate": "2026-09-15"
     },
@@ -662,33 +665,33 @@
       "amazonAsin": "B07KFCGFYF",
       "cartQuantity": 1,
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "offerCheckedDate": "2026-09-15",
       "cartCheckedDate": "2026-09-15"
     },
     {
       "id": "polowat-wire-cutter",
-      "item": "Klein Tools 63050 copper/aluminum cable cutter",
+      "item": "Klein Tools 11061 self-adjusting wire stripper / cutter",
       "qty": 1,
       "unit": "pack",
-      "unitCost": 29.98,
-      "totalUsd": 29.98,
+      "unitCost": 22.96,
+      "totalUsd": 22.96,
       "currency": "USD",
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must",
-      "description": "Manufacturer capacity: up to 2/0 AWG soft copper and 4/0 aluminum, easily covering the selected 8, 10 and 12 AWG DC cable and 10 AWG PV copper. Cutting tool only; not a stripper or terminal crimper. Use on de-energized conductors; not for steel/ACSR.",
+      "description": "Owner-selected replacement already staged in Amazon, not purchased. Klein specifies stripping/cutting 10–20 AWG solid and 12–22 AWG stranded. This system uses stranded wire: 12 AWG is within range, but 10 AWG PV/controller and 8 AWG battery cable are outside the published range. Do not count this tool as verified for those conductors or trim strands to fit. Dedicated 63050 cutter removed per owner; suitable large-wire cutting/stripping capability remains unresolved. Source: Klein 11061 datasheet.",
       "accountingGroup": "system",
-      "unitWeightKg": 0.408,
-      "totalWeightKg": 0.408,
-      "weightBasis": "estimate",
+      "unitWeightKg": 0.358,
+      "totalWeightKg": 0.358,
+      "weightBasis": "manufacturer tool weight; packaging extra",
       "weightNote": "Provisional retail-pack shipping mass; includes spares, verify received package.",
-      "productUrl": "https://www.amazon.com/dp/B0000302X1",
-      "amazonAsin": "B0000302X1",
+      "productUrl": "https://www.amazon.com/dp/B00CXKOEQ6",
+      "amazonAsin": "B00CXKOEQ6",
       "cartQuantity": 1,
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
-      "specUrl": "https://www.kleintools.com/catalog/standard-cable-cutters/cable-cutter",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
+      "specUrl": "https://www.kleintools.com/catalog/combination-cutting-tools/wire-stripper-and-cutter-self-adjusting",
       "offerCheckedDate": "2026-09-15",
       "cartCheckedDate": "2026-09-15"
     },
@@ -703,7 +706,7 @@
       "location": "Import to Chuuk",
       "procurement": "Pending · fit / sourcing",
       "priority": "Must",
-      "description": "Unpriced remaining scope: separate guarded DIN housings for battery-adjacent breakers, PV/MPPT terminal dead-fronts inside the main junction box, rail stops, labels, standoffs, cable restraint and corrosion-resistant fasteners. Includes approved converter terminal/pigtail transitions if received connectors cannot accept 12 AWG. Covers must preserve MPPT cooling clearance. Ordinary screened vents and incompatible WireBox are excluded; resolve thermal performance without unsealed holes. Battery terminal guarding and retention are included in this remaining mounting scope; battery boxes are excluded by the owner.",
+      "description": "Unpriced remaining scope: guarding for the battery isolators inside the main junction box, PV/MPPT terminal dead-fronts inside the main junction box, rail stops, labels, standoffs, cable restraint and corrosion-resistant fasteners. Includes approved converter terminal/pigtail transitions if received connectors cannot accept 12 AWG. Covers must preserve MPPT cooling clearance. Ordinary screened vents and incompatible WireBox are excluded; resolve thermal performance without unsealed holes. Battery terminal guarding and retention are included in this remaining mounting scope; battery boxes are excluded by the owner. Mini grid ties are now separately priced in polowat-mini-zip-ties. Owner already has files for finishing intermediate cutout diameters; no files purchase needed. Owner intends to use the enclosure’s plastic mounting grid and has removed the Tynulox sheet from procurement. Victron requires a nonflammable substrate for the SmartSolar: plastic-grid compliance has not been established. Resolve a suitable controller mounting surface before installation; no replacement plate is staged or priced.",
       "accountingGroup": "system",
       "unitWeightKg": 0.3,
       "totalWeightKg": 0.3,
@@ -715,7 +718,7 @@
     },
     {
       "id": "polowat-battery-lugs",
-      "item": "Four battery-post lugs and matched crimp tooling",
+      "item": "Battery-post lugs, two BMV shunt M10 lugs and crimp tooling",
       "qty": 1,
       "unit": "pack",
       "unitCost": 0,
@@ -724,7 +727,7 @@
       "location": "Import to Chuuk",
       "procurement": "Pending · fit / sourcing",
       "priority": "Must",
-      "description": "Only four 8 AWG battery-post lugs remain: two positive and two negative. Match holes to the locally selected battery terminals and barrels/tooling to the 8 AWG cable. The four former bus-end 8 AWG rings and two controller bus rings are eliminated by DK10N wire cages. The 22–10 AWG ring assortment is removed because it cannot terminate 8 AWG. Exact battery-post size remains unknown; retain this unpriced scope until known.",
+      "description": "Four 8 AWG battery-post lugs with holes matched to the locally selected batteries, plus two 10 AWG × M10 closed lugs for the BMV shunt BATTERY MINUS and LOAD AND CHARGER studs. DK10N bus ends remain bare wire. Match barrels, die and received wire; verify the factory fused lead termination in the spare BATT+ clamp. Retain the supplied 1 A slow-blow fuse and carry exact replacement spares before travel; these residual consumables remain unpriced.",
       "accountingGroup": "system",
       "unitWeightKg": 0.2,
       "totalWeightKg": 0.2,
@@ -759,142 +762,74 @@
     {
       "id": "polowat-battery-cable-red",
       "category": "Wiring",
-      "item": "Ancor 111502 · 8 AWG tinned copper · red · 25 ft",
+      "item": "YDDECW 8 AWG tinned copper · 25 ft red + 25 ft black",
       "qty": 1,
-      "unit": "coil",
-      "unitCost": 49.33,
-      "totalUsd": 49.33,
+      "unit": "paired pack",
+      "unitCost": 49.99,
+      "totalUsd": 49.99,
       "currency": "USD",
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must · verify received markings",
-      "description": "Positive battery branches, each ≤2 m one way including breaker segments. Retail coil: 25 ft / 7.6200 conductor-metres. About 4 m positive cuts for two batteries; 3.62 m reserve. Needs exact 8 AWG rings; the removed 22–10 AWG assortment cannot terminate this wire. UL 1426 marine copper, 600 V, 105°C dry / 75°C wet; fine Type 3 stranding. Use the manufacturer part number and received label: Amazon ancillary length/gauge/weight fields contain errors. Ampacity must meet the circuit requirement after installation derating.",
+      "description": "Replaces both Ancor 25 ft coils with one paired pack, 7.62 m per colour. Routed purchase allowance: 6.60 m red and 4.90 m black after 15% slack, 50 mm per end and equalizing corresponding battery branches. Remaining stock 1.02 m red / 2.72 m black. Seller specifies 165 × 0.254 mm tinned copper strands (calculated 8.36 mm²), 6.7 mm OD, 600 V, 105°C dry / 75°C wet PVC. Seller marine/standards claims are not independent certification; verify received gauge, markings, hot/bundled ampacity and terminal fit. Retain 30 A coordinated protection requirement. Current routed allowance exceeds earlier ≤2 m battery assumption; shorten physical layout or resolve voltage-drop hold before cutting.",
       "accountingGroup": "system",
-      "productUrl": "https://www.amazon.com/dp/B000NUYIHS",
-      "specUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
-      "amazonAsin": "B000NUYIHS",
+      "productUrl": "https://www.amazon.com/dp/B0DTP4ZRSV",
+      "specUrl": "https://www.amazon.com/dp/B0DTP4ZRSV",
+      "amazonAsin": "B0DTP4ZRSV",
       "cartQuantity": 1,
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
-      "unitWeightKg": 0.975,
-      "totalWeightKg": 0.975,
-      "weightBasis": "manufacturer linear-weight estimate",
-      "weightSourceUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
-      "weightNote": "Calculated from manufacturer conductor mass per 1000 ft; coil packaging extra. Amazon weight fields are inconsistent.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
+      "unitWeightKg": 1.95,
+      "totalWeightKg": 1.95,
+      "weightBasis": "provisional same-gauge linear-mass estimate",
+      "weightSourceUrl": "https://www.amazon.com/dp/B0DTP4ZRSV",
+      "weightNote": "Estimated from previous same-length copper coils; not a manufacturer measurement. Weigh received pack.",
       "wireStock": {
         "awg": 8,
         "areaMm2": 8.37,
-        "color": "red",
+        "color": "red-and-black",
         "lengthFt": 25,
         "lengthM": 7.62
       },
       "offerCheckedDate": "2026-09-15",
-      "cartCheckedDate": "2026-09-15"
-    },
-    {
-      "id": "polowat-battery-cable-black",
-      "category": "Wiring",
-      "item": "Ancor 111002 · 8 AWG tinned copper · black · 25 ft",
-      "qty": 1,
-      "unit": "coil",
-      "unitCost": 47.51,
-      "totalUsd": 47.51,
-      "currency": "USD",
-      "location": "Import to Chuuk",
-      "procurement": "Staged 15 Sep · not purchased",
-      "priority": "Must · verify received markings",
-      "description": "Negative battery branches, each ≤2 m one way. Retail coil: 25 ft / 7.6200 conductor-metres. About 4 m negative cuts for two batteries; 3.62 m reserve. Match corresponding A/B cable resistances; no 8 AWG wire enters the controller or LOAD distribution. UL 1426 marine copper, 600 V, 105°C dry / 75°C wet; fine Type 3 stranding. Use the manufacturer part number and received label: Amazon ancillary length/gauge/weight fields contain errors. Ampacity must meet the circuit requirement after installation derating.",
-      "accountingGroup": "system",
-      "productUrl": "https://www.amazon.com/dp/B000NV0HR2",
-      "specUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
-      "amazonAsin": "B000NV0HR2",
-      "cartQuantity": 1,
-      "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
-      "unitWeightKg": 0.975,
-      "totalWeightKg": 0.975,
-      "weightBasis": "manufacturer linear-weight estimate",
-      "weightSourceUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
-      "weightNote": "Calculated from manufacturer conductor mass per 1000 ft; coil packaging extra. Amazon weight fields are inconsistent.",
-      "wireStock": {
-        "awg": 8,
-        "areaMm2": 8.37,
-        "color": "black",
-        "lengthFt": 25,
-        "lengthM": 7.62
-      },
-      "offerCheckedDate": "2026-09-15",
-      "cartCheckedDate": "2026-09-15"
+      "cartCheckedDate": "2026-09-15",
+      "deliveryEstimate": "September 16, 2026, shown for the current Amazon destination at review; checkout timing can change it."
     },
     {
       "id": "polowat-load-cable",
       "category": "Wiring",
-      "item": "Ancor 186803 · 12 AWG tinned copper · red · 12 ft",
+      "item": "YDDECW 12 AWG tinned copper · 25 ft red + 25 ft black",
       "qty": 1,
-      "unit": "coil",
-      "unitCost": 11.63,
-      "totalUsd": 11.63,
+      "unit": "paired pack",
+      "unitCost": 25.99,
+      "totalUsd": 25.99,
       "currency": "USD",
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must · verify received markings",
-      "description": "Shared LOAD+ and positive converter branches inside the junction box. Retail coil: 12 ft / 3.6576 conductor-metres. 12 AWG is 3.31 mm², replacing the prior metric 4 mm² selection after recalculation. Plan ≤0.25 m shared plus ≤0.75 m downstream per branch: 1.75 m positive cuts, 1.9076 m reserve. Require ≥25 A derated ampacity before branch breakers; keep shared pair out of large wire bundles. UL 1426 marine copper, 600 V, 105°C dry / 75°C wet; fine Type 3 stranding. Use the manufacturer part number and received label: Amazon ancillary length/gauge/weight fields contain errors. Ampacity must meet the circuit requirement after installation derating.",
+      "description": "Owner-selected YDDECW brand, replacing NOVINO 15 ft paired pack. One pack supplies 25 ft / 7.62 m each red and black. Routed purchase allowances remain 2.95 m red / 1.85 m black, leaving 4.67 m red / 5.77 m black. Seller specifies 65 × 0.254 mm tinned copper strands (calculated 3.29 mm²), 4 mm OD, 600 V, 105°C dry / 75°C wet PVC. Verify received markings, conductor size, hot/bundled ampacity and terminal compatibility; seller standards claims are not independent certification. Require ≥25 A derated ampacity ahead of branch breakers; LOAD− remains separate from BATT−. Price $25.99 is $6 more than the superseded $19.99 pack.",
       "accountingGroup": "system",
-      "productUrl": "https://www.amazon.com/dp/B000NV2DJC",
-      "specUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
-      "amazonAsin": "B000NV2DJC",
+      "productUrl": "https://www.amazon.com/dp/B0DTPDQ656",
+      "specUrl": "https://www.amazon.com/dp/B0DTPDQ656",
+      "amazonAsin": "B0DTPDQ656",
       "cartQuantity": 1,
       "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
-      "unitWeightKg": 0.168,
-      "totalWeightKg": 0.168,
-      "weightBasis": "manufacturer linear-weight estimate",
-      "weightSourceUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
-      "weightNote": "Calculated from manufacturer conductor mass per 1000 ft; coil packaging extra. Amazon weight fields are inconsistent.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
+      "unitWeightKg": 0.7,
+      "totalWeightKg": 0.7,
+      "weightBasis": "provisional same-gauge linear-mass estimate",
+      "weightSourceUrl": "https://www.amazon.com/dp/B0DTPDQ656",
+      "weightNote": "Provisional prior same-gauge linear mass scaled to 50 conductor-feet; weigh received pack.",
       "wireStock": {
         "awg": 12,
         "areaMm2": 3.31,
-        "color": "red",
-        "lengthFt": 12,
-        "lengthM": 3.6576
+        "color": "red-and-black",
+        "lengthFt": 25,
+        "lengthM": 7.62
       },
       "offerCheckedDate": "2026-09-15",
-      "cartCheckedDate": "2026-09-15"
-    },
-    {
-      "id": "polowat-load-cable-black",
-      "category": "Wiring",
-      "item": "Ancor 186003 · 12 AWG tinned copper · black · 12 ft",
-      "qty": 1,
-      "unit": "coil",
-      "unitCost": 11.63,
-      "totalUsd": 11.63,
-      "currency": "USD",
-      "location": "Import to Chuuk",
-      "procurement": "Staged 15 Sep · not purchased",
-      "priority": "Must · verify received markings",
-      "description": "Shared LOAD− and both converter returns inside the junction box. Retail coil: 12 ft / 3.6576 conductor-metres. About 1.75 m negative cuts and 1.9076 m reserve. 12 AWG fits the selected Dinkle DK10N clamps as bare stranded wire. Verify Phoenix plug/factory input lead capacity; no LOAD− bypass to battery negative. UL 1426 marine copper, 600 V, 105°C dry / 75°C wet; fine Type 3 stranding. Use the manufacturer part number and received label: Amazon ancillary length/gauge/weight fields contain errors. Ampacity must meet the circuit requirement after installation derating.",
-      "accountingGroup": "system",
-      "productUrl": "https://www.amazon.com/dp/B01N8S1CQU",
-      "specUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
-      "amazonAsin": "B01N8S1CQU",
-      "cartQuantity": 1,
-      "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
-      "unitWeightKg": 0.168,
-      "totalWeightKg": 0.168,
-      "weightBasis": "manufacturer linear-weight estimate",
-      "weightSourceUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
-      "weightNote": "Calculated from manufacturer conductor mass per 1000 ft; coil packaging extra. Amazon weight fields are inconsistent.",
-      "wireStock": {
-        "awg": 12,
-        "areaMm2": 3.31,
-        "color": "black",
-        "lengthFt": 12,
-        "lengthM": 3.6576
-      },
-      "offerCheckedDate": "2026-09-15",
-      "cartCheckedDate": "2026-09-15"
+      "cartCheckedDate": "2026-09-15",
+      "deliveryEstimate": "September 17, 2026, shown at review for the current Amazon destination; checkout timing may change it."
     },
     {
       "id": "polowat-mc4-kit",
@@ -920,7 +855,7 @@
       "priceCheckedDate": "2026-09-15",
       "offerCheckedDate": "2026-09-15",
       "cartCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Staged only; tax/delivery excluded."
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased."
     },
     {
       "id": "polowat-din-distribution",
@@ -934,7 +869,7 @@
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must",
-      "description": "One kit: ten DK10N blocks (five red/five black), eight DSS10N-02P jumpers, one DK10NC end cover, two SS2 stops and 7-inch DIN rail. Use eight blocks as four isolated two-block groups: BATT+, BATT−, LOAD+, LOAD−; one matching bridge per pair, three used clamps and one spare per group. Keep all ten blocks contiguous on the same rail so the single end cover/two stops suffice; rearrange colours and clearly label groups, never bridge between groups. Two unbridged spare blocks reserved for converter transitions. DK10N accepts one bare stranded 8/10/12 AWG lead per cage; 12–14 mm strip, 1.3 Nm, 60 A UL / 57 A IEC body rating. Verify exact bridge/received markings and fault coordination; this does not increase system current limits. Replaces both Blue Sea buses and the DK4N kit, eliminating six bus-end eyelets. No connection between LOAD− and BATT−.",
+      "description": "One kit: ten DK10N blocks (five red/five black), eight DSS10N-02P jumpers, one DK10NC end cover, two SS2 stops and 7-inch DIN rail. Use eight blocks as four isolated two-block groups: BATT+, BATT−, LOAD+, LOAD−; one matching bridge per pair, three used clamps and one spare per group. Keep the eight installed blocks contiguous on the same rail so the single end cover/two stops suffice; rearrange colours and clearly label groups, never bridge between groups. The two unused kit blocks stay off the mounted assembly as spares for possible converter transitions. DK10N accepts one bare stranded 8/10/12 AWG lead per cage; 12–14 mm strip, 1.3 Nm, 60 A UL / 57 A IEC body rating. Verify exact bridge/received markings and fault coordination; this does not increase system current limits. Replaces both Blue Sea buses and the DK4N kit, eliminating six bus-end eyelets. No connection between LOAD− and BATT−.",
       "accountingGroup": "system",
       "unitWeightKg": 0.3,
       "totalWeightKg": 0.3,
@@ -946,8 +881,62 @@
       "priceCheckedDate": "2026-09-15",
       "offerCheckedDate": "2026-09-15",
       "cartCheckedDate": "2026-09-15",
-      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Staged only; tax/delivery excluded.",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
       "specUrl": "https://www.dinkle.com/en/terminal/DK10N"
+    },
+    {
+      "id": "polowat-mini-zip-ties",
+      "category": "Wiring & assembly",
+      "item": "TANTTI mini nylon zip ties · black · 4 in × 0.1 in · 200-pack",
+      "qty": 1,
+      "unit": "pack",
+      "unitCost": 3.99,
+      "totalUsd": 3.99,
+      "currency": "USD",
+      "location": "Import to Chuuk",
+      "procurement": "Staged 15 Sep · not purchased",
+      "priority": "Must",
+      "description": "200 UV-resistant nylon 66 ties, approximately 102 × 2.54 mm, listing-rated 18 lb tensile strength. Use roughly 20–40 initially, with the rest as service spares, to dress small cable bundles through the junction-box grid. Confirm the received grid slots accept the tie width. Do not pinch insulation or obstruct vents; trim tails flush. Wire retention only: heavy devices, DIN rails and controller still require mechanical mounting. No adhesive tie mounts included or required for a suitable perforated grid.",
+      "accountingGroup": "system",
+      "unitWeightKg": 0.08,
+      "totalWeightKg": 0.08,
+      "weightBasis": "estimate",
+      "weightNote": "Provisional complete retail-pack mass; weigh received package.",
+      "productUrl": "https://www.amazon.com/dp/B0BC1VH4XB",
+      "specUrl": "https://www.amazon.com/dp/B0BC1VH4XB",
+      "amazonAsin": "B0BC1VH4XB",
+      "cartQuantity": 1,
+      "priceCheckedDate": "2026-09-15",
+      "offerCheckedDate": "2026-09-15",
+      "cartCheckedDate": "2026-09-15",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased."
+    },
+    {
+      "id": "polowat-step-drill",
+      "category": "Wiring & assembly",
+      "item": "STROTON M35 cobalt metric step-drill bit · 4–32 mm · 15 steps",
+      "qty": 1,
+      "unit": "ea",
+      "unitCost": 28.49,
+      "totalUsd": 28.49,
+      "currency": "USD",
+      "location": "Import to Chuuk",
+      "procurement": "Staged 15 Sep · not purchased",
+      "priority": "Must",
+      "description": "One M35 5% cobalt metric step bit, 4–32 mm in 2 mm increments, listed for plastic/PVC as well as metal. Straight shank: use a suitable drill chuck and rotary mode. Amazon listing showed 4.6/5 from 1,198 ratings on 15 Sep 2026, versus 3.5/5 from 140 for the removed Tworider set; listing ratings may aggregate variants and are not a performance certification. For the USB-C nominal 18.5 mm opening, stop at 18 mm and finish to the received fitting with the owner’s existing files. PG cutouts may also need intermediate finishing. Support the empty enclosure wall and deburr; no impact mode. Holes and enclosure order remain deferred until hand assembly and measurement. Files already owned; no files purchase included.",
+      "accountingGroup": "system",
+      "unitWeightKg": 0.18,
+      "totalWeightKg": 0.18,
+      "weightBasis": "estimate",
+      "weightNote": "Provisional complete retail-pack mass; weigh received package.",
+      "productUrl": "https://www.amazon.com/dp/B0886JKJMD",
+      "specUrl": "https://www.amazon.com/dp/B0886JKJMD",
+      "amazonAsin": "B0886JKJMD",
+      "cartQuantity": 1,
+      "priceCheckedDate": "2026-09-15",
+      "offerCheckedDate": "2026-09-15",
+      "cartCheckedDate": "2026-09-15",
+      "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased."
     }
   ],
   "operatingRules": [
@@ -957,7 +946,8 @@
     "Open the relevant 30 A battery breaker before servicing; connected PV and the other battery can still energize buses and wiring. Follow the complete isolation procedure and verify dead before cutting.",
     "Set user-defined LOAD disconnect to 11.8 V and provisional reconnect to 13.1 V, subject to battery-maker acceptance. BatteryLife alone does not enforce this floor. Stop laptop charging first when energy is low.",
     "Keep both converter positives and returns on the physical LOAD output through the two branch circuits. No return, USB shield or external ground path may bypass LOAD−.",
-    "Keep panels unshaded and mounted to a wind-qualified roof system. Keep electronics dry, screened and outside the battery-gas path; preserve all guards and strain relief."
+    "Keep panels unshaded and mounted to a wind-qualified roof system. Keep electronics dry, screened and outside the battery-gas path; preserve all guards and strain relief.",
+    "BMV-700: monitor the combined bank, keep backlight timeout enabled, set 300 Ah for both batteries or 150 Ah after isolating one, and synchronize only at confirmed full charge using battery-specific settings. Battery percentage is an estimate; retain controller LOAD disconnect."
   ],
   "commissioning": [
     "Record exact local battery model, chemistry, terminals, charge limits, internal resistance/fault-current data, weight and price. Separately charge to equal rested voltage before paralleling; configure the correct charge profile and disable unsupported equalization.",
@@ -975,7 +965,9 @@
     "Owner reference is ANIMACYN B0CT5LRGRF, 13.8 × 9.7 × 5.9 inches, previously used for Pasana Group / PNG. Do not stage the enclosure. Hand-assemble components and establish actual dimensions before ordering it; no internal-fit drawing is released. Preserve controller mounting/cooling requirements during that assembly.",
     "Use the reference box’s ventilation; no separate QWORK vent. Check temperature with the final cover closed at full charge and load. The approximate 25–35 W heat allowance is not a guarantee of thermal fit; maintain ≤40°C MPPT ambient for full output.",
     "Separate guarded battery-breaker housings, finish labels/guards, Starlink entry/activation, roof attachment and bonding remain pending. No completed-system IP rating is established.",
-    "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. One contiguous ten-block DK10N rail uses supplied single end cover and two stops. No box order until owner assembly. DIHOOL protection remains held."
+    "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. One contiguous ten-block DK10N rail uses supplied single end cover and two stops. No box order until owner assembly. DIHOOL protection remains held.",
+    "Owner intends to use the enclosure’s plastic mounting grid and has removed the Tynulox sheet from procurement. Victron requires a nonflammable substrate for the SmartSolar: plastic-grid compliance has not been established. Resolve a suitable controller mounting surface before installation; no replacement plate is staged or priced.",
+    "Verify shunt polarity, all charge/load paths through its system side and no LOAD− bypass. Fit two 10 AWG M10 lugs, keep supplied 1 A slow-blow sense fuse near BATT+ and carry spares. Verify 52 mm display body/cutout, rear RJ12 clearance, dry mounting and actual enclosure fit."
   ],
   "research": [
     {
@@ -1099,12 +1091,20 @@
     {
       "title": "MUYI PV assembly kit · same Fiji ASIN",
       "url": "https://www.amazon.com/dp/B0BWRHMHY9"
+    },
+    {
+      "title": "Victron BMV-700 specifications",
+      "url": "https://www.victronenergy.com/upload/documents/Datasheet-BMV-700-series-EN.pdf"
+    },
+    {
+      "title": "Victron BMV-700 shunt and display installation",
+      "url": "https://www.victronenergy.com/media/pg/BMV-700/en/installation.html"
     }
   ],
   "electricalAudit": {
-    "date": "2026-09-15",
+    "date": "2026-09-19",
     "report": "/polowat-electrical-audit.md",
-    "summary": "Terminal-level P9 assembly study replaces Blue Sea/DK4N with one DK10N kit: four isolated battery/LOAD groups, eight used blocks and four bridges on one contiguous rail. Six bus-end eyelets eliminated. Shared iGreely 10 AWG PV/controller stock and 8 AWG battery / 12 AWG LOAD lengths remain. The 325 × 424 mm dimensioned study exceeds the reference box footprint; final compact layout, converter terminals, cable bends/depth, thermal performance and DIHOOL fault coordination remain unresolved. Do not stage the enclosure.",
+    "summary": "P16 adds the ordered BMV-700 shunt, fused supply and display to the routed 3D assembly and totals the rendered wire lengths. Paired YDDECW 8 AWG and 12 AWG packs replace all Ancor coils; the owner-selected Klein 11061 replaces the dedicated cutter. Earlier 2 m battery / 0.5 m controller lengths below are compact-layout targets, not the newly routed cut lengths. Routed allowance drop exceeds the 3% target: shorten the physical layout or revise the conductor/termination design before cutting. Source-end battery protection and received material verification remain unresolved.",
     "circuits": [
       {
         "id": "pv-series",
@@ -1151,8 +1151,8 @@
         "areaMm2": 8.37,
         "oneWayMetres": 2,
         "nominalVolts": 11.8,
-        "protection": "30 A non-polarized at battery +",
-        "note": "20 A normal with B isolated. ≥30 A derated wire ampacity; bus-end backfeed fault coordination unresolved. DIHOOL 30 A candidate held: reconcile published variant/fault ratings and final pole wiring before construction."
+        "protection": "30 A non-polarized inside junction box; upstream lead protection unresolved",
+        "note": "20 A normal with B isolated. ≥30 A derated wire ampacity; bus-end backfeed fault coordination unresolved. DIHOOL 30 A candidate held: reconcile published variant/fault ratings and final pole wiring before construction. Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream."
       },
       {
         "id": "battery-b",
@@ -1167,16 +1167,17 @@
         "areaMm2": 8.37,
         "oneWayMetres": 2,
         "nominalVolts": 11.8,
-        "protection": "30 A non-polarized at battery +",
-        "note": "20 A normal with A isolated. Match corresponding A/B cable resistances; bus-end backfeed fault coordination unresolved. DIHOOL 30 A candidate held: reconcile published variant/fault ratings and final pole wiring before construction."
+        "protection": "30 A non-polarized inside junction box; upstream lead protection unresolved",
+        "note": "20 A normal with A isolated. Match corresponding A/B cable resistances; bus-end backfeed fault coordination unresolved. DIHOOL 30 A candidate held: reconcile published variant/fault ratings and final pole wiring before construction. Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream."
       },
       {
         "id": "controller",
-        "circuit": "Buses ↔ SmartSolar BATT",
+        "circuit": "Buses ↔ BMV shunt ↔ SmartSolar BATT",
         "connectionIds": [
           "mppt-battery-positive",
           "controller-positive-bus",
-          "mppt-battery-negative"
+          "mppt-battery-negative",
+          "battery-bus-shunt"
         ],
         "designCurrentA": 20,
         "gauge": "10 AWG DC",
@@ -1184,7 +1185,7 @@
         "oneWayMetres": 0.5,
         "nominalVolts": 11.8,
         "protection": "30 A non-polarized at bus end",
-        "note": "Charge and discharge are opposite directions, not 40 A added. ≥30 A derated ampacity. Third breaker still unstaged. DIHOOL 30 A candidate held: reconcile published variant/fault ratings and final pole wiring before construction. Cut from the same iGreely PV roll; 0.5 m per colour reserved, not an additional wire purchase."
+        "note": "Charge and discharge are opposite directions, not 40 A added. ≥30 A derated ampacity. Third breaker still unstaged. DIHOOL 30 A candidate held: reconcile published variant/fault ratings and final pole wiring before construction. Cut from the same iGreely PV roll; 0.5 m per colour reserved, not an additional wire purchase. Negative now includes the separate bus-to-shunt and shunt-to-MPPT legs. The old 0.5 m assumption is a target only; use the regenerated full routed path, including the 0.1 mΩ shunt, for voltage drop."
       },
       {
         "id": "shared-load",
@@ -1260,6 +1261,35 @@
         "nominalVolts": null,
         "protection": "Negotiated USB port limits",
         "note": "Capped round panel extensions: QIANRENON USB-C 0.3 m with seller-rated PD 60 W at 20 V/3 A, and owner-approved BATIGE USB-A 0.3 m. Both are staged. Coolgear remains the 60 W USB-C / 18 W USB-A source limit. Verify received PD/QC pass-through, voltage drop, heating and cap/gasket fit; shelter charging connections."
+      },
+      {
+        "id": "monitor-supply",
+        "circuit": "BMV factory fused positive sense/power",
+        "connectionIds": [
+          "monitor-positive-fuse",
+          "monitor-fuse-shunt"
+        ],
+        "designCurrentA": 0.004,
+        "gauge": "Factory fused lead",
+        "areaMm2": null,
+        "oneWayMetres": null,
+        "nominalVolts": 12,
+        "protection": "Included 1 A slow-blow fuse at positive source",
+        "note": "<4 mA with backlight off, not maximum backlit draw. Supplied 2 m positive lead; verify termination and carry exact fuse spares."
+      },
+      {
+        "id": "monitor-display",
+        "circuit": "Shunt ↔ BMV-700 display",
+        "connectionIds": [
+          "monitor-rj12"
+        ],
+        "designCurrentA": null,
+        "gauge": "Factory RJ12 cable",
+        "areaMm2": null,
+        "oneWayMetres": null,
+        "nominalVolts": 12,
+        "protection": "Included monitor harness",
+        "note": "Supplied 10 m RJ12 power/data cable; retain connector pinout. No Bluetooth or separate display supply."
       }
     ],
     "sources": [
@@ -1359,6 +1389,22 @@
       {
         "title": "MUYI PV assembly kit · same Fiji ASIN",
         "url": "https://www.amazon.com/dp/B0BWRHMHY9"
+      },
+      {
+        "title": "Renogy RNG-100DB-H flexible-panel ratings and 15 A maximum series fuse",
+        "url": "https://www.renogy.com/products/100-watt-12-volt-flexible-monocrystalline-solar-panel"
+      },
+      {
+        "title": "YDDECW 8 AWG seller specifications",
+        "url": "https://www.amazon.com/dp/B0DTP4ZRSV"
+      },
+      {
+        "title": "YDDECW 12 AWG seller specifications",
+        "url": "https://www.amazon.com/dp/B0DTPDQ656"
+      },
+      {
+        "title": "Klein 11061 manufacturer cut/strip range",
+        "url": "https://data.kleintools.com/sites/all/product_assets/documents/brochures/klein/kleintools_datasheet_11061.pdf"
       }
     ],
     "assumptions": {
@@ -1382,30 +1428,61 @@
       "loadAreaMm2": 3.31
     },
     "holds": [
+      "Routed cut allowances give 4.79% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give 3.72%, before terminal/contact resistance. Shorten the actual layout or revise the conductor plan before fabrication; older compact-route assumptions are not a pass.",
+      "Klein 11061 is rated for 12–22 AWG stranded; 8 AWG battery and 10 AWG PV/controller cutting/stripping capability remains unresolved. The 10 AWG rating applies to solid wire.",
+      "Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream.",
       "The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection.",
       "Actual battery model, prospective fault current, charge limits, terminals, terminal guarding, retention and equal-length routes remain unknown. Parallel-battery bus-end backfeed requires clearing-energy coordination or additional protection.",
-      "Received Ancor 8/12 AWG and iGreely 10 AWG PV/controller wire markings, hot/bundled ampacity and terminal compatibility must be verified. Exact 8 AWG battery-post lugs and a matched crimper remain unpriced.",
+      "Received YDDECW 8 AWG / YDDECW 12 AWG and iGreely 10 AWG PV/controller wire markings, hot/bundled ampacity and terminal compatibility must be verified. Exact 8 AWG battery-post lugs and a matched crimper remain unpriced.",
       "USB-A BATIGE extension lacks published current/QC and formal IP ratings. Confirm ≥3 A and required charging profiles/sealing, or choose a documented alternative. USB-C PD pass-through must be checked in both orientations. Ports are sheltered while charging; close caps when unused.",
       "Owner reference is ANIMACYN B0CT5LRGRF, 13.8 × 9.7 × 5.9 inches, previously used for Pasana Group / PNG. Do not stage the enclosure. Hand-assemble components and establish actual dimensions before ordering it; no internal-fit drawing is released. Preserve controller mounting/cooling requirements during that assembly.",
       "Use the reference box’s ventilation; no separate QWORK vent. Check temperature with the final cover closed at full charge and load. The approximate 25–35 W heat allowance is not a guarantee of thermal fit; maintain ≤40°C MPPT ambient for full output.",
       "Separate guarded battery-breaker housings, finish labels/guards, Starlink entry/activation, roof attachment and bonding remain pending. No completed-system IP rating is established.",
-      "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. One contiguous ten-block DK10N rail uses supplied single end cover and two stops. No box order until owner assembly. DIHOOL protection remains held."
+      "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. One contiguous ten-block DK10N rail uses supplied single end cover and two stops. No box order until owner assembly. DIHOOL protection remains held.",
+      "Owner intends to use the enclosure’s plastic mounting grid and has removed the Tynulox sheet from procurement. Victron requires a nonflammable substrate for the SmartSolar: plastic-grid compliance has not been established. Resolve a suitable controller mounting surface before installation; no replacement plate is staged or priced."
     ],
     "lengthBasis": {
       "batteryToBus": "Owner: less than 2 m one way; calculate at the conservative 2 m boundary for each battery.",
       "controllerToConverters": "Owner: entirely inside the junction box and under 1 m total one way; allocate 0.25 m shared plus 0.75 m branch.",
       "busToController": "Retained conservative 0.5 m one-way assumption; not a separate owner measurement.",
       "procurement": "Owner directed Amazon staging for DC cable; outdoor PV cable remains local."
-    }
+    },
+    "pvExpansionReview": "Retain the 10 A PV disconnect for the present 3S string (4.84 A Imp / 5.16 A Isc; 8.06 A sizing basis). A 20 A device can only be considered as an adequately rated service disconnect where string overcurrent protection is not required, not as 20 A protection for panels with a 15 A maximum series fuse rating. The MPPT battery-charge rating is not the PV breaker sizing basis. Future parallel strings require a new protection review, total array Isc below the 20 A controller limit and cold Voc below 100 V; the controller still caps battery charging at 20 A (290 W nominal PV at 12 V). Cart remains 10 A."
   },
   "cartStaging": {
     "checkedDate": "2026-09-15",
-    "status": "P9 authenticated cart reconciled · unified DK10N kit staged",
-    "distinctAsins": 21,
-    "retailQuantity": 24,
-    "itemSubtotalUsd": 907.15,
-    "notes": "One DK10N kit replaces both Blue Sea buses, DK4N and the now-unneeded 22–10 AWG eyelet assortment. Enclosure deferred, three DIHOOL devices held. Nothing purchased.",
+    "status": "P15 authenticated cart reconciled · YDDECW for both wire gauges",
+    "distinctAsins": 20,
+    "retailQuantity": 23,
+    "itemSubtotalUsd": 859.23,
+    "notes": [
+      "No purchases or checkout.",
+      "Both 8 AWG and 12 AWG wire packs are YDDECW, each 25 ft red plus 25 ft black.",
+      "12 AWG pack $25.99; September 17 delivery shown, subject to checkout timing.",
+      "All active ASINs, quantities and unit prices reconcile."
+    ],
     "items": [
+      {
+        "asin": "B00CXKOEQ6",
+        "quantity": 1,
+        "unitPriceUsd": 22.96,
+        "totalUsd": 22.96,
+        "url": "https://www.amazon.com/dp/B00CXKOEQ6"
+      },
+      {
+        "asin": "B0BC1VH4XB",
+        "quantity": 1,
+        "unitPriceUsd": 3.99,
+        "totalUsd": 3.99,
+        "url": "https://www.amazon.com/dp/B0BC1VH4XB"
+      },
+      {
+        "asin": "B0DTP4ZRSV",
+        "quantity": 1,
+        "unitPriceUsd": 49.99,
+        "totalUsd": 49.99,
+        "url": "https://www.amazon.com/dp/B0DTP4ZRSV"
+      },
       {
         "asin": "B07TN3RLYZ",
         "quantity": 1,
@@ -1421,25 +1498,11 @@
         "url": "https://www.amazon.com/dp/B09BYGJGTB"
       },
       {
-        "asin": "B0BWRHMHY9",
-        "quantity": 1,
-        "unitPriceUsd": 22.99,
-        "totalUsd": 22.99,
-        "url": "https://www.amazon.com/dp/B0BWRHMHY9"
-      },
-      {
         "asin": "B0BDWSQ49P",
         "quantity": 1,
         "unitPriceUsd": 7.9,
         "totalUsd": 7.9,
         "url": "https://www.amazon.com/dp/B0BDWSQ49P"
-      },
-      {
-        "asin": "B0000302X1",
-        "quantity": 1,
-        "unitPriceUsd": 29.98,
-        "totalUsd": 29.98,
-        "url": "https://www.amazon.com/dp/B0000302X1"
       },
       {
         "asin": "B0GKSWYXSK",
@@ -1463,11 +1526,11 @@
         "url": "https://www.amazon.com/dp/B0FP1CSTVX"
       },
       {
-        "asin": "B075NPQHQK",
+        "asin": "B07RFQGVXG",
         "quantity": 1,
-        "unitPriceUsd": 96.31,
-        "totalUsd": 96.31,
-        "url": "https://www.amazon.com/dp/B075NPQHQK"
+        "unitPriceUsd": 5.99,
+        "totalUsd": 5.99,
+        "url": "https://www.amazon.com/dp/B07RFQGVXG"
       },
       {
         "asin": "B084P83JNW",
@@ -1477,25 +1540,25 @@
         "url": "https://www.amazon.com/dp/B084P83JNW"
       },
       {
-        "asin": "B0DRVMXWHX",
+        "asin": "B0DTPDQ656",
         "quantity": 1,
-        "unitPriceUsd": 15.99,
-        "totalUsd": 15.99,
-        "url": "https://www.amazon.com/dp/B0DRVMXWHX"
+        "unitPriceUsd": 25.99,
+        "totalUsd": 25.99,
+        "url": "https://www.amazon.com/dp/B0DTPDQ656"
       },
       {
-        "asin": "B0CW9SWVC5",
+        "asin": "B0886JKJMD",
         "quantity": 1,
-        "unitPriceUsd": 11.99,
-        "totalUsd": 11.99,
-        "url": "https://www.amazon.com/dp/B0CW9SWVC5"
+        "unitPriceUsd": 28.49,
+        "totalUsd": 28.49,
+        "url": "https://www.amazon.com/dp/B0886JKJMD"
       },
       {
-        "asin": "B000NV2DJC",
+        "asin": "B0BWRHMHY9",
         "quantity": 1,
-        "unitPriceUsd": 11.63,
-        "totalUsd": 11.63,
-        "url": "https://www.amazon.com/dp/B000NV2DJC"
+        "unitPriceUsd": 22.99,
+        "totalUsd": 22.99,
+        "url": "https://www.amazon.com/dp/B0BWRHMHY9"
       },
       {
         "asin": "B07KFCGFYF",
@@ -1505,6 +1568,13 @@
         "url": "https://www.amazon.com/dp/B07KFCGFYF"
       },
       {
+        "asin": "B0DRJ9CDNG",
+        "quantity": 1,
+        "unitPriceUsd": 14.99,
+        "totalUsd": 14.99,
+        "url": "https://www.amazon.com/dp/B0DRJ9CDNG"
+      },
+      {
         "asin": "B07BMNGVV3",
         "quantity": 3,
         "unitPriceUsd": 115.99,
@@ -1512,11 +1582,11 @@
         "url": "https://www.amazon.com/dp/B07BMNGVV3"
       },
       {
-        "asin": "B07RFQGVXG",
+        "asin": "B075NPQHQK",
         "quantity": 1,
-        "unitPriceUsd": 5.99,
-        "totalUsd": 5.99,
-        "url": "https://www.amazon.com/dp/B07RFQGVXG"
+        "unitPriceUsd": 79.04,
+        "totalUsd": 79.04,
+        "url": "https://www.amazon.com/dp/B075NPQHQK"
       },
       {
         "asin": "B09H4W5HSW",
@@ -1526,37 +1596,16 @@
         "url": "https://www.amazon.com/dp/B09H4W5HSW"
       },
       {
-        "asin": "B000NV0HR2",
+        "asin": "B0DRVMXWHX",
         "quantity": 1,
-        "unitPriceUsd": 47.51,
-        "totalUsd": 47.51,
-        "url": "https://www.amazon.com/dp/B000NV0HR2"
-      },
-      {
-        "asin": "B0DRJ9CDNG",
-        "quantity": 1,
-        "unitPriceUsd": 14.99,
-        "totalUsd": 14.99,
-        "url": "https://www.amazon.com/dp/B0DRJ9CDNG"
-      },
-      {
-        "asin": "B01N8S1CQU",
-        "quantity": 1,
-        "unitPriceUsd": 11.63,
-        "totalUsd": 11.63,
-        "url": "https://www.amazon.com/dp/B01N8S1CQU"
-      },
-      {
-        "asin": "B000NUYIHS",
-        "quantity": 1,
-        "unitPriceUsd": 49.33,
-        "totalUsd": 49.33,
-        "url": "https://www.amazon.com/dp/B000NUYIHS"
+        "unitPriceUsd": 15.99,
+        "totalUsd": 15.99,
+        "url": "https://www.amazon.com/dp/B0DRVMXWHX"
       }
     ],
     "pendingChanges": {
       "reviewedDate": "2026-09-15",
-      "reason": "One DK10N kit replaces both Blue Sea buses, DK4N and the now-unneeded 22–10 AWG eyelet assortment. Enclosure deferred, three DIHOOL devices held. Nothing purchased.",
+      "reason": "P15 complete: NOVINO removed and YDDECW 12 AWG 25 ft pair staged per owner.",
       "remove": [],
       "add": [],
       "heldBomIds": [
@@ -1576,295 +1625,311 @@
         "B000NV0D08",
         "B000OTJ89Q",
         "B06XPZG45K",
-        "B09YCRNGP9"
+        "B09YCRNGP9",
+        "B0CW9SWVC5",
+        "B09TPBKVMW",
+        "B0000302X1",
+        "B000NV2DJC",
+        "B000NV0HR2",
+        "B01N8S1CQU",
+        "B000NUYIHS",
+        "B0FCLPKH31"
       ],
       "proposedBomIds": []
     },
     "recheck": {
-      "checkedAt": "2026-09-15T10:54:09.893Z",
-      "status": "P9 authenticated cart reconciled · unified DK10N kit staged",
-      "pricesVerified": 21,
+      "checkedAt": "2026-09-16T02:27:17.965Z",
+      "status": "P15 authenticated cart reconciled · YDDECW for both wire gauges",
+      "pricesVerified": 20,
       "pricePendingAsins": [],
-      "changes": [],
+      "changes": {
+        "checkedAt": "2026-09-16T02:27:17.965Z",
+        "remove": [
+          {
+            "asin": "B0FCLPKH31",
+            "quantity": 1,
+            "unitPriceUsd": 19.99,
+            "totalUsd": 19.99,
+            "url": "https://www.amazon.com/dp/B0FCLPKH31"
+          }
+        ],
+        "add": [
+          {
+            "asin": "B0DTPDQ656",
+            "quantity": 1,
+            "unitPriceUsd": 25.99,
+            "totalUsd": 25.99,
+            "url": "https://www.amazon.com/dp/B0DTPDQ656"
+          }
+        ],
+        "note": "Owner requested YDDECW for both gauges; 12 AWG pack increases from 15 to 25 ft per colour for $6 more."
+      },
       "offers": [
         {
+          "asin": "B00CXKOEQ6",
+          "newUnitPriceUsd": 22.96,
+          "availability": "In Stock",
+          "priceStatus": "Authenticated cart verified"
+        },
+        {
+          "asin": "B0BC1VH4XB",
+          "newUnitPriceUsd": 3.99,
+          "availability": "In Stock",
+          "priceStatus": "Authenticated cart verified"
+        },
+        {
+          "asin": "B0DTP4ZRSV",
+          "newUnitPriceUsd": 49.99,
+          "availability": "In Stock",
+          "priceStatus": "Authenticated cart verified"
+        },
+        {
           "asin": "B07TN3RLYZ",
-          "url": "https://www.amazon.com/dp/B07TN3RLYZ",
           "newUnitPriceUsd": 35.99,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
         },
         {
           "asin": "B09BYGJGTB",
-          "url": "https://www.amazon.com/dp/B09BYGJGTB",
           "newUnitPriceUsd": 35.99,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
-        },
-        {
-          "asin": "B0BWRHMHY9",
-          "url": "https://www.amazon.com/dp/B0BWRHMHY9",
-          "newUnitPriceUsd": 22.99,
-          "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
         },
         {
           "asin": "B0BDWSQ49P",
-          "url": "https://www.amazon.com/dp/B0BDWSQ49P",
           "newUnitPriceUsd": 7.9,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
-        },
-        {
-          "asin": "B0000302X1",
-          "url": "https://www.amazon.com/dp/B0000302X1",
-          "newUnitPriceUsd": 29.98,
-          "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
         },
         {
           "asin": "B0GKSWYXSK",
-          "url": "https://www.amazon.com/dp/B0GKSWYXSK",
           "newUnitPriceUsd": 16.99,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
         },
         {
           "asin": "B0D4JQ9LHZ",
-          "url": "https://www.amazon.com/dp/B0D4JQ9LHZ",
           "newUnitPriceUsd": 14.12,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
         },
         {
           "asin": "B0FP1CSTVX",
-          "url": "https://www.amazon.com/dp/B0FP1CSTVX",
           "newUnitPriceUsd": 39.89,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
-        },
-        {
-          "asin": "B075NPQHQK",
-          "url": "https://www.amazon.com/dp/B075NPQHQK",
-          "newUnitPriceUsd": 96.31,
-          "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
-        },
-        {
-          "asin": "B084P83JNW",
-          "url": "https://www.amazon.com/dp/B084P83JNW",
-          "newUnitPriceUsd": 57.99,
-          "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
-        },
-        {
-          "asin": "B0DRVMXWHX",
-          "url": "https://www.amazon.com/dp/B0DRVMXWHX",
-          "newUnitPriceUsd": 15.99,
-          "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
-        },
-        {
-          "asin": "B0CW9SWVC5",
-          "url": "https://www.amazon.com/dp/B0CW9SWVC5",
-          "newUnitPriceUsd": 11.99,
-          "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
-        },
-        {
-          "asin": "B000NV2DJC",
-          "url": "https://www.amazon.com/dp/B000NV2DJC",
-          "newUnitPriceUsd": 11.63,
-          "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
-        },
-        {
-          "asin": "B07KFCGFYF",
-          "url": "https://www.amazon.com/dp/B07KFCGFYF",
-          "newUnitPriceUsd": 13.99,
-          "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
-        },
-        {
-          "asin": "B07BMNGVV3",
-          "url": "https://www.amazon.com/dp/B07BMNGVV3",
-          "newUnitPriceUsd": 115.99,
-          "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
         },
         {
           "asin": "B07RFQGVXG",
-          "url": "https://www.amazon.com/dp/B07RFQGVXG",
           "newUnitPriceUsd": 5.99,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
         },
         {
-          "asin": "B09H4W5HSW",
-          "url": "https://www.amazon.com/dp/B09H4W5HSW",
-          "newUnitPriceUsd": 8.99,
+          "asin": "B084P83JNW",
+          "newUnitPriceUsd": 57.99,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
         },
         {
-          "asin": "B000NV0HR2",
-          "url": "https://www.amazon.com/dp/B000NV0HR2",
-          "newUnitPriceUsd": 47.51,
+          "asin": "B0DTPDQ656",
+          "newUnitPriceUsd": 25.99,
+          "availability": "Only 4 left in stock - order soon.",
+          "priceStatus": "Authenticated cart verified"
+        },
+        {
+          "asin": "B0886JKJMD",
+          "newUnitPriceUsd": 28.49,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
+        },
+        {
+          "asin": "B0BWRHMHY9",
+          "newUnitPriceUsd": 22.99,
+          "availability": "In Stock",
+          "priceStatus": "Authenticated cart verified"
+        },
+        {
+          "asin": "B07KFCGFYF",
+          "newUnitPriceUsd": 13.99,
+          "availability": "In Stock",
+          "priceStatus": "Authenticated cart verified"
         },
         {
           "asin": "B0DRJ9CDNG",
-          "url": "https://www.amazon.com/dp/B0DRJ9CDNG",
           "newUnitPriceUsd": 14.99,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
         },
         {
-          "asin": "B01N8S1CQU",
-          "url": "https://www.amazon.com/dp/B01N8S1CQU",
-          "newUnitPriceUsd": 11.63,
+          "asin": "B07BMNGVV3",
+          "newUnitPriceUsd": 115.99,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
         },
         {
-          "asin": "B000NUYIHS",
-          "url": "https://www.amazon.com/dp/B000NUYIHS",
-          "newUnitPriceUsd": 49.33,
+          "asin": "B075NPQHQK",
+          "newUnitPriceUsd": 79.04,
           "availability": "In Stock",
-          "priceStatus": "Authenticated cart price verified"
+          "priceStatus": "Authenticated cart verified"
+        },
+        {
+          "asin": "B09H4W5HSW",
+          "newUnitPriceUsd": 8.99,
+          "availability": "In Stock",
+          "priceStatus": "Authenticated cart verified"
+        },
+        {
+          "asin": "B0DRVMXWHX",
+          "newUnitPriceUsd": 15.99,
+          "availability": "Only 10 left in stock - order soon.",
+          "priceStatus": "Authenticated cart verified"
         }
       ],
       "targetItems": [
         {
+          "asin": "B00CXKOEQ6",
+          "quantity": 1,
+          "unitPriceUsd": 22.96,
+          "totalUsd": 22.96,
+          "url": "https://www.amazon.com/dp/B00CXKOEQ6"
+        },
+        {
+          "asin": "B0BC1VH4XB",
+          "quantity": 1,
+          "unitPriceUsd": 3.99,
+          "totalUsd": 3.99,
+          "url": "https://www.amazon.com/dp/B0BC1VH4XB"
+        },
+        {
+          "asin": "B0DTP4ZRSV",
+          "quantity": 1,
+          "unitPriceUsd": 49.99,
+          "totalUsd": 49.99,
+          "url": "https://www.amazon.com/dp/B0DTP4ZRSV"
+        },
+        {
           "asin": "B07TN3RLYZ",
           "quantity": 1,
           "unitPriceUsd": 35.99,
-          "priceVerified": true
+          "totalUsd": 35.99,
+          "url": "https://www.amazon.com/dp/B07TN3RLYZ"
         },
         {
           "asin": "B09BYGJGTB",
           "quantity": 1,
           "unitPriceUsd": 35.99,
-          "priceVerified": true
-        },
-        {
-          "asin": "B0BWRHMHY9",
-          "quantity": 1,
-          "unitPriceUsd": 22.99,
-          "priceVerified": true
+          "totalUsd": 35.99,
+          "url": "https://www.amazon.com/dp/B09BYGJGTB"
         },
         {
           "asin": "B0BDWSQ49P",
           "quantity": 1,
           "unitPriceUsd": 7.9,
-          "priceVerified": true
-        },
-        {
-          "asin": "B0000302X1",
-          "quantity": 1,
-          "unitPriceUsd": 29.98,
-          "priceVerified": true
+          "totalUsd": 7.9,
+          "url": "https://www.amazon.com/dp/B0BDWSQ49P"
         },
         {
           "asin": "B0GKSWYXSK",
           "quantity": 1,
           "unitPriceUsd": 16.99,
-          "priceVerified": true
+          "totalUsd": 16.99,
+          "url": "https://www.amazon.com/dp/B0GKSWYXSK"
         },
         {
           "asin": "B0D4JQ9LHZ",
           "quantity": 1,
           "unitPriceUsd": 14.12,
-          "priceVerified": true
+          "totalUsd": 14.12,
+          "url": "https://www.amazon.com/dp/B0D4JQ9LHZ"
         },
         {
           "asin": "B0FP1CSTVX",
           "quantity": 1,
           "unitPriceUsd": 39.89,
-          "priceVerified": true
-        },
-        {
-          "asin": "B075NPQHQK",
-          "quantity": 1,
-          "unitPriceUsd": 96.31,
-          "priceVerified": true
-        },
-        {
-          "asin": "B084P83JNW",
-          "quantity": 1,
-          "unitPriceUsd": 57.99,
-          "priceVerified": true
-        },
-        {
-          "asin": "B0DRVMXWHX",
-          "quantity": 1,
-          "unitPriceUsd": 15.99,
-          "priceVerified": true
-        },
-        {
-          "asin": "B0CW9SWVC5",
-          "quantity": 1,
-          "unitPriceUsd": 11.99,
-          "priceVerified": true
-        },
-        {
-          "asin": "B000NV2DJC",
-          "quantity": 1,
-          "unitPriceUsd": 11.63,
-          "priceVerified": true
-        },
-        {
-          "asin": "B07KFCGFYF",
-          "quantity": 1,
-          "unitPriceUsd": 13.99,
-          "priceVerified": true
-        },
-        {
-          "asin": "B07BMNGVV3",
-          "quantity": 3,
-          "unitPriceUsd": 115.99,
-          "priceVerified": true
+          "totalUsd": 39.89,
+          "url": "https://www.amazon.com/dp/B0FP1CSTVX"
         },
         {
           "asin": "B07RFQGVXG",
           "quantity": 1,
           "unitPriceUsd": 5.99,
-          "priceVerified": true
+          "totalUsd": 5.99,
+          "url": "https://www.amazon.com/dp/B07RFQGVXG"
         },
         {
-          "asin": "B09H4W5HSW",
-          "quantity": 2,
-          "unitPriceUsd": 8.99,
-          "priceVerified": true
-        },
-        {
-          "asin": "B000NV0HR2",
+          "asin": "B084P83JNW",
           "quantity": 1,
-          "unitPriceUsd": 47.51,
-          "priceVerified": true
+          "unitPriceUsd": 57.99,
+          "totalUsd": 57.99,
+          "url": "https://www.amazon.com/dp/B084P83JNW"
+        },
+        {
+          "asin": "B0DTPDQ656",
+          "quantity": 1,
+          "unitPriceUsd": 25.99,
+          "totalUsd": 25.99,
+          "url": "https://www.amazon.com/dp/B0DTPDQ656"
+        },
+        {
+          "asin": "B0886JKJMD",
+          "quantity": 1,
+          "unitPriceUsd": 28.49,
+          "totalUsd": 28.49,
+          "url": "https://www.amazon.com/dp/B0886JKJMD"
+        },
+        {
+          "asin": "B0BWRHMHY9",
+          "quantity": 1,
+          "unitPriceUsd": 22.99,
+          "totalUsd": 22.99,
+          "url": "https://www.amazon.com/dp/B0BWRHMHY9"
+        },
+        {
+          "asin": "B07KFCGFYF",
+          "quantity": 1,
+          "unitPriceUsd": 13.99,
+          "totalUsd": 13.99,
+          "url": "https://www.amazon.com/dp/B07KFCGFYF"
         },
         {
           "asin": "B0DRJ9CDNG",
           "quantity": 1,
           "unitPriceUsd": 14.99,
-          "priceVerified": true
+          "totalUsd": 14.99,
+          "url": "https://www.amazon.com/dp/B0DRJ9CDNG"
         },
         {
-          "asin": "B01N8S1CQU",
-          "quantity": 1,
-          "unitPriceUsd": 11.63,
-          "priceVerified": true
+          "asin": "B07BMNGVV3",
+          "quantity": 3,
+          "unitPriceUsd": 115.99,
+          "totalUsd": 347.97,
+          "url": "https://www.amazon.com/dp/B07BMNGVV3"
         },
         {
-          "asin": "B000NUYIHS",
+          "asin": "B075NPQHQK",
           "quantity": 1,
-          "unitPriceUsd": 49.33,
-          "priceVerified": true
+          "unitPriceUsd": 79.04,
+          "totalUsd": 79.04,
+          "url": "https://www.amazon.com/dp/B075NPQHQK"
+        },
+        {
+          "asin": "B09H4W5HSW",
+          "quantity": 2,
+          "unitPriceUsd": 8.99,
+          "totalUsd": 17.98,
+          "url": "https://www.amazon.com/dp/B09H4W5HSW"
+        },
+        {
+          "asin": "B0DRVMXWHX",
+          "quantity": 1,
+          "unitPriceUsd": 15.99,
+          "totalUsd": 15.99,
+          "url": "https://www.amazon.com/dp/B0DRVMXWHX"
         }
       ],
-      "targetItemSubtotalUsd": 907.15,
-      "targetRetailQuantity": 24
+      "targetItemSubtotalUsd": 859.23,
+      "targetRetailQuantity": 23
     },
     "history": [
       {
@@ -2591,57 +2656,26 @@
       }
     ],
     "completedChanges": {
-      "checkedAt": "2026-09-15T10:54:09.893Z",
+      "checkedAt": "2026-09-16T02:27:17.965Z",
       "remove": [
         {
-          "asin": "B06XPZG45K",
+          "asin": "B0FCLPKH31",
           "quantity": 1,
-          "unitPriceUsd": 24.99,
-          "totalUsd": 24.99,
-          "url": "https://www.amazon.com/dp/B06XPZG45K"
-        },
-        {
-          "asin": "B09YCRNGP9",
-          "quantity": 1,
-          "unitPriceUsd": 26.99,
-          "totalUsd": 26.99,
-          "url": "https://www.amazon.com/dp/B09YCRNGP9"
-        },
-        {
-          "asin": "B000OTJ89Q",
-          "quantity": 2,
-          "unitPriceUsd": 20.87,
-          "totalUsd": 41.74,
-          "url": "https://www.amazon.com/dp/B000OTJ89Q"
+          "unitPriceUsd": 19.99,
+          "totalUsd": 19.99,
+          "url": "https://www.amazon.com/dp/B0FCLPKH31"
         }
       ],
       "add": [
         {
-          "asin": "B07TN3RLYZ",
+          "asin": "B0DTPDQ656",
           "quantity": 1,
-          "unitPriceUsd": 35.99,
-          "totalUsd": 35.99,
-          "url": "https://www.amazon.com/dp/B07TN3RLYZ"
+          "unitPriceUsd": 25.99,
+          "totalUsd": 25.99,
+          "url": "https://www.amazon.com/dp/B0DTPDQ656"
         }
       ],
-      "verifiedAbsentAsins": [
-        "B0FK52G5S2",
-        "B09N3RK1KG",
-        "B07C62ST1P",
-        "B085S9XQ2M",
-        "B0CPN65CDG",
-        "B092QL1745",
-        "B0CT5LRGRF",
-        "B0B253VBWG",
-        "B00DGXVO80",
-        "B0CJ5QF4Z2",
-        "B01MEE7KL3",
-        "B000NV2CV6",
-        "B000NV0D08",
-        "B000OTJ89Q",
-        "B06XPZG45K",
-        "B09YCRNGP9"
-      ]
+      "note": "Owner requested YDDECW for both gauges; 12 AWG pack increases from 15 to 25 ft per colour for $6 more."
     },
     "reconciliationHistory": [
       {
@@ -2824,6 +2858,853 @@
           "B000NV2CV6",
           "B000NV0D08"
         ]
+      },
+      {
+        "checkedAt": "2026-09-15T10:54:09.893Z",
+        "status": "P9 authenticated cart reconciled · unified DK10N kit staged",
+        "itemSubtotalUsd": 907.15,
+        "items": [
+          {
+            "asin": "B07TN3RLYZ",
+            "quantity": 1,
+            "unitPriceUsd": 35.99,
+            "totalUsd": 35.99,
+            "url": "https://www.amazon.com/dp/B07TN3RLYZ"
+          },
+          {
+            "asin": "B09BYGJGTB",
+            "quantity": 1,
+            "unitPriceUsd": 35.99,
+            "totalUsd": 35.99,
+            "url": "https://www.amazon.com/dp/B09BYGJGTB"
+          },
+          {
+            "asin": "B0BWRHMHY9",
+            "quantity": 1,
+            "unitPriceUsd": 22.99,
+            "totalUsd": 22.99,
+            "url": "https://www.amazon.com/dp/B0BWRHMHY9"
+          },
+          {
+            "asin": "B0BDWSQ49P",
+            "quantity": 1,
+            "unitPriceUsd": 7.9,
+            "totalUsd": 7.9,
+            "url": "https://www.amazon.com/dp/B0BDWSQ49P"
+          },
+          {
+            "asin": "B0000302X1",
+            "quantity": 1,
+            "unitPriceUsd": 29.98,
+            "totalUsd": 29.98,
+            "url": "https://www.amazon.com/dp/B0000302X1"
+          },
+          {
+            "asin": "B0GKSWYXSK",
+            "quantity": 1,
+            "unitPriceUsd": 16.99,
+            "totalUsd": 16.99,
+            "url": "https://www.amazon.com/dp/B0GKSWYXSK"
+          },
+          {
+            "asin": "B0D4JQ9LHZ",
+            "quantity": 1,
+            "unitPriceUsd": 14.12,
+            "totalUsd": 14.12,
+            "url": "https://www.amazon.com/dp/B0D4JQ9LHZ"
+          },
+          {
+            "asin": "B0FP1CSTVX",
+            "quantity": 1,
+            "unitPriceUsd": 39.89,
+            "totalUsd": 39.89,
+            "url": "https://www.amazon.com/dp/B0FP1CSTVX"
+          },
+          {
+            "asin": "B075NPQHQK",
+            "quantity": 1,
+            "unitPriceUsd": 96.31,
+            "totalUsd": 96.31,
+            "url": "https://www.amazon.com/dp/B075NPQHQK"
+          },
+          {
+            "asin": "B084P83JNW",
+            "quantity": 1,
+            "unitPriceUsd": 57.99,
+            "totalUsd": 57.99,
+            "url": "https://www.amazon.com/dp/B084P83JNW"
+          },
+          {
+            "asin": "B0DRVMXWHX",
+            "quantity": 1,
+            "unitPriceUsd": 15.99,
+            "totalUsd": 15.99,
+            "url": "https://www.amazon.com/dp/B0DRVMXWHX"
+          },
+          {
+            "asin": "B0CW9SWVC5",
+            "quantity": 1,
+            "unitPriceUsd": 11.99,
+            "totalUsd": 11.99,
+            "url": "https://www.amazon.com/dp/B0CW9SWVC5"
+          },
+          {
+            "asin": "B000NV2DJC",
+            "quantity": 1,
+            "unitPriceUsd": 11.63,
+            "totalUsd": 11.63,
+            "url": "https://www.amazon.com/dp/B000NV2DJC"
+          },
+          {
+            "asin": "B07KFCGFYF",
+            "quantity": 1,
+            "unitPriceUsd": 13.99,
+            "totalUsd": 13.99,
+            "url": "https://www.amazon.com/dp/B07KFCGFYF"
+          },
+          {
+            "asin": "B07BMNGVV3",
+            "quantity": 3,
+            "unitPriceUsd": 115.99,
+            "totalUsd": 347.97,
+            "url": "https://www.amazon.com/dp/B07BMNGVV3"
+          },
+          {
+            "asin": "B07RFQGVXG",
+            "quantity": 1,
+            "unitPriceUsd": 5.99,
+            "totalUsd": 5.99,
+            "url": "https://www.amazon.com/dp/B07RFQGVXG"
+          },
+          {
+            "asin": "B09H4W5HSW",
+            "quantity": 2,
+            "unitPriceUsd": 8.99,
+            "totalUsd": 17.98,
+            "url": "https://www.amazon.com/dp/B09H4W5HSW"
+          },
+          {
+            "asin": "B000NV0HR2",
+            "quantity": 1,
+            "unitPriceUsd": 47.51,
+            "totalUsd": 47.51,
+            "url": "https://www.amazon.com/dp/B000NV0HR2"
+          },
+          {
+            "asin": "B0DRJ9CDNG",
+            "quantity": 1,
+            "unitPriceUsd": 14.99,
+            "totalUsd": 14.99,
+            "url": "https://www.amazon.com/dp/B0DRJ9CDNG"
+          },
+          {
+            "asin": "B01N8S1CQU",
+            "quantity": 1,
+            "unitPriceUsd": 11.63,
+            "totalUsd": 11.63,
+            "url": "https://www.amazon.com/dp/B01N8S1CQU"
+          },
+          {
+            "asin": "B000NUYIHS",
+            "quantity": 1,
+            "unitPriceUsd": 49.33,
+            "totalUsd": 49.33,
+            "url": "https://www.amazon.com/dp/B000NUYIHS"
+          }
+        ],
+        "completedChanges": {
+          "checkedAt": "2026-09-15T10:54:09.893Z",
+          "remove": [
+            {
+              "asin": "B06XPZG45K",
+              "quantity": 1,
+              "unitPriceUsd": 24.99,
+              "totalUsd": 24.99,
+              "url": "https://www.amazon.com/dp/B06XPZG45K"
+            },
+            {
+              "asin": "B09YCRNGP9",
+              "quantity": 1,
+              "unitPriceUsd": 26.99,
+              "totalUsd": 26.99,
+              "url": "https://www.amazon.com/dp/B09YCRNGP9"
+            },
+            {
+              "asin": "B000OTJ89Q",
+              "quantity": 2,
+              "unitPriceUsd": 20.87,
+              "totalUsd": 41.74,
+              "url": "https://www.amazon.com/dp/B000OTJ89Q"
+            }
+          ],
+          "add": [
+            {
+              "asin": "B07TN3RLYZ",
+              "quantity": 1,
+              "unitPriceUsd": 35.99,
+              "totalUsd": 35.99,
+              "url": "https://www.amazon.com/dp/B07TN3RLYZ"
+            }
+          ],
+          "verifiedAbsentAsins": [
+            "B0FK52G5S2",
+            "B09N3RK1KG",
+            "B07C62ST1P",
+            "B085S9XQ2M",
+            "B0CPN65CDG",
+            "B092QL1745",
+            "B0CT5LRGRF",
+            "B0B253VBWG",
+            "B00DGXVO80",
+            "B0CJ5QF4Z2",
+            "B01MEE7KL3",
+            "B000NV2CV6",
+            "B000NV0D08",
+            "B000OTJ89Q",
+            "B06XPZG45K",
+            "B09YCRNGP9"
+          ]
+        }
+      },
+      {
+        "checkedAt": "2026-09-16T00:33:49.760Z",
+        "status": "P10 authenticated cart reconciled · mini ties and metric step-drill set staged",
+        "itemSubtotalUsd": 912.8,
+        "items": [
+          {
+            "asin": "B0BC1VH4XB",
+            "quantity": 1,
+            "unitPriceUsd": 3.99,
+            "totalUsd": 3.99,
+            "url": "https://www.amazon.com/dp/B0BC1VH4XB"
+          },
+          {
+            "asin": "B09TPBKVMW",
+            "quantity": 1,
+            "unitPriceUsd": 9.99,
+            "totalUsd": 9.99,
+            "url": "https://www.amazon.com/dp/B09TPBKVMW"
+          },
+          {
+            "asin": "B07TN3RLYZ",
+            "quantity": 1,
+            "unitPriceUsd": 35.99,
+            "totalUsd": 35.99,
+            "url": "https://www.amazon.com/dp/B07TN3RLYZ"
+          },
+          {
+            "asin": "B09BYGJGTB",
+            "quantity": 1,
+            "unitPriceUsd": 35.99,
+            "totalUsd": 35.99,
+            "url": "https://www.amazon.com/dp/B09BYGJGTB"
+          },
+          {
+            "asin": "B0BWRHMHY9",
+            "quantity": 1,
+            "unitPriceUsd": 22.99,
+            "totalUsd": 22.99,
+            "url": "https://www.amazon.com/dp/B0BWRHMHY9"
+          },
+          {
+            "asin": "B0BDWSQ49P",
+            "quantity": 1,
+            "unitPriceUsd": 7.9,
+            "totalUsd": 7.9,
+            "url": "https://www.amazon.com/dp/B0BDWSQ49P"
+          },
+          {
+            "asin": "B0CW9SWVC5",
+            "quantity": 1,
+            "unitPriceUsd": 11.99,
+            "totalUsd": 11.99,
+            "url": "https://www.amazon.com/dp/B0CW9SWVC5"
+          },
+          {
+            "asin": "B0000302X1",
+            "quantity": 1,
+            "unitPriceUsd": 29.98,
+            "totalUsd": 29.98,
+            "url": "https://www.amazon.com/dp/B0000302X1"
+          },
+          {
+            "asin": "B0GKSWYXSK",
+            "quantity": 1,
+            "unitPriceUsd": 16.99,
+            "totalUsd": 16.99,
+            "url": "https://www.amazon.com/dp/B0GKSWYXSK"
+          },
+          {
+            "asin": "B0D4JQ9LHZ",
+            "quantity": 1,
+            "unitPriceUsd": 14.12,
+            "totalUsd": 14.12,
+            "url": "https://www.amazon.com/dp/B0D4JQ9LHZ"
+          },
+          {
+            "asin": "B0FP1CSTVX",
+            "quantity": 1,
+            "unitPriceUsd": 39.89,
+            "totalUsd": 39.89,
+            "url": "https://www.amazon.com/dp/B0FP1CSTVX"
+          },
+          {
+            "asin": "B075NPQHQK",
+            "quantity": 1,
+            "unitPriceUsd": 79.04,
+            "totalUsd": 79.04,
+            "url": "https://www.amazon.com/dp/B075NPQHQK"
+          },
+          {
+            "asin": "B07RFQGVXG",
+            "quantity": 1,
+            "unitPriceUsd": 5.99,
+            "totalUsd": 5.99,
+            "url": "https://www.amazon.com/dp/B07RFQGVXG"
+          },
+          {
+            "asin": "B084P83JNW",
+            "quantity": 1,
+            "unitPriceUsd": 57.99,
+            "totalUsd": 57.99,
+            "url": "https://www.amazon.com/dp/B084P83JNW"
+          },
+          {
+            "asin": "B000NV2DJC",
+            "quantity": 1,
+            "unitPriceUsd": 11.63,
+            "totalUsd": 11.63,
+            "url": "https://www.amazon.com/dp/B000NV2DJC"
+          },
+          {
+            "asin": "B07KFCGFYF",
+            "quantity": 1,
+            "unitPriceUsd": 13.99,
+            "totalUsd": 13.99,
+            "url": "https://www.amazon.com/dp/B07KFCGFYF"
+          },
+          {
+            "asin": "B0DRJ9CDNG",
+            "quantity": 1,
+            "unitPriceUsd": 14.99,
+            "totalUsd": 14.99,
+            "url": "https://www.amazon.com/dp/B0DRJ9CDNG"
+          },
+          {
+            "asin": "B07BMNGVV3",
+            "quantity": 3,
+            "unitPriceUsd": 115.99,
+            "totalUsd": 347.97,
+            "url": "https://www.amazon.com/dp/B07BMNGVV3"
+          },
+          {
+            "asin": "B000NV0HR2",
+            "quantity": 1,
+            "unitPriceUsd": 47.51,
+            "totalUsd": 47.51,
+            "url": "https://www.amazon.com/dp/B000NV0HR2"
+          },
+          {
+            "asin": "B0DRVMXWHX",
+            "quantity": 1,
+            "unitPriceUsd": 15.99,
+            "totalUsd": 15.99,
+            "url": "https://www.amazon.com/dp/B0DRVMXWHX"
+          },
+          {
+            "asin": "B09H4W5HSW",
+            "quantity": 2,
+            "unitPriceUsd": 8.99,
+            "totalUsd": 17.98,
+            "url": "https://www.amazon.com/dp/B09H4W5HSW"
+          },
+          {
+            "asin": "B01N8S1CQU",
+            "quantity": 1,
+            "unitPriceUsd": 11.63,
+            "totalUsd": 11.63,
+            "url": "https://www.amazon.com/dp/B01N8S1CQU"
+          },
+          {
+            "asin": "B000NUYIHS",
+            "quantity": 1,
+            "unitPriceUsd": 58.27,
+            "totalUsd": 58.27,
+            "url": "https://www.amazon.com/dp/B000NUYIHS"
+          }
+        ],
+        "completedChanges": {
+          "checkedAt": "2026-09-16T00:33:49.760Z",
+          "remove": [],
+          "add": [
+            {
+              "asin": "B0BC1VH4XB",
+              "quantity": 1,
+              "unitPriceUsd": 3.99,
+              "totalUsd": 3.99,
+              "url": "https://www.amazon.com/dp/B0BC1VH4XB"
+            },
+            {
+              "asin": "B09TPBKVMW",
+              "quantity": 1,
+              "unitPriceUsd": 9.99,
+              "totalUsd": 9.99,
+              "url": "https://www.amazon.com/dp/B09TPBKVMW"
+            }
+          ],
+          "priceChanges": [
+            {
+              "asin": "B075NPQHQK",
+              "bomId": "polowat-mppt",
+              "oldUnitPriceUsd": 96.31,
+              "newUnitPriceUsd": 79.04
+            },
+            {
+              "asin": "B000NUYIHS",
+              "bomId": "polowat-battery-cable-red",
+              "oldUnitPriceUsd": 49.33,
+              "newUnitPriceUsd": 58.27
+            }
+          ],
+          "verifiedAbsentAsins": [
+            "B0FK52G5S2",
+            "B09N3RK1KG",
+            "B07C62ST1P",
+            "B085S9XQ2M",
+            "B0CPN65CDG",
+            "B092QL1745",
+            "B0CT5LRGRF",
+            "B0B253VBWG",
+            "B00DGXVO80",
+            "B0CJ5QF4Z2",
+            "B01MEE7KL3",
+            "B000NV2CV6",
+            "B000NV0D08",
+            "B000OTJ89Q",
+            "B06XPZG45K",
+            "B09YCRNGP9"
+          ]
+        }
+      },
+      {
+        "checkedAt": "2026-09-16T00:45:11.426Z",
+        "status": "P11 authenticated cart reconciled · sheet removed and drill upgraded",
+        "itemSubtotalUsd": 919.31,
+        "items": [
+          {
+            "asin": "B0BC1VH4XB",
+            "quantity": 1,
+            "unitPriceUsd": 3.99,
+            "totalUsd": 3.99,
+            "url": "https://www.amazon.com/dp/B0BC1VH4XB"
+          },
+          {
+            "asin": "B0886JKJMD",
+            "quantity": 1,
+            "unitPriceUsd": 28.49,
+            "totalUsd": 28.49,
+            "url": "https://www.amazon.com/dp/B0886JKJMD"
+          },
+          {
+            "asin": "B07TN3RLYZ",
+            "quantity": 1,
+            "unitPriceUsd": 35.99,
+            "totalUsd": 35.99,
+            "url": "https://www.amazon.com/dp/B07TN3RLYZ"
+          },
+          {
+            "asin": "B09BYGJGTB",
+            "quantity": 1,
+            "unitPriceUsd": 35.99,
+            "totalUsd": 35.99,
+            "url": "https://www.amazon.com/dp/B09BYGJGTB"
+          },
+          {
+            "asin": "B0BWRHMHY9",
+            "quantity": 1,
+            "unitPriceUsd": 22.99,
+            "totalUsd": 22.99,
+            "url": "https://www.amazon.com/dp/B0BWRHMHY9"
+          },
+          {
+            "asin": "B0BDWSQ49P",
+            "quantity": 1,
+            "unitPriceUsd": 7.9,
+            "totalUsd": 7.9,
+            "url": "https://www.amazon.com/dp/B0BDWSQ49P"
+          },
+          {
+            "asin": "B0000302X1",
+            "quantity": 1,
+            "unitPriceUsd": 29.98,
+            "totalUsd": 29.98,
+            "url": "https://www.amazon.com/dp/B0000302X1"
+          },
+          {
+            "asin": "B0GKSWYXSK",
+            "quantity": 1,
+            "unitPriceUsd": 16.99,
+            "totalUsd": 16.99,
+            "url": "https://www.amazon.com/dp/B0GKSWYXSK"
+          },
+          {
+            "asin": "B0D4JQ9LHZ",
+            "quantity": 1,
+            "unitPriceUsd": 14.12,
+            "totalUsd": 14.12,
+            "url": "https://www.amazon.com/dp/B0D4JQ9LHZ"
+          },
+          {
+            "asin": "B0FP1CSTVX",
+            "quantity": 1,
+            "unitPriceUsd": 39.89,
+            "totalUsd": 39.89,
+            "url": "https://www.amazon.com/dp/B0FP1CSTVX"
+          },
+          {
+            "asin": "B075NPQHQK",
+            "quantity": 1,
+            "unitPriceUsd": 79.04,
+            "totalUsd": 79.04,
+            "url": "https://www.amazon.com/dp/B075NPQHQK"
+          },
+          {
+            "asin": "B07RFQGVXG",
+            "quantity": 1,
+            "unitPriceUsd": 5.99,
+            "totalUsd": 5.99,
+            "url": "https://www.amazon.com/dp/B07RFQGVXG"
+          },
+          {
+            "asin": "B084P83JNW",
+            "quantity": 1,
+            "unitPriceUsd": 57.99,
+            "totalUsd": 57.99,
+            "url": "https://www.amazon.com/dp/B084P83JNW"
+          },
+          {
+            "asin": "B000NV2DJC",
+            "quantity": 1,
+            "unitPriceUsd": 11.63,
+            "totalUsd": 11.63,
+            "url": "https://www.amazon.com/dp/B000NV2DJC"
+          },
+          {
+            "asin": "B07KFCGFYF",
+            "quantity": 1,
+            "unitPriceUsd": 13.99,
+            "totalUsd": 13.99,
+            "url": "https://www.amazon.com/dp/B07KFCGFYF"
+          },
+          {
+            "asin": "B0DRJ9CDNG",
+            "quantity": 1,
+            "unitPriceUsd": 14.99,
+            "totalUsd": 14.99,
+            "url": "https://www.amazon.com/dp/B0DRJ9CDNG"
+          },
+          {
+            "asin": "B07BMNGVV3",
+            "quantity": 3,
+            "unitPriceUsd": 115.99,
+            "totalUsd": 347.97,
+            "url": "https://www.amazon.com/dp/B07BMNGVV3"
+          },
+          {
+            "asin": "B000NV0HR2",
+            "quantity": 1,
+            "unitPriceUsd": 47.51,
+            "totalUsd": 47.51,
+            "url": "https://www.amazon.com/dp/B000NV0HR2"
+          },
+          {
+            "asin": "B0DRVMXWHX",
+            "quantity": 1,
+            "unitPriceUsd": 15.99,
+            "totalUsd": 15.99,
+            "url": "https://www.amazon.com/dp/B0DRVMXWHX"
+          },
+          {
+            "asin": "B09H4W5HSW",
+            "quantity": 2,
+            "unitPriceUsd": 8.99,
+            "totalUsd": 17.98,
+            "url": "https://www.amazon.com/dp/B09H4W5HSW"
+          },
+          {
+            "asin": "B01N8S1CQU",
+            "quantity": 1,
+            "unitPriceUsd": 11.63,
+            "totalUsd": 11.63,
+            "url": "https://www.amazon.com/dp/B01N8S1CQU"
+          },
+          {
+            "asin": "B000NUYIHS",
+            "quantity": 1,
+            "unitPriceUsd": 58.27,
+            "totalUsd": 58.27,
+            "url": "https://www.amazon.com/dp/B000NUYIHS"
+          }
+        ],
+        "completedChanges": {
+          "checkedAt": "2026-09-16T00:45:11.426Z",
+          "remove": [
+            {
+              "asin": "B09TPBKVMW",
+              "quantity": 1,
+              "unitPriceUsd": 9.99,
+              "totalUsd": 9.99,
+              "url": "https://www.amazon.com/dp/B09TPBKVMW"
+            },
+            {
+              "asin": "B0CW9SWVC5",
+              "quantity": 1,
+              "unitPriceUsd": 11.99,
+              "totalUsd": 11.99,
+              "url": "https://www.amazon.com/dp/B0CW9SWVC5"
+            }
+          ],
+          "add": [
+            {
+              "asin": "B0886JKJMD",
+              "quantity": 1,
+              "unitPriceUsd": 28.49,
+              "totalUsd": 28.49,
+              "url": "https://www.amazon.com/dp/B0886JKJMD"
+            }
+          ],
+          "verifiedAbsentAsins": [
+            "B0FK52G5S2",
+            "B09N3RK1KG",
+            "B07C62ST1P",
+            "B085S9XQ2M",
+            "B0CPN65CDG",
+            "B092QL1745",
+            "B0CT5LRGRF",
+            "B0B253VBWG",
+            "B00DGXVO80",
+            "B0CJ5QF4Z2",
+            "B01MEE7KL3",
+            "B000NV2CV6",
+            "B000NV0D08",
+            "B000OTJ89Q",
+            "B06XPZG45K",
+            "B09YCRNGP9",
+            "B0CW9SWVC5",
+            "B09TPBKVMW"
+          ]
+        }
+      },
+      {
+        "checkedAt": "2026-09-16T02:17:59.425Z",
+        "status": "P14 authenticated cart reconciled · all Ancor replaced; owner-selected stripper retained",
+        "itemSubtotalUsd": 853.23,
+        "items": [
+          {
+            "asin": "B00CXKOEQ6",
+            "quantity": 1,
+            "unitPriceUsd": 22.96,
+            "totalUsd": 22.96,
+            "url": "https://www.amazon.com/dp/B00CXKOEQ6"
+          },
+          {
+            "asin": "B0BC1VH4XB",
+            "quantity": 1,
+            "unitPriceUsd": 3.99,
+            "totalUsd": 3.99,
+            "url": "https://www.amazon.com/dp/B0BC1VH4XB"
+          },
+          {
+            "asin": "B0DTP4ZRSV",
+            "quantity": 1,
+            "unitPriceUsd": 49.99,
+            "totalUsd": 49.99,
+            "url": "https://www.amazon.com/dp/B0DTP4ZRSV"
+          },
+          {
+            "asin": "B07TN3RLYZ",
+            "quantity": 1,
+            "unitPriceUsd": 35.99,
+            "totalUsd": 35.99,
+            "url": "https://www.amazon.com/dp/B07TN3RLYZ"
+          },
+          {
+            "asin": "B09BYGJGTB",
+            "quantity": 1,
+            "unitPriceUsd": 35.99,
+            "totalUsd": 35.99,
+            "url": "https://www.amazon.com/dp/B09BYGJGTB"
+          },
+          {
+            "asin": "B0BDWSQ49P",
+            "quantity": 1,
+            "unitPriceUsd": 7.9,
+            "totalUsd": 7.9,
+            "url": "https://www.amazon.com/dp/B0BDWSQ49P"
+          },
+          {
+            "asin": "B0GKSWYXSK",
+            "quantity": 1,
+            "unitPriceUsd": 16.99,
+            "totalUsd": 16.99,
+            "url": "https://www.amazon.com/dp/B0GKSWYXSK"
+          },
+          {
+            "asin": "B0D4JQ9LHZ",
+            "quantity": 1,
+            "unitPriceUsd": 14.12,
+            "totalUsd": 14.12,
+            "url": "https://www.amazon.com/dp/B0D4JQ9LHZ"
+          },
+          {
+            "asin": "B0FP1CSTVX",
+            "quantity": 1,
+            "unitPriceUsd": 39.89,
+            "totalUsd": 39.89,
+            "url": "https://www.amazon.com/dp/B0FP1CSTVX"
+          },
+          {
+            "asin": "B07RFQGVXG",
+            "quantity": 1,
+            "unitPriceUsd": 5.99,
+            "totalUsd": 5.99,
+            "url": "https://www.amazon.com/dp/B07RFQGVXG"
+          },
+          {
+            "asin": "B084P83JNW",
+            "quantity": 1,
+            "unitPriceUsd": 57.99,
+            "totalUsd": 57.99,
+            "url": "https://www.amazon.com/dp/B084P83JNW"
+          },
+          {
+            "asin": "B0FCLPKH31",
+            "quantity": 1,
+            "unitPriceUsd": 19.99,
+            "totalUsd": 19.99,
+            "url": "https://www.amazon.com/dp/B0FCLPKH31"
+          },
+          {
+            "asin": "B0886JKJMD",
+            "quantity": 1,
+            "unitPriceUsd": 28.49,
+            "totalUsd": 28.49,
+            "url": "https://www.amazon.com/dp/B0886JKJMD"
+          },
+          {
+            "asin": "B0BWRHMHY9",
+            "quantity": 1,
+            "unitPriceUsd": 22.99,
+            "totalUsd": 22.99,
+            "url": "https://www.amazon.com/dp/B0BWRHMHY9"
+          },
+          {
+            "asin": "B07KFCGFYF",
+            "quantity": 1,
+            "unitPriceUsd": 13.99,
+            "totalUsd": 13.99,
+            "url": "https://www.amazon.com/dp/B07KFCGFYF"
+          },
+          {
+            "asin": "B0DRJ9CDNG",
+            "quantity": 1,
+            "unitPriceUsd": 14.99,
+            "totalUsd": 14.99,
+            "url": "https://www.amazon.com/dp/B0DRJ9CDNG"
+          },
+          {
+            "asin": "B07BMNGVV3",
+            "quantity": 3,
+            "unitPriceUsd": 115.99,
+            "totalUsd": 347.97,
+            "url": "https://www.amazon.com/dp/B07BMNGVV3"
+          },
+          {
+            "asin": "B075NPQHQK",
+            "quantity": 1,
+            "unitPriceUsd": 79.04,
+            "totalUsd": 79.04,
+            "url": "https://www.amazon.com/dp/B075NPQHQK"
+          },
+          {
+            "asin": "B09H4W5HSW",
+            "quantity": 2,
+            "unitPriceUsd": 8.99,
+            "totalUsd": 17.98,
+            "url": "https://www.amazon.com/dp/B09H4W5HSW"
+          },
+          {
+            "asin": "B0DRVMXWHX",
+            "quantity": 1,
+            "unitPriceUsd": 15.99,
+            "totalUsd": 15.99,
+            "url": "https://www.amazon.com/dp/B0DRVMXWHX"
+          }
+        ],
+        "completedChanges": {
+          "checkedAt": "2026-09-16T02:17:59.425Z",
+          "remove": [
+            {
+              "asin": "B0000302X1",
+              "quantity": 1,
+              "unitPriceUsd": 29.98,
+              "totalUsd": 29.98,
+              "url": "https://www.amazon.com/dp/B0000302X1"
+            },
+            {
+              "asin": "B000NV2DJC",
+              "quantity": 1,
+              "unitPriceUsd": 11.63,
+              "totalUsd": 11.63,
+              "url": "https://www.amazon.com/dp/B000NV2DJC"
+            },
+            {
+              "asin": "B000NV0HR2",
+              "quantity": 1,
+              "unitPriceUsd": 47.51,
+              "totalUsd": 47.51,
+              "url": "https://www.amazon.com/dp/B000NV0HR2"
+            },
+            {
+              "asin": "B01N8S1CQU",
+              "quantity": 1,
+              "unitPriceUsd": 11.63,
+              "totalUsd": 11.63,
+              "url": "https://www.amazon.com/dp/B01N8S1CQU"
+            },
+            {
+              "asin": "B000NUYIHS",
+              "quantity": 1,
+              "unitPriceUsd": 58.27,
+              "totalUsd": 58.27,
+              "url": "https://www.amazon.com/dp/B000NUYIHS"
+            }
+          ],
+          "add": [
+            {
+              "asin": "B00CXKOEQ6",
+              "quantity": 1,
+              "unitPriceUsd": 22.96,
+              "totalUsd": 22.96,
+              "url": "https://www.amazon.com/dp/B00CXKOEQ6"
+            },
+            {
+              "asin": "B0DTP4ZRSV",
+              "quantity": 1,
+              "unitPriceUsd": 49.99,
+              "totalUsd": 49.99,
+              "url": "https://www.amazon.com/dp/B0DTP4ZRSV"
+            },
+            {
+              "asin": "B0FCLPKH31",
+              "quantity": 1,
+              "unitPriceUsd": 19.99,
+              "totalUsd": 19.99,
+              "url": "https://www.amazon.com/dp/B0FCLPKH31"
+            }
+          ],
+          "note": "Owner had already replaced the cutter with Klein 11061; agent replaced four Ancor coils with two paired packs."
+        }
       }
     ],
     "supersededBomRows": [
@@ -3094,6 +3975,262 @@
         "cartCheckedDate": "2026-09-15",
         "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Staged only; tax/delivery excluded.",
         "specUrl": "https://www.dinkle.com/en/terminal/DK4N"
+      },
+      {
+        "id": "polowat-controller-backplate",
+        "category": "Mounting",
+        "item": "Tynulox 6061 aluminum sheet · 1/16 × 8 × 12 in · controller mounting subplate",
+        "qty": 1,
+        "unit": "ea",
+        "unitCost": 11.99,
+        "currency": "USD",
+        "totalUsd": 11.99,
+        "location": "Import to Chuuk",
+        "procurement": "Staged 15 Sep · not purchased",
+        "priority": "Must · site fit pending",
+        "description": "The cart’s Tynulox 1PCS 6061 Aluminum Sheet Metal (ASIN B0CW9SWVC5) is this BOM item, not an extra purchase. One nominal 203.2 × 304.8 × 1.59 mm aluminum sheet provides a nonflammable surface for controller bench assembly and can be cut to the measured final layout. Remove protective film; cut/drill/deburr before fitting electronics. It is not a claim that the uncut sheet fits the deferred reference box and is not an engineered heatsink. Retain controller cooling clearance; final standoffs, fasteners, bonding and corrosion isolation follow bench assembly.",
+        "accountingGroup": "system",
+        "unitWeightKg": 0.26,
+        "totalWeightKg": 0.26,
+        "weightBasis": "estimate",
+        "weightNote": "Planning shipping mass; weigh received hardware.",
+        "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+        "cartQuantity": 1,
+        "productUrl": "https://www.amazon.com/dp/B0CW9SWVC5",
+        "amazonAsin": "B0CW9SWVC5",
+        "priceCheckedDate": "2026-09-15",
+        "specUrl": "https://www.amazon.com/dp/B0CW9SWVC5",
+        "offerCheckedDate": "2026-09-15",
+        "cartCheckedDate": "2026-09-15"
+      },
+      {
+        "id": "polowat-step-drill",
+        "category": "Wiring & assembly",
+        "item": "Tworider metric step-drill set · 4–12 / 4–20 / 4–32 mm · 3 pieces",
+        "qty": 1,
+        "unit": "set",
+        "unitCost": 9.99,
+        "totalUsd": 9.99,
+        "currency": "USD",
+        "location": "Import to Chuuk",
+        "procurement": "Staged 15 Sep · not purchased",
+        "priority": "Must",
+        "description": "HSS titanium-coated step-drill set with 1/4-inch hex shanks and storage pouch, listed for plastic and sheet material under 5 mm. Sizes are in 2 mm increments; use for roughing gland and panel-port holes in the empty ABS enclosure after the final layout is measured. Measure each received fitting and use its cutout specification, not cable diameter. The USB-C listing calls for 18.5 mm: stop at the 18 mm step, then finish to fit with a round file or reamer (not included); do not jump to 20 mm. PG gland cutouts may also fall between steps. Use rotary drill mode, support the wall and deburr; remove electronics before drilling. Exact hole positions remain deferred with the box order.",
+        "accountingGroup": "system",
+        "unitWeightKg": 0.25,
+        "totalWeightKg": 0.25,
+        "weightBasis": "estimate",
+        "weightNote": "Provisional complete retail-pack mass; weigh received package.",
+        "productUrl": "https://www.amazon.com/dp/B09TPBKVMW",
+        "specUrl": "https://www.amazon.com/dp/B09TPBKVMW",
+        "amazonAsin": "B09TPBKVMW",
+        "cartQuantity": 1,
+        "priceCheckedDate": "2026-09-15",
+        "offerCheckedDate": "2026-09-15",
+        "cartCheckedDate": "2026-09-15",
+        "priceBasis": "Authenticated Amazon cart price verified 15 Sep 2026 (Los Angeles date). Staged only; tax/delivery excluded."
+      },
+      {
+        "id": "polowat-wire-cutter",
+        "item": "Klein Tools 63050 copper/aluminum cable cutter",
+        "qty": 1,
+        "unit": "pack",
+        "unitCost": 29.98,
+        "totalUsd": 29.98,
+        "currency": "USD",
+        "location": "Import to Chuuk",
+        "procurement": "Staged 15 Sep · not purchased",
+        "priority": "Must",
+        "description": "Manufacturer capacity: up to 2/0 AWG soft copper and 4/0 aluminum, easily covering the selected 8, 10 and 12 AWG DC cable and 10 AWG PV copper. Cutting tool only; not a stripper or terminal crimper. Use on de-energized conductors; not for steel/ACSR.",
+        "accountingGroup": "system",
+        "unitWeightKg": 0.408,
+        "totalWeightKg": 0.408,
+        "weightBasis": "estimate",
+        "weightNote": "Provisional retail-pack shipping mass; includes spares, verify received package.",
+        "productUrl": "https://www.amazon.com/dp/B0000302X1",
+        "amazonAsin": "B0000302X1",
+        "cartQuantity": 1,
+        "priceCheckedDate": "2026-09-15",
+        "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+        "specUrl": "https://www.kleintools.com/catalog/standard-cable-cutters/cable-cutter",
+        "offerCheckedDate": "2026-09-15",
+        "cartCheckedDate": "2026-09-15"
+      },
+      {
+        "id": "polowat-battery-cable-red",
+        "category": "Wiring",
+        "item": "Ancor 111502 · 8 AWG tinned copper · red · 25 ft",
+        "qty": 1,
+        "unit": "coil",
+        "unitCost": 58.27,
+        "totalUsd": 58.27,
+        "currency": "USD",
+        "location": "Import to Chuuk",
+        "procurement": "Staged 15 Sep · not purchased",
+        "priority": "Must · verify received markings",
+        "description": "Positive battery branches, each ≤2 m one way including breaker segments. Retail coil: 25 ft / 7.6200 conductor-metres. About 4 m positive cuts for two batteries; 3.62 m reserve. Needs exact 8 AWG rings; the removed 22–10 AWG assortment cannot terminate this wire. UL 1426 marine copper, 600 V, 105°C dry / 75°C wet; fine Type 3 stranding. Use the manufacturer part number and received label: Amazon ancillary length/gauge/weight fields contain errors. Ampacity must meet the circuit requirement after installation derating.",
+        "accountingGroup": "system",
+        "productUrl": "https://www.amazon.com/dp/B000NUYIHS",
+        "specUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
+        "amazonAsin": "B000NUYIHS",
+        "cartQuantity": 1,
+        "priceCheckedDate": "2026-09-15",
+        "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+        "unitWeightKg": 0.975,
+        "totalWeightKg": 0.975,
+        "weightBasis": "manufacturer linear-weight estimate",
+        "weightSourceUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
+        "weightNote": "Calculated from manufacturer conductor mass per 1000 ft; coil packaging extra. Amazon weight fields are inconsistent.",
+        "wireStock": {
+          "awg": 8,
+          "areaMm2": 8.37,
+          "color": "red",
+          "lengthFt": 25,
+          "lengthM": 7.62
+        },
+        "offerCheckedDate": "2026-09-15",
+        "cartCheckedDate": "2026-09-15"
+      },
+      {
+        "id": "polowat-battery-cable-black",
+        "category": "Wiring",
+        "item": "Ancor 111002 · 8 AWG tinned copper · black · 25 ft",
+        "qty": 1,
+        "unit": "coil",
+        "unitCost": 47.51,
+        "totalUsd": 47.51,
+        "currency": "USD",
+        "location": "Import to Chuuk",
+        "procurement": "Staged 15 Sep · not purchased",
+        "priority": "Must · verify received markings",
+        "description": "Negative battery branches, each ≤2 m one way. Retail coil: 25 ft / 7.6200 conductor-metres. About 4 m negative cuts for two batteries; 3.62 m reserve. Match corresponding A/B cable resistances; no 8 AWG wire enters the controller or LOAD distribution. UL 1426 marine copper, 600 V, 105°C dry / 75°C wet; fine Type 3 stranding. Use the manufacturer part number and received label: Amazon ancillary length/gauge/weight fields contain errors. Ampacity must meet the circuit requirement after installation derating.",
+        "accountingGroup": "system",
+        "productUrl": "https://www.amazon.com/dp/B000NV0HR2",
+        "specUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
+        "amazonAsin": "B000NV0HR2",
+        "cartQuantity": 1,
+        "priceCheckedDate": "2026-09-15",
+        "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+        "unitWeightKg": 0.975,
+        "totalWeightKg": 0.975,
+        "weightBasis": "manufacturer linear-weight estimate",
+        "weightSourceUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
+        "weightNote": "Calculated from manufacturer conductor mass per 1000 ft; coil packaging extra. Amazon weight fields are inconsistent.",
+        "wireStock": {
+          "awg": 8,
+          "areaMm2": 8.37,
+          "color": "black",
+          "lengthFt": 25,
+          "lengthM": 7.62
+        },
+        "offerCheckedDate": "2026-09-15",
+        "cartCheckedDate": "2026-09-15"
+      },
+      {
+        "id": "polowat-load-cable",
+        "category": "Wiring",
+        "item": "Ancor 186803 · 12 AWG tinned copper · red · 12 ft",
+        "qty": 1,
+        "unit": "coil",
+        "unitCost": 11.63,
+        "totalUsd": 11.63,
+        "currency": "USD",
+        "location": "Import to Chuuk",
+        "procurement": "Staged 15 Sep · not purchased",
+        "priority": "Must · verify received markings",
+        "description": "Shared LOAD+ and positive converter branches inside the junction box. Retail coil: 12 ft / 3.6576 conductor-metres. 12 AWG is 3.31 mm², replacing the prior metric 4 mm² selection after recalculation. Plan ≤0.25 m shared plus ≤0.75 m downstream per branch: 1.75 m positive cuts, 1.9076 m reserve. Require ≥25 A derated ampacity before branch breakers; keep shared pair out of large wire bundles. UL 1426 marine copper, 600 V, 105°C dry / 75°C wet; fine Type 3 stranding. Use the manufacturer part number and received label: Amazon ancillary length/gauge/weight fields contain errors. Ampacity must meet the circuit requirement after installation derating.",
+        "accountingGroup": "system",
+        "productUrl": "https://www.amazon.com/dp/B000NV2DJC",
+        "specUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
+        "amazonAsin": "B000NV2DJC",
+        "cartQuantity": 1,
+        "priceCheckedDate": "2026-09-15",
+        "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+        "unitWeightKg": 0.168,
+        "totalWeightKg": 0.168,
+        "weightBasis": "manufacturer linear-weight estimate",
+        "weightSourceUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
+        "weightNote": "Calculated from manufacturer conductor mass per 1000 ft; coil packaging extra. Amazon weight fields are inconsistent.",
+        "wireStock": {
+          "awg": 12,
+          "areaMm2": 3.31,
+          "color": "red",
+          "lengthFt": 12,
+          "lengthM": 3.6576
+        },
+        "offerCheckedDate": "2026-09-15",
+        "cartCheckedDate": "2026-09-15"
+      },
+      {
+        "id": "polowat-load-cable-black",
+        "category": "Wiring",
+        "item": "Ancor 186003 · 12 AWG tinned copper · black · 12 ft",
+        "qty": 1,
+        "unit": "coil",
+        "unitCost": 11.63,
+        "totalUsd": 11.63,
+        "currency": "USD",
+        "location": "Import to Chuuk",
+        "procurement": "Staged 15 Sep · not purchased",
+        "priority": "Must · verify received markings",
+        "description": "Shared LOAD− and both converter returns inside the junction box. Retail coil: 12 ft / 3.6576 conductor-metres. About 1.75 m negative cuts and 1.9076 m reserve. 12 AWG fits the selected Dinkle DK10N clamps as bare stranded wire. Verify Phoenix plug/factory input lead capacity; no LOAD− bypass to battery negative. UL 1426 marine copper, 600 V, 105°C dry / 75°C wet; fine Type 3 stranding. Use the manufacturer part number and received label: Amazon ancillary length/gauge/weight fields contain errors. Ampacity must meet the circuit requirement after installation derating.",
+        "accountingGroup": "system",
+        "productUrl": "https://www.amazon.com/dp/B01N8S1CQU",
+        "specUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
+        "amazonAsin": "B01N8S1CQU",
+        "cartQuantity": 1,
+        "priceCheckedDate": "2026-09-15",
+        "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. New items; tax, delivery and conditional discounts excluded. Staged only, not purchased.",
+        "unitWeightKg": 0.168,
+        "totalWeightKg": 0.168,
+        "weightBasis": "manufacturer linear-weight estimate",
+        "weightSourceUrl": "https://www.navico.com/content/dam/navico/integrated-sites/ancor/resources/products/wire-and-cable/SPEC_Ancor_Primary_Wire_Battery_Cable_TCHDAT.pdf",
+        "weightNote": "Calculated from manufacturer conductor mass per 1000 ft; coil packaging extra. Amazon weight fields are inconsistent.",
+        "wireStock": {
+          "awg": 12,
+          "areaMm2": 3.31,
+          "color": "black",
+          "lengthFt": 12,
+          "lengthM": 3.6576
+        },
+        "offerCheckedDate": "2026-09-15",
+        "cartCheckedDate": "2026-09-15"
+      },
+      {
+        "id": "polowat-load-cable",
+        "category": "Wiring",
+        "item": "NOVINO 12 AWG tinned copper · 15 ft red + 15 ft black",
+        "qty": 1,
+        "unit": "paired pack",
+        "unitCost": 19.99,
+        "totalUsd": 19.99,
+        "currency": "USD",
+        "location": "Import to Chuuk",
+        "procurement": "Staged 15 Sep · not purchased",
+        "priority": "Must · verify received markings",
+        "description": "Replaces both Ancor 12 ft coils with one paired pack, 4.572 m per colour. Routed purchase allowance: 2.95 m red / 1.85 m black including slack and termination allowance; leaves 1.622 m red / 2.722 m black. The 10 ft-per-colour alternative leaves only about 0.10 m beyond red cuts, so this pack preserves room for final assembly. Seller specifies tinned stranded copper, 600 V, 105°C dry / 75°C wet and UL 1426 conformity; certification and actual wire size remain received checks, not independently verified. Require ≥25 A derated ampacity ahead of branch breakers and verified converter terminal preparation. LOAD− stays separate from BATT−.",
+        "accountingGroup": "system",
+        "productUrl": "https://www.amazon.com/dp/B0FCLPKH31",
+        "specUrl": "https://www.amazon.com/dp/B0FCLPKH31",
+        "amazonAsin": "B0FCLPKH31",
+        "cartQuantity": 1,
+        "priceCheckedDate": "2026-09-15",
+        "priceBasis": "Authenticated Amazon cart unit price verified 15 Sep 2026. Item-only price; delivery estimates are not guarantees. Nothing purchased.",
+        "unitWeightKg": 0.42,
+        "totalWeightKg": 0.42,
+        "weightBasis": "provisional same-gauge linear-mass estimate",
+        "weightSourceUrl": "https://www.amazon.com/dp/B0FCLPKH31",
+        "weightNote": "Estimated from prior 12 AWG linear mass scaled to 30 conductor-feet; weigh received pack.",
+        "wireStock": {
+          "awg": 12,
+          "areaMm2": 3.31,
+          "color": "red-and-black",
+          "lengthFt": 15,
+          "lengthM": 4.572
+        },
+        "offerCheckedDate": "2026-09-15",
+        "cartCheckedDate": "2026-09-15",
+        "deliveryEstimate": "September 17, 2026, shown for the current Amazon destination at review; checkout timing can change it."
       }
     ]
   },
@@ -3183,22 +4320,22 @@
   "cableStockPlan": {
     "bomId": "polowat-pv-cable",
     "lengthPerColourM": 9.144,
-    "pvRoutePerColourM": 8,
-    "controllerRoutePerColourM": 0.5,
-    "reservePerColourM": 0.644,
+    "pvRoutePerColourM": 6.95,
+    "controllerRoutePerColourM": 1.95,
+    "reservePerColourM": 0.244,
     "areaForCalculationsMm2": 5.26,
     "claimedAreaMm2": 6,
     "strandCalculatedAreaMm2": 5.3587,
-    "note": "One combined stock purchase, never double-count controller offcuts. Planning route caps require measurement before cutting; PV allocation includes both sides of its disconnect."
+    "note": "Shared 9.144 m per colour: reserve 1.95 m for controller/shunt, 6.95 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site."
   },
   "assemblyReview": {
-    "revision": "P9",
+    "revision": "P16",
     "route": "/polowat/model",
     "report": "/polowat-assembly-review.md",
     "status": "dimensioned-study-not-fabrication-release",
     "referenceBoxFits": false,
     "workspaceMm": [
-      325,
+      475,
       424
     ],
     "terminalKitBomId": "polowat-din-distribution",
@@ -3208,7 +4345,7 @@
     "suppliedJumpers": 8,
     "endCovers": 1,
     "railStops": 2,
-    "railArrangement": "One contiguous ten-block assembly; four electrically separate groups, no jumper across group boundaries.",
+    "railArrangement": "Eight installed blocks on one contiguous rail; four electrically isolated bridged pairs. Two unused kit blocks remain off the mounted assembly as spares.",
     "unresolved": [
       "Reference enclosure fit",
       "Received converter terminals/dimensions",
@@ -3216,7 +4353,46 @@
       "DIHOOL protection coordination",
       "Battery-post lug size",
       "PV mating connector family",
-      "Full-load thermal and weather validation"
-    ]
+      "Full-load thermal and weather validation",
+      "Battery-to-box leads upstream of in-box isolators require source-end fault protection",
+      "Cable cut allowances exceed earlier compact voltage-drop assumptions; shorten final layout or revise conductor design"
+    ],
+    "spareBlocksMounted": false
+  },
+  "ownerSuppliedTools": [
+    {
+      "item": "Hand files",
+      "status": "Already owned",
+      "use": "Finish and deburr intermediate gland and USB port cutout diameters; not a new purchase."
+    }
+  ],
+  "routedCablePlan": {
+    "report": "/polowat-cable-routing.md",
+    "artifact": "data/generated/polowat-cable-routes.json",
+    "basis": "10 mm 3D A* service-zone grid; exclusive grid cells; exact terminal and entry stubs; piecewise-linear rendered centreline lengths",
+    "allowance": "15% plus 50 mm per end, each cut rounded up to 50 mm; corresponding parallel battery branch lengths equalized",
+    "totals": {
+      "8 AWG DC": {
+        "red": 6.6,
+        "black": 4.9
+      },
+      "10 AWG PV": {
+        "red": 5,
+        "black": 6.45
+      },
+      "10 AWG DC": {
+        "red": 1.4,
+        "black": 1.95
+      },
+      "12 AWG DC": {
+        "red": 2.95,
+        "black": 1.85
+      }
+    },
+    "modelBatteryControllerDropV": 0.439,
+    "allowanceBatteryControllerDropV": 0.566,
+    "allowanceBatteryControllerDropPercent": 4.79,
+    "limits": "Planning geometry, not surveyed site distances or a fabrication release. Grid paths avoid component bodies in the front service zone; terminal stubs, rounded bends, cable-to-cable swept clearance and received glands still require physical verification. PV span in scene is illustrative, not a surveyed roof run. Check the remaining shared 10 AWG stock after controller cuts before installation.",
+    "includesShuntResistanceOhms": 0.0001
   }
 }

@@ -84,6 +84,20 @@ function reconcile() {
     credit.totalUsd = -remainingAssumedRefundUsd(system.bom, credit.refundForBomId, credit.refundExpectedUsd);
     credit.unitCost = credit.totalUsd;
     credit.refundAllocations = [{ bomId: credit.refundForBomId, amountUsd: -credit.totalUsd }];
+    if (credit.totalUsd === 0) {
+      const item = existing.get(credit.refundForBomId);
+      const note = "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.";
+      credit.grantPaymentNote = note;
+      credit.description = note;
+      credit.procurement = "Purchased · refund assumption superseded by confirmed credit";
+      item.returnAccounting = "confirmed";
+      item.procurement = "Purchased · returned · refund issued";
+      item.grantPaymentNote = note;
+      delivery.items[item.id] = { ...delivery.items[item.id],
+        amazonStatus: "refunded", eta: "Returned", time: "Amazon refund issued", note };
+      customs.itemMeta[item.id] = { ...customs.itemMeta[item.id],
+        excludedFromManifest: true, exclusionReason: "Returned item; Amazon-issued refund confirmed." };
+    }
   }
   write("data/dse-system.json", system);
   write("data/dse-delivery.json", delivery);

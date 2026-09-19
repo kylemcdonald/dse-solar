@@ -1,3 +1,4 @@
+import type { DiagramRuntime } from "./diagramRuntime";
 import { dseRuntime } from "./dseRuntime";
 import { conductorColor } from "./systemGraph";
 import type { ConductorKind, ResolvedDevice, RoutedConnection } from "./systemGraph";
@@ -88,6 +89,10 @@ export function routeStrokeWidth(route: RoutedConnection) {
   return Math.max(2.5, Math.min(8, route.diameterMm / 2.2));
 }
 
+export type WireObjective = { jumps: number; turns: number; length: number };
+
+/** Each project gets an isolated solver with the same placement and routing rules. */
+export function createDiagramLayoutBuilder(runtime: DiagramRuntime) {
 /**
  * Schematic flow directions. Graph connections are authored supply-to-load,
  * except the geometry-only stub between a device terminal and its bodyless
@@ -97,8 +102,8 @@ export function routeStrokeWidth(route: RoutedConnection) {
  * feeds the device.
  */
 const diagramConnections = (() => {
-  const connections = dseRuntime.graph.connections;
-  const joinById = new Map(dseRuntime.devices.filter((device) => device.presentation === "wire-join").map((device) => [device.id, device]));
+  const connections = runtime.graph.connections;
+  const joinById = new Map(runtime.devices.filter((device) => device.presentation === "wire-join").map((device) => [device.id, device]));
   return connections.map((connection) => {
     if (connection.topologyRole !== "terminal-join") return connection;
     const joinId = endpointDeviceId(connection.to);
@@ -147,7 +152,7 @@ function joinSideForConductor(device: ResolvedDevice, conductorId: string): Port
   return conductor.face === "left" ? "input" : "output";
 }
 
-export function devicePorts(device: ResolvedDevice): DiagramPort[] {
+function devicePorts(device: ResolvedDevice): DiagramPort[] {
   return device.conductors.map((conductor) => ({
     id: conductor.id,
     endpointId: `${device.id}.${conductor.id}`,
@@ -177,15 +182,15 @@ function makeNode(device: ResolvedDevice, ports: DiagramPort[]): DiagramNode {
 // ---------------------------------------------------------------------------
 
 function junctionOwner(deviceId: string) {
-  const device = dseRuntime.deviceById.get(deviceId);
+  const device = runtime.deviceById.get(deviceId);
   return device?.placement.space === "junction" ? device.placement.junctionId : undefined;
 }
 
 
 function glandMaps() {
-  const glandByConnection = new Map<string, typeof dseRuntime.glands[number]>();
+  const glandByConnection = new Map<string, typeof runtime.glands[number]>();
   const glandOrder = new Map<string, number>();
-  dseRuntime.glands.forEach((gland, index) => {
+  runtime.glands.forEach((gland, index) => {
     glandOrder.set(gland.id, index);
     gland.connectionIds.forEach((connectionId) => glandByConnection.set(connectionId, gland));
   });
@@ -200,9 +205,9 @@ function junctionEdgeSide(route: RoutedConnection, junctionId: string): PortSide
 function systemProjection() {
   const { glandByConnection } = glandMaps();
   const portSets = new Map<string, DiagramPort[]>();
-  const passthroughs = dseRuntime.devices.filter((device) => device.presentation === "wall-passthrough");
+  const passthroughs = runtime.devices.filter((device) => device.presentation === "wall-passthrough");
   const passthroughIds = new Set(passthroughs.map((device) => device.id));
-  const worldDevices = dseRuntime.devices.filter((device) => device.placement.space === "world" && !passthroughIds.has(device.id));
+  const worldDevices = runtime.devices.filter((device) => device.placement.space === "world" && !passthroughIds.has(device.id));
   worldDevices.forEach((device) => portSets.set(device.id, device.kind === "junction" ? [] : devicePorts(device)));
   const seeds: WireSeed[] = [];
   const projectedEndpoint = (endpoint: string, owner: string | undefined, physicalRoute: RoutedConnection) => {
@@ -229,14 +234,14 @@ function systemProjection() {
     if (!fromEndpointId || !toEndpointId || fromEndpointId === toEndpointId) return;
     seeds.push({ route, fromEndpointId, toEndpointId });
   };
-  dseRuntime.routes.forEach((route) => {
+  runtime.routes.forEach((route) => {
     if (passthroughIds.has(endpointDeviceId(route.from)) || passthroughIds.has(endpointDeviceId(route.to))) return;
     const ends = flowEnds(route);
     addSeed(route, ends.from, ends.to);
   });
   // A sealed penetration is two physical routes but one schematic conductor.
   const routeByEndpoint = new Map<string, RoutedConnection>();
-  dseRuntime.routes.forEach((route) => {
+  runtime.routes.forEach((route) => {
     if (passthroughIds.has(endpointDeviceId(route.from))) routeByEndpoint.set(route.from, route);
     if (passthroughIds.has(endpointDeviceId(route.to))) routeByEndpoint.set(route.to, route);
   });
@@ -272,7 +277,7 @@ const PAIR_KINDS = new Set<ConductorKind>(["positive", "negative", "ac-line", "a
  */
 function sheathPairs(seeds: WireSeed[], portSets: Map<string, DiagramPort[]>): DiagramNode[] {
   const rootOf = (id: string): string => {
-    const device = dseRuntime.deviceById.get(id);
+    const device = runtime.deviceById.get(id);
     return device?.attachment ? rootOf(endpointDeviceId(device.attachment.endpoint)) : id;
   };
   const groups = new Map<string, WireSeed[]>();
@@ -284,13 +289,14 @@ function sheathPairs(seeds: WireSeed[], portSets: Map<string, DiagramPort[]>): D
     const key = `${owner}|${rootOf(endpointDeviceId(deviceEnd))}|${fromAbstract ? "out" : "in"}`;
     groups.set(key, [...(groups.get(key) ?? []), seed]);
   });
-  const template = dseRuntime.devices.find((device) => device.presentation === "wire-join")!;
+  const joinTemplate = runtime.devices.find((device) => device.presentation === "wire-join");
   const fans: DiagramNode[] = [];
   groups.forEach((members, key) => {
     if (members.length < 2 || new Set(members.map((member) => member.route.kind)).size < 2) return;
     const [owner, root, direction] = key.split("|");
     const boxFeeds = direction === "out";
-    const rootDevice = dseRuntime.deviceById.get(root)!;
+    const rootDevice = runtime.deviceById.get(root)!;
+    const template = joinTemplate ?? { ...rootDevice, kind: "connector" as const, presentation: "wire-join" as const, size: [.01,.01,.01] as const };
     const fanId = `sheath:${owner}:${root}`;
     const leads = members.map((member) => {
       const deviceEnd = boxFeeds ? member.toEndpointId : member.fromEndpointId;
@@ -336,15 +342,15 @@ function sheathPairs(seeds: WireSeed[], portSets: Map<string, DiagramPort[]>): D
 }
 
 function junctionProjection(junctionId: string) {
-  const junction = dseRuntime.deviceById.get(junctionId)!;
-  const members = dseRuntime.devices.filter((device) => device.placement.space === "junction" && device.placement.junctionId === junctionId);
+  const junction = runtime.deviceById.get(junctionId)!;
+  const members = runtime.devices.filter((device) => device.placement.space === "junction" && device.placement.junctionId === junctionId);
   const memberIds = new Set(members.map((device) => device.id));
   const { glandByConnection } = glandMaps();
-  const crossing = dseRuntime.routes.filter((route) => memberIds.has(endpointDeviceId(route.from)) !== memberIds.has(endpointDeviceId(route.to)));
+  const crossing = runtime.routes.filter((route) => memberIds.has(endpointDeviceId(route.from)) !== memberIds.has(endpointDeviceId(route.to)));
   const boundaryPorts: BoundaryPort[] = crossing.map((route) => {
     const internalEndpoint = memberIds.has(endpointDeviceId(route.from)) ? route.from : route.to;
     const externalEndpoint = internalEndpoint === route.from ? route.to : route.from;
-    const externalConductor = dseRuntime.conductorByKey.get(externalEndpoint)!;
+    const externalConductor = runtime.conductorByKey.get(externalEndpoint)!;
     const gland = glandByConnection.get(route.id);
     return {
       id: `boundary-${route.id}`, endpointId: `boundary::${route.id}`,
@@ -354,7 +360,7 @@ function junctionProjection(junctionId: string) {
     };
   });
   const boundaryByConnection = new Map(boundaryPorts.map((port) => [port.connectionId!, port]));
-  const seeds = dseRuntime.routes.flatMap((route): WireSeed[] => {
+  const seeds = runtime.routes.flatMap((route): WireSeed[] => {
     const fromInside = memberIds.has(endpointDeviceId(route.from));
     const toInside = memberIds.has(endpointDeviceId(route.to));
     if (!fromInside && !toInside) return [];
@@ -546,7 +552,7 @@ type WireJob = {
   routed: boolean;
 };
 
-export type WireObjective = { jumps: number; turns: number; length: number };
+
 
 const betterObjective = (a: WireObjective, b: WireObjective, lengthCounts = true) => (
   a.jumps < b.jumps || (a.jumps === b.jumps && (a.turns < b.turns || (lengthCounts && a.turns === b.turns && a.length < b.length - 1e-6)))
@@ -962,7 +968,7 @@ class WireField {
   materialize(): RoutedWire[] {
     const wires: RoutedWire[] = this.jobs.map((job) => ({
       ...job.seed, points: this.polyline(job), bridges: [],
-      color: job.seed.sheath || dseRuntime.graph.cables.find((cable) => cable.id === job.seed.route.cableId)?.sheath === "white" ? "#f8f6ef" : diagramConductorColor[job.seed.route.kind],
+      color: job.seed.sheath || runtime.graph.cables.find((cable) => cable.id === job.seed.route.cableId)?.sheath === "white" ? "#f8f6ef" : diagramConductorColor[job.seed.route.kind],
       width: routeStrokeWidth(job.seed.route),
       fromNodeId: endpointDeviceId(job.seed.fromEndpointId), toNodeId: endpointDeviceId(job.seed.toEndpointId),
     }));
@@ -1233,7 +1239,7 @@ function placeAndRoute(activeJunctionId: string | undefined, hints: DiagramLayou
   return { projection, nodes, seeds, boundaryPorts, placed, width, height, field, fallbackIds, routingMs };
 }
 
-export function buildDiagramLayout(activeJunctionId?: string, hints: DiagramLayoutHints = {}): DiagramLayout {
+function buildDiagramLayout(activeJunctionId?: string, hints: DiagramLayoutHints = {}): DiagramLayout {
   const started = performance.now();
   // The previous artifact's order is a hint, never a constraint: the scope
   // is also laid out from scratch and the better of the two is kept, hinted
@@ -1291,3 +1297,10 @@ export function buildDiagramLayout(activeJunctionId?: string, hints: DiagramLayo
     wireLength: wires.reduce((sum, wire) => sum + segmentsOf(wire.points).reduce((length, [a, b]) => length + Math.abs(b.x - a.x) + Math.abs(b.y - a.y), 0), 0),
   };
 }
+
+  return { buildDiagramLayout, devicePorts };
+}
+
+const fijiBuilder = createDiagramLayoutBuilder(dseRuntime);
+export const buildDiagramLayout = fijiBuilder.buildDiagramLayout;
+export const devicePorts = fijiBuilder.devicePorts;

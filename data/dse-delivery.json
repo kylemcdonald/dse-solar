@@ -38,12 +38,14 @@
       "note": "Paid by IYOIYO as part of the FJD 12,172 transfer. Verify the received item before installation or allocation."
     },
     "dse-battery-cable": {
-      "amazonStatus": "purchased",
+      "amazonStatus": "partially-returned",
       "sourceLabel": "Amazon · Shirbly 1/0 AWG preterminated cable pairs",
       "sourceUrl": "https://www.amazon.com/dp/B0F93TT9CW",
-      "eta": "Arriving Aug 27",
-      "time": "3 × 1.5 ft pairs + 2 × 2 ft pairs",
-      "note": "This retained receipt row covers all five usable Shirbly pairs: ten individual cables and 17 conductor-feet. The four iGreely pairs were returned and must not be counted. Allocate compatible assemblies onsite and purchase the remaining correctly terminated cable in Fiji."
+      "eta": "Return reviewed 18 Sep 2026",
+      "time": "Amazon refund issued",
+      "note": "4 of 5 purchased units returned; 1 retained. Separately listed Amazon-issued refund: USD 110.58, including tax. Gross purchase quantity and value preserved.",
+      "returnedQuantity": 4,
+      "retainedQuantity": 1
     },
     "dse-supplemental-1-0-cable-fiji": {
       "amazonStatus": "unavailable",
@@ -436,12 +438,14 @@
       "note": "All four modules are purchased."
     },
     "dse-usb-output-breaker": {
-      "amazonStatus": "refund-assumed",
+      "amazonStatus": "refunded",
       "sourceLabel": "Amazon · CHTAIXI B60 B09H4W8CLY",
       "sourceUrl": "https://www.amazon.com/dp/B09H4W8CLY",
-      "eta": "Treated as returned for accounting",
-      "time": "Amazon refund not confirmed",
-      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
+      "eta": "Returned",
+      "time": "Amazon refund issued",
+      "note": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0
     },
     "dse-mppt-wirebox-mc4-rejected": {
       "amazonStatus": "refund-issued",
@@ -611,20 +615,24 @@
       "note": "Exclude all three pairs from usable inventory, shipping and customs."
     },
     "dse-10awg-wire-30ft": {
-      "amazonStatus": "purchased",
+      "amazonStatus": "refunded",
       "sourceLabel": "Amazon · iGreely 10 AWG red/black wire",
       "sourceUrl": "https://www.amazon.com/dp/B08HSC5NW5",
-      "eta": "Arriving Aug 25–26",
-      "time": "Purchased Aug 23–24",
-      "note": "Reconciled to order 111-2349613-5829811. Install stock."
+      "eta": "Return reviewed 18 Sep 2026",
+      "time": "Amazon refund issued",
+      "note": "1 of 1 purchased units returned; 0 retained. Separately listed Amazon-issued refund: USD 39.50, including tax. Gross purchase quantity and value preserved.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0
     },
     "dse-2awg-wire-pair-5ft": {
-      "amazonStatus": "purchased",
+      "amazonStatus": "refunded",
       "sourceLabel": "Amazon · 2 AWG five-foot red/black cable pair",
       "sourceUrl": "https://www.amazon.com/dp/B0DTNX7S3S",
-      "eta": "Arriving Aug 25–26",
-      "time": "Purchased Aug 23–24",
-      "note": "Reconciled to order 111-2349613-5829811. Allocate onsite only where received length, construction and terminals match; remaining cable is an accepted Fiji purchase."
+      "eta": "Return reviewed 18 Sep 2026",
+      "time": "Amazon refund issued",
+      "note": "1 of 1 purchased units returned; 0 retained. Separately listed Amazon-issued refund: USD 43.89, including tax. Gross purchase quantity and value preserved.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0
     },
     "dse-1-0-battery-cables-2ft": {
       "amazonStatus": "return-complete",
@@ -667,12 +675,14 @@
       "note": "Reconciled to order 111-0039636-2784221. Service tool."
     },
     "dse-8awg-wire-10ft": {
-      "amazonStatus": "purchased",
+      "amazonStatus": "refunded",
       "sourceLabel": "Amazon · iGreely 8 AWG red/black wire",
       "sourceUrl": "https://www.amazon.com/dp/B093R538JV",
-      "eta": "Arriving Aug 25",
-      "time": "Purchased Aug 23–24",
-      "note": "Reconciled to order 111-0039636-2784221. Install stock."
+      "eta": "Return reviewed 18 Sep 2026",
+      "time": "Amazon refund issued",
+      "note": "1 of 1 purchased units returned; 0 retained. Separately listed Amazon-issued refund: USD 21.68, including tax. Gross purchase quantity and value preserved.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0
     },
     "dse-ferrule-crimper-kit": {
       "amazonStatus": "purchased",
@@ -932,12 +942,14 @@
       "note": "Second purchased HT-8 tracked separately and accepted as the verified-fit R28 battery/MPPT cutoff enclosure for exactly three 120 A breakers; acceptance comes from the received-hardware fit check, not rendered scale."
     },
     "dse-shirbly-2awg-cable-pairs": {
-      "amazonStatus": "purchased",
+      "amazonStatus": "partially-returned",
       "sourceLabel": "Amazon · Shirbly 2 AWG three-foot cable pairs",
       "sourceUrl": "https://www.amazon.com/dp/B0CHS3JJ9F",
-      "eta": "Arriving Aug 27",
-      "time": "Two red/black pairs across two orders",
-      "note": "Integration pending; M10 ring ends do not directly match the SmartSolar screw clamp."
+      "eta": "Return reviewed 18 Sep 2026",
+      "time": "Amazon refund issued",
+      "note": "1 of 2 purchased units returned; 1 retained. Separately listed Amazon-issued refund: USD 27.65, including tax. Gross purchase quantity and value preserved.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 1
     },
     "dse-amomd-600a-busbars-unused": {
       "amazonStatus": "return-complete",
@@ -948,20 +960,24 @@
       "note": "Excluded purchase/return history; replaced by the selected Joinfworld pair."
     },
     "dse-extra-dihool-120a-breaker": {
-      "amazonStatus": "refund-assumed",
+      "amazonStatus": "refunded",
       "sourceLabel": "Amazon · surplus fourth DIHOOL 120 A breaker",
       "sourceUrl": "https://www.amazon.com/dp/B0BFF7F46Y",
-      "eta": "Treated as returned for accounting",
-      "time": "Amazon refund not confirmed",
-      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
+      "eta": "Returned",
+      "time": "Amazon refund issued",
+      "note": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
+      "returnedQuantity": 1,
+      "retainedQuantity": 0
     },
     "dse-extra-ac-rcbo-pair": {
-      "amazonStatus": "refund-assumed",
+      "amazonStatus": "refunded",
       "sourceLabel": "Amazon · duplicate DIHOOL 10 A AC-protection pair",
       "sourceUrl": "https://www.amazon.com/dp/B0CRKNJSRH",
-      "eta": "Treated as returned for accounting",
-      "time": "Amazon refund not confirmed",
-      "note": "Assumed refund under the owner's 13 Sep 2026 instruction; Amazon processing is not confirmed. Assumes the full order amount, including tax and any original shipping, is refunded. Original purchase evidence supports the amount, not a completed refund."
+      "eta": "Returned",
+      "time": "Amazon refund issued",
+      "note": "Amazon-issued refund replaces the earlier accounting assumption; no additional assumed credit remains. Original purchase and confirmed refund are retained separately.",
+      "returnedQuantity": 2,
+      "retainedQuantity": 0
     },
     "dse-kerwinn-shared-services-breaker-alternate": {
       "amazonStatus": "refund-assumed",

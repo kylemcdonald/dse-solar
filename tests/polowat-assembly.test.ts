@@ -14,7 +14,7 @@ test('DIN assembly has four isolated bridged pairs on one contiguous kit',()=>{
  const groupTerminals=terminalGroups.flatMap(g=>assemblyPorts.filter(p=>p.id.startsWith(g.id+'-')).map(p=>p.id));
  assert.equal(groupTerminals.length,16);
  assert.equal(new Set(groupTerminals).size,16);
- for(const g of terminalGroups)assert.equal(assemblyWires.filter(w=>w.from.startsWith(g.id+'-')||w.to.startsWith(g.id+'-')).length,3);
+ for(const g of terminalGroups)assert.equal(assemblyWires.filter(w=>w.from.startsWith(g.id+'-')||w.to.startsWith(g.id+'-')).length,g.id==='main-positive'?4:3);
  for(const asin of ['B000OTJ89Q','B06XPZG45K','B09YCRNGP9'])assert.ok(!system.cartStaging.items.some(r=>r.asin===asin));
 });
 test('every internal graph connection has explicit unique wire landings',()=>{

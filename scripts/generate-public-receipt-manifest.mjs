@@ -18,6 +18,7 @@ const customsAgentPath = resolve("private/extreme-customs-clearance-invoices-thr
 const solarFijiPath = resolve("private/solar-fiji-purchases-through-2026-09-02.json");
 const rcManubhaiPath = resolve("private/rc-manubhai-purchases-through-2026-09-01.json");
 const bankWiresPath = resolve("private/bank-of-america-wires-through-2026-08-25.json");
+const returnsPath = resolve("private/amazon-returns-through-2026-09-18.json");
 
 // The first two receipts predate the private, PII-free reconciliation JSON. This
 // public description intentionally contains only the evidence metadata needed by
@@ -121,6 +122,14 @@ const orders = [
   ...solarFijiDocuments,
   ...rcManubhaiDocuments,
   ...bankWireDocuments,
+  ...(fs.existsSync(returnsPath)
+    ? JSON.parse(fs.readFileSync(returnsPath, "utf8")).documents
+    : (fs.existsSync(resolve(outputPath)) ? readJson(outputPath).invoices : [])
+      .filter((invoice) => ["Refund confirmation", "Return approval"].includes(invoice.kind))
+      .map((invoice) => ({ date: invoice.date, supplier: invoice.supplier,
+        receiptFile: invoice.filename, documentKind: invoice.kind, reference: invoice.reference,
+        bomIds: Object.entries(readJson(outputPath).itemInvoices)
+          .filter(([, refs]) => refs.includes(invoice.number)).map(([id]) => id), items: [] }))),
 ].sort((a, b) =>
   a.date.localeCompare(b.date) || a.supplier.localeCompare(b.supplier) || a.receiptFile.localeCompare(b.receiptFile));
 
