@@ -6,7 +6,7 @@ The equipment wall meets Polowat’s floor at y=0. Both battery bases sit on tha
 
 ## Terminal-grid alignment
 
-The DIN row and centered fuse terminals now align with the main 20 mm routing grid. Components remain contiguous; terminal leads leave square to their device faces. Diagonal lead adapters are removed. Every Polowat route segment, including terminal leads, must be axis-aligned before smooth elbows are rendered. Fiji is unchanged. The breaker direction comparison and cable schedule are regenerated for this alignment.
+The DIN row and centered fuse terminals now align with the main 20 mm routing grid. Neighbors touch except at explicitly tested routing aisles; terminal leads leave square to their device faces. Diagonal lead adapters are removed. Every Polowat route segment, including terminal leads, must be axis-aligned before smooth elbows are rendered. Fiji is unchanged. The breaker direction comparison and cable schedule are regenerated for this alignment.
 
 ## Non-polarized breaker direction
 
@@ -14,11 +14,11 @@ The three 30 A Battery A, Battery B and controller breakers may exchange top/bot
 
 ## Compact lower-rail layout · 19 September 2026
 
-The Polowat layout no longer enforces the previous 100 mm controller separation or declared inter-device gaps. All six DIN breakers and four terminal-pair devices touch side-by-side on one lower rail; wires route around the row. Functional space for terminal exits and cable bends remains.
+The Polowat layout no longer enforces the previous 100 mm controller separation or declared inter-device gaps. All six DIN breakers and four terminal-pair devices share one lower rail. The endpoint-guided ordering search reroutes every candidate and retains explicit routing aisles only when they improve its score. Wires route around bodies or through real open aisles. Functional space for terminal exits and cable bends remains.
 
 Nine bottom glands now have actual sleeve bores and matching panel openings. Routes stay centered through each sleeve with straight approaches on both sides. Exact rounded-cable checks reject misaligned entries. The shunt, supplied fuse and display remain modeled and connected.
 
-See the [eight-layout comparison](polowat-layout-comparison.md) for alternatives, measured footprints, cable lengths and the selected configuration. The live study and [cable schedule](polowat-cable-routing.md) are generated from that selection. Fiji’s device positions, terminals, glands and cable routes are unchanged and protected by an exact geometry regression test.
+See the [DIN ordering and spacing search](polowat-din-optimization.md) for the current selection. The [eight-layout comparison](polowat-layout-comparison.md) records the historical enclosure/backplate choice. The live study and [cable schedule](polowat-cable-routing.md) follow the optimized rail and subsequent breaker-direction comparison. Separating terminal pairs may require additional end covers or rail stops; verify those against the received kit before assembly. No hardware purchase or financial record is changed by this routing study. Fiji’s device positions, terminals, glands and cable routes are unchanged and protected by an exact geometry regression test.
 
 ## Shared physical layout · 19 September 2026
 

@@ -1,6 +1,6 @@
-# Original Polowat enclosure layout comparison
+# Polowat enclosure layout comparison
 
-Historical comparison before terminal-grid alignment. Keep the selected enclosure arrangement; use the [current breaker comparison](polowat-breaker-comparison.md) and [cable schedule](polowat-cable-routing.md) for current routing costs and lengths.
+Historical enclosure/backplate comparison. The subsequent [DIN ordering and spacing optimization](polowat-din-optimization.md) supersedes the rail order, spacing and cable totals below.
 
 Eight deterministic layouts were tested on the shared 20 mm router. Only Polowat opts into touching DIN components and centered gland bores. Fiji’s device, terminal, gland and route geometry is protected by a saved SHA-256 regression fixture.
 
@@ -23,6 +23,6 @@ The previous 100 mm controller-layout constraint and declared inter-device gaps 
 
 This is the best score among these tested candidates, not a proof of a globally optimal layout. Dimensions are routing envelopes, not a fabrication template or a new enclosure purchase. The generated cable schedule supersedes previous length estimates.
 
-Reproduce with `npm run compare:polowat-layouts`. Raw results, including rejected candidates, are in `data/generated/polowat-layout-comparison.json`. Each solve has a 45-second budget; timed-out or invalid candidates cannot be selected.
+The layout sweep above uses the original breaker terminal directions. The subsequent [non-polarized breaker comparison](polowat-breaker-comparison.md) tests all eight direction combinations on the optimized rail; its selected routes supersede the cable totals above.
 
-The layout sweep above uses the original breaker terminal directions. The subsequent [non-polarized breaker comparison](polowat-breaker-comparison.md) tests all eight direction combinations on the selected layout; its selected routes supersede the cable totals above.
+Reproduce with `npm run compare:polowat-layouts`. Raw results, including rejected candidates, are in `data/generated/polowat-layout-comparison.json`. Each solve has a 45-second budget; timed-out or invalid candidates cannot be selected.

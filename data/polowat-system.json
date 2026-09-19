@@ -545,7 +545,7 @@
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must",
-      "description": "Owner-selected B09BYGJGTB supplies 30 ft / 9.144 m EACH red and black, bare-ended. Listing claims tinned copper, UV-resistant PV insulation, −40 to 90°C and 1.5 kV DC / 1.0 kV AC; suitable in principle for outdoor PV and short DC controller wiring. Title says 6 mm², but 84 strands × 0.285 mm implies about 5.36 mm²: calculate conservatively as 10 AWG / 5.26 mm², not certified 6 mm². Offcuts replace both separate Ancor 10 AWG rolls; retain 8 AWG batteries and 12 AWG LOAD. Require ≥30 A ampacity after installation derating for the BATT cuts; verify received conductor/temperature markings, actual jacket OD, gland/MC4 seal fit, crimp contact and controller clamp fit. One lead per controller terminal, max 6 mm²; never trim strands. PV cable temperature rating alone does not establish derated ampacity. Shared 9.144 m per colour: reserve 1.40 m for controller/shunt, 7.50 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site.",
+      "description": "Owner-selected B09BYGJGTB supplies 30 ft / 9.144 m EACH red and black, bare-ended. Listing claims tinned copper, UV-resistant PV insulation, −40 to 90°C and 1.5 kV DC / 1.0 kV AC; suitable in principle for outdoor PV and short DC controller wiring. Title says 6 mm², but 84 strands × 0.285 mm implies about 5.36 mm²: calculate conservatively as 10 AWG / 5.26 mm², not certified 6 mm². Offcuts replace both separate Ancor 10 AWG rolls; retain 8 AWG batteries and 12 AWG LOAD. Require ≥30 A ampacity after installation derating for the BATT cuts; verify received conductor/temperature markings, actual jacket OD, gland/MC4 seal fit, crimp contact and controller clamp fit. One lead per controller terminal, max 6 mm²; never trim strands. PV cable temperature rating alone does not establish derated ampacity. Shared 9.144 m per colour: reserve 1.00 m for controller/shunt, 7.90 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site.",
       "accountingGroup": "system",
       "unitWeightKg": 1.3,
       "totalWeightKg": 1.3,
@@ -869,7 +869,7 @@
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must",
-      "description": "One kit: ten DK10N blocks (five red/five black), eight DSS10N-02P jumpers, one DK10NC end cover, two SS2 stops and 7-inch DIN rail. Use eight blocks as four isolated two-block groups: BATT+, BATT−, LOAD+, LOAD−; one matching bridge per pair, three used clamps and one spare per group. Keep the eight installed blocks contiguous on the same rail so the single end cover/two stops suffice; rearrange colours and clearly label groups, never bridge between groups. The two unused kit blocks stay off the mounted assembly as spares for possible converter transitions. DK10N accepts one bare stranded 8/10/12 AWG lead per cage; 12–14 mm strip, 1.3 Nm, 60 A UL / 57 A IEC body rating. Verify exact bridge/received markings and fault coordination; this does not increase system current limits. Replaces both Blue Sea buses and the DK4N kit, eliminating six bus-end eyelets. No connection between LOAD− and BATT−.",
+      "description": "One kit: ten DK10N blocks (five red/five black), eight DSS10N-02P jumpers, one DK10NC end cover, two SS2 stops and 7-inch DIN rail. Use eight blocks as four isolated two-block groups: BATT+, BATT−, LOAD+, LOAD−; one matching bridge per pair, three used clamps and one spare per group. Keep each bridged pair together on the lower rail; pair ordering and explicit aisles follow the routing study. Verify additional end covers/stops for separated groups; the supplied single cover/two stops are not assumed sufficient. Clearly label groups and never bridge between them. The two unused kit blocks stay off the mounted assembly as spares for possible converter transitions. DK10N accepts one bare stranded 8/10/12 AWG lead per cage; 12–14 mm strip, 1.3 Nm, 60 A UL / 57 A IEC body rating. Verify exact bridge/received markings and fault coordination; this does not increase system current limits. Replaces both Blue Sea buses and the DK4N kit, eliminating six bus-end eyelets. No connection between LOAD− and BATT−.",
       "accountingGroup": "system",
       "unitWeightKg": 0.3,
       "totalWeightKg": 0.3,
@@ -965,7 +965,7 @@
     "Owner reference is ANIMACYN B0CT5LRGRF, 13.8 × 9.7 × 5.9 inches, previously used for Pasana Group / PNG. Do not stage the enclosure. Hand-assemble components and establish actual dimensions before ordering it; no internal-fit drawing is released. Preserve controller mounting/cooling requirements during that assembly.",
     "Use the reference box’s ventilation; no separate QWORK vent. Check temperature with the final cover closed at full charge and load. The approximate 25–35 W heat allowance is not a guarantee of thermal fit; maintain ≤40°C MPPT ambient for full output.",
     "Separate guarded battery-breaker housings, finish labels/guards, Starlink entry/activation, roof attachment and bonding remain pending. No completed-system IP rating is established.",
-    "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. One contiguous ten-block DK10N rail uses supplied single end cover and two stops. No box order until owner assembly. DIHOOL protection remains held.",
+    "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. Eight installed DK10N blocks form four bridged pairs on the lower rail; two blocks remain spare. Verify end covers/stops for the optimized separated groups. No box order until owner assembly. DIHOOL protection remains held.",
     "Owner intends to use the enclosure’s plastic mounting grid and has removed the Tynulox sheet from procurement. Victron requires a nonflammable substrate for the SmartSolar: plastic-grid compliance has not been established. Resolve a suitable controller mounting surface before installation; no replacement plate is staged or priced.",
     "Verify shunt polarity, all charge/load paths through its system side and no LOAD− bypass. Fit two 10 AWG M10 lugs, keep supplied 1 A slow-blow sense fuse near BATT+ and carry spares. Verify 52 mm display body/cutout, rear RJ12 clearance, dry mounting and actual enclosure fit."
   ],
@@ -1429,7 +1429,7 @@
       "loadAreaMm2": 3.31
     },
     "holds": [
-      "Routed cut allowances give 3.22% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give 2.27%, before terminal/contact resistance. Cut allowances exceed the 3% target; shorten the physical layout or revise the conductor plan before fabrication.",
+      "Routed cut allowances give 2.79% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give 2.00%, before terminal/contact resistance. Modeled cut allowances meet the 3% target before terminal/contact resistance; verify the remaining margin on the physical assembly.",
       "Klein 11061 is rated for 12–22 AWG stranded; 8 AWG battery and 10 AWG PV/controller cutting/stripping capability remains unresolved. The 10 AWG rating applies to solid wire.",
       "Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream.",
       "The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection.",
@@ -1439,7 +1439,7 @@
       "Owner reference is ANIMACYN B0CT5LRGRF, 13.8 × 9.7 × 5.9 inches, previously used for Pasana Group / PNG. Do not stage the enclosure. Hand-assemble components and establish actual dimensions before ordering it; no internal-fit drawing is released. Preserve controller mounting/cooling requirements during that assembly.",
       "Use the reference box’s ventilation; no separate QWORK vent. Check temperature with the final cover closed at full charge and load. The approximate 25–35 W heat allowance is not a guarantee of thermal fit; maintain ≤40°C MPPT ambient for full output.",
       "Separate guarded battery-breaker housings, finish labels/guards, Starlink entry/activation, roof attachment and bonding remain pending. No completed-system IP rating is established.",
-      "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. One contiguous ten-block DK10N rail uses supplied single end cover and two stops. No box order until owner assembly. DIHOOL protection remains held.",
+      "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. Eight installed DK10N blocks form four bridged pairs on the lower rail; two blocks remain spare. Verify end covers/stops for the optimized separated groups. No box order until owner assembly. DIHOOL protection remains held.",
       "Owner intends to use the enclosure’s plastic mounting grid and has removed the Tynulox sheet from procurement. Victron requires a nonflammable substrate for the SmartSolar: plastic-grid compliance has not been established. Resolve a suitable controller mounting surface before installation; no replacement plate is staged or priced."
     ],
     "lengthBasis": {
@@ -4321,13 +4321,13 @@
   "cableStockPlan": {
     "bomId": "polowat-pv-cable",
     "lengthPerColourM": 9.144,
-    "pvRoutePerColourM": 7.5,
-    "controllerRoutePerColourM": 1.4,
+    "pvRoutePerColourM": 7.9,
+    "controllerRoutePerColourM": 1,
     "reservePerColourM": 0.244,
     "areaForCalculationsMm2": 5.26,
     "claimedAreaMm2": 6,
     "strandCalculatedAreaMm2": 5.3587,
-    "note": "Shared 9.144 m per colour: reserve 1.40 m for controller/shunt, 7.50 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site."
+    "note": "Shared 9.144 m per colour: reserve 1.00 m for controller/shunt, 7.90 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site."
   },
   "assemblyReview": {
     "revision": "P16",
@@ -4346,7 +4346,7 @@
     "suppliedJumpers": 8,
     "endCovers": 1,
     "railStops": 2,
-    "railArrangement": "Eight installed blocks on one contiguous rail; four electrically isolated bridged pairs. Two unused kit blocks remain off the mounted assembly as spares.",
+    "railArrangement": "Eight installed blocks in four electrically isolated bridged pairs on one lower rail, with optimized pair ordering and tested routing aisles. End covers/stops for separated groups require assembly verification. Two unused kit blocks remain off the mounted assembly as spares.",
     "unresolved": [
       "Reference enclosure fit",
       "Received converter terminals/dimensions",
@@ -4356,7 +4356,8 @@
       "PV mating connector family",
       "Full-load thermal and weather validation",
       "Battery-to-box leads upstream of in-box isolators require source-end fault protection",
-      "Cable cut allowances exceed earlier compact voltage-drop assumptions; shorten final layout or revise conductor design"
+      "Cable cut allowances exceed earlier compact voltage-drop assumptions; shorten final layout or revise conductor design",
+      "End covers and rail stops for separated terminal pairs in the optimized DIN layout"
     ],
     "spareBlocksMounted": false
   },
@@ -4374,25 +4375,25 @@
     "allowance": "15% plus 50 mm per end, each cut rounded up to 50 mm; corresponding parallel battery branch lengths equalized",
     "totals": {
       "8 AWG DC": {
-        "red": 3.8,
-        "black": 3.9
+        "red": 3.3,
+        "black": 3.5
       },
       "10 AWG PV": {
-        "red": 5.2,
-        "black": 6.35
+        "red": 4.25,
+        "black": 5.85
       },
       "10 AWG DC": {
-        "red": 1.4,
-        "black": 0.85
+        "red": 1,
+        "black": 0.9
       },
       "12 AWG DC": {
-        "red": 3.15,
-        "black": 2.25
+        "red": 2.6,
+        "black": 1.9
       }
     },
-    "modelBatteryControllerDropV": 0.268,
-    "allowanceBatteryControllerDropV": 0.38,
-    "allowanceBatteryControllerDropPercent": 3.22,
+    "modelBatteryControllerDropV": 0.236,
+    "allowanceBatteryControllerDropV": 0.329,
+    "allowanceBatteryControllerDropPercent": 2.79,
     "limits": "Planning geometry, not surveyed site distances or a fabrication release. All modeled routes pass the shared device, cable, wall, self-intersection and rounded-geometry checks. Received hardware and installation clearances still require physical verification. PV span in scene is illustrative, not a surveyed roof run. Check the remaining shared 10 AWG stock after controller cuts before installation.",
     "includesShuntResistanceOhms": 0.0001,
     "method": "Shared 20 mm physical layout and turn-aware A*; device-front exclusion, negotiated cable clearance and exact rounded-geometry audits; lengths measured on the rendered curves"

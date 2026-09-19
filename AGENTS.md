@@ -184,3 +184,9 @@ Polowat sets `orthogonalRoutes`: generation and candidate comparisons must rejec
 ## Polowat ground plane
 
 Polowat declares its own `site.floor`; do not reuse Fiji’s offset floor slab. Its top is y=0, its width and x-center match the equipment wall, and its rear edge meets the wall’s front face. Floor-mounted devices rest on the slab using their resolved body height; all terminal coordinates and cable routes follow that resolved placement. Keep the floor solid to routing. Projects without an explicit floor retain their legacy geometry, including Fiji.
+
+## Polowat DIN ordering optimization
+
+The owner's subsequent spacing experiment supersedes the blanket edge-to-edge rule for Polowat: keep neighbors touching unless an explicitly tested `dinSpacesAfter` aisle improves the routing objective. Aisles are whole 20 mm routing cells; wires may use those real open spaces only after all body, front/rear exclusion, swept-curve and gland audits pass. No diagonal terminal adapters. Fiji's installed placement remains unchanged.
+
+`dinRailOptimization.ts` supplies connected-endpoint means, stable ordering, cycle-safe candidate identities and route-guided adjacent-swap/aisle refinement. `optimize:polowat-din` explores endpoint/gland barycentric seeds and 0/20/40 mm spacing, compacts promising orders, and evaluates the local neighborhood to convergence. Preserve rejected results, score definition, stopping status and the generated selection/report; never claim a global optimum. Rerun all eight permitted breaker directions on the selected rail before publishing, and regenerate cable/diagram artifacts.

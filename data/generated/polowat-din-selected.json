@@ -1,0 +1,19 @@
+{
+  "order": [
+    "pvBreaker",
+    "batteryBreakerA",
+    "controllerBreaker",
+    "positiveBus",
+    "negativeBus",
+    "loadNegativeBus",
+    "loadPositiveBus",
+    "starlinkBreaker",
+    "batteryBreakerB",
+    "usbBreaker"
+  ],
+  "spacesAfter": {
+    "positiveBus": 0.02,
+    "loadNegativeBus": 0.02,
+    "loadPositiveBus": 0.02
+  }
+}

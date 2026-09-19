@@ -457,7 +457,9 @@ function planEnclosure(
   );
   const horizontalGap = (a: SizedDevice, b: SizedDevice) => {
     const contiguous = (junction.contiguousDin && sectionOf(a) === "din" && sectionOf(b) === "din") || (a.layoutGroup?.contiguous && a.layoutGroup.id === b.layoutGroup?.id);
-    const declared = contiguous ? 0 : sectionOf(a) === "din" && sectionOf(b) === "din" ? junction.dinGap : junction.backplateGap;
+    const aisle = sectionOf(a) === "din" && sectionOf(b) === "din" ? junction.dinSpacesAfter?.[a.id] : undefined;
+    if (aisle !== undefined && (!Number.isFinite(aisle) || aisle < 0 || Math.abs(aisle / cell - Math.round(aisle / cell)) > 1e-8)) throw new Error(`${junction.id}: DIN aisle must be a nonnegative whole routing cell`);
+    const declared = aisle ?? (contiguous ? 0 : sectionOf(a) === "din" && sectionOf(b) === "din" ? junction.dinGap : junction.backplateGap);
     const facing = reach(a, "right") + reach(b, "left");
     return Math.max(declared, facing > 0 ? channel(reach(a, "right"), reach(b, "left")) : 0);
   };

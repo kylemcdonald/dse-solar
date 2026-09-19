@@ -4,18 +4,19 @@ import {fileURLToPath} from "node:url";
 import {glandCrossingFailures} from "../app/glandAudit";
 import {readFileSync,writeFileSync} from 'node:fs';
 import {buildPolowatGraph} from '../app/polowatGraph';
-import {polowatLayoutCandidates,selectedPolowatLayout,type PolowatLayout} from '../app/polowatLayout';
+import {polowatLayoutCandidates,baselinePolowatLayout,type PolowatLayout} from '../app/polowatLayout';
 import {buildSystemRuntime,routingFailureDiagnostics,renderedGeometryFailureDiagnostics,sampledResolvedDeviceOverlaps} from '../app/systemGraphRuntime';
 import {roundedRoutePieces} from '../app/renderedCableGeometry';
 const objective='Reject every collision and routing/gland failure. Prefer lower DIN. Compare footprint, cable length and battery source-lead length; score = area m² + 0.01 × cable m + 0.02 × battery source-lead m (lower is better).';
 type ComparisonResult={layout:PolowatLayout;valid:boolean;sizeMm?:number[];totalLengthM?:number;batterySourceLeadM?:number;score?:number;error?:string;failures?:Record<string,number>};
 function writeReport(results:ComparisonResult[]) {
- const chosen=results.find(r=>r.layout.id===selectedPolowatLayout.id);
+ const chosen=results.find(r=>r.layout.id===baselinePolowatLayout.id);
  if(!chosen?.valid)throw Error('Selected layout did not pass the comparison');
  const rows=results.map(r=>`| ${r.layout.id}${r===chosen?' **selected**':''} | ${r.valid?'Pass':r.error?'Solver rejected':'Audit rejected'} | ${r.sizeMm?.join(' × ')??'—'} | ${r.totalLengthM??'—'} | ${r.batterySourceLeadM??'—'} | ${r.valid?r.score:'—'} |`);
  writeFileSync('public/polowat-layout-comparison.md',[
   '# Polowat enclosure layout comparison',
   '',
+  'Historical enclosure/backplate comparison. The subsequent [DIN ordering and spacing optimization](polowat-din-optimization.md) supersedes the rail order, spacing and cable totals below.', '',
   'Eight deterministic layouts were tested on the shared 20 mm router. Only Polowat opts into touching DIN components and centered gland bores. Fiji’s device, terminal, gland and route geometry is protected by a saved SHA-256 regression fixture.',
   '',
   objective,
@@ -29,7 +30,7 @@ function writeReport(results:ComparisonResult[]) {
   '',
   'This is the best score among these tested candidates, not a proof of a globally optimal layout. Dimensions are routing envelopes, not a fabrication template or a new enclosure purchase. The generated cable schedule supersedes previous length estimates.',
   '',
-  'The layout sweep above uses the original breaker terminal directions. The subsequent [non-polarized breaker comparison](polowat-breaker-comparison.md) tests all eight direction combinations on the selected layout; its selected routes supersede the cable totals above.', '',
+  'The layout sweep above uses the original breaker terminal directions. The subsequent [non-polarized breaker comparison](polowat-breaker-comparison.md) tests all eight direction combinations on the optimized rail; its selected routes supersede the cable totals above.', '',
   'Reproduce with `npm run compare:polowat-layouts`. Raw results, including rejected candidates, are in `data/generated/polowat-layout-comparison.json`. Each solve has a 45-second budget; timed-out or invalid candidates cannot be selected.',
   ''
  ].join('\n'));

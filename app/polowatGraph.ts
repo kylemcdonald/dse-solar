@@ -63,6 +63,6 @@ export function buildPolowatGraph(layout:PolowatLayout, reversedBreakers:readonl
   const order=ids.indexOf(device.id);
   if(order<0)throw Error(`Missing layout order for ${device.id}`);
   return {...device,placement:{...device.placement,order}};
- }),junctions:baseGraph.junctions.map(j=>({...j,dinPosition:layout.dinPosition,backplateColumns:layout.columns,minimumSize:[layout.minimumWidth,j.minimumSize[1],j.minimumSize[2]]}))};
+ }),junctions:baseGraph.junctions.map(j=>({...j,dinSpacesAfter:layout.dinSpacesAfter,dinPosition:layout.dinPosition,backplateColumns:layout.columns,minimumSize:[layout.minimumWidth,j.minimumSize[1],j.minimumSize[2]]}))};
 }
 export const polowatGraph=buildPolowatGraph(selectedPolowatLayout,selectedPolowatBreakerRouting);

@@ -1,5 +1,6 @@
+import optimizedDin from '../data/generated/polowat-din-selected.json';
 /** Polowat-only planning choices; Fiji never imports these. */
-export type PolowatLayout = { id:string; dinPosition:'top'|'bottom'; columns:number; minimumWidth:number; dinOrder:readonly string[]; backplateOrder:readonly string[] };
+export type PolowatLayout = { id:string; dinPosition:'top'|'bottom'; columns:number; minimumWidth:number; dinOrder:readonly string[]; dinSpacesAfter?:Readonly<Record<string,number>>; backplateOrder:readonly string[] };
 const buses=['positiveBus','negativeBus','loadPositiveBus','loadNegativeBus'];
 const sources=['pvBreaker','controllerBreaker','batteryBreakerA','batteryBreakerB',...buses,'starlinkBreaker','usbBreaker'];
 const batteries=['batteryBreakerA','batteryBreakerB',...buses,'controllerBreaker','pvBreaker','starlinkBreaker','usbBreaker'];
@@ -16,8 +17,11 @@ export const polowatLayoutCandidates:readonly PolowatLayout[]=[
  {id:'bottom-wide-3',dinPosition:'bottom',columns:3,minimumWidth:.6,dinOrder:sources,backplateOrder:convertersFirst},
  {id:'bottom-wide-monitor-3',dinPosition:'bottom',columns:3,minimumWidth:.6,dinOrder:batteries,backplateOrder:monitorFirst},
 ];
-export const selectedPolowatLayout=polowatLayoutCandidates.find(p=>p.id==='bottom-wide-monitor-3')!;
+export const baselinePolowatLayout=polowatLayoutCandidates.find(p=>p.id==='bottom-wide-monitor-3')!;
+
+export const selectedPolowatLayout:PolowatLayout={...baselinePolowatLayout,id:baselinePolowatLayout.id+'-din-optimized',dinOrder:optimizedDin.order,dinSpacesAfter:optimizedDin.spacesAfter};
 
 /** Non-polarized positions may exchange top/bottom connections without rotating the body. */
 export const reversiblePolowatBreakers=["batteryBreakerA","batteryBreakerB","controllerBreaker"] as const;
-export const selectedPolowatBreakerRouting:readonly string[]=["batteryBreakerA", "batteryBreakerB"];
+export const baselinePolowatBreakerRouting:readonly string[]=["batteryBreakerA", "batteryBreakerB"];
+export const selectedPolowatBreakerRouting:readonly string[]=[...reversiblePolowatBreakers];

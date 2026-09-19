@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import fiji from '../data/generated/dse-runtime.json';
 import baseline from './fixtures/fiji-physical-layout.json';
 import comparison from '../data/generated/polowat-layout-comparison.json';
-import {selectedPolowatLayout} from '../app/polowatLayout';
+import {baselinePolowatLayout,selectedPolowatLayout} from '../app/polowatLayout';
 import {polowatRuntime as runtime} from '../app/polowatRuntime';
 import {dseTopology} from '../app/dseTopology';
 import {glandCrossingFailures} from '../app/glandAudit';
@@ -20,7 +20,7 @@ test('Fiji geometry stays byte-for-byte identical to the pre-compact-layout base
  assert.ok(dseTopology.junctions.every(j=>!j.contiguousDin&&!j.centeredGlands));
 });
 
-test('Polowat removes blanket clearances and packs all DIN devices on one continuous lower rail',()=>{
+test('Polowat removes blanket clearances and keeps DIN devices on one lower rail with only declared aisles',()=>{
  const j=runtime.graph.junctions[0];
  assert.equal(j.dinPosition,'bottom');assert.equal(j.dinGap,0);assert.equal(j.backplateGap,0);
  assert.ok(runtime.devices.every(d=>!d.installationClearanceM));
@@ -28,16 +28,15 @@ test('Polowat removes blanket clearances and packs all DIN devices on one contin
  assert.equal(rail.length,10);
  for(let i=1;i<rail.length;i++){
   assert.equal(rail[i].position[1],rail[0].position[1]);
-  assert.ok(Math.abs(rail[i].position[0]-rail[i-1].position[0]-(rail[i].size[0]+rail[i-1].size[0])/2)<1e-8,rail[i].id+' must touch its neighbour');
+  const gap=j.dinSpacesAfter?.[rail[i-1].id]??0;
+  assert.ok(Math.abs(rail[i].position[0]-rail[i-1].position[0]-(rail[i].size[0]+rail[i-1].size[0])/2-gap)<1e-8,rail[i].id+' must match its declared aisle');
  }
  const shell=runtime.deviceById.get(j.deviceId)!;
  assert.ok(rail[0].position[1]-rail[0].size[1]/2-(shell.position[1]-shell.size[1]/2)<.10);
- const lowX=rail[0].position[0]-rail[0].size[0]/2,highX=rail.at(-1)!.position[0]+rail.at(-1)!.size[0]/2;
- const halfHeight=Math.min(...rail.map(d=>d.size[1]/2));
- for(const route of runtime.routes){
-  const points=sampleCableCurve(roundedRoutePieces(route.points,Math.max(.009,route.diameterMm/2000*4.25)));
-  assert.ok(points.every(p=>!(p[0]>lowX+1e-6&&p[0]<highX-1e-6&&Math.abs(p[1]-rail[0].position[1])<halfHeight-1e-6&&Math.abs(p[2]-shell.position[2])<shell.size[2]/2)),route.id+' tunnels through the rail');
- }
+ assert.deepEqual(rail.map(d=>d.id),selectedPolowatLayout.dinOrder);
+ assert.deepEqual(glandCrossingFailures(runtime),[]);
+ assert.equal(runtime.diagnostics.deviceConflicts,0);
+ assert.equal(runtime.diagnostics.renderedGeometryConflicts,0);
 });
 
 test('every external cable traverses its own gland bore and the rendered hole is actually open',()=>{
@@ -61,13 +60,14 @@ test('gland audit rejects a cable passing in front of its assigned opening',()=>
  assert.ok(glandCrossingFailures({...runtime,routeById:routes}).some(message=>message.startsWith(route.id+':')));
 });
 
-test('Polowat retains the configuration selected by the original eight-layout comparison',()=>{
+test('Polowat retains the backplate configuration selected by the historical enclosure comparison',()=>{
  assert.equal(comparison.results.length,8);
  const valid=comparison.results.filter(r=>r.valid);
- const selected=valid.find(r=>r.layout.id===selectedPolowatLayout.id)!;
+ const selected=valid.find(r=>r.layout.id===baselinePolowatLayout.id)!;
  assert.ok(selected);
  assert.equal(selected.score,Math.min(...valid.map(r=>r.score!)));
- assert.deepEqual(selected.sizeMm,runtime.deviceById.get('equipmentEnclosure')!.size.map(n=>Math.round(n*1000)));
+ assert.deepEqual(selectedPolowatLayout.backplateOrder,baselinePolowatLayout.backplateOrder);
+ assert.equal(selectedPolowatLayout.columns,baselinePolowatLayout.columns);
  // Historical layout selection is separate from terminal-grid alignment and direction optimization.
 });
 

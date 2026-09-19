@@ -408,6 +408,8 @@ export type Junction = {
   dinPosition?: "top" | "bottom";
   /** Pack an entire DIN row edge-to-edge on the half-cell geometry lattice. */
   contiguousDin?: boolean;
+  /** Explicit routing aisles after DIN devices, in whole routing cells; absent boundaries touch. */
+  dinSpacesAfter?: Readonly<Record<string, number>>;
   /** Constrain shell crossings to the gland bore and render a matching opening. */
   centeredGlands?: boolean;
   /** Optional vertical datum for the power-device band. */
