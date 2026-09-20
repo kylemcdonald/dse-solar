@@ -1,7 +1,7 @@
 {
   "graphId": "inowon-polowat-compact-12v",
   "graphRevision": "P16-2026-09-19-compact-1",
-  "sourceHash": "dc0c16e2b8a4ba9294eb7002bdbcca226d87c511347b4fe17be577166e947f93",
+  "sourceHash": "ddebb093d3c469e370acb345218d58e1c14205526d732022e7e38e6698b2fca6",
   "layouts": {
     "system": {
       "key": "system",
@@ -2247,6 +2247,7 @@
               0.07
             ],
             "poles": 2,
+            "dinModules": 2,
             "status": "planned",
             "placement": {
               "space": "junction",
@@ -2526,6 +2527,7 @@
               0.077
             ],
             "poles": 2,
+            "dinModules": 2,
             "status": "planned",
             "placement": {
               "space": "junction",
@@ -3223,6 +3225,7 @@
               0.077
             ],
             "poles": 2,
+            "dinModules": 2,
             "status": "planned",
             "placement": {
               "space": "junction",
@@ -3346,6 +3349,7 @@
               0.077
             ],
             "poles": 2,
+            "dinModules": 2,
             "status": "planned",
             "placement": {
               "space": "junction",
@@ -3729,6 +3733,7 @@
               0.07
             ],
             "poles": 1,
+            "dinModules": 1,
             "status": "planned",
             "placement": {
               "space": "junction",
@@ -3919,6 +3924,7 @@
               0.07
             ],
             "poles": 1,
+            "dinModules": 1,
             "status": "planned",
             "placement": {
               "space": "junction",

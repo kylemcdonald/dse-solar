@@ -22,6 +22,8 @@ export type PolowatDevice = {
   subtitle: string;
   kind: PolowatDeviceKind;
   bomId?: string;
+  poles?: 1 | 2;
+  dinModules?: 1 | 2;
   position: readonly [number, number, number];
   size: readonly [number, number, number];
   rotation?: readonly [number, number, number];
@@ -68,7 +70,7 @@ const devices: PolowatDevice[] = ([
     rotation: [-0.22, 0, 0],
   },
   {
-    id: "pvBreaker",
+    id: "pvBreaker", poles: 2, dinModules: 2,
     label: "PV disconnect",
     subtitle: "10 A polarized · two-pole",
     kind: "breaker",
@@ -86,7 +88,7 @@ const devices: PolowatDevice[] = ([
     size: [0.131, 0.100, 0.060],
   },
   {
-    id: "controllerBreaker",
+    id: "controllerBreaker", poles: 2, dinModules: 2,
     label: "MPPT battery breaker",
     subtitle: "30 A non-polarized · bus end",
     kind: "breaker",
@@ -125,7 +127,7 @@ const devices: PolowatDevice[] = ([
     kind: "fuse", bomId: "polowat-battery-monitor", position: [0, 0, 0], size: [0.040, 0.015, 0.015],
   },
   {
-    id: "batteryBreakerA",
+    id: "batteryBreakerA", poles: 2, dinModules: 2,
     label: "Battery A isolate",
     subtitle: "30 A non-polarized · inside junction box",
     kind: "breaker",
@@ -134,7 +136,7 @@ const devices: PolowatDevice[] = ([
     size: [0.027, 0.092, 0.070],
   },
   {
-    id: "batteryBreakerB",
+    id: "batteryBreakerB", poles: 2, dinModules: 2,
     label: "Battery B isolate",
     subtitle: "30 A non-polarized · inside junction box",
     kind: "breaker",
@@ -169,7 +171,7 @@ const devices: PolowatDevice[] = ([
     size: [0.020, 0.0432, 0.0493] as const,
   })),
   {
-    id: "starlinkBreaker",
+    id: "starlinkBreaker", poles: 1, dinModules: 1,
     label: "Starlink branch",
     subtitle: "10 A breaker",
     kind: "breaker",
@@ -197,7 +199,7 @@ const devices: PolowatDevice[] = ([
     rotation: [-0.32, 0, -0.08],
   },
   {
-    id: "usbBreaker",
+    id: "usbBreaker", poles: 1, dinModules: 1,
     label: "USB branch",
     subtitle: "10 A breaker",
     kind: "breaker",

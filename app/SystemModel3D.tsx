@@ -1,5 +1,6 @@
 "use client";
 
+import { breakerFace } from './breakerGeometry';
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { SVGRenderer } from "three/examples/jsm/renderers/SVGRenderer.js";
@@ -485,35 +486,14 @@ function deviceBody(device: ResolvedDevice, software = false) {
     body.castShadow = true;
     group.add(body);
 
-    if (device.kind === "breaker" || device.kind === "protection") {
+    if (device.kind === "breaker") {
+      group.add(breakerFace(device));
+    } else if (device.kind === "protection") {
       const poleCount = device.poles ?? Math.max(1, Math.round(device.size[0] / 0.020));
-      const linked = device.kind === "breaker" && poleCount > 1;
-      const pitch = device.size[0] / poleCount;
-      if (linked) {
-        // Separate molded pole faces and a common handle distinguish a multi-pole
-        // breaker from adjacent independent single-pole breakers on the same rail.
-        for (let pole = 0; pole < poleCount; pole += 1) {
-          const face = new THREE.Mesh(
-            new THREE.BoxGeometry(pitch - 0.0015, device.size[1] - 0.008, 0.002),
-            new THREE.MeshStandardMaterial({ color: "#e8e5db", roughness: 0.62 }),
-          );
-          face.position.set(-device.size[0] / 2 + (pole + 0.5) * pitch, 0, device.size[2] / 2 + 0.001);
-          group.add(face);
-        }
-        const handleTie = new THREE.Mesh(
-          new THREE.BoxGeometry(device.size[0] - 0.006, 0.009, 0.006),
-          new THREE.MeshStandardMaterial({ color: "#343638", roughness: 0.48 }),
-        );
-        handleTie.position.set(0, 0.008, device.size[2] / 2 + 0.013);
-        handleTie.rotation.x = -0.18;
-        group.add(handleTie);
-      }
       for (let pole = 0; pole < poleCount; pole += 1) {
-        const toggle = new THREE.Mesh(
-          new THREE.BoxGeometry(0.015, 0.024, 0.010),
-          new THREE.MeshStandardMaterial({ color: "#343638", roughness: 0.48, transparent: opacity < 1, opacity }),
-        );
-        toggle.position.set(-device.size[0] / 2 + (pole + 0.5) * (device.size[0] / poleCount), 0.006, device.size[2] / 2 + 0.005);
+        const toggle = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.024, 0.010),
+          new THREE.MeshStandardMaterial({ color: "#343638", roughness: 0.48, transparent: opacity < 1, opacity }));
+        toggle.position.set(-device.size[0] / 2 + (pole + 0.5) * device.size[0] / poleCount, 0.006, device.size[2] / 2 + 0.005);
         toggle.rotation.x = -0.18;
         group.add(toggle);
       }

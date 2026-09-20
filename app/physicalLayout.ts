@@ -192,11 +192,11 @@ function frontFaceGrid(count: number, pitch: number, width: number) {
   return { columns, rows: Math.ceil(count / columns) };
 }
 
-/** Declared sizes rounded to the 20 mm routing cell; DIN devices are exactly
- * 20 mm per pole; bodies grow to fit their terminal rows. */
+/** Declared sizes rounded to the 20 mm routing cell; DIN devices use declared
+ * 20 mm body modules independently of their electrical poles; bodies grow to fit their terminal rows. */
 function resolvedBodySize(device: Device): Vec3 {
   const units = device.size.map((value) => Math.max(2, Math.round(value / ROUTE_CELL_M) * 2)) as [number, number, number];
-  if ((device.kind === "breaker" || device.kind === "protection") && device.poles) units[0] = device.poles * 2;
+  if ((device.kind === "breaker" || device.kind === "protection") && (device.dinModules ?? device.poles)) units[0] = (device.dinModules ?? device.poles)! * 2;
   const span = (face: Face) => {
     const count = device.conductors.filter((port) => port.face === face).length;
     return geometryUnits(rowSpan(count, facePitch(device, face)));
@@ -304,9 +304,9 @@ export function validateGraph(graph: SystemGraph) {
     problems.push(`${endpoint}: one physical conductor has ${count} external wires; add an explicit wire join`);
   });
   graph.devices.forEach((device) => {
-    if ((device.kind === "breaker" || device.kind === "protection") && device.poles
-      && Math.abs(device.size[0] - device.poles * 0.020) > 1e-9) {
-      problems.push(`${device.id}: breaker/protection width must be exactly 20 mm per way`);
+    if ((device.kind === "breaker" || device.kind === "protection") && (device.dinModules ?? device.poles)
+      && Math.abs(device.size[0] - (device.dinModules ?? device.poles)! * 0.020) > 1e-9) {
+      problems.push(`${device.id}: breaker/protection width must be exactly 20 mm per declared body module`);
     }
     const placement = device.placement;
     if (placement.space === "junction" && !graph.junctions.some((junction) => junction.deviceId === placement.junctionId)) {

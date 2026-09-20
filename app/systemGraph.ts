@@ -269,7 +269,10 @@ export type Device = {
    * must remain de-energized pending verification. */
   procurementStatus?: ProcurementStatus;
   holdReason?: string;
+  /** Electrical poles, independent of the number of DIN-width modules. */
   poles?: 1 | 2 | 3 | 4;
+  /** Body width in 20 mm planning modules; defaults to legacy pole-based sizing. */
+  dinModules?: 1 | 2 | 3 | 4;
   color?: string;
   /** Hardware shape, independent of project or device ID. */
   appearance?: "round-display" | "current-shunt" | "terminal-pair" | "inline-fuse" | "earth-bar" | "ac-socket" | "ac-plug" | "light";
