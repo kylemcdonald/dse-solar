@@ -1,7 +1,7 @@
 {
   "graphId": "inowon-polowat-compact-12v",
-  "graphRevision": "P16-2026-09-19-compact-1",
-  "sourceHash": "ddebb093d3c469e370acb345218d58e1c14205526d732022e7e38e6698b2fca6",
+  "graphRevision": "P17-2026-09-19-compact-1",
+  "sourceHash": "536f9c2a3015f263117c413e793e7f017685de12b0fde6f2d243972ee363abd3",
   "layouts": {
     "system": {
       "key": "system",
@@ -659,14 +659,14 @@
               "offset": -36
             },
             {
-              "id": "equipmentEnclosure-bottom-gland-2-pv-home-positive",
+              "id": "equipmentEnclosure-bottom-gland-1-pv-home-positive",
               "endpointId": "equipmentEnclosure::pv-home-positive",
               "label": "Renogy panel 3",
               "kind": "positive",
               "side": "input",
               "selectionKey": "pvBreaker.top-0",
               "connectionId": "pv-home-positive",
-              "glandId": "equipmentEnclosure-bottom-gland-2",
+              "glandId": "equipmentEnclosure-bottom-gland-1",
               "offset": 0
             },
             {
@@ -677,7 +677,7 @@
               "side": "input",
               "selectionKey": "batteryBreakerA.bottom-0",
               "connectionId": "battery-a-positive",
-              "glandId": "equipmentEnclosure-bottom-gland-1",
+              "glandId": "equipmentEnclosure-bottom-gland-2",
               "offset": 36
             },
             {
@@ -1215,60 +1215,50 @@
               [
                 -0.02,
                 0.8,
-                0.04
+                0.06
               ],
               [
                 -0.02,
                 0.76,
-                0.04
+                0.06
               ],
               [
-                0.18,
-                0.76,
-                0.04
-              ],
-              [
-                0.18,
+                0.14,
                 0.76,
                 0.06
               ],
               [
-                0.18,
+                0.14,
                 0.84,
                 0.06
               ],
               [
-                0.18,
+                0.12,
                 0.84,
-                0.04
+                0.06
               ],
               [
-                0.08,
-                0.84,
-                0.04
-              ],
-              [
-                0.08,
+                0.12,
                 0.84,
                 0.08
               ],
               [
-                0.08,
+                0.12,
                 0.98,
                 0.08
               ],
               [
-                0.1,
+                0.14,
                 0.98,
                 0.08
               ],
               [
-                0.1,
+                0.13999999999999999,
                 0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 3.14,
+            "lengthM": 2.98,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 7
@@ -1363,32 +1353,32 @@
                 0.06
               ],
               [
-                0.08,
+                0.12,
                 0.86,
                 0.06
               ],
               [
-                0.08,
-                0.98,
-                0.06
-              ],
-              [
                 0.12,
                 0.98,
                 0.06
               ],
               [
-                0.12,
+                0.16,
+                0.98,
+                0.06
+              ],
+              [
+                0.16,
                 0.98,
                 0.08
               ],
               [
-                0.12,
+                0.16,
                 0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 4.42,
+            "lengthM": 4.38,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 6
@@ -1438,27 +1428,27 @@
                 0.06
               ],
               [
-                0.14,
+                0.18,
                 0.3,
                 0.06
               ],
               [
-                0.14,
+                0.18,
                 0.84,
                 0.06
               ],
               [
-                0.14,
+                0.18,
                 0.84,
                 0.08
               ],
               [
-                0.13999999999999999,
+                0.18,
                 0.87,
                 0.08
               ]
             ],
-            "lengthM": 1.11,
+            "lengthM": 1.15,
             "diameterMm": 11.850000000000001,
             "routed": true,
             "routingRank": 1
@@ -1519,27 +1509,27 @@
                 0.06
               ],
               [
-                0.14,
+                0.18,
                 0.3,
                 0.06
               ],
               [
-                0.14,
+                0.18,
                 0.84,
                 0.06
               ],
               [
-                0.14,
+                0.18,
                 0.84,
                 0.08
               ],
               [
-                0.13999999999999999,
+                0.18,
                 0.87,
                 0.08
               ]
             ],
-            "lengthM": 1.11,
+            "lengthM": 1.15,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 1
@@ -1700,7 +1690,7 @@
                 0.08
               ],
               [
-                0.45999999999999996,
+                0.46,
                 0.87,
                 0.08
               ]
@@ -1773,7 +1763,7 @@
                 0.08
               ],
               [
-                0.45999999999999996,
+                0.46,
                 0.87,
                 0.08
               ]
@@ -2228,7 +2218,7 @@
           "height": 168,
           "abstractJunction": false,
           "x": 216,
-          "y": 744,
+          "y": 660,
           "deviceId": "pvBreaker",
           "device": {
             "id": "pvBreaker",
@@ -2293,7 +2283,7 @@
               "polowat-pv-breaker"
             ],
             "position": [
-              0.11,
+              0.15,
               0.92,
               0.08
             ],
@@ -2370,8 +2360,8 @@
           "width": 168,
           "height": 264,
           "abstractJunction": false,
-          "x": 588,
-          "y": 744,
+          "x": 516,
+          "y": 660,
           "deviceId": "mppt",
           "device": {
             "id": "mppt",
@@ -2474,26 +2464,6 @@
               "offset": 0
             },
             {
-              "id": "top-1",
-              "endpointId": "controllerBreaker.top-1",
-              "label": "Top clamp 2",
-              "kind": "positive",
-              "side": "output",
-              "selectionKey": "controllerBreaker.top-1",
-              "declaredOrder": 2,
-              "offset": -48
-            },
-            {
-              "id": "bottom-1",
-              "endpointId": "controllerBreaker.bottom-1",
-              "label": "Bottom clamp 2",
-              "kind": "positive",
-              "side": "output",
-              "selectionKey": "controllerBreaker.bottom-1",
-              "declaredOrder": 3,
-              "offset": 0
-            },
-            {
               "id": "bottom-0",
               "endpointId": "controllerBreaker.bottom-0",
               "label": "To BATT + bus",
@@ -2501,34 +2471,34 @@
               "side": "output",
               "selectionKey": "controllerBreaker.bottom-0",
               "declaredOrder": 0,
-              "offset": 48
+              "offset": 0
             }
           ],
           "width": 192,
-          "height": 216,
+          "height": 120,
           "abstractJunction": false,
-          "x": 816,
-          "y": 300,
+          "x": 720,
+          "y": 336,
           "deviceId": "controllerBreaker",
           "device": {
             "id": "controllerBreaker",
             "label": "MPPT battery breaker",
-            "subtitle": "30 A non-polarized · bus end",
+            "subtitle": "30 A single-pole · non-polarized · bus end",
             "kind": "breaker",
             "centeredTerminals": true,
             "size": [
-              0.04,
+              0.02,
               0.1,
               0.08
             ],
             "physicalSize": [
-              0.054,
+              0.018,
               0.092,
               0.077
             ],
-            "poles": 2,
-            "dinModules": 2,
-            "status": "planned",
+            "poles": 1,
+            "dinModules": 1,
+            "status": "purchased",
             "placement": {
               "space": "junction",
               "junctionId": "equipmentEnclosure",
@@ -2551,29 +2521,13 @@
                 "face": "top",
                 "gauge": "10 AWG DC",
                 "order": 1
-              },
-              {
-                "id": "top-1",
-                "label": "Top clamp 2",
-                "kind": "positive",
-                "face": "top",
-                "optional": true,
-                "order": 2
-              },
-              {
-                "id": "bottom-1",
-                "label": "Bottom clamp 2",
-                "kind": "positive",
-                "face": "bottom",
-                "optional": true,
-                "order": 3
               }
             ],
             "bomIds": [
               "polowat-controller-breaker"
             ],
             "position": [
-              0.19,
+              0.2,
               0.92,
               0.08
             ],
@@ -2630,8 +2584,8 @@
           "width": 168,
           "height": 408,
           "abstractJunction": false,
-          "x": 1032,
-          "y": 516,
+          "x": 1284,
+          "y": 432,
           "lockedPorts": true,
           "deviceId": "positiveBus",
           "device": {
@@ -2770,8 +2724,8 @@
           "width": 168,
           "height": 408,
           "abstractJunction": false,
-          "x": 1536,
-          "y": 816,
+          "x": 1500,
+          "y": 684,
           "lockedPorts": true,
           "deviceId": "negativeBus",
           "device": {
@@ -2920,8 +2874,8 @@
           "width": 168,
           "height": 216,
           "abstractJunction": false,
-          "x": 1800,
-          "y": 600,
+          "x": 1740,
+          "y": 468,
           "lockedPorts": true,
           "deviceId": "batteryShunt",
           "device": {
@@ -2941,7 +2895,7 @@
               0.05,
               0.065
             ],
-            "status": "planned",
+            "status": "purchased",
             "placement": {
               "space": "junction",
               "junctionId": "equipmentEnclosure",
@@ -3018,8 +2972,8 @@
           "width": 168,
           "height": 216,
           "abstractJunction": false,
-          "x": 1800,
-          "y": 288,
+          "x": 1740,
+          "y": 156,
           "lockedPorts": true,
           "deviceId": "batteryMonitor",
           "device": {
@@ -3039,7 +2993,7 @@
               0.069,
               0.031
             ],
-            "status": "planned",
+            "status": "purchased",
             "placement": {
               "space": "junction",
               "junctionId": "equipmentEnclosure",
@@ -3098,8 +3052,8 @@
           "width": 168,
           "height": 120,
           "abstractJunction": false,
-          "x": 1584,
-          "y": 492,
+          "x": 1524,
+          "y": 372,
           "deviceId": "monitorFuse",
           "device": {
             "id": "monitorFuse",
@@ -3118,7 +3072,7 @@
               0.015,
               0.015
             ],
-            "status": "planned",
+            "status": "purchased",
             "placement": {
               "space": "junction",
               "junctionId": "equipmentEnclosure",
@@ -3171,16 +3125,6 @@
               "offset": 0
             },
             {
-              "id": "top-1",
-              "endpointId": "batteryBreakerA.top-1",
-              "label": "Top clamp 2",
-              "kind": "positive",
-              "side": "output",
-              "selectionKey": "batteryBreakerA.top-1",
-              "declaredOrder": 2,
-              "offset": -48
-            },
-            {
               "id": "top-0",
               "endpointId": "batteryBreakerA.top-0",
               "label": "To BATT + bus",
@@ -3189,44 +3133,34 @@
               "selectionKey": "batteryBreakerA.top-0",
               "declaredOrder": 0,
               "offset": 0
-            },
-            {
-              "id": "bottom-1",
-              "endpointId": "batteryBreakerA.bottom-1",
-              "label": "Bottom clamp 2",
-              "kind": "positive",
-              "side": "output",
-              "selectionKey": "batteryBreakerA.bottom-1",
-              "declaredOrder": 3,
-              "offset": 48
             }
           ],
           "width": 168,
-          "height": 216,
+          "height": 120,
           "abstractJunction": false,
-          "x": 816,
-          "y": 564,
+          "x": 1044,
+          "y": 480,
           "lockedPorts": true,
           "deviceId": "batteryBreakerA",
           "device": {
             "id": "batteryBreakerA",
             "label": "Battery A isolate",
-            "subtitle": "30 A non-polarized · inside junction box",
+            "subtitle": "30 A single-pole · non-polarized · inside junction box",
             "kind": "breaker",
             "centeredTerminals": true,
             "size": [
-              0.04,
+              0.02,
               0.1,
               0.08
             ],
             "physicalSize": [
-              0.054,
+              0.018,
               0.092,
               0.077
             ],
-            "poles": 2,
-            "dinModules": 2,
-            "status": "planned",
+            "poles": 1,
+            "dinModules": 1,
+            "status": "purchased",
             "placement": {
               "space": "junction",
               "junctionId": "equipmentEnclosure",
@@ -3249,29 +3183,13 @@
                 "face": "bottom",
                 "gauge": "8 AWG DC",
                 "order": 1
-              },
-              {
-                "id": "top-1",
-                "label": "Top clamp 2",
-                "kind": "positive",
-                "face": "top",
-                "optional": true,
-                "order": 2
-              },
-              {
-                "id": "bottom-1",
-                "label": "Bottom clamp 2",
-                "kind": "positive",
-                "face": "bottom",
-                "optional": true,
-                "order": 3
               }
             ],
             "bomIds": [
               "polowat-battery-breakers"
             ],
             "position": [
-              0.15,
+              0.18,
               0.92,
               0.08
             ],
@@ -3295,16 +3213,6 @@
               "offset": 0
             },
             {
-              "id": "top-1",
-              "endpointId": "batteryBreakerB.top-1",
-              "label": "Top clamp 2",
-              "kind": "positive",
-              "side": "output",
-              "selectionKey": "batteryBreakerB.top-1",
-              "declaredOrder": 2,
-              "offset": -48
-            },
-            {
               "id": "top-0",
               "endpointId": "batteryBreakerB.top-0",
               "label": "To BATT + bus",
@@ -3313,44 +3221,34 @@
               "selectionKey": "batteryBreakerB.top-0",
               "declaredOrder": 0,
               "offset": 0
-            },
-            {
-              "id": "bottom-1",
-              "endpointId": "batteryBreakerB.bottom-1",
-              "label": "Bottom clamp 2",
-              "kind": "positive",
-              "side": "output",
-              "selectionKey": "batteryBreakerB.bottom-1",
-              "declaredOrder": 3,
-              "offset": 48
             }
           ],
           "width": 168,
-          "height": 216,
+          "height": 120,
           "abstractJunction": false,
-          "x": 816,
-          "y": 876,
+          "x": 864,
+          "y": 648,
           "lockedPorts": true,
           "deviceId": "batteryBreakerB",
           "device": {
             "id": "batteryBreakerB",
             "label": "Battery B isolate",
-            "subtitle": "30 A non-polarized · inside junction box",
+            "subtitle": "30 A single-pole · non-polarized · inside junction box",
             "kind": "breaker",
             "centeredTerminals": true,
             "size": [
-              0.04,
+              0.02,
               0.1,
               0.08
             ],
             "physicalSize": [
-              0.054,
+              0.018,
               0.092,
               0.077
             ],
-            "poles": 2,
-            "dinModules": 2,
-            "status": "planned",
+            "poles": 1,
+            "dinModules": 1,
+            "status": "purchased",
             "placement": {
               "space": "junction",
               "junctionId": "equipmentEnclosure",
@@ -3373,29 +3271,13 @@
                 "face": "bottom",
                 "gauge": "8 AWG DC",
                 "order": 1
-              },
-              {
-                "id": "top-1",
-                "label": "Top clamp 2",
-                "kind": "positive",
-                "face": "top",
-                "optional": true,
-                "order": 2
-              },
-              {
-                "id": "bottom-1",
-                "label": "Bottom clamp 2",
-                "kind": "positive",
-                "face": "bottom",
-                "optional": true,
-                "order": 3
               }
             ],
             "bomIds": [
               "polowat-battery-breakers"
             ],
             "position": [
-              0.47,
+              0.46,
               0.92,
               0.08
             ],
@@ -3442,8 +3324,8 @@
           "width": 168,
           "height": 408,
           "abstractJunction": false,
-          "x": 1020,
-          "y": 1584,
+          "x": 1080,
+          "y": 1500,
           "lockedPorts": true,
           "deviceId": "loadPositiveBus",
           "device": {
@@ -3582,8 +3464,8 @@
           "width": 168,
           "height": 408,
           "abstractJunction": false,
-          "x": 1344,
-          "y": 1272,
+          "x": 1428,
+          "y": 1188,
           "lockedPorts": true,
           "deviceId": "loadNegativeBus",
           "device": {
@@ -3712,8 +3594,8 @@
           "width": 144,
           "height": 120,
           "abstractJunction": false,
-          "x": 1224,
-          "y": 960,
+          "x": 1752,
+          "y": 936,
           "lockedPorts": true,
           "deviceId": "starlinkBreaker",
           "device": {
@@ -3810,8 +3692,8 @@
           "width": 192,
           "height": 168,
           "abstractJunction": false,
-          "x": 1560,
-          "y": 1152,
+          "x": 1968,
+          "y": 960,
           "deviceId": "starlinkConverter",
           "device": {
             "id": "starlinkConverter",
@@ -3903,8 +3785,8 @@
           "width": 144,
           "height": 120,
           "abstractJunction": false,
-          "x": 1224,
-          "y": 1656,
+          "x": 1284,
+          "y": 1572,
           "lockedPorts": true,
           "deviceId": "usbBreaker",
           "device": {
@@ -3954,7 +3836,7 @@
               "polowat-load-breakers"
             ],
             "position": [
-              0.5,
+              0.48,
               0.92,
               0.08
             ],
@@ -4011,8 +3893,8 @@
           "width": 168,
           "height": 168,
           "abstractJunction": false,
-          "x": 1584,
-          "y": 1416,
+          "x": 1644,
+          "y": 1332,
           "deviceId": "usbCharger",
           "device": {
             "id": "usbCharger",
@@ -4098,10 +3980,10 @@
           "side": "input",
           "selectionKey": "pvBreaker.top-0",
           "connectionId": "pv-home-positive",
-          "glandId": "equipmentEnclosure-bottom-gland-2",
+          "glandId": "equipmentEnclosure-bottom-gland-1",
           "point": {
             "x": 0,
-            "y": 720
+            "y": 636
           }
         },
         {
@@ -4115,7 +3997,7 @@
           "glandId": "equipmentEnclosure-bottom-gland-3",
           "point": {
             "x": 0,
-            "y": 768
+            "y": 684
           }
         },
         {
@@ -4126,10 +4008,10 @@
           "side": "input",
           "selectionKey": "batteryBreakerA.bottom-0",
           "connectionId": "battery-a-positive",
-          "glandId": "equipmentEnclosure-bottom-gland-1",
+          "glandId": "equipmentEnclosure-bottom-gland-2",
           "point": {
             "x": 0,
-            "y": 564
+            "y": 480
           }
         },
         {
@@ -4143,7 +4025,7 @@
           "glandId": "equipmentEnclosure-bottom-gland-4",
           "point": {
             "x": 0,
-            "y": 924
+            "y": 264
           }
         },
         {
@@ -4157,7 +4039,7 @@
           "glandId": "equipmentEnclosure-bottom-gland-9",
           "point": {
             "x": 0,
-            "y": 1080
+            "y": 888
           }
         },
         {
@@ -4171,7 +4053,7 @@
           "glandId": "equipmentEnclosure-bottom-gland-5",
           "point": {
             "x": 0,
-            "y": 1032
+            "y": 840
           }
         },
         {
@@ -4184,8 +4066,8 @@
           "connectionId": "starlink-regulated",
           "glandId": "equipmentEnclosure-bottom-gland-6",
           "point": {
-            "x": 2160,
-            "y": 1044
+            "x": 2208,
+            "y": 960
           }
         },
         {
@@ -4198,8 +4080,8 @@
           "connectionId": "usb-device-leads",
           "glandId": "equipmentEnclosure-bottom-gland-8",
           "point": {
-            "x": 2160,
-            "y": 1284
+            "x": 2208,
+            "y": 1200
           }
         },
         {
@@ -4212,8 +4094,8 @@
           "connectionId": "usb-a-device-lead",
           "glandId": "equipmentEnclosure-bottom-gland-7",
           "point": {
-            "x": 2160,
-            "y": 1332
+            "x": 2208,
+            "y": 1248
           }
         }
       ],
@@ -4224,11 +4106,11 @@
           "points": [
             {
               "x": 0,
-              "y": 720
+              "y": 636
             },
             {
               "x": 144,
-              "y": 720
+              "y": 636
             }
           ],
           "bridges": [],
@@ -4273,60 +4155,50 @@
               [
                 -0.02,
                 0.8,
-                0.04
+                0.06
               ],
               [
                 -0.02,
                 0.76,
-                0.04
+                0.06
               ],
               [
-                0.18,
-                0.76,
-                0.04
-              ],
-              [
-                0.18,
+                0.14,
                 0.76,
                 0.06
               ],
               [
-                0.18,
+                0.14,
                 0.84,
                 0.06
               ],
               [
-                0.18,
+                0.12,
                 0.84,
-                0.04
+                0.06
               ],
               [
-                0.08,
-                0.84,
-                0.04
-              ],
-              [
-                0.08,
+                0.12,
                 0.84,
                 0.08
               ],
               [
-                0.08,
+                0.12,
                 0.98,
                 0.08
               ],
               [
-                0.1,
+                0.14,
                 0.98,
                 0.08
               ],
               [
-                0.1,
+                0.13999999999999999,
                 0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 3.14,
+            "lengthM": 2.98,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 7
@@ -4338,11 +4210,11 @@
           "points": [
             {
               "x": 0,
-              "y": 768
+              "y": 684
             },
             {
               "x": 144,
-              "y": 768
+              "y": 684
             }
           ],
           "bridges": [],
@@ -4405,32 +4277,32 @@
                 0.06
               ],
               [
-                0.08,
+                0.12,
                 0.86,
                 0.06
               ],
               [
-                0.08,
-                0.98,
-                0.06
-              ],
-              [
                 0.12,
                 0.98,
                 0.06
               ],
               [
-                0.12,
+                0.16,
+                0.98,
+                0.06
+              ],
+              [
+                0.16,
                 0.98,
                 0.08
               ],
               [
-                0.12,
+                0.16,
                 0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 4.42,
+            "lengthM": 4.38,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 6
@@ -4442,11 +4314,11 @@
           "points": [
             {
               "x": 288,
-              "y": 720
+              "y": 636
             },
             {
-              "x": 504,
-              "y": 720
+              "x": 432,
+              "y": 636
             }
           ],
           "bridges": [],
@@ -4464,17 +4336,17 @@
             "cableId": "pv-breaker-positive",
             "points": [
               [
-                0.1,
+                0.13999999999999999,
                 0.87,
                 0.08
               ],
               [
-                0.1,
+                0.14,
                 0.86,
                 0.08
               ],
               [
-                0.1,
+                0.14,
                 0.86,
                 0.1
               ],
@@ -4504,7 +4376,7 @@
                 0.08
               ]
             ],
-            "lengthM": 0.42,
+            "lengthM": 0.46,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 9
@@ -4516,11 +4388,11 @@
           "points": [
             {
               "x": 288,
-              "y": 768
+              "y": 684
             },
             {
-              "x": 504,
-              "y": 768
+              "x": 432,
+              "y": 684
             }
           ],
           "bridges": [],
@@ -4538,12 +4410,12 @@
             "cableId": "pv-breaker-negative",
             "points": [
               [
-                0.12,
+                0.16,
                 0.87,
                 0.08
               ],
               [
-                0.12,
+                0.16,
                 0.82,
                 0.08
               ],
@@ -4568,7 +4440,7 @@
                 0.08
               ]
             ],
-            "lengthM": 0.54,
+            "lengthM": 0.58,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 8
@@ -4579,20 +4451,20 @@
           "toEndpointId": "controllerBreaker.top-0",
           "points": [
             {
-              "x": 672,
-              "y": 672
+              "x": 600,
+              "y": 588
             },
             {
-              "x": 708,
-              "y": 672
+              "x": 612,
+              "y": 588
             },
             {
-              "x": 708,
-              "y": 300
+              "x": 612,
+              "y": 336
             },
             {
-              "x": 720,
-              "y": 300
+              "x": 624,
+              "y": 336
             }
           ],
           "bridges": [],
@@ -4635,22 +4507,22 @@
                 0.06
               ],
               [
-                0.18,
+                0.2,
                 0.98,
                 0.06
               ],
               [
-                0.18,
+                0.2,
                 0.98,
                 0.08
               ],
               [
-                0.18,
+                0.2,
                 0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 0.42,
+            "lengthM": 0.4,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 11
@@ -4661,20 +4533,12 @@
           "toEndpointId": "positiveBus.main-positive-2",
           "points": [
             {
-              "x": 912,
-              "y": 348
+              "x": 816,
+              "y": 336
             },
             {
-              "x": 936,
-              "y": 348
-            },
-            {
-              "x": 936,
-              "y": 420
-            },
-            {
-              "x": 948,
-              "y": 420
+              "x": 1200,
+              "y": 336
             }
           ],
           "bridges": [],
@@ -4692,17 +4556,17 @@
             "cableId": "controller-positive-bus",
             "points": [
               [
-                0.18,
+                0.2,
                 0.87,
                 0.08
               ],
               [
-                0.18,
+                0.2,
                 0.86,
                 0.08
               ],
               [
-                0.18,
+                0.2,
                 0.86,
                 0.1
               ],
@@ -4732,7 +4596,7 @@
                 0.08
               ]
             ],
-            "lengthM": 0.28,
+            "lengthM": 0.26,
             "diameterMm": 6.5,
             "routed": true,
             "routingRank": 13
@@ -4743,35 +4607,35 @@
           "toEndpointId": "batteryShunt.shunt-system",
           "points": [
             {
-              "x": 672,
+              "x": 600,
+              "y": 636
+            },
+            {
+              "x": 756,
+              "y": 636
+            },
+            {
+              "x": 756,
               "y": 720
             },
             {
-              "x": 924,
+              "x": 1392,
               "y": 720
             },
             {
-              "x": 924,
-              "y": 732
+              "x": 1392,
+              "y": 468
             },
             {
-              "x": 1428,
-              "y": 732
-            },
-            {
-              "x": 1428,
-              "y": 600
-            },
-            {
-              "x": 1716,
-              "y": 600
+              "x": 1656,
+              "y": 468
             }
           ],
           "bridges": [
             {
               "point": {
-                "x": 936,
-                "y": 732
+                "x": 1404,
+                "y": 468
               },
               "axis": "horizontal"
             }
@@ -4826,20 +4690,20 @@
           "toEndpointId": "batteryShunt.shunt-battery",
           "points": [
             {
-              "x": 1620,
-              "y": 696
+              "x": 1584,
+              "y": 564
             },
             {
-              "x": 1704,
-              "y": 696
+              "x": 1644,
+              "y": 564
             },
             {
-              "x": 1704,
-              "y": 648
+              "x": 1644,
+              "y": 516
             },
             {
-              "x": 1716,
-              "y": 648
+              "x": 1656,
+              "y": 516
             }
           ],
           "bridges": [],
@@ -4908,15 +4772,31 @@
           "toEndpointId": "monitorFuse.monitor-fuse-in",
           "points": [
             {
-              "x": 1116,
-              "y": 492
+              "x": 1368,
+              "y": 408
             },
             {
-              "x": 1500,
-              "y": 492
+              "x": 1428,
+              "y": 408
+            },
+            {
+              "x": 1428,
+              "y": 372
+            },
+            {
+              "x": 1440,
+              "y": 372
             }
           ],
-          "bridges": [],
+          "bridges": [
+            {
+              "point": {
+                "x": 1404,
+                "y": 408
+              },
+              "axis": "horizontal"
+            }
+          ],
           "color": "#dc2626",
           "width": 2.5,
           "fromNodeId": "positiveBus",
@@ -4982,20 +4862,20 @@
           "toEndpointId": "batteryShunt.shunt-positive",
           "points": [
             {
-              "x": 1668,
-              "y": 492
+              "x": 1608,
+              "y": 372
             },
             {
-              "x": 1704,
-              "y": 492
+              "x": 1644,
+              "y": 372
             },
             {
-              "x": 1704,
-              "y": 552
+              "x": 1644,
+              "y": 420
             },
             {
-              "x": 1716,
-              "y": 552
+              "x": 1656,
+              "y": 420
             }
           ],
           "bridges": [],
@@ -5054,28 +4934,28 @@
           "toEndpointId": "batteryMonitor.monitor-rj12",
           "points": [
             {
-              "x": 1824,
-              "y": 708
+              "x": 1764,
+              "y": 576
             },
             {
-              "x": 1824,
-              "y": 720
+              "x": 1764,
+              "y": 588
             },
             {
-              "x": 1896,
-              "y": 720
+              "x": 1836,
+              "y": 588
             },
             {
-              "x": 1896,
-              "y": 408
+              "x": 1836,
+              "y": 276
             },
             {
-              "x": 1776,
-              "y": 408
+              "x": 1716,
+              "y": 276
             },
             {
-              "x": 1776,
-              "y": 396
+              "x": 1716,
+              "y": 264
             }
           ],
           "bridges": [],
@@ -5130,18 +5010,18 @@
           "points": [
             {
               "x": 0,
-              "y": 564
+              "y": 480
             },
             {
-              "x": 732,
-              "y": 564
+              "x": 960,
+              "y": 480
             }
           ],
           "bridges": [
             {
               "point": {
-                "x": 708,
-                "y": 564
+                "x": 612,
+                "y": 480
               },
               "axis": "horizontal"
             }
@@ -5175,27 +5055,27 @@
                 0.06
               ],
               [
-                0.14,
+                0.18,
                 0.3,
                 0.06
               ],
               [
-                0.14,
+                0.18,
                 0.84,
                 0.06
               ],
               [
-                0.14,
+                0.18,
                 0.84,
                 0.08
               ],
               [
-                0.13999999999999999,
+                0.18,
                 0.87,
                 0.08
               ]
             ],
-            "lengthM": 1.11,
+            "lengthM": 1.15,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 1
@@ -5206,12 +5086,12 @@
           "toEndpointId": "positiveBus.main-positive-0",
           "points": [
             {
-              "x": 900,
-              "y": 564
+              "x": 1128,
+              "y": 480
             },
             {
-              "x": 948,
-              "y": 564
+              "x": 1200,
+              "y": 480
             }
           ],
           "bridges": [],
@@ -5229,12 +5109,12 @@
             "cableId": "battery-a-positive-bus",
             "points": [
               [
-                0.13999999999999999,
+                0.18,
                 0.9700000000000001,
                 0.08
               ],
               [
-                0.14,
+                0.18,
                 1,
                 0.08
               ],
@@ -5249,7 +5129,7 @@
                 0.08
               ]
             ],
-            "lengthM": 0.18,
+            "lengthM": 0.14,
             "diameterMm": 7.9,
             "routed": true,
             "routingRank": 5
@@ -5261,45 +5141,30 @@
           "points": [
             {
               "x": 0,
-              "y": 924
+              "y": 264
             },
             {
-              "x": 720,
-              "y": 924
+              "x": 1188,
+              "y": 264
             },
             {
-              "x": 720,
-              "y": 996
+              "x": 1188,
+              "y": 216
             },
             {
-              "x": 1116,
-              "y": 996
+              "x": 1404,
+              "y": 216
             },
             {
-              "x": 1116,
-              "y": 816
+              "x": 1404,
+              "y": 684
             },
             {
-              "x": 1452,
-              "y": 816
+              "x": 1416,
+              "y": 684
             }
           ],
-          "bridges": [
-            {
-              "point": {
-                "x": 684,
-                "y": 924
-              },
-              "axis": "horizontal"
-            },
-            {
-              "point": {
-                "x": 696,
-                "y": 924
-              },
-              "axis": "horizontal"
-            }
-          ],
+          "bridges": [],
           "color": "#111827",
           "width": 3.590909090909091,
           "fromNodeId": "boundary",
@@ -5376,49 +5241,42 @@
           "points": [
             {
               "x": 0,
-              "y": 1080
+              "y": 888
             },
             {
               "x": 12,
-              "y": 1080
+              "y": 888
             },
             {
               "x": 12,
-              "y": 1044
+              "y": 852
             },
             {
               "x": 0,
-              "y": 1044
+              "y": 852
             },
             {
               "x": 0,
-              "y": 912
+              "y": 516
             },
             {
-              "x": 720,
-              "y": 912
+              "x": 768,
+              "y": 516
             },
             {
-              "x": 720,
-              "y": 876
+              "x": 768,
+              "y": 648
             },
             {
-              "x": 732,
-              "y": 876
+              "x": 780,
+              "y": 648
             }
           ],
           "bridges": [
             {
               "point": {
-                "x": 684,
-                "y": 912
-              },
-              "axis": "horizontal"
-            },
-            {
-              "point": {
-                "x": 696,
-                "y": 912
+                "x": 612,
+                "y": 516
               },
               "axis": "horizontal"
             }
@@ -5467,7 +5325,7 @@
                 0.08
               ],
               [
-                0.45999999999999996,
+                0.46,
                 0.87,
                 0.08
               ]
@@ -5483,20 +5341,20 @@
           "toEndpointId": "positiveBus.main-positive-1",
           "points": [
             {
-              "x": 900,
-              "y": 876
-            },
-            {
-              "x": 936,
-              "y": 876
-            },
-            {
-              "x": 936,
-              "y": 660
-            },
-            {
               "x": 948,
-              "y": 660
+              "y": 648
+            },
+            {
+              "x": 1188,
+              "y": 648
+            },
+            {
+              "x": 1188,
+              "y": 576
+            },
+            {
+              "x": 1200,
+              "y": 576
             }
           ],
           "bridges": [],
@@ -5514,7 +5372,7 @@
             "cableId": "battery-b-positive-bus",
             "points": [
               [
-                0.45999999999999996,
+                0.46,
                 0.9700000000000001,
                 0.08
               ],
@@ -5556,41 +5414,33 @@
           "points": [
             {
               "x": 0,
-              "y": 1032
+              "y": 840
             },
             {
-              "x": 1128,
-              "y": 1032
+              "x": 1404,
+              "y": 840
             },
             {
-              "x": 1128,
-              "y": 888
+              "x": 1404,
+              "y": 780
             },
             {
-              "x": 1440,
-              "y": 888
-            },
-            {
-              "x": 1440,
-              "y": 912
-            },
-            {
-              "x": 1452,
-              "y": 912
+              "x": 1416,
+              "y": 780
             }
           ],
           "bridges": [
             {
               "point": {
-                "x": 684,
-                "y": 1032
+                "x": 720,
+                "y": 840
               },
               "axis": "horizontal"
             },
             {
               "point": {
-                "x": 696,
-                "y": 1032
+                "x": 732,
+                "y": 840
               },
               "axis": "horizontal"
             }
@@ -5660,20 +5510,20 @@
           "toEndpointId": "loadPositiveBus.load-positive-0",
           "points": [
             {
-              "x": 672,
-              "y": 816
+              "x": 600,
+              "y": 732
             },
             {
-              "x": 684,
-              "y": 816
+              "x": 720,
+              "y": 732
             },
             {
-              "x": 684,
-              "y": 1440
+              "x": 720,
+              "y": 1356
             },
             {
-              "x": 936,
-              "y": 1440
+              "x": 996,
+              "y": 1356
             }
           ],
           "bridges": [],
@@ -5747,27 +5597,27 @@
           "toEndpointId": "loadNegativeBus.load-negative-0",
           "points": [
             {
-              "x": 672,
-              "y": 768
+              "x": 600,
+              "y": 684
             },
             {
-              "x": 696,
-              "y": 768
+              "x": 732,
+              "y": 684
             },
             {
-              "x": 696,
-              "y": 1224
+              "x": 732,
+              "y": 1140
             },
             {
-              "x": 1260,
-              "y": 1224
+              "x": 1344,
+              "y": 1140
             }
           ],
           "bridges": [
             {
               "point": {
-                "x": 1140,
-                "y": 1224
+                "x": 1236,
+                "y": 1140
               },
               "axis": "horizontal"
             }
@@ -5842,20 +5692,20 @@
           "toEndpointId": "starlinkBreaker.top-0",
           "points": [
             {
-              "x": 1104,
-              "y": 1512
+              "x": 1164,
+              "y": 1428
             },
             {
-              "x": 1140,
-              "y": 1512
+              "x": 1236,
+              "y": 1428
             },
             {
-              "x": 1140,
-              "y": 960
+              "x": 1236,
+              "y": 936
             },
             {
-              "x": 1152,
-              "y": 960
+              "x": 1680,
+              "y": 936
             }
           ],
           "bridges": [],
@@ -5906,7 +5756,7 @@
             "lengthM": 0.18,
             "diameterMm": 4,
             "routed": true,
-            "routingRank": 27
+            "routingRank": 26
           }
         },
         {
@@ -5914,20 +5764,12 @@
           "toEndpointId": "starlinkConverter.starlinkConverter+",
           "points": [
             {
-              "x": 1296,
-              "y": 960
+              "x": 1824,
+              "y": 936
             },
             {
-              "x": 1440,
-              "y": 960
-            },
-            {
-              "x": 1440,
-              "y": 1128
-            },
-            {
-              "x": 1464,
-              "y": 1128
+              "x": 1872,
+              "y": 936
             }
           ],
           "bridges": [],
@@ -5951,26 +5793,16 @@
               ],
               [
                 0.44,
-                0.86,
+                0.82,
                 0.08
               ],
               [
-                0.42,
-                0.86,
+                0.5,
+                0.82,
                 0.08
               ],
               [
-                0.42,
-                0.86,
-                0.1
-              ],
-              [
-                0.42,
-                1.16,
-                0.1
-              ],
-              [
-                0.42,
+                0.5,
                 1.16,
                 0.08
               ],
@@ -5985,7 +5817,7 @@
                 0.08
               ]
             ],
-            "lengthM": 0.52,
+            "lengthM": 0.68,
             "diameterMm": 4,
             "routed": true,
             "routingRank": 20
@@ -5996,20 +5828,20 @@
           "toEndpointId": "starlinkConverter.",
           "points": [
             {
-              "x": 1428,
-              "y": 1296
+              "x": 1512,
+              "y": 1212
             },
             {
-              "x": 1452,
-              "y": 1296
+              "x": 1860,
+              "y": 1212
             },
             {
-              "x": 1452,
-              "y": 1176
+              "x": 1860,
+              "y": 984
             },
             {
-              "x": 1464,
-              "y": 1176
+              "x": 1872,
+              "y": 984
             }
           ],
           "bridges": [],
@@ -6078,20 +5910,12 @@
           "toEndpointId": "boundary::starlink-regulated",
           "points": [
             {
-              "x": 1656,
-              "y": 1152
+              "x": 2064,
+              "y": 960
             },
             {
-              "x": 2148,
-              "y": 1152
-            },
-            {
-              "x": 2148,
-              "y": 1044
-            },
-            {
-              "x": 2160,
-              "y": 1044
+              "x": 2208,
+              "y": 960
             }
           ],
           "bridges": [],
@@ -6175,12 +5999,12 @@
           "toEndpointId": "usbBreaker.top-0",
           "points": [
             {
-              "x": 1104,
-              "y": 1656
+              "x": 1164,
+              "y": 1572
             },
             {
-              "x": 1152,
-              "y": 1656
+              "x": 1212,
+              "y": 1572
             }
           ],
           "bridges": [],
@@ -6210,28 +6034,28 @@
               [
                 0.4,
                 0.98,
-                0.12
+                0.1
               ],
               [
-                0.5,
+                0.48,
                 0.98,
-                0.12
+                0.1
               ],
               [
-                0.5,
+                0.48,
                 0.98,
                 0.08
               ],
               [
-                0.5,
+                0.48,
                 0.9700000000000001,
                 0.08
               ]
             ],
-            "lengthM": 0.22,
+            "lengthM": 0.16,
             "diameterMm": 4,
             "routed": true,
-            "routingRank": 26
+            "routingRank": 27
           }
         },
         {
@@ -6239,20 +6063,20 @@
           "toEndpointId": "usbCharger.usbCharger+",
           "points": [
             {
-              "x": 1296,
-              "y": 1656
+              "x": 1356,
+              "y": 1572
             },
             {
-              "x": 1488,
-              "y": 1656
+              "x": 1548,
+              "y": 1572
             },
             {
-              "x": 1488,
-              "y": 1440
+              "x": 1548,
+              "y": 1356
             },
             {
-              "x": 1500,
-              "y": 1440
+              "x": 1560,
+              "y": 1356
             }
           ],
           "bridges": [],
@@ -6270,33 +6094,38 @@
             "cableId": "usb-breaker-charger",
             "points": [
               [
-                0.5,
+                0.48,
                 0.87,
                 0.08
               ],
               [
-                0.5,
+                0.48,
                 0.86,
                 0.08
-              ],
-              [
-                0.52,
-                0.86,
-                0.08
-              ],
-              [
-                0.52,
-                0.98,
-                0.08
-              ],
-              [
-                0.52,
-                0.98,
-                0.06
               ],
               [
                 0.48,
-                0.98,
+                0.86,
+                0.1
+              ],
+              [
+                0.5,
+                0.86,
+                0.1
+              ],
+              [
+                0.5,
+                1,
+                0.1
+              ],
+              [
+                0.48,
+                1,
+                0.1
+              ],
+              [
+                0.48,
+                1,
                 0.06
               ],
               [
@@ -6305,7 +6134,7 @@
                 0.06
               ]
             ],
-            "lengthM": 0.42,
+            "lengthM": 0.44,
             "diameterMm": 4,
             "routed": true,
             "routingRank": 21
@@ -6316,12 +6145,12 @@
           "toEndpointId": "usbCharger.",
           "points": [
             {
-              "x": 1428,
-              "y": 1392
+              "x": 1512,
+              "y": 1308
             },
             {
-              "x": 1500,
-              "y": 1392
+              "x": 1560,
+              "y": 1308
             }
           ],
           "bridges": [],
@@ -6360,12 +6189,7 @@
               ],
               [
                 0.5,
-                1,
-                0.04
-              ],
-              [
-                0.5,
-                1,
+                0.98,
                 0.06
               ],
               [
@@ -6385,16 +6209,16 @@
           "toEndpointId": "boundary::usb-device-leads",
           "points": [
             {
-              "x": 1668,
-              "y": 1440
+              "x": 1728,
+              "y": 1356
             },
             {
-              "x": 2160,
-              "y": 1440
+              "x": 2208,
+              "y": 1356
             },
             {
-              "x": 2160,
-              "y": 1284
+              "x": 2208,
+              "y": 1200
             }
           ],
           "bridges": [],
@@ -6483,20 +6307,20 @@
           "toEndpointId": "boundary::usb-a-device-lead",
           "points": [
             {
-              "x": 1668,
-              "y": 1392
+              "x": 1728,
+              "y": 1308
             },
             {
-              "x": 2148,
-              "y": 1392
+              "x": 2196,
+              "y": 1308
             },
             {
-              "x": 2148,
-              "y": 1332
+              "x": 2196,
+              "y": 1248
             },
             {
-              "x": 2160,
-              "y": 1332
+              "x": 2208,
+              "y": 1248
             }
           ],
           "bridges": [],
@@ -6581,26 +6405,26 @@
           }
         }
       ],
-      "width": 2160,
-      "height": 1872,
+      "width": 2208,
+      "height": 1776,
       "routingMs": 0,
       "layoutMs": 0,
       "compactionMs": 0,
-      "compactionMoves": 37,
+      "compactionMoves": 44,
       "coincidentSegments": 0,
       "nonOrthogonalSegments": 0,
       "conductorOverlaps": 0,
       "routingFallbacks": 0,
       "fallbackRouteIds": [],
-      "bridgedCrossings": 9,
+      "bridgedCrossings": 7,
       "unbridgedCrossings": 0,
       "parallelEnvelopeOverlaps": 0,
       "minimumParallelWireSeparation": 12,
       "nodeBodyCrossings": 0,
       "maskedNodeBodyCrossings": 0,
       "nodeOverlaps": 0,
-      "wireTurns": 49,
-      "wireLength": 14304,
+      "wireTurns": 43,
+      "wireLength": 15252,
       "junctionId": "equipmentEnclosure"
     }
   }

@@ -12,7 +12,7 @@ test("Los Angeles tax applies to priced imports while preserving pre-tax cart an
   assert.equal(system.taxEstimate.ratePercent, 9.75);
   assert.equal(system.taxEstimate.jurisdiction, "City of Los Angeles, California");
   assert.deepEqual(planningEstimate(system.bom, system.taxEstimate), {
-    subtotalUsd: 2073.57, taxableSubtotalUsd: 1373.57, taxUsd: 133.92, totalUsd: 2207.49,
+    subtotalUsd: 2059.58, taxableSubtotalUsd: 1359.58, taxUsd: 132.56, totalUsd: 2192.14,
   });
   const local = system.bom.filter(item => item.location === "Buy in Chuuk");
   assert.deepEqual(planningEstimate(local, system.taxEstimate), {
@@ -95,10 +95,10 @@ test("Polowat diagram and 3D model share one minimal protected topology", () => 
     "mppt-load-positive", "mppt-load-negative", "starlink-regulated", "usb-device-leads",
   ]) assert.ok(ids.has(id), `missing ${id}`);
 
-  assert.equal(polowatDeviceById.get("batteryBreakerA")?.subtitle, "30 A non-polarized · inside junction box");
-  assert.equal(polowatDeviceById.get("batteryBreakerB")?.subtitle, "30 A non-polarized · inside junction box");
+  assert.equal(polowatDeviceById.get("batteryBreakerA")?.subtitle, "30 A single-pole · non-polarized · inside junction box");
+  assert.equal(polowatDeviceById.get("batteryBreakerB")?.subtitle, "30 A single-pole · non-polarized · inside junction box");
   assert.equal(polowatDeviceById.get("pvBreaker")?.subtitle, "10 A polarized · two-pole");
-  assert.equal(polowatDeviceById.get("controllerBreaker")?.subtitle, "30 A non-polarized · bus end");
+  assert.equal(polowatDeviceById.get("controllerBreaker")?.subtitle, "30 A single-pole · non-polarized · bus end");
   assert.equal(polowatDeviceById.get("starlinkBreaker")?.subtitle, "10 A breaker");
   assert.equal(polowatDeviceById.get("usbBreaker")?.subtitle, "10 A breaker");
 
@@ -207,7 +207,7 @@ test("reference enclosure is deferred and bench spacing does not claim a fitted 
   }
   assert.ok(!system.bom.some(r => /MidNite|MNEDC/.test(r.item)));
   assert.ok(!system.bom.some(r => r.id === "polowat-vents"));
-  assert.match(system.bom.find(r => r.id === "polowat-battery-breakers")!.procurement, /Hold/);
+  assert.match(system.bom.find(r => r.id === "polowat-battery-breakers")!.procurement, /Purchased/);
   assert.match(system.bom.find(r => r.id === "polowat-usb-a-extension")!.procurement, /Staged/);
 });
 
@@ -237,4 +237,17 @@ test("shared PV stock covers both circuits once and removed splice purchases sta
   }
   assert.equal(polowatDeviceById.get("loadPositiveBus")?.bomId, "polowat-din-distribution");
   assert.ok(!system.bom.some(row => row.id === "polowat-pv-splice-housing"));
+});
+
+test('two purchased DIHOOL packs account for three installed breakers and one spare', () => {
+  const rows=system.bom.filter(b=>['polowat-battery-breakers','polowat-controller-breaker'].includes(b.id));
+  assert.equal(rows.length,2);
+  assert.ok(rows.every(b=>b.amazonAsin==='B0BFF6RN2N' && b.unit==='2-pack' && b.qty===1));
+  const inventory=rows.reduce((n,b)=>n+b.qty*2,0);
+  const installed=polowatTopology.devices.filter(d=>rows.some(b=>b.id===d.bomId));
+  assert.equal(inventory,4);
+  assert.equal(installed.length,3);
+  assert.equal(inventory-installed.length,system.dihoolReview.purchaseAllocation.spares);
+  assert.ok(installed.every(d=>d.poles===1 && d.dinModules===1));
+  assert.equal(rows.reduce((n,b)=>n+Math.round(b.totalUsd*100),0),2798);
 });

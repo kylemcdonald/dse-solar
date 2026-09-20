@@ -194,3 +194,9 @@ The owner's subsequent spacing experiment supersedes the blanket edge-to-edge ru
 ## Breaker pole count versus body width
 
 Electrical `poles` and mechanical `dinModules` are independent. A 1P/2-module breaker has one centered toggle on an uninterrupted wide face; a 2P/2-module breaker has two pole faces and linked toggles. Never infer electrical poles from casing width or the number of currently connected wires. Existing undeclared DIN widths keep legacy sizing; preserve Fiji's installed layout. Polowat declares both values explicitly, retaining its recorded hardware pole counts unless the owner supplies a correction.
+
+## Polowat purchased single-pole breakers (19 September 2026)
+
+P17 supersedes the earlier two-pole DIHOOL candidates and procurement holds. Owner purchased two B0BFF6RN2N two-packs: four single-pole, single-width, non-polarized 30 A breakers. Allocate two to battery positives, one to controller positive and one unmounted spare. Keep battery negatives continuous through BATT− and the BMV shunt. Both BOM rows use one two-pack each; controller row includes the spare. Private reviewed invoice and refreshed exports remain ignored under `private/receipts/polowat/`.
+
+Owner accepts the listing's low-voltage wording as poor copy; do not reintroduce a procurement approval requirement. Exact single-pole photo is DZ47X-63 / 30 A / 400 V AC/DC / Icu 4 kA, not the superseded two-pole 6 kA/C-curve evidence. Received terminal/torque, source-end protection and parallel-battery fault coordination remain installation checks. Rendering and routing use one pole, one module and exactly two clamps per installed breaker; spare is inventory only. Preserve Fiji unchanged.

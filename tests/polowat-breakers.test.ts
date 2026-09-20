@@ -33,3 +33,17 @@ test('selected breaker routing minimizes the measured score and matches the gene
  const total=polowatRuntime.routes.reduce((n,r)=>n+roundedRoutePieces(r.points,Math.max(.009,r.diameterMm/2000*4.25)).reduce((n,p)=>n+p.lengthM,0),0);
  assert.equal(+total.toFixed(3),winner.totalLengthM);
 });
+
+
+test('purchased single-pole breakers have only two clamps and one module; spare stays off the rail',()=>{
+ for(const id of reversiblePolowatBreakers){
+  const device=polowatGraph.devices.find(d=>d.id===id)!;
+  assert.equal(device.poles,1);
+  assert.equal(device.dinModules,1);
+  assert.equal(device.size[0],.02);
+  assert.equal(device.status,'purchased');
+  assert.deepEqual(device.conductors.map(p=>p.id).sort(),['bottom-0','top-0']);
+ }
+ assert.equal(polowatGraph.devices.filter(d=>reversiblePolowatBreakers.includes(d.id as typeof reversiblePolowatBreakers[number])).length,3);
+ assert.equal(polowatGraph.devices.find(d=>d.id==='pvBreaker')!.poles,2);
+});

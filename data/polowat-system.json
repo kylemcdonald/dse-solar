@@ -5,8 +5,8 @@
   "name": "Inowon Sailing School compact solar network",
   "subtitle": "Minimal direct-DC Starlink and USB charging system",
   "location": "Polowat, Chuuk State, FSM",
-  "revision": "P16 · BMV-700 bank monitor · 19 Sep 2026",
-  "status": "Cart staged for owner review · enclosure fit and installation checks unresolved",
+  "revision": "P17 · purchased single-pole DIHOOL breakers · 19 Sep 2026",
+  "status": "Equipment purchases recorded · enclosure fit and installation checks unresolved",
   "currency": {
     "base": "USD",
     "fjdPerUsd": 2.2,
@@ -16,9 +16,9 @@
     "targetUsd": 2350,
     "targetBasis": "total",
     "contingencyIncluded": false,
-    "note": "P15 equipment $1,985.17 ($1,285.17 import / $700.00 local), LA tax estimate $125.30, total $2,110.47. Cart $859.23 before tax. Includes deferred box and held DIHOOL allowances; unpriced scopes, freight, duty and service excluded. Routed voltage drop, tooling, mounting and enclosure fit remain unresolved."
+    "note": "P17 equipment estimate $2,059.58, including both DIHOOL two-packs (three installed breakers and one spare). Actual paid goods, tax and tender are reconciled separately in the private receipt ledger. Enclosure purchase remains deferred; freight, duty and unpriced installation scopes are excluded."
   },
-  "summary": "Three 100 W panels in 3S feed a SmartSolar 100/20: 20 A maximum charge and physical LOAD output. Two matched local 12 V / 150 Ah batteries use 8 AWG branches; controller wiring is 10 AWG and short LOAD wiring 12 AWG. CHTAIXI supplies polarized 10 A PV/load protection; required 30 A non-polarized DIHOOL battery/controller protection has conflicting published specifications to resolve. Owner reference enclosure is the ANIMACYN B0CT5LRGRF ventilated ABS box, 13.8 × 9.7 × 5.9 inches, previously used for Pasana Group / PNG. Keep it out of the current order; determine the final fit by hand-assembling the components before ordering the box. Capped USB-A/USB-C female extensions remain. The 165 W load envelope has no inverter. The ordered BMV-700 adds bank state of charge through its included 500 A / 50 mV shunt and wired display; its fused sense/power lead is the only added battery-bus load. Purchase evidence is retained in the private Polowat ledger.",
+  "summary": "Three 100 W panels in 3S feed a SmartSolar 100/20: 20 A maximum charge and physical LOAD output. Two matched local 12 V / 150 Ah batteries use 8 AWG branches; controller wiring is 10 AWG and short LOAD wiring 12 AWG. CHTAIXI supplies polarized 10 A PV/load protection; three purchased single-pole 30 A non-polarized DIHOOL breakers protect battery/controller positives, with one spare from the two purchased two-packs. Owner reference enclosure is the ANIMACYN B0CT5LRGRF ventilated ABS box, 13.8 × 9.7 × 5.9 inches, previously used for Pasana Group / PNG. Keep it out of the current order; determine the final fit by hand-assembling the components before ordering the box. Capped USB-A/USB-C female extensions remain. The 165 W load envelope has no inverter. The ordered BMV-700 adds bank state of charge through its included 500 A / 50 mV shunt and wired display; its fused sense/power lead is the only added battery-bus load. Purchase evidence is retained in the private Polowat ledger.",
   "keyFacts": [
     {
       "label": "Solar array",
@@ -47,8 +47,8 @@
     },
     {
       "label": "Imported shipment",
-      "value": "23.45 kg net",
-      "detail": "About 27.0 kg packed; includes provisional monitor-kit weight; final box deferred"
+      "value": "23.25 kg net",
+      "detail": "About 26.7 kg packed; provisional weights include four single-pole breakers; final box deferred"
     },
     {
       "label": "Battery monitor",
@@ -103,11 +103,11 @@
       }
     ],
     "shipping": {
-      "importedNetKg": 23.45,
-      "importedPackedKg": 27,
+      "importedNetKg": 23.25,
+      "importedPackedKg": 26.7,
       "localEquipmentKg": 84,
       "batteryKg": 84,
-      "totalInstalledKg": 107.45,
+      "totalInstalledKg": 107.25,
       "packingAllowancePercent": 15,
       "note": "Complete eventual deployment estimate, including a provisional 1.5 kg reference enclosure that is excluded from the current cart. Includes DC coils, tools and spares; the aluminum sheet is excluded. Weigh received cartons and the final box before freight booking; three unpriced scopes and added cooling may increase mass. Battery boxes and their former 4 kg allowance are excluded."
     }
@@ -302,58 +302,58 @@
     {
       "id": "polowat-battery-breakers",
       "category": "DC safety",
-      "item": "DIHOOL 30 A non-polarized battery breakers · candidate on hold",
-      "qty": 2,
-      "unit": "ea",
-      "unitCost": 13.99,
-      "currency": "USD",
-      "totalUsd": 27.98,
-      "location": "Import to Chuuk",
-      "procurement": "Hold · reconcile DIHOOL specifications",
-      "priority": "Must · battery adjacent",
-      "description": "Two 30 A non-polarized battery-branch breakers, both inside the main junction box, on 8 AWG cable. Charging and discharging reverse current on these conductors. The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection. Final two-pole wiring, received fine-stranded conductor preparation and torque, actual battery fault current and parallel-source backfeed coordination remain installation checks. MidNite is excluded. Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream.",
-      "accountingGroup": "system",
-      "unitWeightKg": 0.2,
-      "totalWeightKg": 0.4,
-      "weightBasis": "estimate",
-      "weightNote": "Planning shipping mass; weigh received hardware.",
-      "specUrl": "https://www.dihool.net/detail_DZ47X-Electric-Linear-Actuator/2540_457",
-      "productUrl": "https://www.amazon.com/dp/B0B253VBWG",
-      "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Amazon new-item offer rechecked 15 Sep 2026 in the signed-in session: $13.99 per breaker, before tax/delivery. Specification clarification remains pending.",
-      "amazonAsin": "B0B253VBWG",
-      "cartQuantity": 0,
-      "priceStatus": "estimate",
-      "offerCheckedDate": "2026-09-15",
-      "ratingEvidence": "Seller photographs: 12–500 VDC, Icu 6 kA, C curve, non-polarized, 30 A; not an independently verified certification."
-    },
-    {
-      "id": "polowat-controller-breaker",
-      "category": "DC safety",
-      "item": "DIHOOL 30 A non-polarized controller breaker · candidate on hold",
+      "item": "DIHOOL 30 A single-pole battery breakers · 2-pack",
       "qty": 1,
-      "unit": "ea",
+      "unit": "2-pack",
       "unitCost": 13.99,
       "currency": "USD",
       "totalUsd": 13.99,
       "location": "Import to Chuuk",
-      "procurement": "Hold · reconcile DIHOOL specifications",
+      "procurement": "Purchased · awaiting delivery",
+      "priority": "Must · battery adjacent",
+      "description": "One two-pack: two installed battery-positive breakers on 8 AWG cable. Battery negatives remain continuous to BATT− and the BMV shunt. The battery-to-box positive leads remain upstream of these breakers; source-end protection and backfeed coordination remain installation checks. Owner selected and purchased DIHOOL B0BFF6RN2N on 19 Sep 2026: two packs of two single-pole 30 A non-polarized breakers. Three are allocated to battery A, battery B and controller positives; the fourth is an unmounted spare. Owner accepts the low-voltage listing wording as poor copy. Exact product photo shows DZ47X-63, 30 A, 400 V AC/DC and Icu 4 kA; do not carry over the superseded two-pole 6 kA/C-curve claims. Received terminal/torque checks and battery fault coordination remain installation checks, not a procurement hold.",
+      "accountingGroup": "system",
+      "unitWeightKg": 0.2,
+      "totalWeightKg": 0.2,
+      "weightBasis": "estimate",
+      "weightNote": "Estimated mass per two-pack; weigh received hardware.",
+      "specUrl": "https://www.dihool.net/detail_DZ47X-Electric-Linear-Actuator/2540_457",
+      "productUrl": "https://www.amazon.com/dp/B0BFF6RN2N",
+      "priceCheckedDate": "2026-09-19",
+      "priceBasis": "Two-pack unit basis; private reviewed Amazon receipt supplies actual purchase quantity, tax and cost.",
+      "amazonAsin": "B0BFF6RN2N",
+      "cartQuantity": 0,
+      "priceStatus": "estimate",
+      "offerCheckedDate": "2026-09-19",
+      "ratingEvidence": "Exact single-pole seller photo: DZ47X-63, 30 A, 400 V AC/DC, Icu 4 kA. Non-polarized per listing. Received verification pending."
+    },
+    {
+      "id": "polowat-controller-breaker",
+      "category": "DC safety",
+      "item": "DIHOOL 30 A single-pole controller breaker + spare · 2-pack",
+      "qty": 1,
+      "unit": "2-pack",
+      "unitCost": 13.99,
+      "currency": "USD",
+      "totalUsd": 13.99,
+      "location": "Import to Chuuk",
+      "procurement": "Purchased · awaiting delivery",
       "priority": "Must",
-      "description": "One 30 A non-polarized breaker at the positive-bus source end of the 10 AWG MPPT battery pair; Victron’s interval is 25–30 A. Charging and discharging reverse current on these conductors. The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection. Final two-pole wiring, received fine-stranded conductor preparation and torque, actual battery fault current and parallel-source backfeed coordination remain installation checks. MidNite is excluded.",
+      "description": "One two-pack: one installed controller-positive breaker on 10 AWG cable and one unmounted spare. Victron specifies 25–30 A battery-side protection. Owner selected and purchased DIHOOL B0BFF6RN2N on 19 Sep 2026: two packs of two single-pole 30 A non-polarized breakers. Three are allocated to battery A, battery B and controller positives; the fourth is an unmounted spare. Owner accepts the low-voltage listing wording as poor copy. Exact product photo shows DZ47X-63, 30 A, 400 V AC/DC and Icu 4 kA; do not carry over the superseded two-pole 6 kA/C-curve claims. Received terminal/torque checks and battery fault coordination remain installation checks, not a procurement hold.",
       "specUrl": "https://www.dihool.net/detail_DZ47X-Electric-Linear-Actuator/2540_457",
       "accountingGroup": "system",
       "unitWeightKg": 0.2,
       "totalWeightKg": 0.2,
       "weightBasis": "estimate",
-      "weightNote": "Planning shipping mass; weigh received hardware.",
-      "productUrl": "https://www.amazon.com/dp/B0B253VBWG",
-      "priceCheckedDate": "2026-09-15",
-      "priceBasis": "Amazon new-item offer rechecked 15 Sep 2026 in the signed-in session: $13.99 per breaker, before tax/delivery. Specification clarification remains pending.",
-      "amazonAsin": "B0B253VBWG",
+      "weightNote": "Estimated mass per two-pack; weigh received hardware.",
+      "productUrl": "https://www.amazon.com/dp/B0BFF6RN2N",
+      "priceCheckedDate": "2026-09-19",
+      "priceBasis": "Two-pack unit basis; private reviewed Amazon receipt supplies actual purchase quantity, tax and cost.",
+      "amazonAsin": "B0BFF6RN2N",
       "cartQuantity": 0,
       "priceStatus": "estimate",
-      "offerCheckedDate": "2026-09-15",
-      "ratingEvidence": "Seller photographs: 12–500 VDC, Icu 6 kA, C curve, non-polarized, 30 A; not an independently verified certification."
+      "offerCheckedDate": "2026-09-19",
+      "ratingEvidence": "Exact single-pole seller photo: DZ47X-63, 30 A, 400 V AC/DC, Icu 4 kA. Non-polarized per listing. Received verification pending."
     },
     {
       "id": "polowat-load-breakers",
@@ -420,7 +420,7 @@
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must",
-      "description": "Three 4-inch aluminum rail pieces for CHTAIXI breakers and DIN distribution. The proposed DIHOOL replacements use DIN mounting and may include rail. Allocate rails after received dimensions and guarded battery-breaker positions are known. Rail stops, terminal guards and stainless installation hardware remain separate finish work.",
+      "description": "Three 4-inch aluminum rail pieces for CHTAIXI breakers and DIN distribution. The purchased single-pole DIHOOL breakers use DIN mounting and may include rail. Allocate rails after received dimensions and guarded battery-breaker positions are known. Rail stops, terminal guards and stainless installation hardware remain separate finish work.",
       "accountingGroup": "system",
       "unitWeightKg": 0.12,
       "totalWeightKg": 0.12,
@@ -545,7 +545,7 @@
       "location": "Import to Chuuk",
       "procurement": "Staged 15 Sep · not purchased",
       "priority": "Must",
-      "description": "Owner-selected B09BYGJGTB supplies 30 ft / 9.144 m EACH red and black, bare-ended. Listing claims tinned copper, UV-resistant PV insulation, −40 to 90°C and 1.5 kV DC / 1.0 kV AC; suitable in principle for outdoor PV and short DC controller wiring. Title says 6 mm², but 84 strands × 0.285 mm implies about 5.36 mm²: calculate conservatively as 10 AWG / 5.26 mm², not certified 6 mm². Offcuts replace both separate Ancor 10 AWG rolls; retain 8 AWG batteries and 12 AWG LOAD. Require ≥30 A ampacity after installation derating for the BATT cuts; verify received conductor/temperature markings, actual jacket OD, gland/MC4 seal fit, crimp contact and controller clamp fit. One lead per controller terminal, max 6 mm²; never trim strands. PV cable temperature rating alone does not establish derated ampacity. Shared 9.144 m per colour: reserve 1.00 m for controller/shunt, 7.90 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site.",
+      "description": "Owner-selected B09BYGJGTB supplies 30 ft / 9.144 m EACH red and black, bare-ended. Listing claims tinned copper, UV-resistant PV insulation, −40 to 90°C and 1.5 kV DC / 1.0 kV AC; suitable in principle for outdoor PV and short DC controller wiring. Title says 6 mm², but 84 strands × 0.285 mm implies about 5.36 mm²: calculate conservatively as 10 AWG / 5.26 mm², not certified 6 mm². Offcuts replace both separate Ancor 10 AWG rolls; retain 8 AWG batteries and 12 AWG LOAD. Require ≥30 A ampacity after installation derating for the BATT cuts; verify received conductor/temperature markings, actual jacket OD, gland/MC4 seal fit, crimp contact and controller clamp fit. One lead per controller terminal, max 6 mm²; never trim strands. PV cable temperature rating alone does not establish derated ampacity. Shared 9.144 m per colour: reserve 0.95 m for controller/shunt, 7.95 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site.",
       "accountingGroup": "system",
       "unitWeightKg": 1.3,
       "totalWeightKg": 1.3,
@@ -958,14 +958,14 @@
     "Test both batteries together and each alone for at least two hours at the simultaneous design load. Measure battery-to-MPPT voltage drop, charge voltage at actual posts, all terminal temperatures and enclosure ambient; Victron full 20 A output requires ≤40°C ambient.",
     "Resolve site bonding, earth, ground-fault and lightning requirements. Do not ground either PV pole or create a LOAD− bypass; exact earth conductor sizing remains unassigned pending the site design.",
     "Ancor wire is rated 105°C dry but 75°C wet; installation must keep this DC cable dry. For the 12 AWG shared LOAD pair, verify ≥25 A derated ampacity: the manufacturer’s 4–6 conductor non-engine bundle example is 27 A, while its 7–24 conductor example falls to 22.5 A. Route the shared pair separately from larger bundles; terminal/local installation limits still apply.",
-    "The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection.",
+    "Owner selected and purchased DIHOOL B0BFF6RN2N on 19 Sep 2026: two packs of two single-pole 30 A non-polarized breakers. Three are allocated to battery A, battery B and controller positives; the fourth is an unmounted spare. Owner accepts the low-voltage listing wording as poor copy. Exact product photo shows DZ47X-63, 30 A, 400 V AC/DC and Icu 4 kA; do not carry over the superseded two-pole 6 kA/C-curve claims. Received terminal/torque checks and battery fault coordination remain installation checks, not a procurement hold.",
     "Actual battery model, prospective fault current, charge limits, terminals, terminal guarding, retention and equal-length routes remain unknown. Parallel-battery bus-end backfeed requires clearing-energy coordination or additional protection.",
     "Received Ancor 8/12 AWG and iGreely 10 AWG PV/controller wire markings, hot/bundled ampacity and terminal compatibility must be verified. Exact 8 AWG battery-post lugs and a matched crimper remain unpriced.",
     "USB-A BATIGE extension lacks published current/QC and formal IP ratings. Confirm ≥3 A and required charging profiles/sealing, or choose a documented alternative. USB-C PD pass-through must be checked in both orientations. Ports are sheltered while charging; close caps when unused.",
     "Owner reference is ANIMACYN B0CT5LRGRF, 13.8 × 9.7 × 5.9 inches, previously used for Pasana Group / PNG. Do not stage the enclosure. Hand-assemble components and establish actual dimensions before ordering it; no internal-fit drawing is released. Preserve controller mounting/cooling requirements during that assembly.",
     "Use the reference box’s ventilation; no separate QWORK vent. Check temperature with the final cover closed at full charge and load. The approximate 25–35 W heat allowance is not a guarantee of thermal fit; maintain ≤40°C MPPT ambient for full output.",
     "Separate guarded battery-breaker housings, finish labels/guards, Starlink entry/activation, roof attachment and bonding remain pending. No completed-system IP rating is established.",
-    "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. Eight installed DK10N blocks form four bridged pairs on the lower rail; two blocks remain spare. Verify end covers/stops for the optimized separated groups. No box order until owner assembly. DIHOOL protection remains held.",
+    "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. Eight installed DK10N blocks form four bridged pairs on the lower rail; two blocks remain spare. Verify end covers/stops for the optimized separated groups. No box order until owner assembly. Single-pole DIHOOL breakers are purchased; received hardware and protection coordination remain installation checks.",
     "Owner intends to use the enclosure’s plastic mounting grid and has removed the Tynulox sheet from procurement. Victron requires a nonflammable substrate for the SmartSolar: plastic-grid compliance has not been established. Resolve a suitable controller mounting surface before installation; no replacement plate is staged or priced.",
     "Verify shunt polarity, all charge/load paths through its system side and no LOAD− bypass. Fit two 10 AWG M10 lugs, keep supplied 1 A slow-blow sense fuse near BATT+ and carry spares. Verify 52 mm display body/cutout, rear RJ12 clearance, dry mounting and actual enclosure fit."
   ],
@@ -1056,9 +1056,9 @@
       "url": "https://cdtfa.ca.gov/taxes-and-fees/rates.aspx"
     },
     {
-      "title": "DIHOOL DZ47X 30 A non-polarized candidate — published specification mismatch",
+      "title": "DIHOOL DZ47X 30 A single-pole non-polarized · purchased two-packs",
       "publisher": "DIHOOL / Amazon",
-      "url": "https://www.amazon.com/dp/B0B253VBWG"
+      "url": "https://www.amazon.com/dp/B0BFF6RN2N"
     },
     {
       "title": "ANIMACYN owner reference ventilated ABS enclosure · order after bench assembly",
@@ -1152,7 +1152,7 @@
         "oneWayMetres": 2,
         "nominalVolts": 11.8,
         "protection": "30 A non-polarized inside junction box; upstream lead protection unresolved",
-        "note": "20 A normal with B isolated. ≥30 A derated wire ampacity; bus-end backfeed fault coordination unresolved. DIHOOL 30 A candidate held: reconcile published variant/fault ratings and final pole wiring before construction. Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream."
+        "note": "20 A normal with B isolated. ≥30 A derated wire ampacity; bus-end backfeed fault coordination unresolved. Purchased DIHOOL 30 A single-pole positive breaker; verify received terminals and fault coordination. Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream."
       },
       {
         "id": "battery-b",
@@ -1168,7 +1168,7 @@
         "oneWayMetres": 2,
         "nominalVolts": 11.8,
         "protection": "30 A non-polarized inside junction box; upstream lead protection unresolved",
-        "note": "20 A normal with A isolated. Match corresponding A/B cable resistances; bus-end backfeed fault coordination unresolved. DIHOOL 30 A candidate held: reconcile published variant/fault ratings and final pole wiring before construction. Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream."
+        "note": "20 A normal with A isolated. Match corresponding A/B cable resistances; bus-end backfeed fault coordination unresolved. Purchased DIHOOL 30 A single-pole positive breaker; verify received terminals and fault coordination. Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream."
       },
       {
         "id": "controller",
@@ -1185,7 +1185,7 @@
         "oneWayMetres": 0.5,
         "nominalVolts": 11.8,
         "protection": "30 A non-polarized at bus end",
-        "note": "Charge and discharge are opposite directions, not 40 A added. ≥30 A derated ampacity. Third breaker still unstaged. DIHOOL 30 A candidate held: reconcile published variant/fault ratings and final pole wiring before construction. Cut from the same iGreely PV roll; 0.5 m per colour reserved, not an additional wire purchase. Negative now includes the separate bus-to-shunt and shunt-to-MPPT legs. The old 0.5 m assumption is a target only; use the regenerated full routed path, including the 0.1 mΩ shunt, for voltage drop."
+        "note": "Charge and discharge are opposite directions, not 40 A added. ≥30 A derated ampacity. Third breaker still unstaged. Purchased DIHOOL 30 A single-pole positive breaker; verify received terminals and fault coordination. Cut from the same iGreely PV roll; 0.5 m per colour reserved, not an additional wire purchase. Negative now includes the separate bus-to-shunt and shunt-to-MPPT legs. The old 0.5 m assumption is a target only; use the regenerated full routed path, including the 0.1 mΩ shunt, for voltage drop."
       },
       {
         "id": "shared-load",
@@ -1355,9 +1355,9 @@
         "url": "https://docs.navico.com/view/362211770/65/"
       },
       {
-        "title": "DIHOOL DZ47X 30 A non-polarized candidate — published specification mismatch",
+        "title": "DIHOOL DZ47X 30 A single-pole non-polarized · purchased two-packs",
         "publisher": "DIHOOL / Amazon",
-        "url": "https://www.amazon.com/dp/B0B253VBWG"
+        "url": "https://www.amazon.com/dp/B0BFF6RN2N"
       },
       {
         "title": "ANIMACYN owner reference ventilated ABS enclosure · order after bench assembly",
@@ -1429,17 +1429,17 @@
       "loadAreaMm2": 3.31
     },
     "holds": [
-      "Routed cut allowances give 2.79% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give 2.00%, before terminal/contact resistance. Modeled cut allowances meet the 3% target before terminal/contact resistance; verify the remaining margin on the physical assembly.",
+      "Routed cut allowances give 2.75% battery/controller drop at 20 A and 11.8 V, including the BMV shunt, versus the 3% target. Scene route lengths give 1.97%, before terminal/contact resistance. Modeled cut allowances meet the 3% target before terminal/contact resistance; verify the remaining margin on the physical assembly.",
       "Klein 11061 is rated for 12–22 AWG stranded; 8 AWG battery and 10 AWG PV/controller cutting/stripping capability remains unresolved. The 10 AWG rating applies to solid wire.",
       "Battery isolators are inside the main junction box by owner request. Battery-to-box positive leads are upstream of their breakers: a fault there cannot be cleared by those downstream breakers. Source-end fault protection, mechanical guarding and parallel-bank backfeed coordination remain unresolved; keep leads shortest-practical. Moving a breaker does not extend its protection upstream.",
-      "The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection.",
+      "Owner selected and purchased DIHOOL B0BFF6RN2N on 19 Sep 2026: two packs of two single-pole 30 A non-polarized breakers. Three are allocated to battery A, battery B and controller positives; the fourth is an unmounted spare. Owner accepts the low-voltage listing wording as poor copy. Exact product photo shows DZ47X-63, 30 A, 400 V AC/DC and Icu 4 kA; do not carry over the superseded two-pole 6 kA/C-curve claims. Received terminal/torque checks and battery fault coordination remain installation checks, not a procurement hold.",
       "Actual battery model, prospective fault current, charge limits, terminals, terminal guarding, retention and equal-length routes remain unknown. Parallel-battery bus-end backfeed requires clearing-energy coordination or additional protection.",
       "Received YDDECW 8 AWG / YDDECW 12 AWG and iGreely 10 AWG PV/controller wire markings, hot/bundled ampacity and terminal compatibility must be verified. Exact 8 AWG battery-post lugs and a matched crimper remain unpriced.",
       "USB-A BATIGE extension lacks published current/QC and formal IP ratings. Confirm ≥3 A and required charging profiles/sealing, or choose a documented alternative. USB-C PD pass-through must be checked in both orientations. Ports are sheltered while charging; close caps when unused.",
       "Owner reference is ANIMACYN B0CT5LRGRF, 13.8 × 9.7 × 5.9 inches, previously used for Pasana Group / PNG. Do not stage the enclosure. Hand-assemble components and establish actual dimensions before ordering it; no internal-fit drawing is released. Preserve controller mounting/cooling requirements during that assembly.",
       "Use the reference box’s ventilation; no separate QWORK vent. Check temperature with the final cover closed at full charge and load. The approximate 25–35 W heat allowance is not a guarantee of thermal fit; maintain ≤40°C MPPT ambient for full output.",
       "Separate guarded battery-breaker housings, finish labels/guards, Starlink entry/activation, roof attachment and bonding remain pending. No completed-system IP rating is established.",
-      "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. Eight installed DK10N blocks form four bridged pairs on the lower rail; two blocks remain spare. Verify end covers/stops for the optimized separated groups. No box order until owner assembly. DIHOOL protection remains held.",
+      "P9 terminal-level mockup is an assembly study, not a released fabrication drawing: 325 × 424 mm workspace exceeds reference enclosure outside footprint. Exact converter dimensions, clamp/plug access, gland cuts and collision-free cable bend envelopes need received hardware. Eight installed DK10N blocks form four bridged pairs on the lower rail; two blocks remain spare. Verify end covers/stops for the optimized separated groups. No box order until owner assembly. Single-pole DIHOOL breakers are purchased; received hardware and protection coordination remain installation checks.",
       "Owner intends to use the enclosure’s plastic mounting grid and has removed the Tynulox sheet from procurement. Victron requires a nonflammable substrate for the SmartSolar: plastic-grid compliance has not been established. Resolve a suitable controller mounting surface before installation; no replacement plate is staged or priced."
     ],
     "lengthBasis": {
@@ -1605,14 +1605,11 @@
       }
     ],
     "pendingChanges": {
-      "reviewedDate": "2026-09-15",
-      "reason": "P15 complete: NOVINO removed and YDDECW 12 AWG 25 ft pair staged per owner.",
+      "reviewedDate": "2026-09-19",
+      "reason": "P15 complete: NOVINO removed and YDDECW 12 AWG 25 ft pair staged per owner. P17: owner purchased the replacement DIHOOL single-pole two-packs separately; no breaker purchase remains pending.",
       "remove": [],
       "add": [],
-      "heldBomIds": [
-        "polowat-battery-breakers",
-        "polowat-controller-breaker"
-      ],
+      "heldBomIds": [],
       "deferredBomIds": [
         "polowat-enclosure"
       ],
@@ -4290,44 +4287,42 @@
     "note": "Owner excludes battery boxes. Terminal guarding and battery retention remain part of final mounting; no replacement box allowance."
   },
   "dihoolReview": {
-    "checkedDate": "2026-09-15",
-    "summary": "The exact Amazon product photos show DZ47X-63, 30 A, non-polarized, 12–500 VDC and Icu 6 kA; the parameter image specifies a C curve. This establishes the advertised voltage range, not an independently verified test result. The Amazon bullet still limits its short-circuit claim to 48 V and above, while DIHOOL’s generic family page gives 4 kA/B-curve data. Resolve this variant/documentation mismatch before accepting the breaker as sole battery-fault protection.",
+    "checkedDate": "2026-09-19",
+    "summary": "Owner selected and purchased DIHOOL B0BFF6RN2N on 19 Sep 2026: two packs of two single-pole 30 A non-polarized breakers. Three are allocated to battery A, battery B and controller positives; the fourth is an unmounted spare. Owner accepts the low-voltage listing wording as poor copy. Exact product photo shows DZ47X-63, 30 A, 400 V AC/DC and Icu 4 kA; do not carry over the superseded two-pole 6 kA/C-curve claims. Received terminal/torque checks and battery fault coordination remain installation checks, not a procurement hold.",
     "manufacturerUrl": "https://www.dihool.net/detail_DZ47X-Electric-Linear-Actuator/2540_457",
-    "listingUrl": "https://www.amazon.com/dp/B0B253VBWG",
-    "confirmationNeeded": [
-      "Reconcile the current DZ47X-63 30 A / 6 kA / C-curve photos with the generic 4 kA / B-curve family page and the Amazon overload-only wording below 48 V. Identify which specifications apply to the supplied revision and its 12 V battery-fault interruption."
-    ],
-    "evidenceRequested": "Exact-revision manufacturer documentation or technical clarification of the contradictory ratings. The seller photos already document the advertised 12–500 VDC range, non-polarity and 6 kA marking. No seller message has been sent.",
-    "installationFollowup": "Compare confirmed interrupt rating and clearing curve with the selected batteries’ prospective fault current and the actual parallel-source wiring; this remains a separate installation check.",
+    "listingUrl": "https://www.amazon.com/dp/B0BFF6RN2N",
+    "confirmationNeeded": [],
+    "evidenceRequested": "No seller contact requested. Owner-authorized selection; inspect received markings and terminals.",
+    "installationFollowup": "Verify received cable preparation/torque and coordinate interruption/clearing with the actual batteries and parallel-source wiring.",
     "photoEvidence": {
-      "checkedDate": "2026-09-15",
+      "checkedDate": "2026-09-19",
       "modelMarking": "DZ47X-63, 30 A",
       "ratedVoltageVdc": [
-        12,
-        500
+        400
       ],
-      "icuKa": 6,
-      "tripCurve": "C (seller parameter image)",
+      "icuKa": 4,
+      "tripCurve": "Not established from exact single-pole photo",
       "nonPolarized": true,
-      "labelImage": "https://m.media-amazon.com/images/I/41Bs6W86DlL.jpg",
-      "parameterImage": "https://m.media-amazon.com/images/I/41qkFtvLPwL.jpg",
-      "terminalCableRangeMm2": [
-        1,
-        10
-      ],
-      "terminalTorqueNm": 3
+      "labelImage": "https://m.media-amazon.com/images/I/41wnwr0nE7L.jpg"
+    },
+    "purchaseAllocation": {
+      "packs": 2,
+      "unitsPerPack": 2,
+      "batteryBreakers": 2,
+      "controllerBreakers": 1,
+      "spares": 1
     }
   },
   "cableStockPlan": {
     "bomId": "polowat-pv-cable",
     "lengthPerColourM": 9.144,
-    "pvRoutePerColourM": 7.9,
-    "controllerRoutePerColourM": 1,
+    "pvRoutePerColourM": 7.95,
+    "controllerRoutePerColourM": 0.95,
     "reservePerColourM": 0.244,
     "areaForCalculationsMm2": 5.26,
     "claimedAreaMm2": 6,
     "strandCalculatedAreaMm2": 5.3587,
-    "note": "Shared 9.144 m per colour: reserve 1.00 m for controller/shunt, 7.90 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site."
+    "note": "Shared 9.144 m per colour: reserve 0.95 m for controller/shunt, 7.95 m for PV including disconnect tails, and 0.244 m trim margin. Both negative shunt legs are included. Measure the real rooftop route; illustrative scene distances do not prove the pack covers the site."
   },
   "assemblyReview": {
     "revision": "P16",
@@ -4379,21 +4374,21 @@
         "black": 3.5
       },
       "10 AWG PV": {
-        "red": 4.25,
+        "red": 4.15,
         "black": 5.85
       },
       "10 AWG DC": {
-        "red": 1,
+        "red": 0.95,
         "black": 0.9
       },
       "12 AWG DC": {
-        "red": 2.6,
+        "red": 2.75,
         "black": 1.9
       }
     },
-    "modelBatteryControllerDropV": 0.236,
-    "allowanceBatteryControllerDropV": 0.329,
-    "allowanceBatteryControllerDropPercent": 2.79,
+    "modelBatteryControllerDropV": 0.232,
+    "allowanceBatteryControllerDropV": 0.325,
+    "allowanceBatteryControllerDropPercent": 2.75,
     "limits": "Planning geometry, not surveyed site distances or a fabrication release. All modeled routes pass the shared device, cable, wall, self-intersection and rounded-geometry checks. Received hardware and installation clearances still require physical verification. PV span in scene is illustrative, not a surveyed roof run. Check the remaining shared 10 AWG stock after controller cuts before installation.",
     "includesShuntResistanceOhms": 0.0001,
     "method": "Shared 20 mm physical layout and turn-aware A*; device-front exclusion, negotiated cable clearance and exact rounded-geometry audits; lengths measured on the rendered curves"

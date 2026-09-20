@@ -1,5 +1,12 @@
 # Inowon / Polowat — current planning state
 
+## P17 · purchased single-pole breakers · 19 September 2026
+
+This update supersedes earlier two-pole DIHOOL candidate/hold statements below. Two B0BFF6RN2N two-packs supply four 30 A non-polarized single-pole, single-width breakers: battery A positive, battery B positive, controller positive, and one unmounted spare. Each BOM row is one two-pack; the controller row includes its spare. Battery negatives remain continuous through the BMV shunt. The private Amazon invoice is reviewed and archived, with refreshed expense PDF, CSV and receipt ZIP.
+
+The exact single-pole photo shows DZ47X-63 / 30 A / 400 V AC/DC / Icu 4 kA. The owner accepts the listing wording as poor copy and authorizes this selection. Superseded 6 kA/C-curve claims must not be applied to this variant. Received terminals, torque, source-end protection and parallel-source fault coordination remain installation checks. The three narrow bodies use one module and two clamps each; generated routes, diagram and cable schedule describe the updated geometry. The existing optimized ordering is retained, with all eight permitted breaker directions retested for this hardware. Fiji is unchanged.
+
+
 P9, 15 September 2026. The owner authorized the full current/wire survey, BOM changes, Los Angeles tax estimate, DC cable and reversible Amazon cart staging; no checkout or purchase. Current sources: [BOM](data/polowat-system.json), [electrical audit](public/polowat-electrical-audit.md), [cart changes and outstanding list](public/polowat-amazon-staging.md).
 
 300 W in 3S, SmartSolar 100/20, 20 A charge/LOAD ceilings, no inverter. 8 AWG batteries at <2 m; 12 AWG LOAD inside <1 m. Shared iGreely B09BYGJGTB stock is 30 ft / 9.144 m EACH red and black. Per colour budget 8 m complete PV route, 0.5 m bus/controller path and 0.644 m trimming/slack. Treat as 10 AWG / 5.26 mm²: the 6 mm² title conflicts with the stated strand construction (~5.36 mm²). Measure before cutting; add wire if routes exceed the budget. Separate Ancor 10 AWG rolls and the local PV allowance are removed. Four Ancor rolls remain: 8 AWG red/black 25 ft each and 12 AWG red/black 12 ft each.

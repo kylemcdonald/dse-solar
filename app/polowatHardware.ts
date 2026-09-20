@@ -68,14 +68,14 @@ export const polowatParts = [
   },
   {
     "id": "controllerBreaker",
-    "label": "DC 30 A*",
+    "label": "DC 30 A · 1P",
     "size": [
-      0.054,
+      0.018,
       0.092,
       0.077
     ],
     "kind": "breaker",
-    "basis": "Conservative installation envelope, not a measured received body. Confirm before drilling."
+    "basis": "DIHOOL B0BFF6RN2N: single-pole, single-width body. 18 × 92 × 77 mm planning envelope; photo establishes one pole, received dimensions/terminals remain to measure."
   },
   {
     "id": "starlinkBreaker",
@@ -125,23 +125,23 @@ export const polowatParts = [
     "id": "batteryBreakerA",
     "label": "Battery A 30 A",
     "size": [
-      0.054,
+      0.018,
       0.092,
       0.077
     ],
     "kind": "breaker",
-    "basis": "Conservative installation envelope, not a measured received body. Confirm before drilling."
+    "basis": "DIHOOL B0BFF6RN2N: single-pole, single-width body. 18 × 92 × 77 mm planning envelope; photo establishes one pole, received dimensions/terminals remain to measure."
   },
   {
     "id": "batteryBreakerB",
     "label": "Battery B 30 A",
     "size": [
-      0.054,
+      0.018,
       0.092,
       0.077
     ],
     "kind": "breaker",
-    "basis": "Conservative installation envelope, not a measured received body. Confirm before drilling."
+    "basis": "DIHOOL B0BFF6RN2N: single-pole, single-width body. 18 × 92 × 77 mm planning envelope; photo establishes one pole, received dimensions/terminals remain to measure."
   },
   {
     "id": "usbCharger",
@@ -347,18 +347,6 @@ export const polowatPorts = [
     "face": "bottom"
   },
   {
-    "id": "controllerBreaker-top-1",
-    "owner": "controllerBreaker",
-    "label": "Top clamp 2",
-    "face": "top"
-  },
-  {
-    "id": "controllerBreaker-bottom-1",
-    "owner": "controllerBreaker",
-    "label": "Bottom clamp 2",
-    "face": "bottom"
-  },
-  {
     "id": "starlinkBreaker-top-0",
     "owner": "starlinkBreaker",
     "label": "Source clamp 1",
@@ -395,18 +383,6 @@ export const polowatPorts = [
     "face": "bottom"
   },
   {
-    "id": "batteryBreakerA-top-1",
-    "owner": "batteryBreakerA",
-    "label": "Top clamp 2",
-    "face": "top"
-  },
-  {
-    "id": "batteryBreakerA-bottom-1",
-    "owner": "batteryBreakerA",
-    "label": "Bottom clamp 2",
-    "face": "bottom"
-  },
-  {
     "id": "batteryBreakerB-top-0",
     "owner": "batteryBreakerB",
     "label": "Top clamp 1",
@@ -416,18 +392,6 @@ export const polowatPorts = [
     "id": "batteryBreakerB-bottom-0",
     "owner": "batteryBreakerB",
     "label": "Bottom clamp 1",
-    "face": "bottom"
-  },
-  {
-    "id": "batteryBreakerB-top-1",
-    "owner": "batteryBreakerB",
-    "label": "Top clamp 2",
-    "face": "top"
-  },
-  {
-    "id": "batteryBreakerB-bottom-1",
-    "owner": "batteryBreakerB",
-    "label": "Bottom clamp 2",
     "face": "bottom"
   },
   {

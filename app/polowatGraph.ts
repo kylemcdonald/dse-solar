@@ -12,7 +12,7 @@ const devices:Device[]=polowatTopology.devices.map(d=>({
 
  layoutGroup:d.kind==='bus'?{id:'distribution-rail',label:'Four isolated bridged pairs',columns:4,order:0,contiguous:true}:undefined,
  centeredTerminals:d.kind==='bus'||d.kind==='breaker'||d.kind==='fuse',
- size:d.kind==='bus'?[.04,.06,.06]:d.kind==='breaker'?[(d.dinModules??1)*.02,d.size[1],d.size[2]]:d.size.map(n=>Math.ceil(n/.02-1e-8)*.02) as unknown as Vec3,physicalSize:d.kind==='enclosure'?undefined:d.size,poles:d.poles,dinModules:d.dinModules,status:'planned',
+ size:d.kind==='bus'?[.04,.06,.06]:d.kind==='breaker'?[(d.dinModules??1)*.02,d.size[1],d.size[2]]:d.size.map(n=>Math.ceil(n/.02-1e-8)*.02) as unknown as Vec3,physicalSize:d.kind==='enclosure'?undefined:d.size,poles:d.poles,dinModules:d.dinModules,status:['controllerBreaker','batteryBreakerA','batteryBreakerB','batteryMonitor','batteryShunt','monitorFuse'].includes(d.id)?'purchased':'planned',
  placement:inside.has(d.id)?{space:'junction',junctionId:'equipmentEnclosure',section:d.kind==='breaker'||d.kind==='bus'?'din':'backplate',order:d.kind==='bus'?100+terminalGroups.findIndex(g=>g.part===d.id):assemblyParts.findIndex(p=>p.id===d.id)}:{space:'world',surface:d.kind==='battery'?'floor':'wall',position:d.id==='equipmentEnclosure'?[.3,1.2,.13]:d.kind==='panel'?[d.position[0],3.1,.12]:d.position,rotation:[0,0,0]},
  conductors:[],bomIds:d.bomId?[d.bomId]:[],
 }));

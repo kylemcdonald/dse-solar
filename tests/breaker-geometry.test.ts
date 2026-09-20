@@ -22,7 +22,7 @@ test('one-pole narrow, one-pole wide and two-pole wide use distinct casing and h
 
 test('a wide single-pole casing retains its two-module layout width',()=>{
  const graph=buildPolowatGraph(selectedPolowatLayout);
- const wide={...graph,devices:graph.devices.map(d=>d.id==='controllerBreaker'?{...d,poles:1 as const,dinModules:2 as const}:d)};
+ const wide={...graph,devices:graph.devices.map(d=>d.id==='pvBreaker'?{...d,poles:1 as const,dinModules:2 as const}:d)};
  assert.doesNotThrow(()=>validateGraph(wide));
  const before=resolveDevices(graph),after=resolveDevices(wide);
  for(let i=0;i<before.length;i++){

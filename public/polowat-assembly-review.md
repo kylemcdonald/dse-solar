@@ -1,5 +1,12 @@
 # Polowat terminal-level assembly review — P9, 15 September 2026
 
+## P17 · purchased single-pole breakers · 19 September 2026
+
+This update supersedes earlier two-pole DIHOOL candidate/hold statements below. Two B0BFF6RN2N two-packs supply four 30 A non-polarized single-pole, single-width breakers: battery A positive, battery B positive, controller positive, and one unmounted spare. Each BOM row is one two-pack; the controller row includes its spare. Battery negatives remain continuous through the BMV shunt. The private Amazon invoice is reviewed and archived, with refreshed expense PDF, CSV and receipt ZIP.
+
+The exact single-pole photo shows DZ47X-63 / 30 A / 400 V AC/DC / Icu 4 kA. The owner accepts the listing wording as poor copy and authorizes this selection. Superseded 6 kA/C-curve claims must not be applied to this variant. Received terminals, torque, source-end protection and parallel-source fault coordination remain installation checks. The three narrow bodies use one module and two clamps each; generated routes, diagram and cable schedule describe the updated geometry. The existing optimized ordering is retained, with all eight permitted breaker directions retested for this hardware. Fiji is unchanged.
+
+
 ## Ground plane
 
 The equipment wall meets Polowat’s floor at y=0. Both battery bases sit on that plane; their cable routes and cut estimates follow the grounded positions. The floor spans the wall’s full width and extends forward from its front face. Fiji’s floor and installed geometry remain unchanged.

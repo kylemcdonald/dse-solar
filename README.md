@@ -1,5 +1,12 @@
 # DSE Fiji + Inowon Polowat solar-system viewer
 
+## P17 · purchased single-pole breakers · 19 September 2026
+
+This update supersedes earlier two-pole DIHOOL candidate/hold statements below. Two B0BFF6RN2N two-packs supply four 30 A non-polarized single-pole, single-width breakers: battery A positive, battery B positive, controller positive, and one unmounted spare. Each BOM row is one two-pack; the controller row includes its spare. Battery negatives remain continuous through the BMV shunt. The private Amazon invoice is reviewed and archived, with refreshed expense PDF, CSV and receipt ZIP.
+
+The exact single-pole photo shows DZ47X-63 / 30 A / 400 V AC/DC / Icu 4 kA. The owner accepts the listing wording as poor copy and authorizes this selection. Superseded 6 kA/C-curve claims must not be applied to this variant. Received terminals, torque, source-end protection and parallel-source fault coordination remain installation checks. The three narrow bodies use one module and two clamps each; generated routes, diagram and cable schedule describe the updated geometry. The existing optimized ordering is retained, with all eight permitted breaker directions retested for this hardware. Fiji is unchanged.
+
+
 This viewer contains two intentionally separate systems selected from the top-right project switcher:
 
 - **DSE / Fiji** is the installation record for the Drua Sailing Experience system. R33 uses the canonical graph in `app/dseTopology.ts`.

@@ -1,5 +1,7 @@
 # Polowat DIN rail optimization
 
+Historical P16 ordering study: the P17 single-pole replacement retains this selected ordering and aisles. Its current lengths and audits are in the [breaker-direction comparison](polowat-breaker-comparison.md) and [cable schedule](polowat-cable-routing.md); the older measurements below describe the former two-pole bodies.
+
 Minimize enclosure area m² + 0.01 × rounded cable m + 0.02 × upstream battery-positive lead m. All physical, gland, orthogonality and rendered audits are mandatory. Scores are routing comparisons, not dollar prices.
 
 Connected clamps vote at the far end of each wire (all connected poles on breakers and all 3–4 used clamps on terminal pairs). Stable mean-x ordering is rerouted repeatedly until a fixed point, cycle, invalid route or 12 iterations. A second seed uses enclosure glands as local anchors. Uniform 0/20/40 mm spacing seeds explore routing aisles. The best basins are compacted, then adjacent swaps and ±20 mm aisle changes undergo full rerouting until no neighbor improves the score. Gaps are capped at 60 mm. This is a local search, not proof of the global optimum.
